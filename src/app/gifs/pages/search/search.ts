@@ -15,6 +15,7 @@ const imageUrls: string[] = [
     "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-8.jpg",
     "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-9.jpg",
     "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-10.jpg",
+    "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-11.jpg",
     "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-11.jpg"
 ];
 
