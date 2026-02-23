@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component, } from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal,} from '@angular/core';
+import {GifListItem} from '../../components/gif-list-item/gif-list-item';
+import {GiphyService} from '../../services/giphy.service';
+import {Gif} from '../../interfaces/gif.interface';
 
 const imageUrls: string[] = [
     "https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg",
@@ -17,11 +20,21 @@ const imageUrls: string[] = [
 
 @Component({
   selector: 'app-search',
-  imports: [],
+  imports: [
+    GifListItem
+  ],
   templateUrl: './search.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export  default class Search { 
+export  default class Search {
+  giphyService = inject(GiphyService);
+  searchedGifs = signal<Gif[]>([]);
 
+  OnSearch(query: string) {
+    if(query.length <= 1) {return;}
+    this.giphyService.searchGifs(query).subscribe(resp =>{
+      this.searchedGifs.set(resp);
+    });
+  }
 
 }

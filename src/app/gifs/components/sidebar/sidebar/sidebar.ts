@@ -8,7 +8,7 @@ import { environment } from '../../../../../environments/environment.development
   imports: [SideMenuOption],
   templateUrl: './sidebar.html',
 })
-export default class Sidebar { 
+export default class Sidebar {
   // En tu componente.ts
 
   envs = environment;
