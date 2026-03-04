@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
   styles: ``,
 })
 export class ProductList {
-
+  // this module will list the product paginated a all good
 }
