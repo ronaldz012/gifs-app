@@ -18,9 +18,7 @@ const imageUrls: string[] = [
     "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-11.jpg",
     "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-11.jpg"
 ];
-//test for many small windows
-//test for commit windows in webstorm
-//this componente is for searching thing
+// this comment is to test  my waybar
 @Component({
   selector: 'app-search',
   imports: [
