@@ -19,6 +19,7 @@ const imageUrls: string[] = [
     "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-11.jpg"
 ];
 //test for many small windows
+//test for commit windows in webstorm
 @Component({
   selector: 'app-search',
   imports: [
