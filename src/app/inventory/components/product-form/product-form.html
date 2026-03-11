@@ -7,9 +7,7 @@
             class="w-full px-4 py-2 border rounded-lg resize-none"></textarea>
 
   <div class="grid grid-cols-2 gap-4">
-    <select formControlName="brandId" class="px-4 py-2 border rounded-lg">
-      <option value="">Marca</option>
-    </select>
+    <app-autocomplete-input [options]="categories()" placeHolder="Categoria"></app-autocomplete-input>
     <select formControlName="categoryId" class="px-4 py-2 border rounded-lg">
       <option value="">Categoría</option>
     </select>

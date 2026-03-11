@@ -1,18 +1,21 @@
-import {Component, inject, output} from '@angular/core';
+import {Component, inject, input, output} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CreateProductDto} from '../../interfaces/Dtos/create-product-dto';
+import {AutocompleteInput} from '../autocomplete-input/autocomplete-input';
+import {Category} from '../../interfaces/Dtos/query-categories-dto';
 
 @Component({
   selector: 'app-product-form',
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    AutocompleteInput
   ],
   templateUrl: './product-form.html',
   styles: ``,
 })
 export class ProductForm {
   private fb = inject(FormBuilder);
-
+  categories = input.required<Category[]>()
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(6)]],

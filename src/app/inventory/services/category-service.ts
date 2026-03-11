@@ -1,0 +1,34 @@
+import {inject, Injectable} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {environment} from '../../../environments/environment';
+import {Category, PagedResult, QueryCategoriesDto} from '../interfaces/Dtos/query-categories-dto';
+import {map, Observable} from 'rxjs';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class CategoryService {
+
+private  http = inject(HttpClient);
+private url = environment.BACKEND_URL + '/api/Category';
+
+
+GetCategories(query : QueryCategoriesDto): Observable<PagedResult<Category>>
+{
+  let params = new HttpParams();
+
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) {
+      params = params.set(key, value.toString());
+    }
+  });
+  return this.http.get<PagedResult<Category>>(this.url, { params });
+}
+
+  getAll(): Observable<Category[]> {
+    return this.GetCategories({ isPaged: false }).pipe(
+      map(result => result.items)
+    );
+  }
+
+}
