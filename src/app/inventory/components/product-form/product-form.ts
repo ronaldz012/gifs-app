@@ -69,15 +69,6 @@ export class ProductForm {
     }
   }
 
-  sanitizeNumber(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const sanitized = input.value.replace(/[^0-9.]/g, '');
-    if (input.value !== sanitized) {
-      input.value = sanitized;
-      this.form.patchValue({ basePrice: sanitized ? parseFloat(sanitized) : null });
-    }
-  }
-
   clearIfZero() {
     if (this.form.get('basePrice')?.value === 0) {
       this.form.patchValue({ basePrice: null as unknown as number });
