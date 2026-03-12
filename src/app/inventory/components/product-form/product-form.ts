@@ -2,7 +2,9 @@ import {Component, inject, input, output} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CreateProductDto} from '../../interfaces/Dtos/create-product-dto';
 import {AutocompleteInput} from '../autocomplete-input/autocomplete-input';
-import {Category} from '../../interfaces/Dtos/query-categories-dto';
+import {Category} from '../../interfaces/Dtos/category-dto';
+import {Brand} from '../../interfaces/Dtos/brand-dto';
+import {BrandService} from '../../services/brand-service';
 
 @Component({
   selector: 'app-product-form',
@@ -16,6 +18,7 @@ import {Category} from '../../interfaces/Dtos/query-categories-dto';
 export class ProductForm {
   private fb = inject(FormBuilder);
   categories = input.required<Category[]>()
+  brands = input.required<Brand[]>()
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(6)]],
@@ -32,4 +35,6 @@ export class ProductForm {
     }
     return;
   }
+
+  protected readonly BrandService = BrandService;
 }

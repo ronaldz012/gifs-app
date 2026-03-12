@@ -1,8 +1,9 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {environment} from '../../../environments/environment';
-import {Category, PagedResult, QueryCategoriesDto} from '../interfaces/Dtos/query-categories-dto';
+import {Category, CategoryQuery} from '../interfaces/Dtos/category-dto';
 import {map, Observable} from 'rxjs';
+import {PagedResult} from '../interfaces/Dtos/paged-result';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ private  http = inject(HttpClient);
 private url = environment.BACKEND_URL + '/api/Category';
 
 
-GetCategories(query : QueryCategoriesDto): Observable<PagedResult<Category>>
+GetCategories(query : CategoryQuery): Observable<PagedResult<Category>>
 {
   let params = new HttpParams();
 
