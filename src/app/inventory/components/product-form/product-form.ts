@@ -47,7 +47,7 @@ export class ProductForm {
       this.formSubmitted.set(true);
       return;
     }
-    const dto: CreateProductDto = this.form.value as CreateProductDto;
+    const dto = this.form.value as unknown as CreateProductDto;
     this.isLoading.set(true);
     this.formSubmitted.set(false);
     this.productService.CreateProduct(dto).subscribe({
@@ -57,10 +57,30 @@ export class ProductForm {
         this.onSaved.emit();
       },
       error: (err: any) => {
-        this.isLoading.set(false);
+        this.isLoading.set(false)
         console.error(err);
       }
     });
 
+  }
+  onlyNumbers(event: KeyboardEvent) {
+    if (['e', 'E', '+', '-'].includes(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  sanitizeNumber(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const sanitized = input.value.replace(/[^0-9.]/g, '');
+    if (input.value !== sanitized) {
+      input.value = sanitized;
+      this.form.patchValue({ basePrice: sanitized ? parseFloat(sanitized) : null });
+    }
+  }
+
+  clearIfZero() {
+    if (this.form.get('basePrice')?.value === 0) {
+      this.form.patchValue({ basePrice: null as unknown as number });
+    }
   }
 }
