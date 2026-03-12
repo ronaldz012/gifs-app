@@ -1,22 +1,62 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
 
-  <input formControlName="name" placeholder="Nombre"
-         class="w-full px-4 py-2 border rounded-lg" />
-
-  <textarea formControlName="description" placeholder="Descripción" rows="3"
-            class="w-full px-4 py-2 border rounded-lg resize-none"></textarea>
-
-  <div class="grid grid-cols-2 gap-4">
-    <app-autocomplete-input [options]="categories()" placeHolder="Selecciona Categoria"></app-autocomplete-input>
-   <app-autocomplete-input [options]="brands()" placeHolder="Selecciona Marca"></app-autocomplete-input>
+  <!-- Nombre -->
+  <div class="flex flex-col gap-1">
+    <input formControlName="name" placeholder="Nombre"
+           class="w-full px-4 py-2 border rounded-lg"
+           [class.border-red-500]="getError('name')" />
+    @if (getError('name')) {
+      <p class="text-red-500 text-sm">{{ getError('name') }}</p>
+    }
   </div>
 
-  <input formControlName="basePrice" type="number" placeholder="Precio base"
-         class="w-1/3 px-4 py-2 border rounded-lg" />
+  <!-- Descripción -->
+  <div class="flex flex-col gap-1">
+    <textarea formControlName="description" placeholder="Descripción" rows="3"
+              class="w-full px-4 py-2 border rounded-lg resize-none"
+              [class.border-red-500]="getError('description')"></textarea>
+    @if (getError('description')) {
+      <p class="text-red-500 text-sm">{{ getError('description') }}</p>
+    }
+  </div>
+
+  <!-- Categoria y Marca -->
+  <div class="grid grid-cols-2 gap-4">
+    <div class="flex flex-col gap-1">
+      <app-autocomplete-input [options]="categories()" placeHolder="Selecciona Categoria"
+                              (valueChange)="form.patchValue({categoryId: $event})"
+                              (valueTouched)="form.get('categoryId')?.markAsTouched()"
+                              [forceTouched] = "formSubmitted()">
+      </app-autocomplete-input>
+    </div>
+
+    <div class="flex flex-col gap-1">      @if (getError('brandId')) {
+        <p class="text-red-500 text-sm">{{ getError('brandId') }}</p>
+      }
+      <app-autocomplete-input [options]="brands()" placeHolder="Selecciona Marca"
+                              (valueChange)="form.patchValue({brandId: $event})"
+                              (valueTouched)="form.get('brandId')?.markAsTouched()"
+                              [forceTouched] = "formSubmitted()">
+      </app-autocomplete-input>
+    </div>
+  </div>
+
+  <!-- Precio -->
+  <div class="flex flex-col gap-1">
+    <input formControlName="basePrice" type="number" placeholder="Precio base"
+           class="w-1/3 px-4 py-2 border rounded-lg"
+           [class.border-red-500]="getError('basePrice')" />
+    @if (getError('basePrice')) {
+      <p class="text-red-500 text-sm">{{ getError('basePrice') }}</p>
+    }
+  </div>
 
   <div class="flex justify-end gap-2 mt-2">
     <button type="button" class="px-4 py-2 rounded-lg border">Cancelar</button>
-    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white">Crear</button>
+    <button type="submit" [disabled]="isLoading()"
+            class="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50">
+      {{ isLoading() ? 'Guardando...' : 'Crear' }}
+    </button>
   </div>
 
 </form>

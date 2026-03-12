@@ -17,7 +17,7 @@ export const routes: Routes = [
                 },
                 {
                   path:'products',
-                  loadComponent: () => import('./inventory/pages/products/products')
+                  loadComponent: () => import('./inventory/pages/products-page/products-page')
                 },
                 {
                   path:'**',

@@ -8,15 +8,16 @@ import {Category} from '../../interfaces/Dtos/category-dto';
 import {Brand} from '../../interfaces/Dtos/brand-dto';
 import {BrandService} from '../../services/brand-service';
 
+
 @Component({
-  selector: 'app-products',
+  selector: 'app-products-page',
   imports: [
     ProductList, ProductForm
   ],
-  templateUrl: './products.html',
+  templateUrl: './products-page.html',
   styles: ``,
 })
-export default class Products implements OnInit {
+export default class ProductsPage implements OnInit {
   categories = signal<Category[]>([]);
   brands = signal<Brand[]>([]);
   private categoryService = inject(CategoryService);
@@ -27,7 +28,6 @@ export default class Products implements OnInit {
   }
 
 
-
   showForm = signal(false);
   product = signal<Product>({
     id:1,
@@ -35,4 +35,10 @@ export default class Products implements OnInit {
     stock:2,
     price:100,
   });
+
+
+  onProductSave()
+  {
+    this.showForm.set(false)
+  }
 }
