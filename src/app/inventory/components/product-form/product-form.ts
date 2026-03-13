@@ -50,7 +50,7 @@ export class ProductForm {
     const dto = this.form.value as unknown as CreateProductDto;
     this.isLoading.set(true);
     this.formSubmitted.set(false);
-    this.productService.CreateProduct(dto).subscribe({
+    this.productService.createProduct(dto).subscribe({
       next: () => {
 
         this.isLoading.set(false);

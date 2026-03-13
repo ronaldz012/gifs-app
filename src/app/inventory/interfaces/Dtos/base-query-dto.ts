@@ -1,4 +1,4 @@
-export interface QueryBaseDto {
+export interface BaseQueryDto {
   isPaged: boolean;
   page?: number;
   pageSize?: number;

@@ -1,12 +1,12 @@
 
 // Define la entidad base
-import {QueryBaseDto} from './query-base-dto';
+import {BaseQueryDto} from './base-query-dto';
 
 export interface Category {
   id: number;
   name: string;
 }
-export interface CategoryQuery extends QueryBaseDto {
+export interface CategoryQuery extends BaseQueryDto {
 
 }
 

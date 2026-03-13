@@ -7,6 +7,8 @@ import {CategoryService} from '../../services/category-service';
 import {Category} from '../../interfaces/Dtos/category-dto';
 import {Brand} from '../../interfaces/Dtos/brand-dto';
 import {BrandService} from '../../services/brand-service';
+import {ProductService} from '../../services/product-service';
+import {ProductQuery} from '../../interfaces/Dtos/product-dto';
 
 
 @Component({
@@ -20,25 +22,28 @@ import {BrandService} from '../../services/brand-service';
 export default class ProductsPage implements OnInit {
   categories = signal<Category[]>([]);
   brands = signal<Brand[]>([]);
+  products = signal<Product[]>([]);
+  query: ProductQuery = {
+    branchId: 1,
+    isPaged:true,
+    pageSize:20,
+    page:1
+  }
+
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
+  private productService = inject(ProductService);
   ngOnInit(): void {
     this.categoryService.getAll().subscribe(c => this.categories.set(c));
     this.brandService.GetAll().subscribe(b => this.brands.set(b));
+    this.productService.getProducts(this.query).subscribe(p => this.products.set(p.items))
   }
 
 
   showForm = signal(false);
-  product = signal<Product>({
-    id:1,
-    name:"Pantalon",
-    stock:2,
-    price:100,
-  });
-
-
   onProductSave()
   {
+    this.productService.getProducts(this.query).subscribe(p => this.products.set(p.items))
     this.showForm.set(false)
   }
 }
