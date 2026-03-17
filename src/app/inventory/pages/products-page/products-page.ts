@@ -1,5 +1,5 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
-import {Product} from '../../interfaces/product';
+import {ListProduct} from '../../interfaces/listProduct';
 import ProductItem from './product-list/product-item/product-item';
 import {ProductList} from './product-list/product-list';
 import {ProductForm} from './product-form/product-form';
@@ -24,7 +24,7 @@ import {BrandService} from '../../services/brand-service';
 export default class ProductsPage implements OnInit {
   categories = signal<Category[]>([]);
   brands = signal<Brand[]>([]);
-  products = signal<Product[]>([]);
+  products = signal<ListProduct[]>([]);
   query = signal<ProductQuery>({
     branchId: 1,
     isPaged:true,

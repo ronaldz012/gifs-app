@@ -5,7 +5,8 @@ import {environment} from '../../../environments/environment';
 import {Observable} from 'rxjs';
 import {ProductQuery} from '../interfaces/Dtos/product-dto';
 import {PagedResult} from '../interfaces/Dtos/paged-result';
-import {Product} from '../interfaces/product';
+import {ListProduct} from '../interfaces/listProduct';
+import {ProductSearchResult} from '../models/products/product-search-result';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,7 @@ export class ProductService {
   createProduct(dto : CreateProductDto): Observable<boolean> {
     return  this.http.post<boolean>(this.url, dto);
   }
-  getProducts(query : ProductQuery) : Observable<PagedResult<Product>>{
+  getProducts(query : ProductQuery) : Observable<PagedResult<ListProduct>>{
     let params = new HttpParams();
 
     Object.entries(query).forEach(([key, value]) => {
@@ -25,6 +26,12 @@ export class ProductService {
         params = params.set(key, value.toString());
       }
     });
-    return this.http.get<PagedResult<Product>>(this.url, {params});
+    return this.http.get<PagedResult<ListProduct>>(this.url, {params});
+  }
+  searchProduct(query :string )
+  {
+    let params = new HttpParams();
+    params = params.set('request', query);
+    return this.http.get<ProductSearchResult[]>(this.url+ '/Search', {params});
   }
 }

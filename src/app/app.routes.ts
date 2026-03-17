@@ -20,6 +20,10 @@ export const routes: Routes = [
                   loadComponent: () => import('./inventory/pages/products-page/products-page')
                 },
                 {
+                  path:'receptions',
+                  loadComponent: () => import('./inventory/pages/receptions-page/receptions-page')
+                },
+                {
                   path:'**',
                   redirectTo: 'trending',
                 }

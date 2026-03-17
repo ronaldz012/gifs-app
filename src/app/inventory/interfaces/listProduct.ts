@@ -1,4 +1,4 @@
-export interface Product {
+export interface ListProduct {
 id: number;
 name: string;
 basePrice: number;

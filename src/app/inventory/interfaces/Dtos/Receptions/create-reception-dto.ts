@@ -28,9 +28,9 @@ export interface Variants {
 }
 
 export interface NewVariant {
-   productId: number;
-   description: string;
-   size: string;
-   color: string;
-   price: number;
+   productId?: number;
+   description?: string;
+   size?: string;
+   color?: string;
+   price?: number;
 }

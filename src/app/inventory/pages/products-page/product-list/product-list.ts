@@ -1,6 +1,6 @@
 import {Component, input, signal} from '@angular/core';
 import ProductItem from './product-item/product-item';
-import {Product} from '../../../interfaces/product';
+import {ListProduct} from '../../../interfaces/listProduct';
 
 @Component({
   selector: 'app-product-list',
@@ -11,5 +11,5 @@ import {Product} from '../../../interfaces/product';
   styles: ``,
 })
 export class ProductList {
-  products = input<Product[]>([]);
+  products = input<ListProduct[]>([]);
 }

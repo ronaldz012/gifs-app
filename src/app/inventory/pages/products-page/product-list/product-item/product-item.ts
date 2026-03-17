@@ -1,5 +1,5 @@
 import {Component, input} from '@angular/core';
-import {Product} from '../../../../interfaces/product';
+import {ListProduct} from '../../../../interfaces/listProduct';
 
 @Component({
   selector: 'app-product-item',
@@ -8,5 +8,5 @@ import {Product} from '../../../../interfaces/product';
   styles: ``,
 })
 export default class ProductItem {
-  product = input.required<Product>();
+  product = input.required<ListProduct>();
 }
