@@ -18,7 +18,7 @@
   </div>
 
   <!-- Toggle modo: existente / nueva — solo si no es forceNew -->
-  @if (!forceNew) {
+  @if (!forceNew()) {
     <div class="flex gap-2 mb-4">
       <button
         type="button"
