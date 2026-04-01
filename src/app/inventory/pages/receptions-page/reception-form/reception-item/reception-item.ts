@@ -1,105 +1,131 @@
-import { Component, inject, input, OnInit, output, signal, computed, DestroyRef } from '@angular/core';
-import { VariantFormGroup } from '../common/variant-form-group';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
-  FormArray,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
-import { ProductSearchResult, ProductVariantOption } from '../../../../models/products/product-search-result';
-import { ProductService } from '../../../../services/product-service';
-import { debounceTime, distinctUntilChanged, startWith, Subject, switchMap } from 'rxjs';
-import { ItemFormGroup } from '../common/item-form-group';
-import ReceptionVariant from './reception-variant/reception-variant';
-import { Category } from '../../../../interfaces/Dtos/category-dto';
-import { Brand } from '../../../../interfaces/Dtos/brand-dto';
-import { CategoryService } from '../../../../services/category-service';
-import { BrandService } from '../../../../services/brand-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
+import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+
+import { VariantFormGroup } from '../common/variant-form-group';
+import { ProductSearchResult, ProductVariantOption } from '../../../../models/products/product-search-result';
+import { ProductService } from '../../../../services/product-service';
+import { CategoryService } from '../../../../services/category-service';
+import { BrandService } from '../../../../services/brand-service';
+import { Category } from '../../../../interfaces/Dtos/category-dto';
+import { Brand } from '../../../../interfaces/Dtos/brand-dto';
+import ReceptionVariant from './reception-variant/reception-variant';
+import {ItemFormGroup} from '../common/item-form-group';
 
 @Component({
   selector: 'app-reception-item',
   standalone: true,
-  imports: [
-    ReceptionVariant,
-    ReactiveFormsModule,
-    DecimalPipe,
-  ],
+  imports: [ReceptionVariant, ReactiveFormsModule, DecimalPipe],
   templateUrl: './reception-item.html',
 })
 export default class ReceptionItem implements OnInit {
-  private fb = inject(FormBuilder);
-  private productService = inject(ProductService);
+  // —— Dependencies ——————————————————————————————————————————————————————
+  private fb              = inject(FormBuilder);
+  private destroyRef      = inject(DestroyRef);
+  private productService  = inject(ProductService);
   private categoryService = inject(CategoryService);
-  private brandService = inject(BrandService);
-  private destroyRef = inject(DestroyRef);
+  private brandService    = inject(BrandService);
 
-  form = input.required<ItemFormGroup>();
+  // —— Inputs / Outputs ——————————————————————————————————————————————————
+  form  = input.required<ItemFormGroup>();
   index = input<number>(0);
   remove = output<void>();
 
-  isNewProduct = signal(false);
+  // —— Estado UI —————————————————————————————————————————————————————————
+  isNewProduct  = signal(false);
   productSearch = signal('');
-  showDropdown = signal(false);
-  isSearching = signal(false);
-  searchResults = signal<ProductSearchResult[]>([]);
-  availableVariants = signal<ProductVariantOption[]>([]);
-  brands = signal<Brand[]>([]);
-  categories = signal<Category[]>([]);
+  showDropdown  = signal(false);
+  isSearching   = signal(false);
+  collapsed     = signal(false);
 
-  // ── SOLUCIÓN AL ERROR NG8118 ──
-  // Usamos una señal manual que actualizaremos en el ngOnInit
-  // Esto evita acceder al input() en la raíz de la clase
+  // —— Datos remotos —————————————————————————————————————————————————————
+  searchResults     = signal<ProductSearchResult[]>([]);
+  availableVariants = signal<ProductVariantOption[]>([]);
+  categories        = signal<Category[]>([]);
+  brands            = signal<Brand[]>([]);
+
+  // —— Puente reactivo para el FormArray —————————————————————————————————
+  // Necesario para que los computed lean el valor del array reactivamente,
+  // ya que los inputs() no pueden usarse en la raíz de la clase.
   private variantsValue = signal<any[]>([]);
 
-  // Accessor computado para el FormArray
+  // —— Computados ————————————————————————————————————————————————————————
   variantsArray = computed(() => this.form().controls.variants);
 
-  // IDs usados (ahora depende de la señal manual)
-  usedIds = computed(() => {
-    return this.variantsValue()
+  usedIds = computed(() =>
+    this.variantsValue()
       .map(v => v.productVariantId)
-      .filter((id): id is number => id !== null && id !== undefined);
-  });
+      .filter((id): id is number => id !== null && id !== undefined)
+  );
 
-  // Totales (ahora dependen de la señal manual)
-  totalUnits = computed(() => {
-    return this.variantsValue().reduce((acc, curr) => acc + (curr.quantityReceived ?? 0), 0);
-  });
+  totalUnits = computed(() =>
+    this.variantsValue().reduce((acc, v) => acc + (v.quantityReceived ?? 0), 0)
+  );
 
-  itemTotalCost = computed(() => {
-    return this.variantsValue().reduce((acc, curr) => {
-      const qty = curr.quantityReceived ?? 0;
-      const cost = curr.unitCost ?? 0;
-      return acc + (qty * cost);
-    }, 0);
-  });
+  itemTotalCost = computed(() =>
+    this.variantsValue().reduce((acc, v) =>
+      acc + (v.quantityReceived ?? 0) * (v.unitCost ?? 0), 0
+    )
+  );
 
+  get summaryLabel(): string {
+    if (this.isNewProduct()) {
+      return this.newProductGroup.get('name')?.value || 'Producto nuevo';
+    }
+    return this.productSearch() || 'Seleccioná un producto';
+  }
+
+  // —— Search subject ————————————————————————————————————————————————————
   private searchInput$ = new Subject<string>();
 
+  // —— Lifecycle —————————————————————————————————————————————————————————
   ngOnInit(): void {
-    this.brandService.GetAll().subscribe(x => this.brands.set(x));
-    this.categoryService.getAll().subscribe(x => this.categories.set(x));
+    this.loadCatalogs();
+    this.syncVariantsSignal();
+    this.setupProductSearch();
+  }
 
-    // ── SINCRONIZACIÓN DE SEÑALES ──
-    // 1. Seteamos el valor inicial (aquí el input ya es seguro de usar)
+  private loadCatalogs(): void {
+    this.categoryService.getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(x => this.categories.set(x));
+
+    this.brandService.GetAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(x => this.brands.set(x));
+  }
+
+  private syncVariantsSignal(): void {
     this.variantsValue.set(this.variantsArray().value);
-
-    // 2. Nos suscribimos a los cambios para mantener la señal actualizada
     this.variantsArray().valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(val => this.variantsValue.set(val));
+  }
 
-    // Búsqueda con debounce
+  private setupProductSearch(): void {
     this.searchInput$
       .pipe(
         debounceTime(400),
         distinctUntilChanged(),
-        switchMap((q) => {
+        switchMap(q => {
           if (!q || q.length < 2) {
             this.searchResults.set([]);
             this.isSearching.set(false);
@@ -111,7 +137,7 @@ export default class ReceptionItem implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: (results) => {
+        next: results => {
           this.searchResults.set(results);
           this.isSearching.set(false);
         },
@@ -122,6 +148,7 @@ export default class ReceptionItem implements OnInit {
       });
   }
 
+  // —— Accessors —————————————————————————————————————————————————————————
   get productIdCtrl(): FormControl<number | null> {
     return this.form().controls.productId;
   }
@@ -130,6 +157,7 @@ export default class ReceptionItem implements OnInit {
     return this.form().controls.newProduct;
   }
 
+  // —— Búsqueda de producto ——————————————————————————————————————————————
   onSearchInput(value: string): void {
     this.productSearch.set(value);
     if (!value) this.clearProductSelection();
@@ -149,9 +177,11 @@ export default class ReceptionItem implements OnInit {
     this.availableVariants.set([]);
   }
 
-  openDropdown(): void { this.showDropdown.set(true); }
+  openDropdown():  void { this.showDropdown.set(true); }
   closeDropdown(): void { setTimeout(() => this.showDropdown.set(false), 150); }
+  toggleCollapse(): void { this.collapsed.set(!this.collapsed()); }
 
+  // —— Toggle modo producto ——————————————————————————————————————————————
   switchToNewProduct(): void {
     this.isNewProduct.set(true);
     this.productIdCtrl.setValue(null);
@@ -167,8 +197,7 @@ export default class ReceptionItem implements OnInit {
     np.get('basePrice')?.setValidators([Validators.required]);
     np.updateValueAndValidity();
 
-    this.clearVariants();
-    this.addVariant();
+    this.resetVariants();
   }
 
   switchToExistingProduct(): void {
@@ -176,10 +205,10 @@ export default class ReceptionItem implements OnInit {
     this.newProductGroup.reset();
     this.productIdCtrl.setValidators([Validators.required]);
     this.productIdCtrl.updateValueAndValidity();
-    this.clearVariants();
-    this.addVariant();
+    this.resetVariants();
   }
 
+  // —— Gestión de variantes ——————————————————————————————————————————————
   addVariant(): void {
     this.variantsArray().push(this.buildVariantGroup());
   }
@@ -189,10 +218,11 @@ export default class ReceptionItem implements OnInit {
     this.variantsArray().removeAt(i);
   }
 
-  private clearVariants(): void {
+  private resetVariants(): void {
     while (this.variantsArray().length > 0) {
       this.variantsArray().removeAt(0);
     }
+    this.addVariant();
   }
 
   private buildVariantGroup(): VariantFormGroup {
@@ -200,18 +230,19 @@ export default class ReceptionItem implements OnInit {
       productVariantId: [null as number | null],
       newVariant: this.fb.group({
         description: ['', { nonNullable: true }],
-        size: ['', { nonNullable: true }],
-        color: ['', { nonNullable: true }],
-        price: [null as number | null],
+        size:        ['', { nonNullable: true }],
+        color:       ['', { nonNullable: true }],
+        price:       [null as number | null],
       }),
       quantityReceived: [null as number | null, [Validators.required, Validators.min(1)]],
-      unitCost: [null as number | null, [Validators.required, Validators.min(0.01)]],
+      unitCost:         [null as number | null, [Validators.required, Validators.min(0.01)]],
     }) as unknown as VariantFormGroup;
   }
 
+  // —— Helpers ———————————————————————————————————————————————————————————
   onRemove(): void { this.remove.emit(); }
 
-  hasError(ctrl: AbstractControl | null, error: string = 'required'): boolean {
+  hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
     return !!(ctrl?.hasError(error) && ctrl.touched);
   }
 }

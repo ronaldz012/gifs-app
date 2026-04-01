@@ -1,105 +1,76 @@
-import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DecimalPipe } from '@angular/common';
 import { ProductVariantOption } from '../../../../../models/products/product-search-result';
 import { VariantFormGroup } from '../../common/variant-form-group';
-import { DecimalPipe } from '@angular/common';
-
 
 @Component({
   selector: 'app-reception-variant',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    DecimalPipe,
-  ],
+  imports: [ReactiveFormsModule, DecimalPipe],
   templateUrl: './reception-variant.html',
   styles: ``,
 })
 export default class ReceptionVariant implements OnInit {
-  // DEPENDENCIES
-  private fb = inject(FormBuilder);
+  // ── Dependencies ──────────────────────────────────────────────────────
+  private destroyRef = inject(DestroyRef);
 
-  // INPUTS
-  form = input.required<VariantFormGroup>();
+  // ── Inputs ────────────────────────────────────────────────────────────
+  form           = input.required<VariantFormGroup>();
   availableVariants = input<ProductVariantOption[]>([]);
-  index = input<number>(0);
-  forceNew = input.required<boolean>();
+  index          = input<number>(0);
+  forceNew       = input.required<boolean>();
   usedVariantIds = input<number[]>([]);
 
-  // OUTPUTS
+  // ── Outputs ───────────────────────────────────────────────────────────
   remove = output<void>();
 
-  // STATE
-  isNewVariant = signal(false);
+  // ── Estado UI ─────────────────────────────────────────────────────────
+  isNewVariant  = signal(false);
   variantSearch = signal('');
-  showDropdown = signal(false);
+  showDropdown  = signal(false);
 
-  /** Signal puente para el ID de variante (necesario para reactividad en computed) */
+  // ── Puentes reactivos ─────────────────────────────────────────────────
   private selectedVariantId = signal<number | null>(null);
+  private qtySignal         = signal(0);
+  private costSignal        = signal(0);
 
-  /** Signals manuales para el subtotal (evitan errores de inicialización de inputs) */
-  private qtySignal = signal(0);
-  private costSignal = signal(0);
+  // ── Computados ────────────────────────────────────────────────────────
+  private selectedVariant = computed<ProductVariantOption | undefined>(() =>
+    this.availableVariants().find(v => v.id === this.selectedVariantId())
+  );
 
-  // ── Señales computadas ───────────────────────────────────────────────
-
-  /** Variante actualmente seleccionada (objeto completo). */
-  private selectedVariant = computed<ProductVariantOption | undefined>(() => {
-    const id = this.selectedVariantId();
-    if (!id) return undefined;
-    return this.availableVariants().find(v => v.id === id);
-  });
-
-  selectedVariantSize = computed(() => this.selectedVariant()?.size ?? '');
+  selectedVariantSize  = computed(() => this.selectedVariant()?.size  ?? '');
   selectedVariantColor = computed(() => this.selectedVariant()?.color ?? '');
   selectedVariantPrice = computed(() => this.selectedVariant()?.price ?? null);
-
-  /** Subtotal reactivo basado en las señales manuales */
-  subtotal = computed(() => this.qtySignal() * this.costSignal());
-
-  // ── Lifecycle ─────────────────────────────────────────────────────────
-
-  ngOnInit(): void {
-    this.restoreModeFromValidators();
-
-    // 1. Inicializar ID seleccionado si ya existe en el form
-    const initialId = this.productVariantIdCtrl.value;
-    if (initialId) {
-      this.selectedVariantId.set(initialId);
-      const found = this.availableVariants().find(v => v.id === initialId);
-      if (found) this.variantSearch.set(this.formatDropdownLabel(found));
-    }
-
-    // 2. Sincronizar Subtotal (Valores iniciales)
-    this.qtySignal.set(this.form().controls.quantityReceived.value ?? 0);
-    this.costSignal.set(this.form().controls.unitCost.value ?? 0);
-
-    // 3. Escuchar cambios en el formulario para actualizar las señales del subtotal
-    this.form().controls.quantityReceived.valueChanges.subscribe(val => {
-      this.qtySignal.set(val ?? 0);
-    });
-    this.form().controls.unitCost.valueChanges.subscribe(val => {
-      this.costSignal.set(val ?? 0);
-    });
-  }
-
-  // ── Dropdown / búsqueda ───────────────────────────────────────────────
+  subtotal             = computed(() => this.qtySignal() * this.costSignal());
 
   filteredVariants = computed(() => {
-    const q = this.variantSearch().toLowerCase().trim();
-    const allVariants = this.availableVariants();
-    const usedIds = this.usedVariantIds();
+    const q        = this.variantSearch().toLowerCase().trim();
+    const usedIds  = this.usedVariantIds();
     const currentId = this.selectedVariantId();
 
-    // 1. Filtramos las que ya están usadas en OTRAS filas
-    // (Permitimos la actual para que no desaparezca de su propio buscador)
-    let available = allVariants.filter(v =>
-      !usedIds.includes(v.id) || v.id === currentId
+    const available = this.availableVariants().filter(
+      v => !usedIds.includes(v.id) || v.id === currentId
     );
 
     if (!q) return available;
-
-    // 2. Filtro de búsqueda normal sobre las disponibles
     return available.filter(v =>
       v.description.toLowerCase().includes(q) ||
       v.size?.toLowerCase().includes(q) ||
@@ -107,42 +78,70 @@ export default class ReceptionVariant implements OnInit {
     );
   });
 
-  openDropdown(): void { this.showDropdown.set(true); }
+  // ── Lifecycle ─────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.restoreModeFromValidators();
+    this.restoreSelectedVariant();
+    this.syncSubtotalSignals();
+  }
+
+  private restoreSelectedVariant(): void {
+    const id = this.productVariantIdCtrl.value;
+    if (!id) return;
+    this.selectedVariantId.set(id);
+    const found = this.availableVariants().find(v => v.id === id);
+    if (found) this.variantSearch.set(this.formatDropdownLabel(found));
+  }
+
+  private syncSubtotalSignals(): void {
+    const { quantityReceived, unitCost } = this.form().controls;
+
+    this.qtySignal.set(quantityReceived.value ?? 0);
+    this.costSignal.set(unitCost.value ?? 0);
+
+    quantityReceived.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(val => this.qtySignal.set(val ?? 0));
+
+    unitCost.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(val => this.costSignal.set(val ?? 0));
+  }
+
+  private restoreModeFromValidators(): void {
+    if (this.forceNew()) {
+      this.isNewVariant.set(true);
+      return;
+    }
+    const hasRequired = this.newVariantGroup
+      .get('description')
+      ?.hasValidator(Validators.required) ?? false;
+    this.isNewVariant.set(hasRequired);
+  }
+
+  // ── Dropdown ──────────────────────────────────────────────────────────
+  openDropdown():  void { this.showDropdown.set(true); }
   closeDropdown(): void { setTimeout(() => this.showDropdown.set(false), 150); }
+
+  onSearchInput(value: string): void {
+    this.variantSearch.set(value);
+    const selected = this.selectedVariant();
+    if (selected && value !== this.formatDropdownLabel(selected)) {
+      this.productVariantIdCtrl.setValue(null);
+      this.selectedVariantId.set(null);
+    }
+    this.openDropdown();
+  }
 
   selectVariant(variant: ProductVariantOption): void {
     this.productVariantIdCtrl.setValue(variant.id);
-    this.selectedVariantId.set(variant.id); // Notifica a los computed
+    this.selectedVariantId.set(variant.id);
     this.productVariantIdCtrl.markAsTouched();
     this.variantSearch.set(this.formatVariantLabel(variant));
     this.showDropdown.set(false);
   }
-  formatVariantLabel(v: ProductVariantOption): string {
-    return v.description;
-  }
-  formatDropdownLabel(v: ProductVariantOption): string {
-    const parts = [v.description];
-    if (v.size) parts.push(`Talle ${v.size}`);
-    if (v.color) parts.push(v.color);
-    return parts.join(' · ');
-  }
-  onSearchInput(value: string): void {
-    this.variantSearch.set(value);
 
-    // LÓGICA DE SEGURIDAD:
-    // Si el texto actual es diferente al label de la variante que estaba seleccionada,
-    // significa que el usuario está editando manualmente -> Limpiamos el ID.
-    const selected = this.selectedVariant();
-    if (selected && value !== this.formatDropdownLabel(selected)) {
-      this.productVariantIdCtrl.setValue(null);
-      this.selectedVariantId.set(null); // Esto vaciará automáticamente Talle/Color/Precio
-    }
-
-    this.openDropdown();
-  }
-
-  // ── Modo Ex / New ─────────────────────────────────────────────────────
-
+  // ── Toggle modo ───────────────────────────────────────────────────────
   switchToNew(): void {
     this.isNewVariant.set(true);
     this.selectedVariantId.set(null);
@@ -152,9 +151,9 @@ export default class ReceptionVariant implements OnInit {
   switchToExisting(): void {
     if (this.forceNew()) return;
     this.isNewVariant.set(false);
-    this.deactivateNewVariantMode();
     this.selectedVariantId.set(null);
     this.variantSearch.set('');
+    this.deactivateNewVariantMode();
   }
 
   private activateNewVariantMode(): void {
@@ -181,17 +180,7 @@ export default class ReceptionVariant implements OnInit {
     nv.get('price')?.updateValueAndValidity();
   }
 
-  private restoreModeFromValidators(): void {
-    if (this.forceNew()) {
-      this.isNewVariant.set(true);
-      return;
-    }
-    const descriptionCtrl = this.newVariantGroup.get('description');
-    this.isNewVariant.set(descriptionCtrl?.hasValidator(Validators.required) ?? false);
-  }
-
-  // ── Accesors ──────────────────────────────────────────────────────────
-
+  // ── Accessors ─────────────────────────────────────────────────────────
   get productVariantIdCtrl(): FormControl<number | null> {
     return this.form().controls.productVariantId;
   }
@@ -200,9 +189,26 @@ export default class ReceptionVariant implements OnInit {
     return this.form().controls.newVariant;
   }
 
+  get quantityCtrl(): FormControl {
+    return this.form().controls.quantityReceived;
+  }
+
+  get unitCostCtrl(): FormControl {
+    return this.form().controls.unitCost;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────
+  formatVariantLabel(v: ProductVariantOption):  string { return v.description; }
+  formatDropdownLabel(v: ProductVariantOption): string {
+    const parts = [v.description];
+    if (v.size)  parts.push(`Talle ${v.size}`);
+    if (v.color) parts.push(v.color);
+    return parts.join(' · ');
+  }
+
   onRemove(): void { this.remove.emit(); }
 
-  hasError(ctrl: AbstractControl | null, error: string = 'required'): boolean {
+  hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
     if (!ctrl) return false;
     return ctrl.hasError(error) && ctrl.touched;
   }
