@@ -1,20 +1,5 @@
-import {
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  input,
-  OnInit,
-  output,
-  signal,
-} from '@angular/core';
-import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import {Component, computed, DestroyRef, inject, input, OnInit, output, signal,} from '@angular/core';
+import {AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { ProductVariantOption } from '../../../../../models/products/product-search-result';

@@ -1,21 +1,5 @@
-import {
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  input,
-  OnInit,
-  output,
-  signal,
-} from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import {Component, computed, DestroyRef, inject, input, OnInit, output, signal,} from '@angular/core';
+import {AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators,} from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
