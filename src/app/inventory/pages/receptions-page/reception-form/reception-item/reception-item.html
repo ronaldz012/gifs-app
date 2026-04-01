@@ -34,7 +34,7 @@
                   class="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 flex items-center justify-between"
                 >
                   <span>{{ product.name }}</span>
-                  <span class="text-xs text-gray-400">{{ product.productVariants?.length || 0 }} variantes</span>
+                  <span class="text-xs text-gray-400">{{ product.productVariants.length}} variantes</span>
                 </button>
               }
             </div>
@@ -67,7 +67,7 @@
       } @else {
         <label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1">&nbsp;</label>
         <span class="text-sm text-gray-500">
-          {{ variantsArray.length }} variantes &nbsp;·&nbsp;
+          {{ variantsArray().length }} variantes &nbsp;·&nbsp;
           <span class="font-medium text-gray-800">Bs {{ itemTotalCost() | number:'1.0-0' }}</span>
         </span>
       }
@@ -172,17 +172,18 @@
     }
 
     <!-- Filas de variantes -->
-    @for (variantForm of variantsArray.controls; track $index) {
+    @for (variantForm of variantsArray().controls; track $index) {
       <app-reception-variant
         [form]="variantForm"
         [availableVariants]="availableVariants()"
+        [usedVariantIds]="usedIds()"
         [index]="$index"
         [forceNew]="isNewProduct()"
         (remove)="removeVariant($index)"
       />
     }
 
-    @if (variantsArray.length === 0) {
+    @if (variantsArray().length === 0) {
       <p class="text-xs text-red-500 text-center py-3 border-t border-gray-100">
         Agregá al menos una variante
       </p>
@@ -202,7 +203,7 @@
     </button>
 
     <div class="text-xs text-gray-500">
-      {{ variantsArray.length }} variantes &nbsp;·&nbsp;
+      {{ variantsArray().length }} variantes &nbsp;·&nbsp;
       {{ totalUnits() }} unidades &nbsp;·&nbsp;
       Costo total: <span class="font-medium text-gray-800">Bs {{ itemTotalCost() | number:'1.0-0' }}</span>
     </div>

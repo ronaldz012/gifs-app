@@ -52,7 +52,7 @@
       <input
         type="text"
         [value]="variantSearch()"
-        (input)="variantSearch.set($any($event.target).value)"
+        (input)="onSearchInput($any($event.target).value)"
         (focus)="openDropdown()"
         (blur)="closeDropdown()"
         placeholder="Buscar variante..."
@@ -62,7 +62,7 @@
       />
 
       @if (showDropdown()) {
-        <div class="absolute z-10 left-1 right-1 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-44 overflow-y-auto">
+        <div class="absolute z-10 left-1 right-1 mt-1 bg-white border border-gray-200 rounded-md shadow-lg  max-h-44 overflow-y-auto">
           @if (filteredVariants().length === 0) {
             <div class="flex items-center justify-between px-3 py-2 text-xs text-gray-500">
               <span>Sin resultados</span>
@@ -83,7 +83,7 @@
               (click)="selectVariant(variant)"
               class="w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 flex items-center justify-between"
             >
-              <span>{{ formatVariantLabel(variant) }}</span>
+              <span>{{ formatDropdownLabel(variant) }}</span>
               <span class="text-xs text-gray-400">Bs {{ variant.price }}</span>
             </button>
           }

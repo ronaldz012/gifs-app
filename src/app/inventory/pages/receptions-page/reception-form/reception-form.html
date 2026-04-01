@@ -1,6 +1,5 @@
-<div class="max-w-7xl mx-auto py-5 px-6">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="max-w-7xl mx-auto py-5 px-6">
 
-  <!-- ── TOOLBAR ──────────────────────────────────────────────────────────── -->
   <div class="flex items-center justify-between mb-5">
 
     <div class="flex items-center gap-4">
@@ -33,23 +32,20 @@
         [disabled]="isSubmitting()"
         class="px-4 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
       >
-        Guardar recepción
+        {{ isSubmitting() ? 'Guardando...' : 'Guardar recepción' }}
       </button>
     </div>
 
   </div>
 
-  <!-- ── FORM ─────────────────────────────────────────────────────────────── -->
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-3">
+  <div class="space-y-3">
 
-    <!-- Error de submit -->
     @if (submitError()) {
       <div class="px-3 py-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
         {{ submitError() }}
       </div>
     }
 
-    <!-- Productos -->
     @if (itemsArray.length === 0) {
       <div class="text-center text-sm text-gray-400 py-10 border border-dashed border-gray-300 rounded-lg">
         No hay productos. Hacé clic en "+ Agregar producto" para empezar.
@@ -64,16 +60,16 @@
       />
     }
 
-    <!-- Agregar producto -->
-    <button
-      type="button"
-      (click)="addItem()"
-      class="text-sm text-blue-600 hover:text-blue-800 hover:underline py-1"
-    >
-      + Agregar producto
-    </button>
+    <div class="py-1">
+      <button
+        type="button"
+        (click)="addItem()"
+        class="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+      >
+        <span class="text-lg font-light">+</span> Agregar producto
+      </button>
+    </div>
 
-    <!-- ── BOTTOM BAR ────────────────────────────────────────────────────── -->
     <div class="flex items-center justify-between pt-3 border-t border-gray-200 mt-2">
 
       <div class="flex items-center gap-6 text-sm text-gray-500">
@@ -107,6 +103,6 @@
 
     </div>
 
-  </form>
+  </div>
 
-</div>
+</form>
