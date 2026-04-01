@@ -1,11 +1,12 @@
-import {Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
-import {AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ProductVariantOption} from '../../../../../models/products/product-search-result';
-import {VariantFormGroup} from '../../common/variant-form-group';
-import {DecimalPipe} from '@angular/common';
+import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ProductVariantOption } from '../../../../../models/products/product-search-result';
+import { VariantFormGroup } from '../../common/variant-form-group';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-reception-variant',
+  standalone: true,
   imports: [
     ReactiveFormsModule,
     DecimalPipe,
@@ -31,11 +32,18 @@ export default class ReceptionVariant implements OnInit {
   variantSearch = signal('');
   showDropdown = signal(false);
 
-  // ── Señales computadas para la variante seleccionada ──────────────────
+  /** Signal puente para el ID de variante (necesario para reactividad en computed) */
+  private selectedVariantId = signal<number | null>(null);
+
+  /** Signals manuales para el subtotal (evitan errores de inicialización de inputs) */
+  private qtySignal = signal(0);
+  private costSignal = signal(0);
+
+  // ── Señales computadas ───────────────────────────────────────────────
 
   /** Variante actualmente seleccionada (objeto completo). */
   private selectedVariant = computed<ProductVariantOption | undefined>(() => {
-    const id = this.productVariantIdCtrl.value;
+    const id = this.selectedVariantId();
     if (!id) return undefined;
     return this.availableVariants().find(v => v.id === id);
   });
@@ -44,23 +52,33 @@ export default class ReceptionVariant implements OnInit {
   selectedVariantColor = computed(() => this.selectedVariant()?.color ?? '');
   selectedVariantPrice = computed(() => this.selectedVariant()?.price ?? null);
 
-  /** Subtotal = quantityReceived × unitCost. */
-  subtotal = computed(() => {
-    const qty = this.form().controls.quantityReceived.value ?? 0;
-    const cost = this.form().controls.unitCost.value ?? 0;
-    return qty * cost;
-  });
+  /** Subtotal reactivo basado en las señales manuales */
+  subtotal = computed(() => this.qtySignal() * this.costSignal());
 
   // ── Lifecycle ─────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.restoreModeFromValidators();
 
-    const selectedId = this.productVariantIdCtrl.value;
-    if (selectedId) {
-      const found = this.availableVariants().find(v => v.id === selectedId);
+    // 1. Inicializar ID seleccionado si ya existe en el form
+    const initialId = this.productVariantIdCtrl.value;
+    if (initialId) {
+      this.selectedVariantId.set(initialId);
+      const found = this.availableVariants().find(v => v.id === initialId);
       if (found) this.variantSearch.set(this.formatVariantLabel(found));
     }
+
+    // 2. Sincronizar Subtotal (Valores iniciales)
+    this.qtySignal.set(this.form().controls.quantityReceived.value ?? 0);
+    this.costSignal.set(this.form().controls.unitCost.value ?? 0);
+
+    // 3. Escuchar cambios en el formulario para actualizar las señales del subtotal
+    this.form().controls.quantityReceived.valueChanges.subscribe(val => {
+      this.qtySignal.set(val ?? 0);
+    });
+    this.form().controls.unitCost.valueChanges.subscribe(val => {
+      this.costSignal.set(val ?? 0);
+    });
   }
 
   // ── Dropdown / búsqueda ───────────────────────────────────────────────
@@ -71,8 +89,8 @@ export default class ReceptionVariant implements OnInit {
     if (!q) return variants;
     return variants.filter(v =>
       v.description.toLowerCase().includes(q) ||
-      v.size?.toLowerCase().includes(q) ||
-      v.color?.toLowerCase().includes(q)
+      (v.size && v.size.toLowerCase().includes(q)) ||
+      (v.color && v.color.toLowerCase().includes(q))
     );
   });
 
@@ -81,6 +99,7 @@ export default class ReceptionVariant implements OnInit {
 
   selectVariant(variant: ProductVariantOption): void {
     this.productVariantIdCtrl.setValue(variant.id);
+    this.selectedVariantId.set(variant.id); // Notifica a los computed
     this.productVariantIdCtrl.markAsTouched();
     this.variantSearch.set(this.formatVariantLabel(variant));
   }
@@ -96,6 +115,7 @@ export default class ReceptionVariant implements OnInit {
 
   switchToNew(): void {
     this.isNewVariant.set(true);
+    this.selectedVariantId.set(null);
     this.activateNewVariantMode();
   }
 
@@ -103,6 +123,7 @@ export default class ReceptionVariant implements OnInit {
     if (this.forceNew()) return;
     this.isNewVariant.set(false);
     this.deactivateNewVariantMode();
+    this.selectedVariantId.set(null);
     this.variantSearch.set('');
   }
 
