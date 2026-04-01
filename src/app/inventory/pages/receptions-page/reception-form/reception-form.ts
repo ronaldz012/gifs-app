@@ -18,6 +18,7 @@ import {DecimalPipe} from '@angular/common';
     ReactiveFormsModule,
     ReceptionItem,
     DecimalPipe,
+    ReceptionItem,
   ],
   templateUrl: './reception-form.html',
   styles: ``,

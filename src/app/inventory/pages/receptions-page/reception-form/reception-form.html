@@ -55,7 +55,6 @@
     @for (itemForm of itemsArray.controls; track $index) {
       <app-reception-item
         [form]="itemForm"
-        [index]="$index"
         (remove)="removeItem($index)"
       />
     }

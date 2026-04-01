@@ -1,5 +1,21 @@
-import {Component, computed, DestroyRef, inject, input, OnInit, output, signal,} from '@angular/core';
-import {AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators,} from '@angular/forms';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
@@ -21,37 +37,40 @@ import {ItemFormGroup} from '../common/item-form-group';
   templateUrl: './reception-item.html',
 })
 export default class ReceptionItem implements OnInit {
-  // —— Dependencies ——————————————————————————————————————————————————————
+  // ── Dependencies ──────────────────────────────────────────────────────
   private fb              = inject(FormBuilder);
   private destroyRef      = inject(DestroyRef);
   private productService  = inject(ProductService);
   private categoryService = inject(CategoryService);
   private brandService    = inject(BrandService);
 
-  // —— Inputs / Outputs ——————————————————————————————————————————————————
-  form  = input.required<ItemFormGroup>();
-  index = input<number>(0);
+  // ── Inputs / Outputs ──────────────────────────────────────────────────
+  form   = input.required<ItemFormGroup>();
+  index  = input<number>(0);
   remove = output<void>();
 
-  // —— Estado UI —————————————————————————————————————————————————————————
+  // ── Estado UI ─────────────────────────────────────────────────────────
   isNewProduct  = signal(false);
   productSearch = signal('');
   showDropdown  = signal(false);
   isSearching   = signal(false);
   collapsed     = signal(false);
 
-  // —— Datos remotos —————————————————————————————————————————————————————
+  // ── Datos remotos ─────────────────────────────────────────────────────
   searchResults     = signal<ProductSearchResult[]>([]);
   availableVariants = signal<ProductVariantOption[]>([]);
   categories        = signal<Category[]>([]);
   brands            = signal<Brand[]>([]);
 
-  // —— Puente reactivo para el FormArray —————————————————————————————————
-  // Necesario para que los computed lean el valor del array reactivamente,
-  // ya que los inputs() no pueden usarse en la raíz de la clase.
+  // ── Modos de variantes ────────────────────────────────────────────────
+  // Array paralelo al FormArray — evita que el hijo maneje su propio estado
+  // de modo y elimina los timing issues de inicialización
+  variantModes = signal<('new' | 'existing')[]>([]);
+
+  // ── Puente reactivo para el FormArray ─────────────────────────────────
   private variantsValue = signal<any[]>([]);
 
-  // —— Computados ————————————————————————————————————————————————————————
+  // ── Computados ────────────────────────────────────────────────────────
   variantsArray = computed(() => this.form().controls.variants);
 
   usedIds = computed(() =>
@@ -77,14 +96,18 @@ export default class ReceptionItem implements OnInit {
     return this.productSearch() || 'Seleccioná un producto';
   }
 
-  // —— Search subject ————————————————————————————————————————————————————
+  // ── Search subject ────────────────────────────────────────────────────
   private searchInput$ = new Subject<string>();
 
-  // —— Lifecycle —————————————————————————————————————————————————————————
+  // ── Lifecycle ─────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.loadCatalogs();
     this.syncVariantsSignal();
     this.setupProductSearch();
+    // Inicializar modos para variantes que ya existan en el form al montar
+    const initialMode: 'new' | 'existing' = this.isNewProduct() ? 'new' : 'existing';
+    const initialModes = this.variantsArray().controls.map(() => initialMode);
+    this.variantModes.set(initialModes);
   }
 
   private loadCatalogs(): void {
@@ -132,7 +155,7 @@ export default class ReceptionItem implements OnInit {
       });
   }
 
-  // —— Accessors —————————————————————————————————————————————————————————
+  // ── Accessors ─────────────────────────────────────────────────────────
   get productIdCtrl(): FormControl<number | null> {
     return this.form().controls.productId;
   }
@@ -141,7 +164,7 @@ export default class ReceptionItem implements OnInit {
     return this.form().controls.newProduct;
   }
 
-  // —— Búsqueda de producto ——————————————————————————————————————————————
+  // ── Búsqueda de producto ──────────────────────────────────────────────
   onSearchInput(value: string): void {
     this.productSearch.set(value);
     if (!value) this.clearProductSelection();
@@ -166,7 +189,7 @@ export default class ReceptionItem implements OnInit {
   closeDropdown(): void { setTimeout(() => this.showDropdown.set(false), 150); }
   toggleCollapse(): void { this.collapsed.set(!this.collapsed()); }
 
-  // —— Toggle modo producto ——————————————————————————————————————————————
+  // ── Toggle modo producto ──────────────────────────────────────────────
   switchToNewProduct(): void {
     this.isNewProduct.set(true);
     this.productIdCtrl.setValue(null);
@@ -193,22 +216,31 @@ export default class ReceptionItem implements OnInit {
     this.resetVariants();
   }
 
-  // —— Gestión de variantes ——————————————————————————————————————————————
+  // ── Gestión de variantes ──────────────────────────────────────────────
   addVariant(): void {
-    const control = this.form().controls.variants;
-    control.push(this.buildVariantGroup());
-    this.variantsValue.set([...control.value]);
+    const mode: 'new' | 'existing' = this.isNewProduct() ? 'new' : 'existing';
+    this.variantsArray().push(this.buildVariantGroup());
+    this.variantModes.update(modes => [...modes, mode]);
+    this.variantsValue.set([...this.variantsArray().value]);
   }
 
   removeVariant(i: number): void {
-    const control = this.form().controls.variants;
-    control.removeAt(i);
-    this.variantsValue.set([...control.value]);
+    if (this.variantsArray().length === 1) return;
+    this.variantsArray().removeAt(i);
+    this.variantModes.update(modes => modes.filter((_, idx) => idx !== i));
+    this.variantsValue.set([...this.variantsArray().value]);
+  }
+
+  switchVariantMode(i: number, mode: 'new' | 'existing'): void {
+    this.variantModes.update(modes =>
+      modes.map((m, idx) => idx === i ? mode : m)
+    );
   }
 
   private resetVariants(): void {
-    const control = this.form().controls.variants;
-    control.clear();
+    this.variantsArray().clear();
+    this.variantModes.set([]);
+    // addVariant() ya asigna el modo correcto según isNewProduct()
     this.addVariant();
   }
 
@@ -226,7 +258,7 @@ export default class ReceptionItem implements OnInit {
     }) as unknown as VariantFormGroup;
   }
 
-  // —— Helpers ———————————————————————————————————————————————————————————
+  // ── Helpers ───────────────────────────────────────────────────────────
   onRemove(): void { this.remove.emit(); }
 
   hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
