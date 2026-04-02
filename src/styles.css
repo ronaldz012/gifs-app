@@ -10,3 +10,10 @@
   align-items: center;
   justify-content: center;
 }
+.grid-cols-new {
+  grid-template-columns: 1fr 80px 96px 88px 88px 100px 96px 32px;
+}
+
+.grid-cols-existing {
+  grid-template-columns: 80px 1fr 80px 96px 88px 88px 100px 96px 32px;
+}

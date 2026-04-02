@@ -27,50 +27,41 @@ import { CategoryService } from '../../../../services/category-service';
 import { BrandService } from '../../../../services/brand-service';
 import { Category } from '../../../../interfaces/Dtos/category-dto';
 import { Brand } from '../../../../interfaces/Dtos/brand-dto';
-import ReceptionVariant from './reception-variant/reception-variant';
+import VariantExistingRow from './variant-existing-row/variant-existing-row';
+import VariantNewRow from './variant-new-row/variant-new-row';
 import {ItemFormGroup} from '../common/item-form-group';
 
 @Component({
   selector: 'app-reception-item',
   standalone: true,
-  imports: [ReceptionVariant, ReactiveFormsModule, DecimalPipe],
+  imports: [VariantExistingRow, VariantNewRow, ReactiveFormsModule, DecimalPipe],
   templateUrl: './reception-item.html',
 })
 export default class ReceptionItem implements OnInit {
-  // ── Dependencies ──────────────────────────────────────────────────────
   private fb              = inject(FormBuilder);
   private destroyRef      = inject(DestroyRef);
   private productService  = inject(ProductService);
   private categoryService = inject(CategoryService);
   private brandService    = inject(BrandService);
 
-  // ── Inputs / Outputs ──────────────────────────────────────────────────
   form   = input.required<ItemFormGroup>();
   index  = input<number>(0);
   remove = output<void>();
 
-  // ── Estado UI ─────────────────────────────────────────────────────────
   isNewProduct  = signal(false);
   productSearch = signal('');
   showDropdown  = signal(false);
   isSearching   = signal(false);
   collapsed     = signal(false);
 
-  // ── Datos remotos ─────────────────────────────────────────────────────
   searchResults     = signal<ProductSearchResult[]>([]);
   availableVariants = signal<ProductVariantOption[]>([]);
   categories        = signal<Category[]>([]);
   brands            = signal<Brand[]>([]);
 
-  // ── Modos de variantes ────────────────────────────────────────────────
-  // Array paralelo al FormArray — evita que el hijo maneje su propio estado
-  // de modo y elimina los timing issues de inicialización
-  variantModes = signal<('new' | 'existing')[]>([]);
-
-  // ── Puente reactivo para el FormArray ─────────────────────────────────
+  variants = signal<{ mode: 'new' | 'existing', form: VariantFormGroup }[]>([]);
   private variantsValue = signal<any[]>([]);
 
-  // ── Computados ────────────────────────────────────────────────────────
   variantsArray = computed(() => this.form().controls.variants);
 
   usedIds = computed(() =>
@@ -90,31 +81,22 @@ export default class ReceptionItem implements OnInit {
   );
 
   get summaryLabel(): string {
-    if (this.isNewProduct()) {
-      return this.newProductGroup.get('name')?.value || 'Producto nuevo';
-    }
+    if (this.isNewProduct()) return this.newProductGroup.get('name')?.value || 'Producto nuevo';
     return this.productSearch() || 'Seleccioná un producto';
   }
 
-  // ── Search subject ────────────────────────────────────────────────────
   private searchInput$ = new Subject<string>();
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.loadCatalogs();
     this.syncVariantsSignal();
     this.setupProductSearch();
-    // Inicializar modos para variantes que ya existan en el form al montar
-    const initialMode: 'new' | 'existing' = this.isNewProduct() ? 'new' : 'existing';
-    const initialModes = this.variantsArray().controls.map(() => initialMode);
-    this.variantModes.set(initialModes);
   }
 
   private loadCatalogs(): void {
     this.categoryService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(x => this.categories.set(x));
-
     this.brandService.GetAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(x => this.brands.set(x));
@@ -144,27 +126,14 @@ export default class ReceptionItem implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: results => {
-          this.searchResults.set(results);
-          this.isSearching.set(false);
-        },
-        error: () => {
-          this.searchResults.set([]);
-          this.isSearching.set(false);
-        },
+        next: results => { this.searchResults.set(results); this.isSearching.set(false); },
+        error: () => { this.searchResults.set([]); this.isSearching.set(false); },
       });
   }
 
-  // ── Accessors ─────────────────────────────────────────────────────────
-  get productIdCtrl(): FormControl<number | null> {
-    return this.form().controls.productId;
-  }
+  get productIdCtrl(): FormControl<number | null> { return this.form().controls.productId; }
+  get newProductGroup(): FormGroup { return this.form().controls.newProduct; }
 
-  get newProductGroup(): FormGroup {
-    return this.form().controls.newProduct;
-  }
-
-  // ── Búsqueda de producto ──────────────────────────────────────────────
   onSearchInput(value: string): void {
     this.productSearch.set(value);
     if (!value) this.clearProductSelection();
@@ -185,12 +154,12 @@ export default class ReceptionItem implements OnInit {
     this.availableVariants.set([]);
   }
 
-  openDropdown():  void { this.showDropdown.set(true); }
-  closeDropdown(): void { setTimeout(() => this.showDropdown.set(false), 150); }
+  openDropdown():   void { this.showDropdown.set(true); }
+  closeDropdown():  void { setTimeout(() => this.showDropdown.set(false), 150); }
   toggleCollapse(): void { this.collapsed.set(!this.collapsed()); }
 
-  // ── Toggle modo producto ──────────────────────────────────────────────
   switchToNewProduct(): void {
+    console.log('--- MODO: NUEVO PRODUCTO ---');
     this.isNewProduct.set(true);
     this.productIdCtrl.setValue(null);
     this.productIdCtrl.clearValidators();
@@ -204,7 +173,6 @@ export default class ReceptionItem implements OnInit {
     np.get('brandId')?.setValidators([Validators.required]);
     np.get('basePrice')?.setValidators([Validators.required]);
     np.updateValueAndValidity();
-
     this.resetVariants();
   }
 
@@ -216,32 +184,48 @@ export default class ReceptionItem implements OnInit {
     this.resetVariants();
   }
 
-  // ── Gestión de variantes ──────────────────────────────────────────────
   addVariant(): void {
     const mode: 'new' | 'existing' = this.isNewProduct() ? 'new' : 'existing';
-    this.variantsArray().push(this.buildVariantGroup());
-    this.variantModes.update(modes => [...modes, mode]);
-    this.variantsValue.set([...this.variantsArray().value]);
+    const form = this.buildVariantGroup();
+
+    console.log(`Agregando variante: Modo=${mode}, isNewProduct=${this.isNewProduct()}`);
+
+    this.variantsArray().push(form);
+
+    // Actualizamos la señal
+    this.variants.update(v => {
+      const newState = [...v, { mode, form }];
+      console.log('Nuevo estado de señal variants (length):', newState.length);
+      return newState;
+    });
+
+    // Log de seguridad para ver si Angular detecta el cambio en el FormArray
+    console.log('FormArray actual despues de push:', this.variantsArray().controls.length);
   }
 
   removeVariant(i: number): void {
-    if (this.variantsArray().length === 1) return;
+    if (this.variants().length === 1) return;
     this.variantsArray().removeAt(i);
-    this.variantModes.update(modes => modes.filter((_, idx) => idx !== i));
-    this.variantsValue.set([...this.variantsArray().value]);
+    this.variants.update(v => v.filter((_, idx) => idx !== i));
   }
 
   switchVariantMode(i: number, mode: 'new' | 'existing'): void {
-    this.variantModes.update(modes =>
-      modes.map((m, idx) => idx === i ? mode : m)
+    this.variants.update(v =>
+      v.map((item, idx) => idx === i ? { ...item, mode } : item)
     );
   }
 
   private resetVariants(): void {
+    console.log('Antes de clear - FormArray:', this.variantsArray().length, 'Signal:', this.variants().length);
+
     this.variantsArray().clear();
-    this.variantModes.set([]);
-    // addVariant() ya asigna el modo correcto según isNewProduct()
-    this.addVariant();
+    this.variants.set([]);
+
+    console.log('Post clear - FormArray:', this.variantsArray().length, 'Signal:', this.variants().length);
+
+    setTimeout(() => {
+      this.addVariant();
+    }, 0);
   }
 
   private buildVariantGroup(): VariantFormGroup {
@@ -258,7 +242,6 @@ export default class ReceptionItem implements OnInit {
     }) as unknown as VariantFormGroup;
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────
   onRemove(): void { this.remove.emit(); }
 
   hasError(ctrl: AbstractControl | null, error = 'required'): boolean {

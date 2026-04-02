@@ -1,0 +1,95 @@
+<div [formGroup]="form()" class="contents group">
+
+  <div class="px-2 py-1.5 flex items-center justify-center">
+    <div class="flex border border-gray-300 rounded overflow-hidden text-[10px]">
+      <span class="px-2 py-1 bg-blue-600 text-white font-medium">Ex</span>
+      @if (canSwitchToNew()) {
+        <button type="button" (click)="onSwitchToNew()"
+                class="px-2 py-1 text-gray-400 hover:bg-gray-100">
+          New
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="px-1 py-1 relative">
+    <input
+      type="text"
+      [value]="variantSearch()"
+      (input)="onSearchInput($any($event.target).value)"
+      (focus)="openDropdown()"
+      (blur)="closeDropdown()"
+      placeholder="Buscar variante..."
+      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
+             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
+             group-hover:border-gray-200"
+    />
+    @if (showDropdown()) {
+      <div class="absolute z-10 left-1 right-1 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-44 overflow-y-auto">
+        @if (filteredVariants().length === 0) {
+          <div class="flex items-center justify-between px-3 py-2 text-xs text-gray-500">
+            <span>Sin resultados</span>
+            @if (canSwitchToNew()) {
+              <button type="button"
+                      (mousedown)="$event.preventDefault()"
+                      (click)="onSwitchToNew()"
+                      class="text-blue-600 hover:underline">
+                Crear nueva →
+              </button>
+            }
+          </div>
+        }
+        @for (variant of filteredVariants(); track variant.id) {
+          <button type="button"
+                  (mousedown)="$event.preventDefault()"
+                  (click)="selectVariant(variant)"
+                  class="w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 flex items-center justify-between">
+            <span>{{ formatDropdownLabel(variant) }}</span>
+            <span class="text-xs text-gray-400">Bs {{ variant.price }}</span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="px-2 py-1.5 text-sm text-gray-400 truncate flex items-center">
+    {{ selectedVariantSize() || '—' }}
+  </div>
+
+  <div class="px-2 py-1.5 text-sm text-gray-400 truncate flex items-center">
+    {{ selectedVariantColor() || '—' }}
+  </div>
+
+  <div class="px-2 py-1.5 text-sm text-gray-400 text-right flex items-center justify-end">
+    {{ selectedVariantPrice() != null ? selectedVariantPrice() : '—' }}
+  </div>
+
+  <div class="px-1 py-1">
+    <input type="number" formControlName="quantityReceived"
+           placeholder="0"
+           class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 text-right
+             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
+             group-hover:border-gray-200"/>
+  </div>
+
+  <div class="px-1 py-1">
+    <input type="number" formControlName="unitCost"
+           placeholder="0"
+           class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 text-right
+             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
+             group-hover:border-gray-200"/>
+  </div>
+
+  <div class="px-2 py-1.5 text-right flex items-center justify-end">
+    <span class="text-sm" [class]="subtotal() > 0 ? 'font-medium text-gray-800' : 'text-gray-300'">
+      {{ subtotal() > 0 ? 'Bs ' + (subtotal() | number:'1.0-0') : '—' }}
+    </span>
+  </div>
+
+  <div class="flex items-center justify-center">
+    <button type="button" (click)="onRemove()"
+            class="text-gray-300 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      ✕
+    </button>
+  </div>
+</div>

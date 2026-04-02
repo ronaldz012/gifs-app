@@ -102,6 +102,7 @@ export default class ReceptionForm implements OnInit {
 
   private buildVariantGroup(): VariantFormGroup {
     return this.fb.group({
+      _id: this.fb.control<number[]>([Date.now() + Math.random()], { validators: [] }),
       productVariantId: this.fb.control<number | null>(null),
       newVariant: this.fb.group({
         description: this.fb.control('', { nonNullable: true }),

@@ -6,197 +6,122 @@
     : 'grid-template-columns: 80px 1fr 80px 96px 88px 88px 100px 96px 32px'"
 >
 
-  <!-- ── Toggle Ex / New (solo producto existente) ──────────────────────── -->
-  <!-- [class.hidden] en lugar de @if para evitar que el bloque se destruya -->
-  <div class="flex items-center px-2 py-1.5" [class.hidden]="forceNew()">
-    <div class="flex border border-gray-300 rounded overflow-hidden text-[10px]">
-      <button
-        type="button"
-        (click)="switchToExisting()"
-        [class]="!isNewVariant()
-          ? 'px-2 py-1 bg-blue-600 text-white font-medium'
-          : 'px-2 py-1 text-gray-400 hover:bg-gray-100'"
-      >
-        Ex
-      </button>
-      <button
-        type="button"
-        (click)="switchToNew()"
-        [class]="isNewVariant()
-          ? 'px-2 py-1 bg-blue-600 text-white font-medium'
-          : 'px-2 py-1 text-gray-400 hover:bg-gray-100'"
-      >
-        New
-      </button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════════════
-       VARIANTE EXISTENTE — siempre en DOM, oculto con hidden
-  ══════════════════════════════════════════════════════════════════════ -->
-
-  <!-- Buscador de variante -->
-  <div class="px-1 py-1 relative" [class.hidden]="isNewVariant()">
-    <input
-      type="text"
-      [value]="variantSearch()"
-      (input)="onSearchInput($any($event.target).value)"
-      (focus)="openDropdown()"
-      (blur)="closeDropdown()"
-      placeholder="Buscar variante..."
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
-    />
-    @if (showDropdown()) {
-      <div class="absolute z-10 left-1 right-1 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-44 overflow-y-auto">
-        @if (filteredVariants().length === 0) {
-          <div class="flex items-center justify-between px-3 py-2 text-xs text-gray-500">
-            <span>Sin resultados</span>
-            <button
-              type="button"
-              (mousedown)="$event.preventDefault()"
-              (click)="switchToNew()"
-              class="text-blue-600 hover:underline"
-            >
-              Crear nueva →
-            </button>
-          </div>
-        }
-        @for (variant of filteredVariants(); track variant.id) {
-          <button
-            type="button"
-            (mousedown)="$event.preventDefault()"
-            (click)="selectVariant(variant)"
-            class="w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 flex items-center justify-between"
-          >
-            <span>{{ formatDropdownLabel(variant) }}</span>
-            <span class="text-xs text-gray-400">Bs {{ variant.price }}</span>
-          </button>
-        }
+  <!-- TOGGLE -->
+  @if (!forceNew()) {
+    <div class="flex items-center px-2 py-1.5">
+      <div class="flex border border-gray-300 rounded overflow-hidden text-[10px]">
+        <button type="button" (click)="switchToExisting()">Ex</button>
+        <button type="button" (click)="switchToNew()">New</button>
       </div>
-    }
-  </div>
+    </div>
+  }
 
-  <!-- Talle readonly -->
-  <div class="px-1 py-1 flex items-center" [class.hidden]="isNewVariant()">
-    <span class="w-full px-2 text-sm text-gray-400 truncate">{{ selectedVariantSize() || '—' }}</span>
-  </div>
+  <!-- ================= EXISTING ================= -->
+  @if (!isNewVariant()) {
 
-  <!-- Color readonly -->
-  <div class="px-1 py-1 flex items-center" [class.hidden]="isNewVariant()">
-    <span class="w-full px-2 text-sm text-gray-400 truncate">{{ selectedVariantColor() || '—' }}</span>
-  </div>
+    <div class="px-1 py-1 relative">
+      <input
+        type="text"
+        [value]="variantSearch()"
+        (input)="onSearchInput($any($event.target).value)"
+        placeholder="Buscar variante..."
+        class="w-full px-2 py-1.5 border rounded text-sm"
+      />
+    </div>
 
-  <!-- Precio readonly -->
-  <div class="px-1 py-1 flex items-center justify-end" [class.hidden]="isNewVariant()">
-    <span class="px-2 text-sm text-gray-400">
-      {{ selectedVariantPrice() != null ? selectedVariantPrice() : '—' }}
-    </span>
-  </div>
+    <div class="px-1 py-1 flex items-center">
+      <span class="w-full px-2 text-sm text-gray-400 truncate">
+        {{ selectedVariantSize() || '—' }}
+      </span>
+    </div>
 
-  <!-- ══════════════════════════════════════════════════════════════════════
-       VARIANTE NUEVA — siempre en DOM, oculto con hidden
-  ══════════════════════════════════════════════════════════════════════ -->
+    <div class="px-1 py-1 flex items-center">
+      <span class="w-full px-2 text-sm text-gray-400 truncate">
+        {{ selectedVariantColor() || '—' }}
+      </span>
+    </div>
 
-  <!-- Descripción -->
-  <div class="px-1 py-1" formGroupName="newVariant" [class.hidden]="!isNewVariant()">
-    <input
-      type="text"
-      formControlName="description"
-      placeholder="Descripción..."
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
-      [class.border-red-300]="hasError(newVariantGroup.get('description'))"
-    />
-  </div>
+    <div class="px-1 py-1 flex items-center justify-end">
+      <span class="px-2 text-sm text-gray-400">
+        {{ selectedVariantPrice() != null ? selectedVariantPrice() : '—' }}
+      </span>
+    </div>
 
-  <!-- Talle editable -->
-  <div class="px-1 py-1" formGroupName="newVariant" [class.hidden]="!isNewVariant()">
-    <input
-      type="text"
-      formControlName="size"
-      placeholder="S/M/L"
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
-    />
-  </div>
+  }
 
-  <!-- Color editable -->
-  <div class="px-1 py-1" formGroupName="newVariant" [class.hidden]="!isNewVariant()">
-    <input
-      type="text"
-      formControlName="color"
-      placeholder="Color"
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
-    />
-  </div>
+  <!-- ================= NEW ================= -->
+  @if (isNewVariant()) {
 
-  <!-- Precio editable -->
-  <div class="px-1 py-1" formGroupName="newVariant" [class.hidden]="!isNewVariant()">
-    <input
-      type="number"
-      formControlName="price"
-      placeholder="0"
-      min="0"
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 text-right placeholder-gray-400
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
-      [class.border-red-300]="hasError(newVariantGroup.get('price'))"
-    />
-  </div>
+    <ng-container formGroupName="newVariant">
 
-  <!-- ══════════════════════════════════════════════════════════════════════
-       CAMPOS COMUNES
-  ══════════════════════════════════════════════════════════════════════ -->
+      <div class="px-1 py-1">
+        <input
+          type="text"
+          formControlName="description"
+          placeholder="Descripción..."
+          class="w-full px-2 py-1.5 border rounded text-sm"
+        />
+      </div>
 
-  <!-- Cantidad -->
+      <div class="px-1 py-1">
+        <input
+          type="text"
+          formControlName="size"
+          placeholder="S/M/L"
+          class="w-full px-2 py-1.5 border rounded text-sm"
+        />
+      </div>
+
+      <div class="px-1 py-1">
+        <input
+          type="text"
+          formControlName="color"
+          placeholder="Color"
+          class="w-full px-2 py-1.5 border rounded text-sm"
+        />
+      </div>
+
+      <div class="px-1 py-1">
+        <input
+          type="number"
+          formControlName="price"
+          placeholder="0"
+          class="w-full px-2 py-1.5 border rounded text-sm text-right"
+        />
+      </div>
+
+    </ng-container>
+
+  }
+
+  <!-- ================= COMMON ================= -->
+
   <div class="px-1 py-1">
     <input
       type="number"
       formControlName="quantityReceived"
       placeholder="0"
-      min="1"
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 text-right placeholder-gray-400
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
+      class="w-full px-2 py-1.5 border rounded text-sm text-right"
     />
   </div>
 
-  <!-- Costo unitario -->
   <div class="px-1 py-1">
     <input
       type="number"
       formControlName="unitCost"
       placeholder="0"
-      min="0"
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 text-right placeholder-gray-400
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
+      class="w-full px-2 py-1.5 border rounded text-sm text-right"
     />
   </div>
 
-  <!-- Subtotal -->
   <div class="px-2 py-1.5 flex items-center justify-end">
-    <span class="text-sm" [class]="subtotal() > 0 ? 'font-medium text-gray-800' : 'text-gray-300'">
+    <span class="text-sm">
       {{ subtotal() > 0 ? 'Bs ' + (subtotal() | number:'1.0-0') : '—' }}
     </span>
   </div>
 
-  <!-- Eliminar -->
   <div class="flex items-center justify-center">
-    <button
-      type="button"
-      (click)="onRemove()"
-      class="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-      title="Eliminar variante"
-    >
-      ✕
-    </button>
+    <button type="button" (click)="onRemove()">✕</button>
   </div>
 
 </div>
