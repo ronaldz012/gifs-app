@@ -5,6 +5,7 @@ import {Brand, BrandQuery} from '../interfaces/Dtos/brand-dto';
 import {map, Observable} from 'rxjs';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {environment} from '../../../environments/environment';
+import {CreateBrandDto} from '../dtos/create-brand-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -30,5 +31,9 @@ export class BrandService {
     return this.GetBrands({isPaged:false}).pipe(
       map(result => result.items)
     )
+  }
+
+  create(newBrand: CreateBrandDto) {
+    return this.http.post<Brand>(this.url, newBrand);
   }
 }
