@@ -1,5 +1,7 @@
-import {Component, ElementRef, inject, output, signal, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, input, OnInit, output, signal, ViewChild} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {CategoryService} from '../../services/category-service';
+import {Category} from '../../interfaces/Dtos/category-dto';
 
 @Component({
   selector: 'app-create-category',
@@ -9,11 +11,13 @@ import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
   templateUrl: './create-category.html',
   styles: ``,
 })
-export class CreateCategory {
+export class CreateCategory  implements OnInit {
+
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
   private fb = inject(FormBuilder);
-
-  created = output<{ name: string; description: string }>();
+  categoryService = inject(CategoryService);
+  initialName = input.required<string>();
+  created = output<Category>();
   closed  = output<void>();
 
   form = this.fb.group({
@@ -21,6 +25,9 @@ export class CreateCategory {
     description: ['']
   });
 
+  ngOnInit(): void {
+    this.form.controls.name.setValue(this.initialName())
+  }
   focus() {
     // El padre puede llamar esto con viewChild para hacer autofocus
     this.nameInput?.nativeElement.focus();
@@ -31,8 +38,12 @@ export class CreateCategory {
       this.form.markAllAsTouched();
       return;
     }
-    const { name, description } = this.form.getRawValue();
-    this.created.emit({ name: name!.trim(), description: description ?? '' });
+    const body = this.form.getRawValue()
+    this.categoryService.create({name: body.name!, description: body.description!}).subscribe(
+      data => {
+        this.created.emit(data);
+      }
+    )
     this.form.reset();
   }
 
