@@ -8,34 +8,36 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { ProductVariantOption } from '../../../../../models/products/product-search-result';
 import { VariantFormGroup } from '../../common/variant-form-group';
 
 @Component({
-  selector: 'app-reception-variant',
-  standalone: true,
+  selector: 'app-variant-existing-row',
   imports: [ReactiveFormsModule, DecimalPipe],
-  templateUrl: './reception-variant.html',
-  styles: ``,
+  templateUrl: './variant-existing-row.html',
+  styles: [`
+    :host {
+      display: contents; /* Esto permite que los divs hijos se alineen con el grid del padre */
+    }
+  `]
 })
-export default class ReceptionVariant implements OnInit {
+export default class VariantExistingRow implements OnInit {
   // ── Dependencies ──────────────────────────────────────────────────────
   private destroyRef = inject(DestroyRef);
 
   // ── Inputs ────────────────────────────────────────────────────────────
   form              = input.required<VariantFormGroup>();
   availableVariants = input<ProductVariantOption[]>([]);
-  index             = input<number>(0);
-  forceNew          = input.required<boolean>();
   usedVariantIds    = input<number[]>([]);
-  mode              = input.required<'new' | 'existing'>();
+  index             = input<number>(0);
+  canSwitchToNew    = input<boolean>(true);
 
   // ── Outputs ───────────────────────────────────────────────────────────
-  remove     = output<void>();
-  modeChange = output<'new' | 'existing'>();
+  remove      = output<void>();
+  switchToNew = output<void>();
 
   // ── Estado UI ─────────────────────────────────────────────────────────
   variantSearch = signal('');
@@ -47,9 +49,6 @@ export default class ReceptionVariant implements OnInit {
   private costSignal        = signal(0);
 
   // ── Computados ────────────────────────────────────────────────────────
-  // Derivado directo del input — sin estado local que se desincronice
-  isNewVariant = computed(() => this.mode() === 'new');
-
   private selectedVariant = computed<ProductVariantOption | undefined>(() =>
     this.availableVariants().find(v => v.id === this.selectedVariantId())
   );
@@ -78,12 +77,6 @@ export default class ReceptionVariant implements OnInit {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────
   ngOnInit(): void {
-    // Sincronizar validadores con el modo inicial
-    if (this.mode() === 'new') {
-      this.activateNewVariantMode();
-    } else {
-      this.activateExistingVariantMode();
-    }
     this.restoreSelectedVariant();
     this.syncSubtotalSignals();
   }
@@ -132,60 +125,9 @@ export default class ReceptionVariant implements OnInit {
     this.showDropdown.set(false);
   }
 
-  // ── Toggle modo ───────────────────────────────────────────────────────
-  switchToNew(): void {
-    this.activateNewVariantMode();
-    this.selectedVariantId.set(null);
-    this.modeChange.emit('new');
-  }
-
-  switchToExisting(): void {
-    if (this.forceNew()) return;
-    this.variantSearch.set('');
-    this.selectedVariantId.set(null);
-    this.activateExistingVariantMode();
-    this.modeChange.emit('existing');
-  }
-
-  private activateNewVariantMode(): void {
-    this.productVariantIdCtrl.setValue(null);
-    this.productVariantIdCtrl.clearValidators();
-    this.productVariantIdCtrl.updateValueAndValidity();
-
-    const nv = this.newVariantGroup;
-    nv.get('description')?.setValidators([Validators.required]);
-    nv.get('price')?.setValidators([Validators.required, Validators.min(0.5)]);
-    nv.get('description')?.updateValueAndValidity();
-    nv.get('price')?.updateValueAndValidity();
-  }
-
-  private activateExistingVariantMode(): void {
-    this.productVariantIdCtrl.setValidators([Validators.required]);
-    this.productVariantIdCtrl.updateValueAndValidity();
-
-    const nv = this.newVariantGroup;
-    nv.reset();
-    nv.get('description')?.clearValidators();
-    nv.get('price')?.clearValidators();
-    nv.get('description')?.updateValueAndValidity();
-    nv.get('price')?.updateValueAndValidity();
-  }
-
   // ── Accessors ─────────────────────────────────────────────────────────
   get productVariantIdCtrl(): FormControl<number | null> {
     return this.form().controls.productVariantId;
-  }
-
-  get newVariantGroup(): FormGroup {
-    return this.form().controls.newVariant;
-  }
-
-  get quantityCtrl(): FormControl {
-    return this.form().controls.quantityReceived;
-  }
-
-  get unitCostCtrl(): FormControl {
-    return this.form().controls.unitCost;
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────
@@ -197,7 +139,8 @@ export default class ReceptionVariant implements OnInit {
     return parts.join(' · ');
   }
 
-  onRemove(): void { this.remove.emit(); }
+  onRemove():      void { this.remove.emit(); }
+  onSwitchToNew(): void { this.switchToNew.emit(); }
 
   hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
     if (!ctrl) return false;

@@ -1,0 +1,95 @@
+<div [formGroup]="form()" class="contents group">
+
+  <div class="px-2 py-1.5 flex items-center justify-center">
+    <div class="flex border border-gray-300 rounded overflow-hidden text-[10px]">
+      <span class="px-2 py-1 bg-blue-600 text-white font-medium">New</span>
+      @if (canSwitchToExisting()) {
+        <button type="button" (click)="onSwitchToExisting()"
+                class="px-2 py-1 text-gray-400 hover:bg-gray-100">
+          Ex
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="px-1 py-1" formGroupName="newVariant">
+    <input
+      type="text"
+      formControlName="description"
+      placeholder="Descripción..."
+      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
+             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
+             group-hover:border-gray-200"
+      [class.border-red-300]="hasError(newVariantGroup.get('description'))"
+    />
+  </div>
+
+  <div class="px-1 py-1" formGroupName="newVariant">
+    <input
+      type="text"
+      formControlName="size"
+      placeholder="S/M/L"
+      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
+             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
+             group-hover:border-gray-200"
+    />
+  </div>
+
+  <div class="px-1 py-1" formGroupName="newVariant">
+    <input
+      type="text"
+      formControlName="color"
+      placeholder="Color"
+      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
+             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
+             group-hover:border-gray-200"
+    />
+  </div>
+
+  <div class="px-1 py-1" formGroupName="newVariant">
+    <input
+      type="number"
+      formControlName="price"
+      placeholder="0"
+      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 text-right placeholder-gray-400
+             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
+             group-hover:border-gray-200"
+    />
+  </div>
+
+  <div class="px-1 py-1">
+    <input
+      type="number"
+      formControlName="quantityReceived"
+      placeholder="0"
+      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 text-right
+             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
+             group-hover:border-gray-200"
+    />
+  </div>
+
+  <div class="px-1 py-1">
+    <input
+      type="number"
+      formControlName="unitCost"
+      placeholder="0"
+      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 text-right
+             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
+             group-hover:border-gray-200"
+    />
+  </div>
+
+  <div class="px-2 py-1.5 text-right flex items-center justify-end">
+    <span class="text-sm" [class]="subtotal() > 0 ? 'font-medium text-gray-800' : 'text-gray-300'">
+      {{ subtotal() > 0 ? 'Bs ' + (subtotal() | number:'1.0-0') : '—' }}
+    </span>
+  </div>
+
+  <div class="flex items-center justify-center">
+    <button type="button" (click)="onRemove()"
+            class="text-gray-300 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      ✕
+    </button>
+  </div>
+
+</div>

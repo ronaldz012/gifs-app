@@ -4,6 +4,7 @@ import {environment} from '../../../environments/environment';
 import {Category, CategoryQuery} from '../interfaces/Dtos/category-dto';
 import {map, Observable} from 'rxjs';
 import {PagedResult} from '../interfaces/Dtos/paged-result';
+import {CreateCategoryDto} from '../dtos/create-category-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -32,4 +33,8 @@ GetCategories(query : CategoryQuery): Observable<PagedResult<Category>>
     );
   }
 
+
+  create(createCategory : CreateCategoryDto): Observable<Category> {
+    return this.http.post<Category>(this.url, createCategory);
+  }
 }

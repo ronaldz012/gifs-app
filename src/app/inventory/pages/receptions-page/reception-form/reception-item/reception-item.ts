@@ -1,74 +1,125 @@
-import {Component, inject, input, OnInit, output, signal} from '@angular/core';
-import {VariantFormGroup} from '../common/variant-form-group';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
-  FormArray,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
-import {ProductSearchResult, ProductVariantOption} from '../../../../models/products/product-search-result';
-import {ProductService} from '../../../../services/product-service';
-import {debounceTime, distinctUntilChanged, Subject, switchMap} from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DecimalPipe } from '@angular/common';
+import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+
+import { VariantFormGroup } from '../common/variant-form-group';
+import { ProductSearchResult, ProductVariantOption } from '../../../../models/products/product-search-result';
+import { ProductService } from '../../../../services/product-service';
+import { CategoryService } from '../../../../services/category-service';
+import { BrandService } from '../../../../services/brand-service';
+import { Category } from '../../../../interfaces/Dtos/category-dto';
+import { Brand } from '../../../../interfaces/Dtos/brand-dto';
+import VariantExistingRow from './variant-existing-row/variant-existing-row';
+import VariantNewRow from './variant-new-row/variant-new-row';
 import {ItemFormGroup} from '../common/item-form-group';
-import ReceptionVariant from './reception-variant/reception-variant';
-import {ProductForm} from '../../../products-page/product-form/product-form';
-import {Category} from '../../../../interfaces/Dtos/category-dto';
-import {Brand} from '../../../../interfaces/Dtos/brand-dto';
-import {CategoryService} from '../../../../services/category-service';
-import {BrandService} from '../../../../services/brand-service';
+import {ExistingProduct} from './existing-product/existing-product';
+import NewProduct from './new-product/new-product';
+import {CreateCategory} from '../../../../components/create-category/create-category';
+import {CreateBrand} from '../../../../components/create-brand/create-brand';
 
 @Component({
   selector: 'app-reception-item',
-  imports: [
-    ReceptionVariant,
-    ReactiveFormsModule,
-    ProductForm
-  ],
+  standalone: true,
+  imports: [VariantExistingRow, VariantNewRow, ReactiveFormsModule, DecimalPipe, ExistingProduct, ExistingProduct, NewProduct, CreateCategory, CreateBrand],
   templateUrl: './reception-item.html',
-  styles: ``,
 })
 export default class ReceptionItem implements OnInit {
-  // ── Dependencies ──────────────────────────────────────────────────────────
-  private fb = inject(FormBuilder);
-  private productService = inject(ProductService);
+  private fb              = inject(FormBuilder);
+  private destroyRef      = inject(DestroyRef);
+  private productService  = inject(ProductService);
   private categoryService = inject(CategoryService);
-  private brandService = inject(BrandService);
+  private brandService    = inject(BrandService);
 
-  // ── Inputs ────────────────────────────────────────────────────────────────
-  form = input.required<ItemFormGroup>();
-  collapsed = signal(false);
-  index = input<number>(0);
-
-  brands = signal<Brand[]>([])
-  categories = signal<Category[]>([])
-
-  // ── Outputs ───────────────────────────────────────────────────────────────
+  form   = input.required<ItemFormGroup>();
+  index  = input<number>(0);
   remove = output<void>();
-  // ── Estado local ──────────────────────────────────────────────────────────
-  isNewProduct = signal(false);
+
+  isNewProduct  = signal(false);
   productSearch = signal('');
-  showDropdown = signal(false);
-  isSearching = signal(false);
-  searchResults = signal<ProductSearchResult[]>([]);
+  showDropdown  = signal(false);
+  isSearching   = signal(false);
+  collapsed     = signal(false);
 
-  /** Variantes del producto seleccionado, se pasan a cada ReceptionVariant */
+  searchResults     = signal<ProductSearchResult[]>([]);
   availableVariants = signal<ProductVariantOption[]>([]);
+  categories        = signal<Category[]>([]);
+  brands            = signal<Brand[]>([]);
+  activeModal = signal<{ type: 'category' | 'brand'; query: string } | null>(null);
 
-  /** Subject para debounce de búsqueda */
+  variants = signal<{ mode: 'new' | 'existing', form: VariantFormGroup }[]>([]);
+  private variantsValue = signal<any[]>([]);
+
+  variantsArray = computed(() => this.form().controls.variants);
+
+  usedIds = computed(() =>
+    this.variantsValue()
+      .map(v => v.productVariantId)
+      .filter((id): id is number => id !== null && id !== undefined)
+  );
+
+  totalUnits = computed(() =>
+    this.variantsValue().reduce((acc, v) => acc + (v.quantityReceived ?? 0), 0)
+  );
+
+  itemTotalCost = computed(() =>
+    this.variantsValue().reduce((acc, v) =>
+      acc + (v.quantityReceived ?? 0) * (v.unitCost ?? 0), 0
+    )
+  );
+
+  get summaryLabel(): string {
+    if (this.isNewProduct()) return this.newProductGroup.get('name')?.value || 'Producto nuevo';
+    return this.productSearch() || 'Seleccioná un producto';
+  }
+
   private searchInput$ = new Subject<string>();
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    this.brandService.GetAll().subscribe(x => this.brands.set(x))
-   this.categoryService.getAll().subscribe(x => this.categories.set(x))
+    this.loadCatalogs();
+    this.syncVariantsSignal();
+    this.setupProductSearch();
+  }
+
+  private loadCatalogs(): void {
+    this.categoryService.getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(x => this.categories.set(x));
+    this.brandService.GetAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(x => this.brands.set(x));
+  }
+
+  private syncVariantsSignal(): void {
+    this.variantsValue.set(this.variantsArray().value);
+    this.variantsArray().valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(val => this.variantsValue.set(val));
+  }
+
+  private setupProductSearch(): void {
     this.searchInput$
       .pipe(
         debounceTime(400),
         distinctUntilChanged(),
-        switchMap((q) => {
+        switchMap(q => {
           if (!q || q.length < 2) {
             this.searchResults.set([]);
             this.isSearching.set(false);
@@ -76,47 +127,36 @@ export default class ReceptionItem implements OnInit {
           }
           this.isSearching.set(true);
           return this.productService.searchProduct(q);
-        })
+        }),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: (results) => {
-          this.searchResults.set(results);
-          this.isSearching.set(false);
-        },
-        error: () => {
-          this.searchResults.set([]);
-          this.isSearching.set(false);
-        },
+        next: results => { this.searchResults.set(results); this.isSearching.set(false); },
+        error: () => { this.searchResults.set([]); this.isSearching.set(false); },
       });
   }
 
-  // ── Accessors del form ────────────────────────────────────────────────────
-  get productIdCtrl(): FormControl<number | null> {
-    return this.form().controls.productId;
-  }
+  get productIdCtrl(): FormControl<number | null> { return this.form().controls.productId; }
+  get newProductGroup(): FormGroup { return this.form().controls.newProduct; }
 
-  get newProductGroup(): FormGroup {
-    return this.form().controls.newProduct;
-  }
-
-  get variantsArray(): FormArray<VariantFormGroup> {
-    return this.form().controls.variants;
-  }
-
-  // ── Búsqueda de producto ──────────────────────────────────────────────────
-  onSearchInput(value: string): void {
+  onSearchInput(value: string) {
     this.productSearch.set(value);
-    // Si el usuario borra el campo, limpiar selección
-    if (!value) this.clearProductSelection();
-    this.searchInput$.next(value);
-  }
 
+    if (value.trim() === '') {
+      this.clearSelection();
+    } else {
+      this.showDropdown.set(true);
+      // IMPORTANTE: Notificar al buscador
+      this.searchInput$.next(value);
+    }
+  }
   selectProduct(product: ProductSearchResult): void {
     this.productIdCtrl.setValue(product.id);
     this.productIdCtrl.markAsTouched();
     this.productSearch.set(product.name);
     this.availableVariants.set(product.productVariants ?? []);
     this.showDropdown.set(false);
+    this.resetVariants();
   }
 
   clearProductSelection(): void {
@@ -124,100 +164,128 @@ export default class ReceptionItem implements OnInit {
     this.availableVariants.set([]);
   }
 
-  openDropdown(): void {
-    this.showDropdown.set(true);
+  openDropdown():   void { this.showDropdown.set(true); }
+  closeDropdown():  void { setTimeout(() => this.showDropdown.set(false), 150); }
+  toggleCollapse(): void { this.collapsed.set(!this.collapsed()); }
+  clearSelection() {
+    this.productIdCtrl.setValue(null);
+    this.productSearch.set('');
+    this.resetVariants()
+    this.showDropdown.set(false);
   }
 
-  closeDropdown(): void {
-    setTimeout(() => this.showDropdown.set(false), 150);
+  handleBlur() {
+    // Retrasamos un poco el cierre para permitir que el click del dropdown funcione
+    setTimeout(() => {
+      this.showDropdown.set(false);
+
+      // ESCENARIO: El usuario dejó texto pero no seleccionó nada del dropdown
+      // o borró parte del nombre de un producto ya seleccionado.
+      if (this.productIdCtrl.value === null) {
+        // Si no hay ID, no permitimos que quede texto "mentiroso"
+        this.clearSelection();
+      } else {
+        // ESCENARIO: Hay un ID seleccionado, pero el usuario alteró el texto del input
+        // Reestablecemos el nombre original del producto seleccionado
+        const selectedProduct = this.searchResults().find(p => p.id === this.productIdCtrl.value);
+        if (selectedProduct && this.productSearch() !== selectedProduct.name) {
+          this.productSearch.set(selectedProduct.name);
+        }
+      }
+    }, 200);
   }
 
-  // ── Toggle nuevo / existente ──────────────────────────────────────────────
   switchToNewProduct(): void {
+    console.log('--- MODO: NUEVO PRODUCTO ---');
     this.isNewProduct.set(true);
     this.productIdCtrl.setValue(null);
     this.productIdCtrl.clearValidators();
     this.productIdCtrl.updateValueAndValidity();
     this.productSearch.set('');
     this.availableVariants.set([]);
-    // Activar validadores de newProduct
-    this.newProductGroup.get('name')?.setValidators([Validators.required]);
-    this.newProductGroup.get('categoryId')?.setValidators([Validators.required]);
-    this.newProductGroup.get('brandId')?.setValidators([Validators.required]);
-    this.newProductGroup.get('basePrice')?.setValidators([Validators.required]);
-    this.newProductGroup.updateValueAndValidity();
-    // Limpiar variantes existentes y agregar una nueva
-    this.clearVariants();
-    this.addVariant();
+
+    const np = this.newProductGroup;
+    np.get('name')?.setValidators([Validators.required]);
+    np.get('categoryId')?.setValidators([Validators.required]);
+    np.get('brandId')?.setValidators([Validators.required]);
+    np.get('basePrice')?.setValidators([Validators.required]);
+    np.updateValueAndValidity();
+    this.resetVariants();
   }
 
   switchToExistingProduct(): void {
     this.isNewProduct.set(false);
     this.newProductGroup.reset();
-    this.newProductGroup.get('name')?.clearValidators();
-    this.newProductGroup.get('categoryId')?.clearValidators();
-    this.newProductGroup.get('brandId')?.clearValidators();
-    this.newProductGroup.get('basePrice')?.clearValidators();
-    this.newProductGroup.updateValueAndValidity();
     this.productIdCtrl.setValidators([Validators.required]);
     this.productIdCtrl.updateValueAndValidity();
-    this.clearVariants();
-    this.addVariant();
+    this.resetVariants();
   }
 
-  // ── Gestión de variantes ──────────────────────────────────────────────────
   addVariant(): void {
-    this.variantsArray.push(this.buildVariantGroup());
+    const mode: 'new' | 'existing' = this.isNewProduct() ? 'new' : 'existing';
+    const form = this.buildVariantGroup();
+
+    console.log(`Agregando variante: Modo=${mode}, isNewProduct=${this.isNewProduct()}`);
+
+    this.variantsArray().push(form);
+
+    // Actualizamos la señal
+    this.variants.update(v => {
+      const newState = [...v, { mode, form }];
+      console.log('Nuevo estado de señal variants (length):', newState.length);
+      return newState;
+    });
+
+    // Log de seguridad para ver si Angular detecta el cambio en el FormArray
+    console.log('FormArray actual despues de push:', this.variantsArray().controls.length);
   }
 
   removeVariant(i: number): void {
-    if (this.variantsArray.length === 1) return; // Al menos una variante
-    this.variantsArray.removeAt(i);
+    if (this.variants().length === 1) return;
+    this.variantsArray().removeAt(i);
+    this.variants.update(v => v.filter((_, idx) => idx !== i));
   }
 
-  private clearVariants(): void {
-    while (this.variantsArray.length > 0) {
-      this.variantsArray.removeAt(0);
-    }
+  switchVariantMode(i: number, mode: 'new' | 'existing'): void {
+    this.variants.update(v =>
+      v.map((item, idx) => idx === i ? { ...item, mode } : item)
+    );
+  }
+
+  public resetVariants(): void {
+    console.log('Antes de clear - FormArray:', this.variantsArray().length, 'Signal:', this.variants().length);
+
+    this.variantsArray().clear();
+    this.variants.set([]);
+
+    console.log('Post clear - FormArray:', this.variantsArray().length, 'Signal:', this.variants().length);
+
+    setTimeout(() => {
+      this.addVariant();
+    }, 0);
   }
 
   private buildVariantGroup(): VariantFormGroup {
-    return this.fb.group<VariantFormGroup['controls']>({
-      productVariantId: this.fb.control<number | null>(null),
+    return this.fb.group({
+      productVariantId: [null as number | null],
       newVariant: this.fb.group({
-        description: this.fb.control('', { nonNullable: true }),
-        size: this.fb.control('', { nonNullable: true }),
-        color: this.fb.control('', { nonNullable: true }),
-        price: this.fb.control<number | null>(null),
+        description: ['', { nonNullable: true }],
+        size:        ['', { nonNullable: true }],
+        color:       ['', { nonNullable: true }],
+        price:       [null as number | null],
       }),
-
-      quantityReceived: this.fb.control<number | null>(null, {
-        validators: [Validators.required, Validators.min(1)]
-      }),
-      unitCost: this.fb.control<number | null>(null, {
-        validators: [Validators.required, Validators.min(0.01)]
-      }),
-    });
+      quantityReceived: [null as number | null, [Validators.required, Validators.min(1)]],
+      unitCost:         [null as number | null, [Validators.required, Validators.min(0.01)]],
+    }) as unknown as VariantFormGroup;
   }
 
-  // ── Helpers UI ────────────────────────────────────────────────────────────
-  get summaryLabel(): string {
-    if (this.isNewProduct()) {
-      const name = this.form().controls.newProduct.get('name')?.value;
-      return name || 'Producto nuevo';
-    }
-    return this.productSearch() || 'Seleccioná un producto';
-  }
-  toggleCollapse(): void {
-    this.collapsed.set(!this.collapsed());
-  }
-  onRemove(): void {
-    this.remove.emit();
+  onRemove(): void { this.remove.emit(); }
+
+  hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
+    return !!(ctrl?.hasError(error) && ctrl.touched);
   }
 
-  hasError(ctrl: AbstractControl | null, error: string = 'required'): boolean {
-    if (!ctrl) return false;
-    return ctrl.hasError(error) && ctrl.touched;
+  handleOpenCreation(event: { type: 'category' | 'brand'; query: string }) {
+    this.activeModal.set(event);
   }
 }
-
