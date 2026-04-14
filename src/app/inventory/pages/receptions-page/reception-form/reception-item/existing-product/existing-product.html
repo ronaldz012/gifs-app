@@ -44,7 +44,7 @@
 <!-- Género -->
 <div class="px-2 py-1.5 flex items-center justify-end border-l border-gray-100">
   <span class="text-xs text-gray-500">
-    {{ selectedProduct() ? getGenderLabel(selectedProduct()!.gender) : '—' }}
+    {{getGenderLabel(selectedProduct()?.gender ?? null)}}
   </span>
 </div>
 
