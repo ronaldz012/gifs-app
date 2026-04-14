@@ -1,11 +1,14 @@
 import {Component, effect, input, output, signal, untracked} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ProductSearchResult} from './product-search-result';
+import {CurrencyPipe} from '@angular/common';
+import {Gender} from '../../interfaces/gender';
 
 @Component({
   selector: 'app-product-search',
   imports: [
-    FormsModule
+    FormsModule,
+    CurrencyPipe
   ],
   template: `
     <div class="relative w-full" (focusout)="handleFocusOut($event)">
@@ -35,20 +38,43 @@ import {ProductSearchResult} from './product-search-result';
               (mousedown)="$event.preventDefault()"
               (click)="selectProduct(product)"
               (mouseenter)="activeIndex.set(i)"
-              class="w-full text-left px-3 py-2 text-[11px] border-b border-gray-100 last:border-0
-                     flex items-center justify-between gap-2 transition-colors"
+              class="w-full text-left px-4 py-3 border-b border-gray-100 last:border-0
+           flex items-center justify-between gap-4 transition-all"
               [class.bg-blue-600]="activeIndex() === i"
               [class.text-white]="activeIndex() === i"
               [class.bg-white]="activeIndex() !== i"
             >
-              <span class="font-medium truncate" [class.text-white]="activeIndex() === i">
-                {{ product.name }}
-              </span>
-              <span class="shrink-0 text-[10px]"
-                    [class.text-blue-100]="activeIndex() === i"
-                    [class.text-gray-400]="activeIndex() !== i">
-                {{ product.brandName }}
-              </span>
+              <div class="flex flex-col min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+        <span class="font-semibold text-[13px] truncate">
+          {{ product.name }}
+        </span>
+                  <span class="px-1.5 py-0.5 rounded text-[9px] uppercase font-bold border"
+                        [class.border-white]="activeIndex() === i"
+                        [class.border-gray-200]="activeIndex() !== i">
+          {{ Gender[product.gender] }}
+        </span>
+                </div>
+
+                <div class="flex items-center gap-2 mt-1">
+        <span class="text-[10px] opacity-80 uppercase tracking-wider font-medium">
+          {{ product.brandName }}
+        </span>
+                  <span class="text-[10px] opacity-50">•</span>
+                  <span class="text-[10px] opacity-80 italic">
+          {{ product.categoryName }}
+        </span>
+                </div>
+              </div>
+
+              <div class="flex flex-col items-end shrink-0">
+      <span class="text-[14px] font-bold">
+        {{ product.basePrice | currency:'Bs' }}
+      </span>
+                <span class="text-[9px] opacity-70">
+        {{ product.productVariants.length }} vars.
+      </span>
+              </div>
             </button>
           }
 
@@ -75,6 +101,8 @@ export class ProductSearch {
   productSearch = signal('');
   showDropdown = signal(false);
   activeIndex = signal(0);
+  protected readonly Gender = Gender;
+
 
   constructor() {
     // Sincroniza el texto del input con el producto seleccionado externamente
@@ -158,4 +186,5 @@ export class ProductSearch {
         break;
     }
   }
+
 }

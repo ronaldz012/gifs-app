@@ -1,3 +1,5 @@
+import {Gender} from '../../interfaces/gender';
+
 export interface ProductSearchResult {
   id: number;
   name: string;
@@ -6,7 +8,7 @@ export interface ProductSearchResult {
   brandName: string;
   categoryName: string;
   productVariants: ProductVariantOption[];
-  gender: number; // 0 unisex | 1 men | 2 woman
+  gender: Gender;
 }
 export interface ProductVariantOption {
   id: number;
