@@ -10,7 +10,7 @@ import {ProductSearchResult} from '../../../../../components/product-search/prod
 @Component({
   selector: 'app-new-product',
   standalone: true,
-  imports: [ReactiveFormsModule, SelectFromList],
+  imports: [ReactiveFormsModule, SelectFromList, SelectFromList],
   templateUrl: './new-product.html',
   styles: [`:host { display: contents; }`],
 })

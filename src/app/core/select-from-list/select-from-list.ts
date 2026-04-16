@@ -1,23 +1,30 @@
-import { Component, computed, effect, input, output, signal, ViewChild, ElementRef, untracked } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  Component,
+  forwardRef,
+  input,
+  output,
+  signal,
+  computed,
+  effect,
+  untracked
+} from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
   selector: 'app-select-from-list',
   standalone: true,
-  imports: [FormsModule],
   template: `
     <div class="relative w-full" (focusout)="handleFocusOut($event)">
       <input
-        #inputRef
         type="text"
-        [ngModel]="query()"
+        [value]="query()"
         (focus)="onFocus()"
+        (input)="onInput($event)"
         (keydown)="handleKeydown($event)"
         [placeholder]="placeholder()"
-        (ngModelChange)="onQueryChange($event)"
-        class="w-full px-2 py-1.5 border border-transparent rounded text-[11px]
+        class="w-full px-2 py-1.5 border border-gray-300 rounded text-[11px]
                focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400
-               hover:border-gray-200 transition-colors"
+               transition-colors bg-white"
       />
 
       @if (isOpen() && (filteredOptions().length > 0 || showCreateOption())) {
@@ -45,35 +52,43 @@ import { FormsModule } from '@angular/forms';
       }
     </div>
   `,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => SelectFromList),
+      multi: true,
+    },
+  ],
 })
-export class SelectFromList {
-  @ViewChild('inputRef') inputRef!: ElementRef<HTMLInputElement>;
+export class SelectFromList implements ControlValueAccessor {
 
   // Inputs
-  options = input.required<{ id: number; name: string; description: string }[]>();
+  options = input.required<{ id: number; name: string }[]>();
   placeholder = input<string>('');
-  selectedId = input<number | null | undefined>(null);
 
-  // Outputs
-  selected = output<{ id: number; name: string; description: string } | null>();
+  // Outputs opcionales
   createNew = output<string>();
-  selectionDone = output<void>();
 
-  // internal states
+  // estado interno
   query = signal('');
   isOpen = signal(false);
   activeIndex = signal(0);
+  value: number | null = null;
 
+  // CVA callbacks
+  private onChange = (value: number | null) => {};
+  private onTouched = () => {};
+
+  // Sync query con value
   constructor() {
     effect(() => {
-      const id = this.selectedId();
       const opts = this.options();
 
       untracked(() => {
-        if (id == null) {
+        if (this.value == null) {
           this.query.set('');
         } else {
-          const match = opts.find(o => o.id === id);
+          const match = opts.find(o => o.id === this.value);
           if (match) this.query.set(match.name);
         }
       });
@@ -83,45 +98,63 @@ export class SelectFromList {
   filteredOptions = computed(() => {
     const q = this.query().toLowerCase().trim();
     const list = this.options().filter(o => o.name.toLowerCase().includes(q));
-    // Resetear el índice cuando cambia la lista para evitar quedar fuera de rango
     untracked(() => this.activeIndex.set(0));
     return list;
   });
 
   showCreateOption = computed(() => {
     const q = this.query().trim();
-    if (q.length === 0) return false;
-    // No mostrar "Crear" si ya existe una coincidencia exacta
+    if (!q) return false;
     return !this.options().some(o => o.name.toLowerCase() === q.toLowerCase());
   });
 
+  // CVA methods
+  writeValue(value: number | null): void {
+    this.value = value;
+  }
+
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+
+  // eventos UI
   onFocus() {
     this.isOpen.set(true);
-    this.activeIndex.set(0);
   }
 
   handleFocusOut(event: FocusEvent) {
     const next = event.relatedTarget as HTMLElement;
     if (next && (event.currentTarget as HTMLElement).contains(next)) return;
+
     this.isOpen.set(false);
+    this.onTouched(); // 👈 automático ahora
   }
 
-  onQueryChange(newValue: string) {
-    this.query.set(newValue);
-    this.isOpen.set(true); // Aseguramos que se abra al escribir
+  onInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.query.set(value);
+    this.isOpen.set(true);
 
-    // Si el usuario borra todo, emitimos null para limpiar el form
-    if (!newValue) {
-      this.selected.emit(null);
+    if (!value) {
+      this.value = null;
+      this.onChange(null);
     }
   }
 
   selectOption(opt: any, event?: MouseEvent) {
     if (event) event.preventDefault();
+
+    this.value = opt.id;
     this.query.set(opt.name);
-    this.selected.emit(opt);
+
+    this.onChange(opt.id);   // 👈 update form
+    this.onTouched();        // 👈 touched automático
+
     this.isOpen.set(false);
-    this.selectionDone.emit();
   }
 
   emitCreate(event?: MouseEvent) {
@@ -134,17 +167,13 @@ export class SelectFromList {
   }
 
   handleKeydown(event: KeyboardEvent) {
-    if (!this.isOpen()) {
-      if (event.key === 'ArrowDown' || event.key === 'Enter') this.isOpen.set(true);
-      return;
-    }
+    if (!this.isOpen()) return;
 
     const maxIndex = this.showCreateOption()
       ? this.filteredOptions().length
       : this.filteredOptions().length - 1;
 
     switch (event.key) {
-      //参数
       case 'ArrowDown':
         event.preventDefault();
         this.activeIndex.update(v => (v < maxIndex ? v + 1 : 0));

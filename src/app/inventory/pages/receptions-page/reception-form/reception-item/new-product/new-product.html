@@ -25,7 +25,7 @@
   <!-- NOMBRE -->
   <div class="px-2 pt-1.5 pb-1 flex flex-col border-r border-gray-100 min-h-[60px]">
     <label class="text-[9px] text-green-700 font-bold uppercase mb-1">
-      Nombre Producto
+      Modelo/Nombre Producto
     </label>
 
     <input
@@ -52,10 +52,8 @@
     </label>
 
     <app-select-from-list
-      class="border border-gray-300 rounded"
+      formControlName="categoryId"
       [options]="categories()"
-      [selectedId]="form().get('categoryId')?.value"
-      (selected)="onCategorySelected($event)"
       (createNew)="handleCreateCategory($event)"
     />
 
@@ -73,10 +71,8 @@
     </label>
 
     <app-select-from-list
-      class="border border-gray-300 rounded"
+      formControlName="brandId"
       [options]="brands()"
-      [selectedId]="form().get('brandId')?.value"
-      (selected)="onBrandSelected($event)"
       (createNew)="handleCreateBrand($event)"
     />
 
@@ -103,6 +99,11 @@
         <option [ngValue]="opt.value">{{ opt.label }}</option>
       }
     </select>
+    @if (form().get('gender')?.invalid && form().get('gender')?.touched) {
+      <span class="text-[9px] text-red-500 font-semibold mt-1">
+        * Requerido
+      </span>
+    }
   </div>
 
   <!-- PRECIO -->
