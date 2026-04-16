@@ -1,99 +1,157 @@
 <div [formGroup]="form()" class="contents group">
 
-  <div class="px-2 py-1.5 flex items-center justify-center border-r border-gray-100">
-    <div class="flex border border-gray-300 rounded overflow-hidden text-[10px]">
-      <span class="px-2 py-1 bg-green-600 text-white font-medium">New</span>
-      <button type="button" (click)="switchMode.emit()"
-              class="px-2 py-1 text-gray-400 hover:bg-gray-100 transition-colors"
-              title="Cambiar a producto existente">
-        Ex
-      </button>
+  <!-- MODO -->
+  <div class="border-r border-gray-100 flex flex-col min-h-[60px]">
+    <span class="text-[9px] text-gray-400 font-bold uppercase text-center bg-gray-50 py-0.5">
+      Modo
+    </span>
+
+    <div class="p-1">
+      <div class="flex border border-gray-200 rounded overflow-hidden text-[9px] h-[26px]">
+        <span class="flex-1 flex items-center justify-center bg-green-600 text-white font-bold">
+          NEW
+        </span>
+        <button
+          type="button"
+          (click)="switchMode.emit()"
+          class="flex-1 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors font-bold"
+        >
+          EX
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="px-1 py-1">
+  <!-- NOMBRE -->
+  <div class="px-2 pt-1.5 pb-1 flex flex-col border-r border-gray-100 min-h-[60px]">
+    <label class="text-[9px] text-green-700 font-bold uppercase mb-1">
+      Nombre Producto
+    </label>
+
     <input
       type="text"
       formControlName="name"
-      placeholder="Nombre del producto..."
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
+      placeholder="Ej. Polera..."
+      class="w-full px-2 py-1 border border-gray-300 rounded text-sm text-gray-900 placeholder-gray-300
+             focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400
+             transition-all bg-white"
+      [class.border-red-400]="form().get('name')?.invalid && form().get('name')?.touched"
     />
+
+    @if (form().get('name')?.invalid && form().get('name')?.touched) {
+      <span class="text-[9px] text-red-500 font-semibold mt-1">
+        * Requerido
+      </span>
+    }
   </div>
 
-  <div class="px-1 py-1 relative">
+  <!-- CATEGORIA -->
+  <div class="px-2 pt-1.5 pb-1 flex flex-col border-r border-gray-100 min-h-[60px]">
+    <label class="text-[9px] text-gray-400 font-bold uppercase mb-1">
+      Categoría
+    </label>
+
     <app-select-from-list
+      class="border border-gray-300 rounded"
       [options]="categories()"
       [selectedId]="form().get('categoryId')?.value"
       (selected)="onCategorySelected($event)"
       (createNew)="handleCreateCategory($event)"
     />
 
+    @if (form().get('categoryId')?.invalid && form().get('categoryId')?.touched) {
+      <span class="text-[9px] text-red-500 font-semibold mt-1">
+        * Requerido
+      </span>
+    }
   </div>
 
-  <div class="px-1 py-1 relative">
+  <!-- MARCA -->
+  <div class="px-2 pt-1.5 pb-1 flex flex-col border-r border-gray-100 min-h-[60px]">
+    <label class="text-[9px] text-gray-400 font-bold uppercase mb-1">
+      Marca
+    </label>
+
     <app-select-from-list
+      class="border border-gray-300 rounded"
       [options]="brands()"
       [selectedId]="form().get('brandId')?.value"
       (selected)="onBrandSelected($event)"
       (createNew)="handleCreateBrand($event)"
     />
 
+    @if (form().get('brandId')?.invalid && form().get('brandId')?.touched) {
+      <span class="text-[9px] text-red-500 font-semibold mt-1">
+        * Requerido
+      </span>
+    }
   </div>
 
-  <div class="px-1 py-1 border-l border-gray-100 flex items-center relative group">
+  <!-- GENERO -->
+  <div class="px-2 pt-1.5 pb-1 flex flex-col border-r border-gray-100 min-h-[60px]">
+    <label class="text-[9px] text-gray-400 font-bold uppercase mb-1">
+      Género
+    </label>
+
     <select
       formControlName="gender"
-      class="w-full px-1 py-1.5 border border-transparent rounded text-[11px] font-bold bg-transparent
-           focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400
-           hover:border-gray-200 cursor-pointer appearance-none text-center transition-colors"
-      [class.text-blue-600]="form().controls.gender.value === 0"
-      [class.text-indigo-600]="form().controls.gender.value === 1"
-      [class.text-pink-600]="form().controls.gender.value === 2"
+      class="w-full text-[11px] font-bold bg-white text-right outline-none cursor-pointer h-[26px]
+             border border-gray-300 rounded px-1
+             focus:border-green-400 focus:ring-1 focus:ring-green-400"
     >
       @for (opt of genderOptions; track opt.value) {
-        <option [ngValue]="opt.value" class="text-gray-700 bg-white">
-          {{ opt.label }}
-        </option>
+        <option [ngValue]="opt.value">{{ opt.label }}</option>
       }
     </select>
-
   </div>
 
-  <div class="px-1 py-1">
+  <!-- PRECIO -->
+  <div class="px-2 pt-1.5 pb-1 flex flex-col border-r border-gray-100 min-h-[60px] bg-green-50/20">
+    <label class="text-[9px] text-green-600 font-bold uppercase mb-1">
+      Precio
+    </label>
+
     <input
       type="number"
       formControlName="basePrice"
-      step="0.5"
-      min="0.5"
-      placeholder="0.00"
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-right font-medium text-blue-700
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
+      class="w-full px-2 py-1 border border-gray-300 rounded text-sm text-right font-bold text-green-700 bg-white outline-none h-[26px]
+             focus:border-green-400 focus:ring-1 focus:ring-green-400"
+      [class.border-red-400]="form().get('basePrice')?.invalid && form().get('basePrice')?.touched"
     />
+
+    @if (form().get('basePrice')?.invalid && form().get('basePrice')?.touched) {
+      <span class="text-[9px] text-red-500 font-semibold mt-1 text-right">
+        * Inválido
+      </span>
+    }
   </div>
 
-  <div class="px-1 py-1 col-span-2">
+  <!-- DESCRIPCION -->
+  <div class="px-2 pt-1.5 pb-1 flex flex-col border-r border-gray-100 min-h-[60px] col-span-2">
+    <label class="text-[9px] text-gray-400 font-bold uppercase mb-1">
+      Descripción
+    </label>
+
     <input
       type="text"
       formControlName="description"
-      placeholder="Descripción (material, temporada...)"
-      class="w-full px-2 py-1.5 border border-transparent rounded text-xs italic text-gray-500
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
+      placeholder="..."
+      class="w-full px-2 py-1 border border-gray-300 rounded text-xs italic text-gray-500 outline-none bg-white h-[26px]
+             focus:border-green-400 focus:ring-1 focus:ring-green-400"
     />
   </div>
 
-  <div class="flex items-center justify-center border-l border-gray-100">
+  <!-- DELETE -->
+  <div class="flex items-start justify-center pt-5 bg-gray-50/50 min-h-[60px] border-l border-gray-100">
     <button
       type="button"
       (click)="remove.emit()"
-      class="p-1.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+      class="p-1 text-gray-400 hover:text-red-500 transition-colors"
     >
-      <svg class="h-4 w-4"  viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 18L18 6M6 6l12 12"/>
       </svg>
     </button>
   </div>
+
 </div>
