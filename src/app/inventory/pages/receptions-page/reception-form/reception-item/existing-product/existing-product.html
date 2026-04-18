@@ -9,7 +9,7 @@
       <div class="flex border border-gray-200 rounded overflow-hidden text-[9px] h-[26px]">
         <button
           type="button"
-          (click)="switchToNewProductMode()"
+          (click)="this.switchMode.emit()"
           class="flex-1 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors font-bold"
         >
           NEW

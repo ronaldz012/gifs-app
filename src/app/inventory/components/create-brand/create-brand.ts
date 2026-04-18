@@ -12,7 +12,7 @@ import {BrandService} from '../../services/brand-service';
   templateUrl: './create-brand.html',
   styles: ``,
 })
-export class CreateBrand implements OnInit {
+export  default class CreateBrand implements OnInit {
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
   private fb = inject(FormBuilder);
   initialName = input.required<string>();

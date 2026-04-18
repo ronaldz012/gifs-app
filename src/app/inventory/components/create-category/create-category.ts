@@ -29,7 +29,6 @@ export class CreateCategory  implements OnInit {
     this.form.controls.name.setValue(this.initialName())
   }
   focus() {
-    // El padre puede llamar esto con viewChild para hacer autofocus
     this.nameInput?.nativeElement.focus();
   }
 

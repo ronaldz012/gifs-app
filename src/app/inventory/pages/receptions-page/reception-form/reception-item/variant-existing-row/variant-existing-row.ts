@@ -141,7 +141,9 @@ export default class VariantExistingRow implements OnInit {
   }
 
   onRemove():      void { this.remove.emit(); }
-  onSwitchToNew(): void { this.switchToNew.emit(); }
+  onSwitchToNew(): void {
+    console.log('onSwitchToNew');
+    this.switchToNew.emit(); }
 
   hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
     if (!ctrl) return false;

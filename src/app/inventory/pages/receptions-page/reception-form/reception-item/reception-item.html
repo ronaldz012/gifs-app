@@ -1,23 +1,24 @@
 <div [formGroup]="form()" class="border border-gray-200 rounded-lg bg-white mb-4 relative">
 
-  <div class="grid grid-cols-[80px_1.2fr_120px_110px_90px_100px_0.8fr_96px_32px] items-stretch border-b border-gray-200 bg-white">    @if (!isNewProduct()) {
-    <app-existing-product
-      [productIdCtrl]="productIdCtrl"
-      [selectedProduct]="selectedProductSignal()"
-      (productSelected)="onProductSelected($event)"
-      (selectionCleared)="onSelectionCleared()"
-      (switchMode)="switchToNewProduct()"
-    />
+  <div class="grid grid-cols-[80px_1.2fr_120px_110px_90px_100px_0.8fr_96px_32px] items-stretch border-b border-gray-200 bg-white">
+    @if (!isNewProduct()) {
+      <app-existing-product
+        [productIdCtrl]="productIdCtrl"
+        (productSelected)="onProductSelected($event)"
+        (selectionCleared)="onSelectionCleared()"
+        (switchMode)="switchToNewProduct()"
+        (remove)="onRemove()"
+      />
     } @else {
       <app-new-product
         [form]="newProductGroup"
-        [index] = "index()"
+        [index]="index()"
         [categories]="categories()"
         [brands]="brands()"
         (switchMode)="switchToExistingProduct()"
         (remove)="onRemove()"
-        (openCreation)  = "handleOpenCreation($event)">
-      </app-new-product>
+        (openCreation)="handleOpenCreation($event)"
+      />
     }
   </div>
 
@@ -35,51 +36,52 @@
     </div>
 
     <div class="flex flex-col">
-      @for (variant of variants(); track variant; let i = $index) {
+      @for (variant of vArray.controls; track $index; let i = $index) {
         <div class="grid grid-cols-[80px_1fr_80px_96px_88px_88px_100px_96px_32px] items-center border-b border-gray-100 hover:bg-gray-50">
-          @if (variant.mode === 'existing') {
 
+          @if (variant.get('mode')?.value === 'ex' && !isNewProduct()) {
             <app-variant-existing-row
-              [form]="variant.form"
+              [form]="$any(variant)"
               [availableVariants]="availableVariants()"
               [usedVariantIds]="usedIds()"
               [index]="i"
               [canSwitchToNew]="!isNewProduct()"
               (switchToNew)="switchVariantMode(i, 'new')"
               (remove)="removeVariant(i)"
-
-            ></app-variant-existing-row>
-
+            />
           } @else {
-
             <app-variant-new-row
-              [form]="variant.form"
+              [form]="$any(variant)"
               [index]="i"
               [canSwitchToExisting]="!isNewProduct()"
-              (switchToExisting)="switchVariantMode(i, 'existing')"
+              (switchToExisting)="switchVariantMode(i, 'ex')"
               (remove)="removeVariant(i)"
-            ></app-variant-new-row>
-
+            />
           }
         </div>
       }
     </div>
-  </div>
 
   <div class="flex items-center justify-between px-3 py-2 bg-gray-50 border-t border-gray-200">
     @if(isNewProduct() || productIdCtrl.value !== null){
-      <button type="button" (click)="addVariant()"
+      <button type="button" (click)="addVariant('new')"
               class="text-xs text-blue-600 font-semibold hover:text-blue-800 transition-colors">
         + AGREGAR VARIANTE
       </button>
     }
 
     <div class="ml-auto text-[11px] text-gray-500 flex gap-4 items-center">
-      <span>{{ variants().length }} VARIANTES</span>
+      <button
+        (click)="addVariant('new')"
+      >
+      Agregar variante
+      </button>
+      <span>{{ vArray.length }} VARIANTES</span>
       <span>{{ totalUnits() }} UNIDADES</span>
       <div class="bg-white px-2 py-1 border border-gray-200 rounded shadow-sm">
         TOTAL ITEM: <span class="font-bold text-gray-900 ml-1">Bs {{ itemTotalCost() | number:'1.0-0' }}</span>
       </div>
     </div>
   </div>
+</div>
 </div>

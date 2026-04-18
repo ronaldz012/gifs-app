@@ -2,12 +2,12 @@ import {
   Component,
   DestroyRef, EventEmitter,
   inject,
-  input, model,
+  input, model, OnDestroy,
   OnInit, Output,
   output,
   signal,
 } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import {FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { Subject, debounceTime, distinctUntilChanged, finalize, switchMap } from 'rxjs';
@@ -27,19 +27,21 @@ import {Gender} from '../../../../../interfaces/gender';
     }
   `],
 })
-export class ExistingProduct implements OnInit {
+export class ExistingProduct implements OnInit, OnDestroy {
+
   private productService = inject(ProductService);
   private destroyRef     = inject(DestroyRef);
+  protected readonly Gender = Gender;
+
 
   // ── Inputs ────────────────────────────────────────────────────────────
   productIdCtrl = input.required<FormControl<number | null>>();
-  selectedProduct = input.required<ProductSearchResult | null>();
+  selectedProduct = signal<ProductSearchResult | null>(null);
 
   // ── Outputs ───────────────────────────────────────────────────────────
   productSelected  = output<ProductSearchResult>();
-  selectionCleared = output<void>();
-  switchMode       = output<void>();
-  remove           = output<void>();
+  switchMode       = output<void>(); // to switch no new mode
+  remove           = output<void>(); //to remove this item
 
   // ── Estado UI ─────────────────────────────────────────────────────────
   isSearching     = signal(false);
@@ -47,13 +49,18 @@ export class ExistingProduct implements OnInit {
   private searchInput$ = new Subject<string>();
 
   ngOnInit(): void {
+    //Required validators
+    this.productIdCtrl().setValidators([Validators.required]);
+    // SEARCH
     this.searchInput$.pipe(
       debounceTime(400),
       distinctUntilChanged(),
       switchMap(q => {
         if (!q || q.length < 2) {
-          this.searchResults.set([]);
+          this.searchResults.set([])
           this.isSearching.set(false);
+          this.selectedProduct.set(null);
+          this.productIdCtrl().setValue(null);
           return [];
         }
         this.isSearching.set(true);
@@ -73,27 +80,24 @@ export class ExistingProduct implements OnInit {
   // Se llama cuando se hace click en un producto de la lista
   handleProductSelected(product: ProductSearchResult | null): void {
     if (product) {
-      // 1. Actualizamos el control de formulario (referencia)
       this.productIdCtrl().setValue(product.id);
-      // 2. Emitimos el objeto completo para que el padre gestione variantes
       this.productSelected.emit(product);
-      // 3. Limpiamos la lista de resultados
+      this.selectedProduct.set(product);
       this.searchResults.set([]);
     } else {
-      this.clearSelection();
+      this.productIdCtrl().setValue(null);
+      this.searchResults.set([]);
     }
   }
 
-  clearSelection(): void {
+
+
+
+
+
+  ngOnDestroy(): void {
     this.productIdCtrl().setValue(null);
+    this.productIdCtrl().clearValidators();
     this.searchResults.set([]);
-    this.selectionCleared.emit();
-  }
-
-  protected readonly Gender = Gender;
-
-   switchToNewProductMode() {
-     this.clearSelection()
-    this.switchMode.emit()
   }
 }

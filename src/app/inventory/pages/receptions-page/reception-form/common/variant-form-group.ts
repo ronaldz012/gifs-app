@@ -2,7 +2,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 
 // Definís el tipo del form de variante
 export type VariantFormGroup = FormGroup<{
-  _id: FormControl<number[]>;
+  mode: FormControl<string>;
   productVariantId: FormControl<number | null>;
   newVariant: FormGroup<{
     description: FormControl<string>;

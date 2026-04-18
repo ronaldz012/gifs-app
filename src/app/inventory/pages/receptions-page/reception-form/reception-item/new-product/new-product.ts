@@ -1,5 +1,5 @@
-import { Component, DestroyRef, inject, input, output, ViewChild, ElementRef } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import {Component, DestroyRef, inject, input, output, ViewChild, ElementRef, OnInit, OnDestroy} from '@angular/core';
+import {ReactiveFormsModule, Validators} from '@angular/forms';
 import { NewProductFormGroup } from '../../common/item-form-group';
 import { Category } from '../../../../../interfaces/Dtos/category-dto';
 import { Brand } from '../../../../../interfaces/Dtos/brand-dto';
@@ -14,10 +14,7 @@ import {ProductSearchResult} from '../../../../../components/product-search/prod
   templateUrl: './new-product.html',
   styles: [`:host { display: contents; }`],
 })
-export default class NewProduct {
-  // Referencia al input de marca
-  @ViewChild('brandInput') brandInput!: ElementRef<HTMLInputElement>;
-
+export default class NewProduct implements OnInit,OnDestroy {
   form = input.required<NewProductFormGroup>();
   categories = input.required<Category[]>();
   brands = input.required<Brand[]>();
@@ -34,6 +31,14 @@ export default class NewProduct {
     { label: 'MUJER', value: 2 }
   ];
 
+  ngOnInit(): void {
+     this.form().controls.name.setValidators([Validators.required]);
+     this.form().controls.categoryId.setValidators([Validators.required]);
+     this.form().controls.brandId.setValidators([Validators.required]);
+     this.form().controls.gender.setValidators([Validators.required]);
+    this.form().controls.basePrice.setValidators([Validators.required]);
+  }
+
   onCategorySelected(category: Category | null) {
     this.form().patchValue({ categoryId: category?.id ?? null });
   }
@@ -41,11 +46,6 @@ export default class NewProduct {
     this.form().patchValue({ brandId: brand?.id ?? null});
   }
 
-  focusBrand() {
-    setTimeout(() => {
-      this.brandInput.nativeElement.focus();
-    }, 10);
-  }
 
   handleCreateBrand(text: string) {
     this.openCreation.emit({ type: 'brand', query: text, itemIndex: this.index() });
@@ -53,5 +53,18 @@ export default class NewProduct {
 
   handleCreateCategory(text: string) {
     this.openCreation.emit({ type: 'category', query: text, itemIndex: this.index() });
+  }
+
+
+  ngOnDestroy(): void {
+    const group = this.form();
+
+    Object.values(group.controls).forEach(control => {
+      control.clearValidators();
+      control.updateValueAndValidity({ emitEvent: false, onlySelf: true });
+    });
+    group.clearValidators();
+    group.reset();
+    group.updateValueAndValidity({ emitEvent: false });
   }
 }

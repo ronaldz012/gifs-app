@@ -27,8 +27,8 @@ import {BrandService} from '../../../services/brand-service';
 import {Category} from '../../../interfaces/Dtos/category-dto';
 import {Brand} from '../../../interfaces/Dtos/brand-dto';
 import {CreateCategory} from '../../../components/create-category/create-category';
-import {CreateBrand} from '../../../components/create-brand/create-brand';
 import {CreateEntityEvent} from '../../../interfaces/types/create-entity-event';
+import CreateBrand from '../../../components/create-brand/create-brand';
 
 
 @Component({
@@ -59,14 +59,16 @@ export default class ReceptionForm implements OnInit {
   saved = output<void>();
   cancelled = output<void>();
 
-  // ── Estado ────────────────────────────────────────────────────────────────
+  // ── Estates ────────────────────────────────────────────────────────────────
   isSubmitting = signal(false);
   submitError = signal<string | null>(null);
   totalCost = signal<number>(0);
   activeModal = signal<CreateEntityEvent | null>(null);
+  //────DATA─────────────────────────────────────────────────────────────────────────────
   categories = signal<Category[]>([])
   brands = signal<Brand[]>([])
   categoryModal = viewChild(CreateCategory);
+  brandModal = viewChild(CreateBrand);
   lastFocusedElement: HTMLElement | null = null;
   // ── Form ──────────────────────────────────────────────────────────────────
   form: NewReceptionForm = this.fb.group<NewReceptionForm['controls']>({
@@ -78,12 +80,18 @@ export default class ReceptionForm implements OnInit {
   constructor() {
     effect(() => {
       const modal = this.activeModal();
-      const modalRef = this.categoryModal();
+      const modalRefCategory = this.categoryModal();
+      const modalRefBrand = this.brandModal();
 
-      if (modal?.type === 'category' && modalRef) {
+      if (modal?.type === 'category' && modalRefCategory) {
         setTimeout(() => {
-          modalRef.focus(); // 🔥 foco automático
+          modalRefCategory.focus(); // 🔥 foco automático
         });
+      }
+      if(modal?.type === 'brand' && modalRefBrand) {
+        setTimeout(() => {
+          modalRefBrand.focus();
+        })
       }
     });
   }
@@ -126,11 +134,15 @@ export default class ReceptionForm implements OnInit {
 
   // ── Gestión de items ──────────────────────────────────────────────────────
   addItem(): void {
-    this.itemsArray.push(this.buildItemGroup());
+    const newItem = this.buildItemGroup();
+    this.itemsArray.push(newItem);
+    const variantsArray = newItem.get('variants') as FormArray;
+    console.log('Cantidad de variantes en el nuevo item:', variantsArray.length);
   }
 
   removeItem(i: number): void {
     if (this.itemsArray.length === 1) return;
+    console.log('deleting: ',i+1);
     this.itemsArray.removeAt(i);
   }
 
@@ -145,14 +157,14 @@ export default class ReceptionForm implements OnInit {
         gender: this.fb.control<number | null>(null),
         basePrice: this.fb.control<number>(0, { nonNullable: true }),
       }),
-      variants: this.fb.array<VariantFormGroup>([]),
+      variants: this.fb.array<VariantFormGroup>([this.buildVariantGroup('new')]),
     });
   }
 
-  private buildVariantGroup(): VariantFormGroup {
+  private buildVariantGroup(mode: 'ex' | 'new'): VariantFormGroup {
     return this.fb.group({
-      _id: this.fb.control<number[]>([Date.now() + Math.random()], { validators: [] }),
       productVariantId: this.fb.control<number | null>(null),
+      mode: this.fb.control<string>(mode),
       newVariant: this.fb.group({
         description: this.fb.control('', { nonNullable: true }),
         size: this.fb.control('', { nonNullable: true }),
@@ -256,6 +268,8 @@ export default class ReceptionForm implements OnInit {
   onCancel(): void {
     this.cancelled.emit();
   }
+
+  //----------------MODALS----------------------------------------------------------
   handleOpenCreation(event: CreateEntityEvent) {
     this.lastFocusedElement = document.activeElement as HTMLElement; // 🔥 guardas foco
     this.activeModal.set(event);

@@ -1,226 +1,217 @@
 import {
   Component,
   computed,
-  DestroyRef,
   inject,
+  Injector,
   input,
   OnInit,
   output,
+  Signal,
   signal,
 } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
-  FormControl,
-  FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
+
 import { VariantFormGroup } from '../common/variant-form-group';
-import { ProductSearchResult, ProductVariantOption } from '../../../../components/product-search/product-search-result';
+import { ItemFormGroup } from '../common/item-form-group';
+import {
+  ProductSearchResult,
+  ProductVariantOption,
+} from '../../../../components/product-search/product-search-result';
 import { Category } from '../../../../interfaces/Dtos/category-dto';
 import { Brand } from '../../../../interfaces/Dtos/brand-dto';
+import { CreateEntityEvent } from '../../../../interfaces/types/create-entity-event';
+
 import VariantExistingRow from './variant-existing-row/variant-existing-row';
 import VariantNewRow from './variant-new-row/variant-new-row';
-import {ItemFormGroup} from '../common/item-form-group';
-import {ExistingProduct} from './existing-product/existing-product';
+import { ExistingProduct } from './existing-product/existing-product';
 import NewProduct from './new-product/new-product';
-import {CreateEntityEvent} from '../../../../interfaces/types/create-entity-event';
-
 
 @Component({
   selector: 'app-reception-item',
   standalone: true,
-  imports: [VariantExistingRow, VariantNewRow, ReactiveFormsModule, DecimalPipe, ExistingProduct, ExistingProduct, NewProduct],
+  imports: [
+    VariantExistingRow,
+    VariantNewRow,
+    ReactiveFormsModule,
+    DecimalPipe,
+    ExistingProduct,
+    NewProduct,
+  ],
   templateUrl: './reception-item.html',
 })
 export default class ReceptionItem implements OnInit {
-  private fb              = inject(FormBuilder);
-  private destroyRef      = inject(DestroyRef);
+  private fb = inject(FormBuilder);
+  private injector = inject(Injector);
 
+  // ---------------- INPUTS / OUTPUTS ----------------
+  form = input.required<ItemFormGroup>();
+  index = input.required<number>();
+  categories = input.required<Category[]>();
+  brands = input.required<Brand[]>();
 
-  form   = input.required<ItemFormGroup>();
-  index  = input<number>(0);
-  remove = output<void>();
+  remove = output<number>();
   create = output<CreateEntityEvent>();
 
-  isNewProduct  = signal(false);
-  productSearch = signal('');
-  showDropdown  = signal(false);
-
-  availableVariants = signal<ProductVariantOption[]>([]);
-  categories        = input.required<Category[]>();
-  brands            = input.required<Brand[]>();
-  variants = signal<{ mode: 'new' | 'existing', form: VariantFormGroup }[]>([]);
-  private variantsValue = signal<any[]>([]);
+  // ---------------- STATE ----------------
   selectedProductSignal = signal<ProductSearchResult | null>(null);
+  isNewProduct = signal(false);
+  availableVariants = signal<ProductVariantOption[]>([]);
+  selectedProduct = signal<ProductSearchResult | null>(null);
 
-  variantsArray = computed(() => this.form().controls.variants);
+  // ---------------- FORM GETTERS ----------------
+  get vArray() {
+    return this.form().controls.variants;
+  }
 
+  get productIdCtrl() {
+    return this.form().controls.productId;
+  }
+
+  get newProductGroup() {
+    return this.form().controls.newProduct;
+  }
+
+  // ---------------- REACTIVE BRIDGE ----------------
+  private formValue!: Signal<any>;
+
+  ngOnInit(): void {
+    this.formValue = toSignal(
+      this.form().valueChanges.pipe(startWith(this.form().value)),
+      { injector: this.injector }
+    );
+  }
+
+  // ---------------- COMPUTEDS ----------------
   usedIds = computed(() =>
-    this.variantsValue()
-      .map(v => v.productVariantId)
-      .filter((id): id is number => id !== null && id !== undefined)
+    (this.formValue()?.variants ?? [])
+      .map((v: any) => v.productVariantId)
+      .filter((id: number | null): id is number => id !== null)
   );
 
   totalUnits = computed(() =>
-    this.variantsValue().reduce((acc, v) => acc + (v.quantityReceived ?? 0), 0)
-  );
-
-  itemTotalCost = computed(() =>
-    this.variantsValue().reduce((acc, v) =>
-      acc + (v.quantityReceived ?? 0) * (v.unitCost ?? 0), 0
+    (this.formValue()?.variants ?? []).reduce(
+      (acc: number, v: any) => acc + (v.quantityReceived ?? 0),
+      0
     )
   );
 
+  itemTotalCost = computed(() =>
+    (this.formValue()?.variants ?? []).reduce(
+      (acc: number, v: any) =>
+        acc + (v.quantityReceived ?? 0) * (v.unitCost ?? 0),
+      0
+    )
+  );
 
-  ngOnInit(): void {
-    this.syncVariantsSignal();
+  // ---------------- VARIANTS ----------------
+  addVariant(mode:'new' | 'ex'): void {
+    this.vArray.push(this.buildVariantGroup(mode));
   }
 
-
-  private syncVariantsSignal(): void {
-    this.variantsValue.set(this.variantsArray().value);
-    this.variantsArray().valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(val => this.variantsValue.set(val));
+  removeVariant(i: number): void {
+    if (this.vArray.length > 1) {
+      this.vArray.removeAt(i);
+    }
   }
 
+  switchVariantMode(i: number, mode: 'new' | 'ex'): void {
+    const group = this.form().controls.variants.at(i) as VariantFormGroup;
+    group.controls.newVariant.reset();
+    group.controls.mode.setValue(mode);
+    group.get('mode')?.updateValueAndValidity();
+    console.log(group.controls.mode.value);
+  }
 
-  get productIdCtrl(): FormControl<number | null> { return this.form().controls.productId; }
-  get newProductGroup(): FormGroup { return this.form().controls.newProduct; }
+  resetVariants(): void {
+    this.vArray.clear();
 
-  selectProductFromChild(product: ProductSearchResult): void {
-    this.selectedProductSignal.set(product)
+    // evita glitches de render
+    if(this.isNewProduct())
+      queueMicrotask(() => this.addVariant('new'));
+    else
+      queueMicrotask(() => this.addVariant('ex'));
+
+  }
+
+  // ---------------- PRODUCT ----------------
+  onProductSelected(product: ProductSearchResult): void {
+    this.selectedProduct.set(product);
     this.productIdCtrl.setValue(product.id);
-    this.productIdCtrl.markAsTouched();
-    this.productSearch.set(product.name);
     this.availableVariants.set(product.productVariants);
-    console.log('ESTO SON LAS VARIANTES'+this.availableVariants());
-    this.showDropdown.set(false);
+    this.resetVariants();
+  }
+
+  onSelectionCleared(): void {
+    this.selectedProduct.set(null);
+    this.productIdCtrl.setValue(null);
+    this.availableVariants.set([]);
     this.resetVariants();
   }
 
   switchToNewProduct(): void {
-    console.log('--- MODO: NUEVO PRODUCTO ---');
     this.isNewProduct.set(true);
-    this.productIdCtrl.setValue(null);
-    this.productIdCtrl.clearValidators();
-    this.productIdCtrl.updateValueAndValidity();
-    this.productIdCtrl.markAsPristine();
-    this.productIdCtrl.markAsUntouched();
-    this.productSearch.set('');
-    this.availableVariants.set([]);
-
-    const np = this.newProductGroup;
-    np.get('name')?.setValidators([Validators.required]);
-    np.get('categoryId')?.setValidators([Validators.required]);
-    np.get('brandId')?.setValidators([Validators.required]);
-    np.get('basePrice')?.setValidators([Validators.required]);
-    np.get('gender')?.setValidators([Validators.required]);
-    np.updateValueAndValidity();
     this.resetVariants();
   }
 
   switchToExistingProduct(): void {
     this.isNewProduct.set(false);
-
-    const  np= this.newProductGroup;
-
-    // 2. Limpiar validadores de los campos específicos de "New Product"
-    // Si no los quitas, el Form sigue pidiéndolos internamente.
-    np.get('name')?.clearValidators();
-    np.get('categoryId')?.clearValidators();
-    np.get('brandId')?.clearValidators();
-    np.get('basePrice')?.clearValidators();
-    np.get('gender')?.clearValidators();
-    np.reset();
-    np.markAsPristine();
-    np.markAsUntouched();
-    this.productIdCtrl.setValidators([Validators.required]);
-    this.productIdCtrl.updateValueAndValidity();
+    this.form().controls.productId.reset()
     this.resetVariants();
   }
 
-  addVariant(): void {
-    const mode: 'new' | 'existing' = this.isNewProduct() ? 'new' : 'existing';
-    const form = this.buildVariantGroup();
+  private setNewProductValidators(active: boolean): void {
+    const np = this.newProductGroup;
 
-    console.log(`Agregando variante: Modo=${mode}, isNewProduct=${this.isNewProduct()}`);
+    const fields = ['name', 'categoryId', 'brandId', 'basePrice', 'gender'];
 
-    this.variantsArray().push(form);
-
-    // Actualizamos la señal
-    this.variants.update(v => {
-      const newState = [...v, { mode, form }];
-      console.log('Nuevo estado de señal variants (length):', newState.length);
-      return newState;
+    fields.forEach((f) => {
+      const control = np.get(f);
+        control?.setValidators([Validators.required]);
+        control?.clearValidators();
+      control?.updateValueAndValidity();
     });
 
-    // Log de seguridad para ver si Angular detecta el cambio en el FormArray
-    console.log('FormArray actual despues de push:', this.variantsArray().controls.length);
+    if (!active) {
+      np.reset();
+    }
   }
 
-  removeVariant(i: number): void {
-    if (this.variants().length === 1) return;
-    this.variantsArray().removeAt(i);
-    this.variants.update(v => v.filter((_, idx) => idx !== i));
-  }
-
-  switchVariantMode(i: number, mode: 'new' | 'existing'): void {
-    this.variants.update(v =>
-      v.map((item, idx) => idx === i ? { ...item, mode } : item)
-    );
-  }
-
-  public resetVariants(): void {
-    console.log('Antes de clear - FormArray:', this.variantsArray().length, 'Signal:', this.variants().length);
-
-    this.variantsArray().clear();
-    this.variants.set([]);
-
-    console.log('Post clear - FormArray:', this.variantsArray().length, 'Signal:', this.variants().length);
-
-    setTimeout(() => {
-      this.addVariant();
-    }, 0);
-  }
-
-  private buildVariantGroup(): VariantFormGroup {
+  private buildVariantGroup(mode : 'ex' | 'new'): VariantFormGroup {
     return this.fb.group({
       productVariantId: [null as number | null],
+      mode: [mode],
       newVariant: this.fb.group({
         description: ['', { nonNullable: true }],
-        size:        ['', { nonNullable: true }],
-        color:       ['', { nonNullable: true }],
-        price:       [null as number | null],
+        size: ['', { nonNullable: true }],
+        color: ['', { nonNullable: true }],
+        price: [null as number | null],
       }),
-      quantityReceived: [null as number | null, [Validators.required, Validators.min(1)]],
-      unitCost:         [null as number | null, [Validators.required, Validators.min(0.01)]],
+
+      quantityReceived: [
+        null as number | null,
+        [Validators.required, Validators.min(1)],
+      ],
+
+      unitCost: [
+        null as number | null,
+        [Validators.required, Validators.min(0.01)],
+      ],
     }) as unknown as VariantFormGroup;
   }
 
-  onProductSelected(product: ProductSearchResult): void {
-    // Guardamos el objeto para que el hijo sepa qué hay seleccionado (input)
-    this.selectedProductSignal.set(product);
-
-    // Cargamos las variantes disponibles
-    this.availableVariants.set(product.productVariants);
-
-    // Reiniciamos los formularios de variantes
-    this.resetVariants();
+  // ---------------- OUTPUTS ----------------
+  onRemove(): void {
+    this.remove.emit(this.index());
   }
 
-  onSelectionCleared(): void {
-    this.selectedProductSignal.set(null);
-    this.availableVariants.set([]);
-    this.resetVariants();
-  }
- onRemove (): void { this.remove.emit(); }
-
-  handleOpenCreation(event: CreateEntityEvent) {
-   this.create.emit(event)
+  handleOpenCreation(event: CreateEntityEvent): void {
+    this.create.emit(event);
   }
 }
