@@ -1,5 +1,5 @@
 import {Injectable, signal} from '@angular/core';
-import {Branch} from './interfaces/Respones/LoginResponse';
+import {Branch, Module} from './interfaces/Respones/LoginResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -36,5 +36,31 @@ export class BranchContextService {
     const saved = branches.find(b => b.branchId === Number(savedId));
     this._available.set(branches);
     this._active.set(saved ?? branches[0] ?? null);
+  }
+
+
+  // Reemplaza setAvailable + setActive + localStorage suelto
+  initialize(branches: Branch[]): void {
+    localStorage.setItem('branches', JSON.stringify(branches));
+    this._available.set(branches);
+
+    const savedId = Number(localStorage.getItem('active_branch_id'));
+    const saved = branches.find(b => b.branchId === savedId);
+    this._active.set(saved ?? branches[0] ?? null);
+
+    if (this._active()) {
+      localStorage.setItem('active_branch_id', String(this._active()!.branchId));
+    }
+  }
+
+  clear(): void {
+    localStorage.removeItem('branches');
+    //localStorage.removeItem('active_branch_id');
+    this._available.set([]);
+    this._active.set(null);
+  }
+
+  getActiveModules(): Module[] {
+    return this._active()?.modules ?? [];
   }
 }
