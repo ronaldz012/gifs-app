@@ -35,6 +35,7 @@ export interface Role {
 export interface Module {
   id: number;
   name: string;
+  route: string;
   canCreate: boolean;
   canRead: boolean;
   canUpdate: boolean;

@@ -1,3 +1,13 @@
-<aside class="w-64 bg-blue-800 rounded-r-xl sticky top-0 h-screen">
-  <app-side-menu-option [modules]="modules()"/>
+<aside class="w-64 bg-blue-800 rounded-r-xl sticky top-0 h-screen flex flex-col">
+
+  <a routerLink="/dashboard"
+     class="flex items-center gap-2 px-5 py-4 text-white font-semibold text-lg border-b border-white/10 hover:bg-white/10 transition-colors">
+    <span class="material-icons text-[20px]">home</span>
+    <span>Dashboard</span>
+  </a>
+
+  <div class="flex-1 overflow-y-auto">
+    <app-side-menu-option [modules]="modules()"/>
+  </div>
+
 </aside>
