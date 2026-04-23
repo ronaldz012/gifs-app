@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
+import {BranchSelector} from './branch-selector/branch-selector';
 
 @Component({
   selector: 'app-topbar',
-  imports: [],
+  imports: [
+    BranchSelector
+  ],
   templateUrl: './topbar.html'
 })
 

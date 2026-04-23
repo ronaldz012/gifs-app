@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import sidebar from '../../components/sidebar/sidebar';
+import sidebar from '../../../sidebar/sidebar';
 import { RouterOutlet } from '@angular/router';
-import Topbar from '../../components/topbar/topbar';
+import Topbar from '../../../topbar/topbar';
 
 @Component({
   selector: 'app-dashboard',
