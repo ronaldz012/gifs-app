@@ -7,6 +7,7 @@ import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {StockTransferListDto} from '../dtos/tranfers/stock-transfer-list-dto';
 import {PagedResult} from '../dtos/paged-result';
+import {form} from '@angular/forms/signals';
 
 @Injectable({
   providedIn: 'root',
@@ -21,11 +22,12 @@ export class TransferService {
   }
 
   cancelTransfer(id: number) {
-    return this.http.patch<boolean>(this.URL, id, {})
+    return this.http.patch<boolean>(this.URL+'/Cancel/'+id,{});
   }
 
   resolveTransfer(id: number, action: "complete" | "reject") :Observable<boolean>{
-    return this.http.patch<boolean>(this.URL, id, {})
+    let accepted = action === "complete";
+    return this.http.post<boolean>(this.URL+'/Resolve/'+id, {complete: accepted, notes: ""})
   }
 
   getTransfers():Observable<PagedResult<StockTransferListDto>> {
