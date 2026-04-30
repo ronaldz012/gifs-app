@@ -1,54 +1,93 @@
-<!-- transfers-page.html -->
-@switch (view()) {
+<!-- transfer-page.html -->
+<div class="bg-gray-50">
 
-  @case ('list') {
-    <div class="min-h-screen bg-gray-50">
+  <!-- ── Header (always rendered, crumbs change per view) ─────────────────── -->
+  <div class="items-center min-h-10">
+  <app-page-header
+    [crumbs]="headerCrumbs"
+    (crumbClick)="onCrumbClick($event)"
+  >
+    <!-- Right-side actions depend on active view -->
+    @switch (view()) {
 
-      <div class="bg-white border-b border-gray-100 sticky top-0 z-10">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <h1 class="text-base font-semibold text-gray-800">Transferencias</h1>
-          <button
-            (click)="showCreate()"
-            class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
-                   hover:bg-blue-700 transition-colors"
-          >
-            <span class="hidden sm:inline">Nueva transferencia</span>
-            <span class="sm:hidden">+ Nueva</span>
-          </button>
-        </div>
-      </div>
+      @case ('list') {
+        <button
+          (click)="showCreate()"
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
+                 hover:bg-blue-700 transition-colors"
+        >
+          <span class="hidden sm:inline">Nueva transferencia</span>
+          <span class="sm:hidden">+ Nueva</span>
+        </button>
+      }
 
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-        <app-transfer-list
-          [transfers]="transfers()"
-          [loading]="loadingTransfers()"
-          (viewDetail)="showDetail($event)"
-          (resolve)="onResolve($event)"
-          (cancel)="onCancel($event)"
-        />
-      </div>
+      @case ('detail') {
+        @if (selectedTransferId(); as id) {
+          <!-- Detail actions are data-driven; TransferDetails exposes canResolve/canCancel
+               but the page doesn't have the detail object. We use a helper signal approach:
+               TransferDetails emits the actions, the page renders the buttons via the
+               detailTransfer signal populated on load. For now the buttons live in the
+               header slot only on desktop — mobile buttons are inside TransferDetails. -->
+        }
+      }
 
-    </div>
-  }
-
-  @case ('detail') {
-    @if (selectedTransferId(); as id) {
-      <app-transfer-details
-        [transferId]="id"
-        (back)="showList()"
-        (resolveSuccess)="onDetailResolveSuccess()"
-        (cancelSuccess)="onDetailCancelSuccess()"
-      />
     }
-  }
+  </app-page-header>
+    </div>
 
-  @case ('create') {
-    <app-create-transfer
-      [branches]="branches()"
-      [loadingBranches]="loadingBranches()"
-      (transferCreated)="onTransferCreated($event)"
-      (cancelled)="showList()"
-    />
-  }
+  <!-- ── Views ─────────────────────────────────────────────────────────────── -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+    @switch (view()) {
 
+      @case ('list') {
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+          <app-transfer-list
+            [transfers]="transfers()"
+            [loading]="loadingTransfers()"
+            (viewDetail)="showDetail($event)"
+            (requestResolve)="openResolveModal($event)"
+            (requestCancel)="openCancelModal($event)"
+          />
+        </div>
+      }
+
+      @case ('detail') {
+        @if (selectedTransferId(); as id) {
+          <app-transfer-details
+            [transferId]="id"
+            (back)="showList()"
+            (requestResolve)="openResolveModal($event)"
+            (requestCancel)="openCancelModal($event)"
+          />
+        }
+      }
+
+      @case ('create') {
+        <app-create-transfer
+          [branches]="branches()"
+          [loadingBranches]="loadingBranches()"
+          (transferCreated)="onTransferCreated($event)"
+          (cancelled)="showList()"
+        />
+      }
+
+    }
+  </div>
+</div>
+
+<!-- ── Modals (always at page level, outside view switch) ────────────────── -->
+@if (resolveModalId() !== null) {
+  <app-resolve-transfer-modal
+    [submitting]="submitting()"
+    (resolve)="onResolveConfirm($event)"
+    (close)="closeResolveModal()"
+  />
+}
+
+@if (cancelModalId() !== null) {
+  <app-cancel-transfer-modal
+    [submitting]="submitting()"
+    (confirm)="onCancelConfirm()"
+    (close)="closeCancelModal()"
+  />
 }

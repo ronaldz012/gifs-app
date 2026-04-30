@@ -7,6 +7,9 @@ import CreateTransfer from './create-transfer/create-transfer';
 import {StockTransferListDto} from '../../dtos/tranfers/stock-transfer-list-dto';
 import {TransferList} from './transfer-list/transfer-list';
 import {TransferDetails} from './transfer-details/transfer-details';
+import {Breadcrumb, PageHeader} from '../../../core/ui/page-header/page-header';
+import {ResolveTransferModal} from './resolve-transfer-modal/resolve-transfer-modal';
+import {CancelTransferModal} from './cancel-transfer-modal/cancel-transfer-modal';
 
 
 type TransfersView = 'list' | 'create' |'detail';
@@ -15,7 +18,10 @@ type TransfersView = 'list' | 'create' |'detail';
   imports: [
     CreateTransfer,
     TransferList,
-    TransferDetails
+    TransferDetails,
+    ResolveTransferModal,
+    CancelTransferModal,
+    PageHeader
   ],
   templateUrl: './transfer-page.html',
   styles: ``,
@@ -36,6 +42,31 @@ export default class TransferPage {
   // ── Transferencias ────────────────────────────────────────────────────────────
   transfers        = signal<StockTransferListDto[]>([]);
   loadingTransfers = signal(false);
+
+  // ── Modal state (owned by the page) ──────────────────────────────────────────
+  /** Id of the transfer pending resolve action, or null if modal is closed. */
+  resolveModalId  = signal<number | null>(null);
+  /** Id of the transfer pending cancel action, or null if modal is closed. */
+  cancelModalId   = signal<number | null>(null);
+  submitting      = signal(false);
+
+  // ── Breadcrumbs ───────────────────────────────────────────────────────────────
+  get headerCrumbs(): Breadcrumb[] {
+    switch (this.view()) {
+      case 'list':
+        return [{ label: 'Transferencias' }];
+      case 'create':
+        return [
+          { label: 'Transferencias', action: true },
+          { label: 'Nueva transferencia' },
+        ];
+      case 'detail':
+        return [
+          { label: 'Transferencias', action: true },
+          { label: this.selectedTransferId() ? `#${this.selectedTransferId()}` : 'Detalle' },
+        ];
+    }
+  }
 
   ngOnInit(): void {
     this.loadBranches();
@@ -74,30 +105,57 @@ export default class TransferPage {
     this.view.set('detail');
   }
 
-  // ── Handlers lista ────────────────────────────────────────────────────────────
-  onResolve(event: { id: number; action: 'complete' | 'reject' }): void {
-    this.transferService.resolveTransfer(event.id, event.action).subscribe({
-      next: () => this.loadTransfers(),
-      error: err => console.error('Error al resolver:', err),
+  /** Called when a breadcrumb with action=true is clicked (index 0 = root). */
+  onCrumbClick(_index: number): void {
+    this.showList();
+  }
+
+  // ── Modal: Resolve ────────────────────────────────────────────────────────────
+  openResolveModal(id: number): void {
+    this.resolveModalId.set(id);
+  }
+
+  closeResolveModal(): void {
+    this.resolveModalId.set(null);
+  }
+
+  onResolveConfirm(action: 'complete' | 'reject'): void {
+    const id = this.resolveModalId();
+    if (!id) return;
+    this.submitting.set(true);
+    this.transferService.resolveTransfer(id, action).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.closeResolveModal();
+        this.loadTransfers();
+        if (this.view() === 'detail') this.showList();
+      },
+      error: () => this.submitting.set(false),
     });
   }
 
-  onCancel(id: number): void {
+  // ── Modal: Cancel ─────────────────────────────────────────────────────────────
+  openCancelModal(id: number): void {
+    this.cancelModalId.set(id);
+  }
+
+  closeCancelModal(): void {
+    this.cancelModalId.set(null);
+  }
+
+  onCancelConfirm(): void {
+    const id = this.cancelModalId();
+    if (!id) return;
+    this.submitting.set(true);
     this.transferService.cancelTransfer(id).subscribe({
-      next: () => this.loadTransfers(),
-      error: err => console.error('Error al cancelar:', err),
+      next: () => {
+        this.submitting.set(false);
+        this.closeCancelModal();
+        this.loadTransfers();
+        if (this.view() === 'detail') this.showList();
+      },
+      error: () => this.submitting.set(false),
     });
-  }
-
-  // ── Handlers detalle ──────────────────────────────────────────────────────────
-  onDetailResolveSuccess(): void {
-    this.loadTransfers();
-    this.showList();
-  }
-
-  onDetailCancelSuccess(): void {
-    this.loadTransfers();
-    this.showList();
   }
 
   // ── Handler create ────────────────────────────────────────────────────────────

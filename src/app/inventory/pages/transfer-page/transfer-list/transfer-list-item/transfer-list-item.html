@@ -1,0 +1,83 @@
+<li
+  class="row-enter bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
+  [style.animation-delay]="index() * 35 + 'ms'"
+>
+  <div class="flex items-center gap-3 px-4 py-3.5">
+
+    <!-- Direction + counterpart info -->
+    <div class="flex items-start flex-col min-w-0 flex-1">
+
+      <div class="flex items-center gap-2 mb-0.5">
+            <span
+              class="text-base font-semibold leading-none"
+              [class]="directionClasses(transfer().direction)"
+            >{{ directionArrow(transfer().direction) }}</span>
+        <span
+          class="text-xs font-medium"
+          [class]="directionClasses(transfer().direction)"
+        >{{ directionLabel(transfer().direction) }}</span>
+
+        <span
+          class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none"
+          [class]="statusClasses(transfer().status)"
+        >{{ statusLabel(transfer().status) }}</span>
+      </div>
+
+      <p class="text-sm font-semibold text-gray-800 truncate leading-tight">
+        {{ transfer().counterpartBranchName }}
+      </p>
+
+      <p class="text-xs text-gray-400 mt-0.5">
+        {{ transfer().totalItem }} {{ transfer().totalItem === 1 ? 'ítem' : 'ítems' }}
+        · {{ transfer().totalQuantity }} uds
+        · <span class="text-gray-300">{{ transfer().createdAt | date: 'dd/MM/yy' }}</span>
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2 shrink-0">
+
+      <!-- View details: always visible -->
+      <button
+        (click)="viewDetail.emit(transfer().id)"
+        title="Ver detalles"
+        class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
+                   flex items-center justify-center text-sm
+                   hover:border-gray-300 hover:text-gray-600 transition-colors"
+      >↗</button>
+
+      <!-- Resolve (Entrada + Pendiente only) -->
+      @if (canResolve()) {
+        <button
+          (click)="requestResolve.emit(transfer().id)"
+          class="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-lg
+                     bg-blue-600 text-white text-xs font-medium
+                     hover:bg-blue-700 transition-colors"
+        >Resolver</button>
+        <button
+          (click)="requestResolve.emit(transfer().id)"
+          title="Resolver"
+          class="sm:hidden w-8 h-8 rounded-lg bg-blue-600 text-white text-sm
+                     flex items-center justify-center hover:bg-blue-700 transition-colors"
+        >✓</button>
+      }
+
+      <!-- Cancel (Salida + Pendiente only) -->
+      @if (canCancel()) {
+        <button
+          (click)="requestCancel.emit(transfer().id)"
+          class="hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-lg
+                     border border-red-200 text-red-400 text-xs font-medium
+                     hover:bg-red-50 hover:text-red-500 transition-colors"
+        >Cancelar</button>
+        <button
+          (click)="requestCancel.emit(transfer().id)"
+          title="Cancelar"
+          class="sm:hidden w-8 h-8 rounded-lg border border-red-200 text-red-400 text-sm
+                     flex items-center justify-center hover:bg-red-50 transition-colors"
+        >✕</button>
+      }
+
+    </div>
+  </div>
+</li>

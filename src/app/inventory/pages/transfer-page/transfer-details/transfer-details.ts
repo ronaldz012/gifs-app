@@ -4,12 +4,14 @@ import {StockTransferDetailDto} from '../../../dtos/tranfers/stock-transfer-deta
 import {TransferService} from '../../../services/transfer-service';
 import {DatePipe} from '@angular/common';
 import {TotalQtyPipe} from '../../../dtos/tranfers/total-qty-pipe-pipe';
+import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
 
 @Component({
   selector: 'app-transfer-details',
   imports: [
     DatePipe,
-    TotalQtyPipe
+    TotalQtyPipe,
+    SkeletonList
   ],
   templateUrl: './transfer-details.html',
   styles: `
@@ -19,40 +21,24 @@ import {TotalQtyPipe} from '../../../dtos/tranfers/total-qty-pipe-pipe';
     }
     .fade-up { animation: fade-up 240ms ease both; }
 
-    @keyframes confirm-in {
-      from { opacity: 0; transform: scaleY(0.9); }
-      to   { opacity: 1; transform: scaleY(1); }
-    }
-    .confirm-enter {
-      animation: confirm-in 160ms ease both;
-      transform-origin: top;
-    }
 
   `,
 })
 export class TransferDetails {
   private transferService = inject(TransferService);
 
-  // ── Inputs ────────────────────────────────────────────────────────────────────
   transferId = input.required<number>();
 
-  // ── Outputs ───────────────────────────────────────────────────────────────────
   back           = output<void>();
-  resolveSuccess = output<void>();
-  cancelSuccess  = output<void>();
+  requestResolve = output<number>();
+  requestCancel  = output<number>();
 
-  // ── Enums expuestos al template ───────────────────────────────────────────────
   readonly Status    = TransferStatus;
   readonly Direction = TransferDirection;
 
-  // ── Estado ────────────────────────────────────────────────────────────────────
-  transfer  = signal<StockTransferDetailDto | null>(null);
-  loading   = signal(true);
-  error     = signal<string | null>(null);
-
-  /** Controla el panel de confirmación de acción ('resolve' | 'cancel' | null) */
-  confirmMode = signal<'resolve' | 'cancel' | null>(null);
-  submitting  = signal(false);
+  transfer = signal<StockTransferDetailDto | null>(null);
+  loading  = signal(true);
+  error    = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadDetail();
@@ -73,7 +59,6 @@ export class TransferDetails {
     });
   }
 
-  // ── Helpers de presentación ───────────────────────────────────────────────────
   statusLabel(s: TransferStatus): string {
     return ['Pendiente', 'En tránsito', 'Completada', 'Rechazada', 'Cancelada'][s];
   }
@@ -91,47 +76,16 @@ export class TransferDetails {
 
   canResolve(t: StockTransferDetailDto): boolean {
     return t.direction === TransferDirection.Entrada
-      && t.status    === TransferStatus.Pendiente;
+      && t.status === TransferStatus.Pendiente;
   }
 
   canCancel(t: StockTransferDetailDto): boolean {
     return t.direction === TransferDirection.Salida
-      && t.status    === TransferStatus.Pendiente;
+      && t.status === TransferStatus.Pendiente;
   }
 
   variantLabel(item: { variantDescription: string; size: string; color: string }): string {
     return [item.variantDescription, item.size, item.color].filter(Boolean).join(' · ');
-  }
-
-  // ── Acciones ──────────────────────────────────────────────────────────────────
-  openConfirm(mode: 'resolve' | 'cancel'): void {
-    this.confirmMode.set(mode);
-  }
-
-  closeConfirm(): void {
-    this.confirmMode.set(null);
-  }
-
-  confirmResolve(action: 'complete' | 'reject'): void {
-    this.submitting.set(true);
-    this.transferService.resolveTransfer(this.transferId(), action).subscribe({
-      next: () => {
-        this.submitting.set(false);
-        this.resolveSuccess.emit();
-      },
-      error: () => this.submitting.set(false),
-    });
-  }
-
-  confirmCancel(): void {
-    this.submitting.set(true);
-    this.transferService.cancelTransfer(this.transferId()).subscribe({
-      next: () => {
-        this.submitting.set(false);
-        this.cancelSuccess.emit();
-      },
-      error: () => this.submitting.set(false),
-    });
   }
 
 }
