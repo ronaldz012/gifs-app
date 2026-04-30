@@ -1,13 +1,23 @@
-<aside class="w-64 bg-blue-800 rounded-r-xl sticky top-0 h-screen flex flex-col">
+@if (sidebarSvc.isOpen()) {
+  <div
+    class="fixed inset-0 bg-black/30 z-20 md:hidden"
+    (click)="sidebarSvc.close()">
+  </div>
+}
 
-  <a routerLink="/dashboard"
-     class="flex items-center gap-2 px-5 py-4 text-white font-semibold text-lg border-b border-white/10 hover:bg-white/10 transition-colors">
-    <span class="material-icons text-[20px]">home</span>
-    <span>Dashboard</span>
-  </a>
+<aside
+  class="fixed top-0 left-0 h-screen w-64 bg-blue-800 z-30 flex flex-col
+         md:sticky md:translate-x-0 md:z-auto"
+  [class.transition-transform]="ready()"
+  [class.duration-300]="ready()"
+  [class.ease-in-out]="ready()"
+  [class.-translate-x-full]="!sidebarSvc.isOpen()"
+  [class.translate-x-0]="sidebarSvc.isOpen()">
 
   <div class="flex-1 overflow-y-auto">
-    <app-side-menu-option [modules]="modules()"/>
+    <app-side-menu-option
+      [modules]="modules()"
+      (onNavigate)="sidebarSvc.close()" />
   </div>
 
 </aside>

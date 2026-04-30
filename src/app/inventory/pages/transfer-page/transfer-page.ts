@@ -6,14 +6,16 @@ import {BranchDto} from '../../../core/dtos/branch-dto';
 import CreateTransfer from './create-transfer/create-transfer';
 import {StockTransferListDto} from '../../dtos/tranfers/stock-transfer-list-dto';
 import {TransferList} from './transfer-list/transfer-list';
+import {TransferDetails} from './transfer-details/transfer-details';
 
 
-type TransfersView = 'list' | 'create';
+type TransfersView = 'list' | 'create' |'detail';
 @Component({
   selector: 'app-transfer-page',
   imports: [
     CreateTransfer,
-    TransferList
+    TransferList,
+    TransferDetails
   ],
   templateUrl: './transfer-page.html',
   styles: ``,
@@ -24,7 +26,8 @@ export default class TransferPage {
   private transferService = inject(TransferService);
 
   // ── Vista activa ──────────────────────────────────────────────────────────────
-  view = signal<TransfersView>('list');
+  view               = signal<TransfersView>('list');
+  selectedTransferId = signal<number | null>(null);
 
   // ── Branches ──────────────────────────────────────────────────────────────────
   branches        = signal<BranchDto[]>([]);
@@ -56,7 +59,6 @@ export default class TransferPage {
     this.transferService.getTransfers().subscribe({
       next: data => {
         this.transfers.set(data.items);
-        console.log(data)
         this.loadingTransfers.set(false);
       },
       error: () => this.loadingTransfers.set(false),
@@ -67,16 +69,16 @@ export default class TransferPage {
   showCreate(): void { this.view.set('create'); }
   showList():   void { this.view.set('list');   }
 
-  // ── Handlers de la lista ──────────────────────────────────────────────────────
-  onViewDetail(id: number): void {
-    // TODO: navegar al detalle
-    console.log('Ver detalle:', id);
+  showDetail(id: number): void {
+    this.selectedTransferId.set(id);
+    this.view.set('detail');
   }
 
+  // ── Handlers lista ────────────────────────────────────────────────────────────
   onResolve(event: { id: number; action: 'complete' | 'reject' }): void {
     this.transferService.resolveTransfer(event.id, event.action).subscribe({
       next: () => this.loadTransfers(),
-      error: err => console.error('Error al resolver:string', err),
+      error: err => console.error('Error al resolver:', err),
     });
   }
 
@@ -87,7 +89,18 @@ export default class TransferPage {
     });
   }
 
-  // ── Handler submit create ─────────────────────────────────────────────────────
+  // ── Handlers detalle ──────────────────────────────────────────────────────────
+  onDetailResolveSuccess(): void {
+    this.loadTransfers();
+    this.showList();
+  }
+
+  onDetailCancelSuccess(): void {
+    this.loadTransfers();
+    this.showList();
+  }
+
+  // ── Handler create ────────────────────────────────────────────────────────────
   onTransferCreated(payload: TransferForm): void {
     this.transferService.createTransfer(payload).subscribe({
       next: () => {
@@ -97,5 +110,6 @@ export default class TransferPage {
       error: err => console.error('Error al crear transferencia:', err),
     });
   }
+
 
 }

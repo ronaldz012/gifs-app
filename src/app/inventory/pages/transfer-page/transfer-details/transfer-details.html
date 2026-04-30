@@ -1,0 +1,273 @@
+<!-- transfer-detail.html -->
+<div class="min-h-screen bg-gray-50">
+
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-100 sticky top-0 z-10">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+
+      <div class="flex items-center gap-3">
+        <button
+          (click)="back.emit()"
+          class="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <span class="text-base leading-none">←</span>
+          Transferencias
+        </button>
+        @if (transfer(); as t) {
+          <span class="text-gray-200">/</span>
+          <span class="text-sm text-gray-400">#{{ t.id }}</span>
+        }
+      </div>
+
+      <!-- Acciones en header (desktop) -->
+      @if (transfer(); as t) {
+        <div class="hidden sm:flex items-center gap-2">
+          @if (canCancel(t)) {
+            <button
+              (click)="openConfirm('cancel')"
+              class="px-4 py-2 rounded-lg border border-red-200 text-red-400 text-sm font-medium
+                     hover:bg-red-50 hover:text-red-500 transition-colors"
+            >Cancelar transferencia</button>
+          }
+          @if (canResolve(t)) {
+            <button
+              (click)="openConfirm('resolve')"
+              class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
+                     hover:bg-blue-700 transition-colors"
+            >Resolver</button>
+          }
+        </div>
+      }
+
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 fade-up">
+
+    @if (loading()) {
+
+      <!-- Skeleton -->
+      <div class="flex flex-col gap-4 animate-pulse">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="h-4 w-32 bg-gray-100 rounded mb-4"></div>
+          <div class="grid grid-cols-2 gap-3">
+            @for (_ of [1,2,3,4]; track $index) {
+              <div class="h-10 bg-gray-100 rounded-lg"></div>
+            }
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="h-4 w-24 bg-gray-100 rounded mb-4"></div>
+          @for (_ of [1,2,3]; track $index) {
+            <div class="h-12 bg-gray-100 rounded-lg mb-2"></div>
+          }
+        </div>
+      </div>
+
+    } @else if (error()) {
+
+      <div class="bg-white rounded-xl border border-red-100 shadow-sm p-8 text-center">
+        <p class="text-sm text-red-400">{{ error() }}</p>
+        <button
+          (click)="back.emit()"
+          class="mt-4 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >← Volver</button>
+      </div>
+
+    } @else if (transfer(); as t) {
+
+      <div class="flex flex-col gap-4">
+
+        <!-- Info general -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">
+              Información general
+            </p>
+            <span
+              class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+              [class]="statusClasses(t.status)"
+            >{{ statusLabel(t.status) }}</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+
+            <div>
+              <p class="text-[11px] text-gray-400 mb-0.5">Origen</p>
+              <p class="text-sm font-medium text-gray-800">{{ t.fromBranchName }}</p>
+            </div>
+
+            <div>
+              <p class="text-[11px] text-gray-400 mb-0.5">Destino</p>
+              <p class="text-sm font-medium text-gray-800">{{ t.toBranchName }}</p>
+            </div>
+
+            <div>
+              <p class="text-[11px] text-gray-400 mb-0.5">Solicitado por</p>
+              <p class="text-sm font-medium text-gray-800">{{ t.requesterName }}</p>
+            </div>
+
+            @if (t.resolverName) {
+              <div>
+                <p class="text-[11px] text-gray-400 mb-0.5">Resuelto por</p>
+                <p class="text-sm font-medium text-gray-800">{{ t.resolverName }}</p>
+              </div>
+            }
+
+            <div>
+              <p class="text-[11px] text-gray-400 mb-0.5">Creado</p>
+              <p class="text-sm text-gray-700">{{ t.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+
+            @if (t.resolvedAt) {
+              <div>
+                <p class="text-[11px] text-gray-400 mb-0.5">Resuelto</p>
+                <p class="text-sm text-gray-700">{{ t.resolvedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+              </div>
+            }
+
+            @if (t.notes) {
+              <div class="sm:col-span-2">
+                <p class="text-[11px] text-gray-400 mb-0.5">Notas</p>
+                <p class="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">{{ t.notes }}</p>
+              </div>
+            }
+
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-4">
+            Productos · {{ t.items.length }} {{ t.items.length === 1 ? 'ítem' : 'ítems' }}
+          </p>
+
+          <ul class="flex flex-col divide-y divide-gray-100">
+            @for (item of t.items; track item.productVariantId) {
+              <li class="flex items-center gap-3 py-3">
+
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-800 truncate">
+                    {{ item.productName }}
+                  </p>
+                  <p class="text-xs text-gray-400">
+                    {{ variantLabel(item) }}
+                    <span class="text-gray-300 ml-1">{{ item.sku }}</span>
+                  </p>
+                </div>
+
+                <div class="shrink-0 text-right">
+                  <p class="text-sm font-semibold tabular-nums text-gray-800">
+                    {{ item.quantityRequested }}
+                  </p>
+                  <p class="text-[11px] text-gray-400">unidades</p>
+                </div>
+
+              </li>
+            }
+          </ul>
+
+          <!-- Total -->
+          <div class="pt-3 mt-1 border-t border-gray-100 flex justify-between items-center">
+            <span class="text-xs text-gray-400">Total</span>
+            <span class="text-sm font-semibold text-gray-700 tabular-nums">
+              {{ t.items | totalQty }} unidades
+            </span>
+          </div>
+        </div>
+
+        <!-- Acciones mobile -->
+        @if (canCancel(t) || canResolve(t)) {
+          <div class="sm:hidden flex flex-col gap-2">
+            @if (canCancel(t)) {
+              <button
+                (click)="openConfirm('cancel')"
+                class="w-full py-3 rounded-xl border border-red-200 text-red-400 text-sm font-medium
+                       hover:bg-red-50 transition-colors"
+              >Cancelar transferencia</button>
+            }
+            @if (canResolve(t)) {
+              <button
+                (click)="openConfirm('resolve')"
+                class="w-full py-3 rounded-xl bg-blue-600 text-white text-sm font-medium
+                       hover:bg-blue-700 transition-colors"
+              >Resolver</button>
+            }
+          </div>
+        }
+
+      </div>
+
+    }
+  </div>
+</div>
+
+<!-- ── Panel de confirmación / Resolve modal ──────────────────────────────── -->
+@if (confirmMode() !== null) {
+  <div
+    class="fixed inset-0 bg-black/30 z-40 flex items-end sm:items-center justify-center
+           backdrop-blur-[2px]"
+    (click)="closeConfirm()"
+  >
+    <div
+      class="confirm-enter w-full sm:w-auto sm:min-w-80 bg-white
+             rounded-t-2xl sm:rounded-2xl shadow-xl z-50
+             px-5 pt-5 pb-7 sm:pb-5"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Handle mobile -->
+      <div class="sm:hidden w-10 h-1 rounded-full bg-gray-200 mx-auto mb-5"></div>
+
+      @if (confirmMode() === 'resolve') {
+
+        <p class="text-sm font-semibold text-gray-800 mb-1">Resolver transferencia</p>
+        <p class="text-xs text-gray-400 mb-5">
+          Seleccioná qué acción tomar sobre esta transferencia entrante.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            (click)="confirmResolve('reject')"
+            [disabled]="submitting()"
+            class="flex-1 py-2.5 rounded-xl border-2 border-red-200 text-red-500
+                   text-sm font-medium hover:bg-red-50 transition-colors
+                   disabled:opacity-40 disabled:cursor-not-allowed"
+          >Rechazar</button>
+          <button
+            (click)="confirmResolve('complete')"
+            [disabled]="submitting()"
+            class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white
+                   text-sm font-medium hover:bg-emerald-700 transition-colors
+                   disabled:opacity-40 disabled:cursor-not-allowed"
+          >Completar</button>
+        </div>
+
+      } @else {
+
+        <p class="text-sm font-semibold text-gray-800 mb-1">¿Cancelar transferencia?</p>
+        <p class="text-xs text-gray-400 mb-5">Esta acción no se puede deshacer.</p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            (click)="closeConfirm()"
+            class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500
+                   text-sm font-medium hover:bg-gray-50 transition-colors"
+          >No, volver</button>
+          <button
+            (click)="confirmCancel()"
+            [disabled]="submitting()"
+            class="flex-1 py-2.5 rounded-xl bg-red-500 text-white
+                   text-sm font-medium hover:bg-red-600 transition-colors
+                   disabled:opacity-40 disabled:cursor-not-allowed"
+          >Sí, cancelar</button>
+        </div>
+
+      }
+
+      <button
+        (click)="closeConfirm()"
+        class="w-full mt-3 py-2 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+      >Cerrar</button>
+
+    </div>
+  </div>
+}

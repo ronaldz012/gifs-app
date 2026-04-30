@@ -1,27 +1,27 @@
-import {TransferStatus} from './transfer-enums';
+import {TransferDirection, TransferStatus} from './transfer-enums';
 
 export interface StockTransferDetailDto {
-
-  Id:number,
-  FromBranchName:string,
-  ToBranchName:string,
-  RequesterName:string,
-  ResolverName:string | null,
-  Status: TransferStatus
- Notes: string
-  CreatedAt: Date
- ResolvedAt: Date | null
- Items: StockTransferItemDetailDto[]
+  id:number,
+  direction: TransferDirection,
+  fromBranchName:string,
+  toBranchName:string,
+  requesterName:string,
+  resolverName:string | null,
+  status: TransferStatus
+  notes: string
+  createdAt: Date
+  resolvedAt: Date | null
+  items: StockTransferItemDetailDto[]
 }
 
-interface StockTransferItemDetailDto
+export interface StockTransferItemDetailDto
 {
-  ProductVariantId: number;
-  Sku  :string;
-  ProductName :string;
-  VariantDescription  :string;
-  Size :string;
-  Color   :string;
-  QuantityRequested: number
+  productVariantId: number;
+  sku  :string;
+  productName :string;
+  variantDescription  :string;
+  size :string;
+  color   :string;
+  quantityRequested: number
 }
 

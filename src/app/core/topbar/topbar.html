@@ -1,18 +1,17 @@
-<header class="h-16 w-full flex items-center justify-between px-4 bg-white border-b border-b-gray-200">
+<header class="h-14 w-full flex items-center gap-2 px-3 bg-white border-b border-gray-200 md:h-16 md:px-4">
 
-  <div class="flex items-center gap-4 flex-1">
-    <div class="hidden md:flex flex-1 max-w-2xl ml-10">
-      <input
-        type="text"
-        placeholder="Buscar..."
-        class="w-full bg-gray-100 px-4 py-2 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-      >
-    </div>
-  </div>
-  <div class="flex items-center gap-2">
-    <app-branch-selector/>
-  </div>
-  <div class="flex items-center gap-2">
-    <app-user-menu/>
-  </div>
+  <button
+    (click)="sidebarSvc.toggle()"
+    class="md:hidden flex items-center justify-center w-8 h-8 rounded-lg
+           hover:bg-gray-100 transition-colors text-gray-600 flex-shrink-0">
+    <span class="material-icons text-[20px]">
+      {{ sidebarSvc.isOpen() ? 'close' : 'menu' }}
+    </span>
+  </button>
+
+  <div class="flex-1"></div>
+
+  <app-branch-selector />
+  <app-user-menu />
+
 </header>

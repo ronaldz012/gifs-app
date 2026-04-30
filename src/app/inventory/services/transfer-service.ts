@@ -8,6 +8,7 @@ import {environment} from '../../../environments/environment';
 import {StockTransferListDto} from '../dtos/tranfers/stock-transfer-list-dto';
 import {PagedResult} from '../dtos/paged-result';
 import {form} from '@angular/forms/signals';
+import {StockTransferDetailDto} from '../dtos/tranfers/stock-transfer-detail-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -33,5 +34,9 @@ export class TransferService {
   getTransfers():Observable<PagedResult<StockTransferListDto>> {
     //let params = new HttpParams();
     return this.http.get<PagedResult<StockTransferListDto>>(this.URL)
+  }
+
+  getTransferDetail(number: number) {
+    return this.http.get<StockTransferDetailDto>(this.URL+'/'+number);
   }
 }

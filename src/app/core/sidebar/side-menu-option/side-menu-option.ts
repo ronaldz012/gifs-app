@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output} from '@angular/core';
 import { RouterLink } from "@angular/router";
 import {Module} from '../../auth/interfaces/Respones/LoginResponse';
 
@@ -9,6 +9,7 @@ import {Module} from '../../auth/interfaces/Respones/LoginResponse';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SideMenuOption {
-  modules = input.required<Module[]>()
+  modules    = input.required<Module[]>();
+  onNavigate = output<void>();
 
 }

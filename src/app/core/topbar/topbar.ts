@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject} from '@angular/core';
 import {BranchSelector} from './branch-selector/branch-selector';
 import {UserMenu} from './user-menu/user-menu';
+import {SideBarService} from '../Dashboard/services/side-bar-service';
 
 @Component({
   selector: 'app-topbar',
@@ -12,5 +13,5 @@ import {UserMenu} from './user-menu/user-menu';
 })
 
 export  default  class  Topbar{
-
+  readonly sidebarSvc = inject(SideBarService);
 }
