@@ -7,6 +7,7 @@ export interface StockReceptionDetailDto {
   notes?: string;
   status: ReceptionStatus;
   canRollback: boolean;
+  reasonCannotRollback:string;
   totalCost: number;
   items: StockReceptionItemDetailDto[];
 }
