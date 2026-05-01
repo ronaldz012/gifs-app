@@ -1,20 +1,23 @@
 import { Component, input, output } from '@angular/core';
 
 /**
- * Modal to confirm cancellation of an outgoing transfer.
+ * Generic confirmation modal for destructive actions.
  * The parent controls visibility; this component only emits actions.
  *
  * Usage:
- *   @if (showCancelModal()) {
- *     <app-cancel-transfer-modal
+ *   @if (showConfirmModal()) {
+ *     <app-confirm-action-modal
+ *       title="¿Cancelar recepción?"
+ *       description="Esta acción revertirá el stock registrado."
+ *       confirmLabel="Sí, revertir"
  *       [submitting]="submitting()"
- *       (confirm)="onConfirmCancel()"
- *       (close)="showCancelModal.set(false)"
+ *       (confirm)="onConfirmRollback()"
+ *       (close)="showConfirmModal.set(false)"
  *     />
  *   }
- */
+ **/
 @Component({
-  selector: 'app-cancel-transfer-modal',
+  selector: 'app-confirm-action-modal',
   template: `
     <!-- Overlay -->
     <div
@@ -32,8 +35,8 @@ import { Component, input, output } from '@angular/core';
         <!-- Handle (mobile) -->
         <div class="sm:hidden w-10 h-1 rounded-full bg-gray-200 mx-auto mb-5"></div>
 
-        <p class="text-sm font-semibold text-gray-800 mb-1">¿Cancelar transferencia?</p>
-        <p class="text-xs text-gray-400 mb-5">Esta acción no se puede deshacer.</p>
+        <p class="text-sm font-semibold text-gray-800 mb-1">{{ title() }}</p>
+        <p class="text-xs text-gray-400 mb-5">{{ description() }}</p>
 
         <div class="flex flex-col sm:flex-row gap-3">
           <button
@@ -41,16 +44,20 @@ import { Component, input, output } from '@angular/core';
             class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500
                    text-sm font-medium hover:bg-gray-50 transition-colors"
           >
-            No, volver
+            {{ cancelLabel() }}
           </button>
           <button
             (click)="confirm.emit()"
             [disabled]="submitting()"
-            class="flex-1 py-2.5 rounded-xl bg-red-500 text-white
-                   text-sm font-medium hover:bg-red-600 transition-colors
-                   disabled:opacity-40 disabled:cursor-not-allowed"
+            class="flex-1 py-2.5 rounded-xl text-white text-sm font-medium
+                   transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            [class]="confirmButtonClass()"
           >
-            Sí, cancelar
+            @if (submitting()) {
+              <span class="opacity-70">{{ submittingLabel() }}</span>
+            } @else {
+              {{ confirmLabel() }}
+            }
           </button>
         </div>
 
@@ -74,9 +81,21 @@ import { Component, input, output } from '@angular/core';
     }
   `,
 })
-export class CancelTransferModal {
+export class ConfirmActionModal {
+  // Content
+  title           = input<string>('¿Confirmar acción?');
+  description     = input<string>('Esta acción no se puede deshacer.');
+  confirmLabel    = input<string>('Confirmar');
+  cancelLabel     = input<string>('No, volver');
+  submittingLabel = input<string>('Procesando...');
+
+  // Style — permite cambiar el color del botón de confirmación según el contexto
+  confirmButtonClass = input<string>('bg-red-500 hover:bg-red-600');
+
+  // State
   submitting = input<boolean>(false);
 
+  // Events
   confirm = output<void>();
   close   = output<void>();
 }

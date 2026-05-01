@@ -38,7 +38,7 @@ import { Gender } from '../../interfaces/gender';
       />
 
       @if (showDropdown() && (searchResults().length > 0 || isSearching())) {
-        <div class="absolute z-[100] left-0 right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg max-h-52 overflow-y-auto">
+        <div class="absolute z-[100] left-0 right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg max-h-52 overflow-y-auto min-w-70">
 
           @if (isSearching()) {
             <div class="px-3 py-2 text-[10px] text-gray-400 animate-pulse">

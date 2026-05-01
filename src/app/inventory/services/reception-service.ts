@@ -5,6 +5,7 @@ import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {queryReceptions, StockReceptionListDto} from '../dtos/Receptions/stock-reception-list-dto';
 import {PagedResult} from '../dtos/paged-result';
+import {StockReceptionDetailDto} from '../dtos/Receptions/stock-reception-details-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -27,5 +28,13 @@ export class ReceptionService {
         }
       });
       return this.http.get<PagedResult<StockReceptionListDto>>(this.url, { params:params });
+  }
+
+  rollbackReception(id: number) {
+    return this.http.get<PagedResult<StockReceptionListDto>>(this.url, {});
+  }
+
+  getReceptionDetail(number: number) {
+    return this.http.get<StockReceptionDetailDto>(this.url+"/"+number,);
   }
 }

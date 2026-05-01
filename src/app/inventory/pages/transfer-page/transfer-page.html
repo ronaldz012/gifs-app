@@ -85,9 +85,12 @@
 }
 
 @if (cancelModalId() !== null) {
-  <app-cancel-transfer-modal
+    <app-confirm-action-modal
+    title="¿Cancelar Transferencia?"
+    description="Esta acción cancelara la transferencia seleccionada"
+    confirmLabel="Sí, Cancelar"
     [submitting]="submitting()"
     (confirm)="onCancelConfirm()"
     (close)="closeCancelModal()"
-  />
+    />
 }

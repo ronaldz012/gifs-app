@@ -1,37 +1,66 @@
-@if (view() === 'list') {
-  <div class="p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Recepciones</h1>
-      <button
-        type="button"
-        (click)="showForm()"
-        class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
-      >
-        <svg class="w-4 h-4" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Nueva recepción
-      </button>
-    </div>
-    @if (view() === 'list') {
-      <div class="p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h1 class="text-2xl font-bold text-gray-900">Recepciones</h1>
-        </div>
+<div class="">
 
+  <!-- ── Header ────────────────────────────────────────────────────────────── -->
+  <div class="items-center min-h-10">
+    <app-page-header
+      [crumbs]="headerCrumbs"
+      (crumbClick)="onCrumbClick($event)"
+    >
+      @if (view() === 'list') {
+        <button
+          (click)="showCreate()"
+          class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
+                 hover:bg-blue-700 transition-colors"
+        >
+          <span class="hidden sm:inline">Nueva recepción</span>
+          <span class="sm:hidden">+ Nueva</span>
+        </button>
+      }
+    </app-page-header>
+  </div>
+
+  <!-- ── Views ─────────────────────────────────────────────────────────────── -->
+  <div [class]="view() === 'create'
+  ? 'w-full px-4 sm:px-6 py-6'
+  : 'max-w-5xl mx-auto px-4 sm:px-6 py-6'">
+    @switch (view()) {
+
+      @case ('list') {
         <app-reception-list
-          [receptions]="receptionsData()"
-          (viewDetails)="handleViewDetails($event)"
-          (rollback)="handleRollback($event)"
+          [receptions]="receptions()"
+          [loading]="loadingReceptions()"
+          (viewDetail)="showDetail($event)"
         />
-      </div>
+      }
+
+      @case ('detail') {
+        @if (selectedReceptionId(); as id) {
+          <app-reception-details
+            [receptionId]="id"
+            (back)="showList()"
+            (requestRollback)="openRollbackModal($event)"
+          />}
+      }
+      @case ('create') {
+        <app-reception-form
+          (saved)="onReceptionSaved()"
+          (cancelled)="showList()"
+        />
+      }
+
     }
   </div>
-}
 
-@if (view() === 'form') {
-  <app-reception-form
-    (saved)="onSaved()"
-    (cancelled)="onCancelled()"
+</div>
+
+<!-- ── Modal: Rollback ────────────────────────────────────────────────────── -->
+@if (rollbackModalId() !== null) {
+  <app-confirm-action-modal
+    title="¿Revertir recepción?"
+    description="Se descontará el stock registrado en esta recepción."
+    confirmLabel="Sí, revertir"
+    [submitting]="submitting()"
+    (confirm)="onRollbackConfirm()"
+    (close)="closeRollbackModal()"
   />
 }

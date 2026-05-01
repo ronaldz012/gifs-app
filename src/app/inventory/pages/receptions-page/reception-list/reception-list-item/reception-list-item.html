@@ -1,0 +1,61 @@
+<li
+  class="row-enter bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
+  [style.animation-delay]="index() * 35 + 'ms'"
+>
+  <div class="flex items-center gap-3 px-4 py-3.5">
+
+    <!-- Info principal -->
+    <div class="flex flex-col min-w-0 flex-1">
+
+      <!-- Status badge -->
+      <div class="flex items-center gap-2 mb-0.5">
+        <span
+          class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px]
+                 font-medium leading-none"
+          [class]="statusClasses(reception().status)"
+        >{{ Status[reception().status] }}</span>
+      </div>
+
+      <!-- Marcas -->
+      <p class="text-sm font-semibold text-gray-800 truncate leading-tight">
+        {{ reception().brandNames.join(', ') || '—' }}
+      </p>
+
+      <!-- Metadata secundaria -->
+      <p class="text-xs text-gray-400 mt-0.5">
+        {{ reception().productVariantsCount }}
+        {{ reception().productVariantsCount === 1 ? 'variante' : 'variantes' }}
+        · {{ reception().totalItems }} uds
+        · <span class="font-medium text-gray-500">
+            {{ reception().totalCost | currency:'BOB':'symbol':'1.2-2' }}
+          </span>
+        · <span class="text-gray-300">
+            {{ reception().receivedAt | date:'dd/MM/yy' }}
+          </span>
+      </p>
+
+      <!-- Categorías como chips — solo si hay más de una marca o para dar contexto -->
+      @if (reception().categoryNames.length) {
+        <div class="flex flex-wrap gap-1 mt-1.5">
+          @for (cat of reception().categoryNames; track cat) {
+            <span class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500">
+              {{ cat }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Acción: solo ver detalle -->
+    <div class="shrink-0">
+      <button
+        (click)="viewDetail.emit(reception().id)"
+        title="Ver detalle"
+        class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
+               flex items-center justify-center text-sm
+               hover:border-gray-300 hover:text-gray-600 transition-colors"
+      >↗</button>
+    </div>
+
+  </div>
+</li>

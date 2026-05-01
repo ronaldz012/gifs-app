@@ -9,7 +9,7 @@ import {TransferList} from './transfer-list/transfer-list';
 import {TransferDetails} from './transfer-details/transfer-details';
 import {Breadcrumb, PageHeader} from '../../../core/ui/page-header/page-header';
 import {ResolveTransferModal} from './resolve-transfer-modal/resolve-transfer-modal';
-import {CancelTransferModal} from './cancel-transfer-modal/cancel-transfer-modal';
+import {ConfirmActionModal} from './confirm-action-modal/confirm-action-modal';
 
 
 type TransfersView = 'list' | 'create' |'detail';
@@ -20,7 +20,7 @@ type TransfersView = 'list' | 'create' |'detail';
     TransferList,
     TransferDetails,
     ResolveTransferModal,
-    CancelTransferModal,
+    ConfirmActionModal,
     PageHeader
   ],
   templateUrl: './transfer-page.html',

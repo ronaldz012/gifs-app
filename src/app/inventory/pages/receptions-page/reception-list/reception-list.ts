@@ -1,31 +1,50 @@
 import {Component, input, output} from '@angular/core';
 import {CurrencyPipe, DatePipe, KeyValuePipe} from '@angular/common';
 import {StockReceptionListDto} from '../../../dtos/Receptions/stock-reception-list-dto';
+import {ReceptionListItem} from './reception-list-item/reception-list-item';
+import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
 
 @Component({
   selector: 'app-reception-list',
-  imports: [
-    CurrencyPipe,
-    DatePipe,
-    KeyValuePipe
-  ],
-  templateUrl: './reception-list.html',
-  styles: ``,
+  imports: [ReceptionListItem,SkeletonList],
+  template: `
+    @if (loading()) {
+
+      <app-skeleton-list [rows]="4" [columns]="3" />
+
+    } @else if (receptions().length === 0) {
+
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-12
+                  flex flex-col items-center gap-3">
+        <span class="text-3xl opacity-30">📦</span>
+        <p class="text-sm text-gray-400">No hay recepciones registradas.</p>
+      </div>
+
+    } @else {
+
+      <ul class="flex flex-col gap-2.5">
+        @for (r of receptions(); track r.id; let i = $index) {
+          <app-reception-list-item
+            [reception]="r"
+            [index]="i"
+            (viewDetail)="viewDetail.emit($event)"
+          />
+        }
+      </ul>
+
+    }
+  `,
+  styles: `
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .row-enter { animation: slide-up 220ms ease both; }
+  `,
 })
 export default class ReceptionList {
-  // Use signals for inputs (Angular 17.1+)
-  receptions = input<StockReceptionListDto[]>([]);
-  // Actions
-  viewDetails = output<number>();
-  rollback = output<number>();
+  receptions = input.required<StockReceptionListDto[]>();
+  loading    = input<boolean>(false);
 
-  onView(id: number) {
-    this.viewDetails.emit(id);
-  }
-
-  onRollback(id: number) {
-    if (confirm('¿Estás seguro de que deseas revertir esta recepción? Esta acción afectará el stock.')) {
-      this.rollback.emit(id);
-    }
-  }
+  viewDetail = output<number>();
 }

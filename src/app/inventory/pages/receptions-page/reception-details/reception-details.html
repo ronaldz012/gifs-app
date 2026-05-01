@@ -1,0 +1,114 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 fade-up">
+
+  @if (loading()) {
+
+    <app-skeleton-list [rows]="3" [columns]="2" />
+
+  } @else if (error()) {
+
+    <div class="bg-white rounded-xl border border-red-100 shadow-sm p-8 text-center">
+      <p class="text-sm text-red-400">{{ error() }}</p>
+      <button
+        (click)="back.emit()"
+        class="mt-4 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+      >← Volver</button>
+    </div>
+
+  } @else if (reception(); as r) {
+
+    <div class="flex flex-col gap-4">
+
+      <!-- Info general -->
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">
+            Información general
+          </p>
+          <span
+            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+            [class]="statusClasses(r.status)"
+          >{{ Status[r.status] }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          <div>
+            <p class="text-[11px] text-gray-400 mb-0.5">Fecha de recepción</p>
+            <p class="text-sm font-medium text-gray-800">
+              {{ r.receivedAt | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-[11px] text-gray-400 mb-0.5">Total</p>
+            <p class="text-sm font-semibold text-gray-800">
+              {{ r.totalCost | currency:'BOB':'symbol':'1.2-2' }}
+            </p>
+          </div>
+          @if (r.notes) {
+            <div class="sm:col-span-2">
+              <p class="text-[11px] text-gray-400 mb-0.5">Notas</p>
+              <p class="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">{{ r.notes }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-4">
+          Productos · {{ r.items.length }} {{ r.items.length === 1 ? 'ítem' : 'ítems' }}
+        </p>
+
+        <ul class="flex flex-col divide-y divide-gray-100">
+          @for (item of r.items; track item.id) {
+            <li class="flex items-center gap-3 py-3">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-800 truncate">{{ item.productName }}</p>
+                <p class="text-xs text-gray-400">{{ variantLabel(item) }}</p>
+              </div>
+              <!-- Cantidad + costo por unidad -->
+              <div class="shrink-0 text-right">
+                <p class="text-sm font-semibold tabular-nums text-gray-800">
+                  {{ item.quantityReceived }}
+                  <span class="text-xs font-normal text-gray-400">uds</span>
+                </p>
+                <p class="text-[11px] text-gray-400 tabular-nums">
+                  {{ item.unitCost | currency:'BOB':'symbol':'1.2-2' }} c/u
+                </p>
+              </div>
+              <!-- Subtotal -->
+              <div class="shrink-0 text-right w-20 hidden sm:block">
+                <p class="text-sm tabular-nums text-gray-600">
+                  {{ item.subtotal | currency:'BOB':'symbol':'1.2-2' }}
+                </p>
+                <p class="text-[11px] text-gray-300">subtotal</p>
+              </div>
+            </li>
+          }
+        </ul>
+
+        <!-- Totales -->
+        <div class="pt-3 mt-1 border-t border-gray-100 flex flex-col sm:flex-row
+                    sm:items-center justify-between gap-1">
+          <span class="text-xs text-gray-400">
+            {{ totalQuantity }} unidades en total
+          </span>
+          <span class="text-sm font-semibold text-gray-700 tabular-nums">
+            {{ r.totalCost | currency:'BOB':'symbol':'1.2-2' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Acción rollback — mobile -->
+      @if (r.canRollback) {
+        <div class="sm:hidden">
+          <button
+            (click)="requestRollback.emit(r.id)"
+            class="w-full py-3 rounded-xl border border-red-200 text-red-400
+                   text-sm font-medium hover:bg-red-50 transition-colors"
+          >Revertir recepción</button>
+        </div>
+      }
+
+    </div>
+  }
+</div>

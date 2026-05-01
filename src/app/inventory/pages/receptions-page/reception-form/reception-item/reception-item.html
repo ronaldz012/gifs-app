@@ -1,87 +1,89 @@
 <div [formGroup]="form()" class="border border-gray-200 rounded-lg bg-white mb-4 relative">
+  <div class="min-w-215">
 
-  <div class="grid grid-cols-[80px_1.2fr_120px_110px_90px_100px_0.8fr_96px_32px] items-stretch border-b border-gray-200 bg-white">
-    @if (!isNewProduct()) {
-      <app-existing-product
-        [productIdCtrl]="productIdCtrl"
-        (productSelected)="onProductSelected($event)"
-        (selectionCleared)="onSelectionCleared()"
-        (switchMode)="switchToNewProduct()"
-        (remove)="onRemove()"
-      />
-    } @else {
-      <app-new-product
-        [form]="newProductGroup"
-        [index]="index()"
-        [categories]="categories()"
-        [brands]="brands()"
-        (switchMode)="switchToExistingProduct()"
-        (remove)="onRemove()"
-        (openCreation)="handleOpenCreation($event)"
-      />
-    }
-  </div>
-
-  <div class="w-full">
-    <div class="grid grid-cols-[80px_1fr_80px_96px_88px_88px_100px_96px_32px] bg-gray-50 border-b border-gray-200 text-[11px] font-medium text-gray-500 uppercase tracking-wide">
-      <div class="px-2 py-2 text-center">Modo</div>
-      <div class="px-2 py-2">Variante / Descrip.</div>
-      <div class="px-2 py-2 text-center">Talle</div>
-      <div class="px-2 py-2 text-center">Color</div>
-      <div class="px-2 py-2 text-right">P. Venta</div>
-      <div class="px-2 py-2 text-right">Cant.</div>
-      <div class="px-2 py-2 text-right">Costo U.</div>
-      <div class="px-2 py-2 text-right">Subtotal</div>
-      <div class="w-8"></div>
-    </div>
-
-    <div class="flex flex-col">
-      @for (variant of vArray.controls; track $index; let i = $index) {
-        <div class="grid grid-cols-[80px_1fr_80px_96px_88px_88px_100px_96px_32px] items-center border-b border-gray-100 hover:bg-gray-50">
-
-          @if (variant.get('mode')?.value === 'ex' && !isNewProduct()) {
-            <app-variant-existing-row
-              [form]="$any(variant)"
-              [availableVariants]="availableVariants()"
-              [usedVariantIds]="usedIds()"
-              [index]="i"
-              [canSwitchToNew]="!isNewProduct()"
-              (switchToNew)="switchVariantMode(i, 'new')"
-              (remove)="removeVariant(i)"
-            />
-          } @else {
-            <app-variant-new-row
-              [form]="$any(variant)"
-              [index]="i"
-              [canSwitchToExisting]="!isNewProduct()"
-              (switchToExisting)="switchVariantMode(i, 'ex')"
-              (remove)="removeVariant(i)"
-            />
-          }
-        </div>
+    <div class="grid grid-cols-[80px_1.2fr_120px_110px_90px_100px_0.8fr_96px_32px] items-stretch border-b border-gray-200 bg-white">
+      @if (!isNewProduct()) {
+        <app-existing-product
+          [productIdCtrl]="productIdCtrl"
+          (productSelected)="onProductSelected($event)"
+          (selectionCleared)="onSelectionCleared()"
+          (switchMode)="switchToNewProduct()"
+          (remove)="onRemove()"
+        />
+      } @else {
+        <app-new-product
+          [form]="newProductGroup"
+          [index]="index()"
+          [categories]="categories()"
+          [brands]="brands()"
+          (switchMode)="switchToExistingProduct()"
+          (remove)="onRemove()"
+          (openCreation)="handleOpenCreation($event)"
+        />
       }
     </div>
 
-  <div class="flex items-center justify-between px-3 py-2 bg-gray-50 border-t border-gray-200">
-    @if(isNewProduct() || productIdCtrl.value !== null){
-      <button type="button" (click)="addVariant('new')"
-              class="text-xs text-blue-600 font-semibold hover:text-blue-800 transition-colors">
-        + AGREGAR VARIANTE
-      </button>
-    }
+    <div class="w-full">
+      <div class="grid grid-cols-[80px_1fr_80px_96px_88px_88px_100px_96px_32px] bg-gray-50 border-b border-gray-200 text-[11px] font-medium text-gray-500 uppercase tracking-wide">
+        <div class="px-2 py-2 text-center">Modo</div>
+        <div class="px-2 py-2">Variante / Descrip.</div>
+        <div class="px-2 py-2 text-center">Talle</div>
+        <div class="px-2 py-2 text-center">Color</div>
+        <div class="px-2 py-2 text-right">P. Venta</div>
+        <div class="px-2 py-2 text-right">Cant.</div>
+        <div class="px-2 py-2 text-right">Costo U.</div>
+        <div class="px-2 py-2 text-right">Subtotal</div>
+        <div class="w-8"></div>
+      </div>
 
-    <div class="ml-auto text-[11px] text-gray-500 flex gap-4 items-center">
-      <button
-        (click)="addVariant('new')"
-      >
-      Agregar variante
-      </button>
-      <span>{{ vArray.length }} VARIANTES</span>
-      <span>{{ totalUnits() }} UNIDADES</span>
-      <div class="bg-white px-2 py-1 border border-gray-200 rounded shadow-sm">
-        TOTAL ITEM: <span class="font-bold text-gray-900 ml-1">Bs {{ itemTotalCost() | number:'1.0-0' }}</span>
+      <div class="flex flex-col">
+        @for (variant of vArray.controls; track $index; let i = $index) {
+          <div class="grid grid-cols-[80px_1fr_80px_96px_88px_88px_100px_96px_32px] items-center border-b border-gray-100 hover:bg-gray-50">
+
+            @if (variant.get('mode')?.value === 'ex' && !isNewProduct()) {
+              <app-variant-existing-row
+                [form]="$any(variant)"
+                [availableVariants]="availableVariants()"
+                [usedVariantIds]="usedIds()"
+                [index]="i"
+                [canSwitchToNew]="!isNewProduct()"
+                (switchToNew)="switchVariantMode(i, 'new')"
+                (remove)="removeVariant(i)"
+              />
+            } @else {
+              <app-variant-new-row
+                [form]="$any(variant)"
+                [index]="i"
+                [canSwitchToExisting]="!isNewProduct()"
+                (switchToExisting)="switchVariantMode(i, 'ex')"
+                (remove)="removeVariant(i)"
+              />
+            }
+          </div>
+        }
+      </div>
+
+    <div class="flex items-center justify-between px-3 py-2 bg-gray-50 border-t border-gray-200">
+      @if(isNewProduct() || productIdCtrl.value !== null){
+        <button type="button" (click)="addVariant('new')"
+                class="text-xs text-blue-600 font-semibold hover:text-blue-800 transition-colors">
+          + AGREGAR VARIANTE
+        </button>
+      }
+
+      <div class="ml-auto text-[11px] text-gray-500 flex gap-4 items-center">
+        <button
+          (click)="addVariant('new')"
+        >
+        Agregar variante
+        </button>
+        <span>{{ vArray.length }} VARIANTES</span>
+        <span>{{ totalUnits() }} UNIDADES</span>
+        <div class="bg-white px-2 py-1 border border-gray-200 rounded shadow-sm">
+          TOTAL ITEM: <span class="font-bold text-gray-900 ml-1">Bs {{ itemTotalCost() | number:'1.0-0' }}</span>
+        </div>
       </div>
     </div>
   </div>
-</div>
+    </div>
 </div>
