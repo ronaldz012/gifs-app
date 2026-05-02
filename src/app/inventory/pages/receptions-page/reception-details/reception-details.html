@@ -9,7 +9,7 @@
     <div class="bg-white rounded-xl border border-red-100 shadow-sm p-8 text-center">
       <p class="text-sm text-red-400">{{ error() }}</p>
       <button
-        (click)="back.emit()"
+        (click)="router.navigate(['dashboard','inventory','receptions'])"
         class="mt-4 text-xs text-gray-400 hover:text-gray-600 transition-colors"
       >← Volver</button>
     </div>
@@ -52,7 +52,7 @@
         </div>
       </div>
 
-      <!-- Items -->
+      <!-- Productos -->
       <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-4">
           Productos · {{ r.items.length }} {{ r.items.length === 1 ? 'ítem' : 'ítems' }}
@@ -65,7 +65,6 @@
                 <p class="text-sm font-medium text-gray-800 truncate">{{ item.productName }}</p>
                 <p class="text-xs text-gray-400">{{ variantLabel(item) }}</p>
               </div>
-              <!-- Cantidad + costo por unidad -->
               <div class="shrink-0 text-right">
                 <p class="text-sm font-semibold tabular-nums text-gray-800">
                   {{ item.quantityReceived }}
@@ -75,7 +74,6 @@
                   {{ item.unitCost | currency:'BOB':'symbol':'1.2-2' }} c/u
                 </p>
               </div>
-              <!-- Subtotal -->
               <div class="shrink-0 text-right w-20 hidden sm:block">
                 <p class="text-sm tabular-nums text-gray-600">
                   {{ item.subtotal | currency:'BOB':'symbol':'1.2-2' }}
@@ -86,29 +84,51 @@
           }
         </ul>
 
-        <!-- Totales -->
         <div class="pt-3 mt-1 border-t border-gray-100 flex flex-col sm:flex-row
                     sm:items-center justify-between gap-1">
-          <span class="text-xs text-gray-400">
-            {{ totalQuantity }} unidades en total
-          </span>
+          <span class="text-xs text-gray-400">{{ totalQuantity }} unidades en total</span>
           <span class="text-sm font-semibold text-gray-700 tabular-nums">
             {{ r.totalCost | currency:'BOB':'symbol':'1.2-2' }}
           </span>
         </div>
       </div>
 
-      <!-- Acción rollback — mobile -->
-      @if (r.canRollback) {
-        <div class="sm:hidden">
-          <button
-            (click)="requestRollback.emit(r.id)"
-            class="w-full py-3 rounded-xl border border-red-200 text-red-400
-                   text-sm font-medium hover:bg-red-50 transition-colors"
-          >Revertir recepción</button>
-        </div>
+      <!-- Razón por la que no se puede revertir -->
+      @switch (r.reasonCannotRollback) {
+        @case ('OUTDATED') {
+          <p class="text-sm text-gray-400 text-center">
+            No se puede revertir: la recepción supera las 24 horas.
+          </p>
+        }
+        @case ('NOT_ENOUGH_STOCK') {
+          <p class="text-sm text-gray-400 text-center">
+            No se puede revertir: stock insuficiente en la sucursal.
+          </p>
+        }
+      }
+
+      <!-- Acción rollback -->
+      @if (r.canRollBack) {
+        <button
+          (click)="openRollbackModal(r.id)"
+          class="w-full py-3 rounded-xl border border-red-200 text-red-400
+                 text-sm font-medium hover:bg-red-50 transition-colors"
+        >Revertir recepción</button>
       }
 
     </div>
   }
+
 </div>
+
+<!-- ── Modal: Rollback ────────────────────────────────────────────────────── -->
+@if (rollbackModalId() !== null) {
+  <app-confirm-action-modal
+    title="¿Revertir recepción?"
+    description="Se descontará el stock registrado en esta recepción."
+    confirmLabel="Sí, revertir"
+    [submitting]="submitting()"
+    (confirm)="onRollbackConfirm()"
+    (close)="closeRollbackModal()"
+  />
+}

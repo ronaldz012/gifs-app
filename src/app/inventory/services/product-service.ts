@@ -5,7 +5,7 @@ import {environment} from '../../../environments/environment';
 import {Observable} from 'rxjs';
 import {ProductQuery} from '../dtos/products/product-dto';
 import {PagedResult} from '../dtos/paged-result';
-import {ListProduct} from '../interfaces/listProduct';
+import {ListProductDto} from '../interfaces/listProductDto';
 import {ProductSearchResult} from '../components/product-search/product-search-result';
 import ProductDetail from '../pages/products-page/product-detail/product-detail';
 import {ProductDetailDto} from '../dtos/products/product-detail-dto';
@@ -21,7 +21,7 @@ export class ProductService {
   createProduct(dto : CreateProductDto): Observable<boolean> {
     return  this.http.post<boolean>(this.url, dto);
   }
-  getProducts(query : ProductQuery) : Observable<PagedResult<ListProduct>>{
+  getProducts(query : ProductQuery) : Observable<PagedResult<ListProductDto>>{
     let params = new HttpParams();
 
     Object.entries(query).forEach(([key, value]) => {
@@ -29,7 +29,7 @@ export class ProductService {
         params = params.set(key, value.toString());
       }
     });
-    return this.http.get<PagedResult<ListProduct>>(this.url, {params});
+    return this.http.get<PagedResult<ListProductDto>>(this.url, {params});
   }
   searchProduct(query :string )
   {

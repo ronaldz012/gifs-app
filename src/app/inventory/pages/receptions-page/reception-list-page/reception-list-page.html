@@ -1,0 +1,48 @@
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<div class="bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 py-4">
+  <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
+
+    <h1 class="text-base font-semibold text-gray-800">Recepciones</h1>
+
+    <div class="flex items-center gap-3">
+      <!-- Buscador placeholder — se habilitará con filtros -->
+      <div class="hidden sm:flex items-center gap-2 px-3 h-9 rounded-lg
+                  border border-gray-200 bg-gray-50 text-sm text-gray-400 w-52
+                  cursor-not-allowed select-none">
+        <span class="text-xs">🔍</span>
+        <span>Buscar...</span>
+      </div>
+
+      <button
+        (click)="router.navigate(['dashboard','inventory','receptions', 'new'])"
+        class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
+               hover:bg-blue-700 transition-colors whitespace-nowrap"
+      >
+        <span class="hidden sm:inline">Nueva recepción</span>
+        <span class="sm:hidden">+ Nueva</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Lista ──────────────────────────────────────────────────────────────── -->
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+  <app-reception-list
+    [receptions]="receptions()"
+    [loading]="loadingReceptions()"
+    (goToDetails)="router.navigate(['dashboard','inventory','receptions', $event])"
+  />
+</div>
+
+<!-- ── Modal: Rollback ────────────────────────────────────────────────────── -->
+@if (rollbackModalId() !== null) {
+  <app-confirm-action-modal
+    title="¿Revertir recepción?"
+    description="Se descontará el stock registrado en esta recepción."
+    confirmLabel="Sí, revertir"
+    [submitting]="submitting()"
+    (confirm)="onRollbackConfirm()"
+    (close)="closeRollbackModal()"
+  />
+}

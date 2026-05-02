@@ -1,8 +1,10 @@
-import {Component, input, output} from '@angular/core';
+import {Component, inject, input, OnInit, output, signal} from '@angular/core';
 import {CurrencyPipe, DatePipe, KeyValuePipe} from '@angular/common';
-import {StockReceptionListDto} from '../../../dtos/Receptions/stock-reception-list-dto';
+import {StockReceptionListDto} from '../../../../dtos/Receptions/stock-reception-list-dto';
 import {ReceptionListItem} from './reception-list-item/reception-list-item';
-import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
+import {SkeletonList} from '../../../../../core/ui/skeleton-list/skeleton-list';
+import {ReceptionService} from '../../../../services/reception-service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-reception-list',
@@ -10,7 +12,7 @@ import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
   template: `
     @if (loading()) {
 
-      <app-skeleton-list [rows]="4" [columns]="3" />
+      <app-skeleton-list [rows]="4" [columns]="3"/>
 
     } @else if (receptions().length === 0) {
 
@@ -27,7 +29,7 @@ import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
           <app-reception-list-item
             [reception]="r"
             [index]="i"
-            (viewDetail)="viewDetail.emit($event)"
+            (viewDetails)="goToDetails.emit($event)"
           />
         }
       </ul>
@@ -43,8 +45,9 @@ import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
   `,
 })
 export default class ReceptionList {
+
+  router = inject(Router);
   receptions = input.required<StockReceptionListDto[]>();
   loading    = input<boolean>(false);
-
-  viewDetail = output<number>();
+  goToDetails = output<number>();
 }

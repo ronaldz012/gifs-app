@@ -9,7 +9,7 @@
     <div class="bg-white rounded-xl border border-red-100 shadow-sm p-8 text-center">
       <p class="text-sm text-red-400">{{ error() }}</p>
       <button
-        (click)="back.emit()"
+        (click)="router.navigate(['transfers'])"
         class="mt-4 text-xs text-gray-400 hover:text-gray-600 transition-colors"
       >← Volver</button>
     </div>
@@ -18,7 +18,7 @@
 
     <div class="flex flex-col gap-4">
 
-      <!-- General info -->
+      <!-- Información general -->
       <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <div class="flex items-center justify-between mb-4">
           <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">
@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <!-- Items -->
+      <!-- Productos -->
       <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-4">
           Productos · {{ t.items.length }} {{ t.items.length === 1 ? 'ítem' : 'ítems' }}
@@ -95,26 +95,26 @@
         <div class="pt-3 mt-1 border-t border-gray-100 flex justify-between items-center">
           <span class="text-xs text-gray-400">Total</span>
           <span class="text-sm font-semibold text-gray-700 tabular-nums">
-                {{ t.items | totalQty }} unidades
-              </span>
+            {{ t.items | totalQty }} unidades
+          </span>
         </div>
       </div>
 
-      <!-- Mobile actions — emit requests, no modal here -->
+      <!-- Acciones mobile -->
       @if (canCancel(t) || canResolve(t)) {
         <div class="sm:hidden flex flex-col gap-2">
           @if (canCancel(t)) {
             <button
-              (click)="requestCancel.emit(t.id)"
+              (click)="openCancelModal(t.id)"
               class="w-full py-3 rounded-xl border border-red-200 text-red-400 text-sm font-medium
-                         hover:bg-red-50 transition-colors"
+                     hover:bg-red-50 transition-colors"
             >Cancelar transferencia</button>
           }
           @if (canResolve(t)) {
             <button
-              (click)="requestResolve.emit(t.id)"
+              (click)="openResolveModal(t.id)"
               class="w-full py-3 rounded-xl bg-blue-600 text-white text-sm font-medium
-                         hover:bg-blue-700 transition-colors"
+                     hover:bg-blue-700 transition-colors"
             >Resolver</button>
           }
         </div>
@@ -122,4 +122,25 @@
 
     </div>
   }
+
 </div>
+
+<!-- ── Modales ────────────────────────────────────────────────────────────── -->
+@if (resolveModalId() !== null) {
+  <app-resolve-transfer-modal
+    [submitting]="submitting()"
+    (resolve)="onResolveConfirm($event)"
+    (close)="closeResolveModal()"
+  />
+}
+
+@if (cancelModalId() !== null) {
+  <app-confirm-action-modal
+    title="¿Cancelar Transferencia?"
+    description="Esta acción cancelará la transferencia seleccionada"
+    confirmLabel="Sí, Cancelar"
+    [submitting]="submitting()"
+    (confirm)="onCancelConfirm()"
+    (close)="closeCancelModal()"
+  />
+}

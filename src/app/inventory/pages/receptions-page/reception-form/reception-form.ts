@@ -29,6 +29,8 @@ import {Brand} from '../../../dtos/brands/brand-dto';
 import {CreateCategory} from '../../../components/create-category/create-category';
 import {CreateEntityEvent} from '../../../interfaces/types/create-entity-event';
 import CreateBrand from '../../../components/create-brand/create-brand';
+import {BranchContextService} from '../../../../core/auth/branch-context-service';
+import {ActivatedRoute, Router} from '@angular/router';
 
 
 @Component({
@@ -51,13 +53,10 @@ export default class ReceptionForm implements OnInit {
   private destroyRef = inject(DestroyRef);
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
+  private branchService = inject(BranchContextService)
+  private router = inject(Router);
 
-  // ── Inputs ────────────────────────────────────────────────────────────────
-  branchId = input<number>(1);
-
-  // ── Outputs ───────────────────────────────────────────────────────────────
-  saved = output<void>();
-  cancelled = output<void>();
+  branchId = signal<number>(0);
 
   // ── Estates ────────────────────────────────────────────────────────────────
   isSubmitting = signal(false);
@@ -102,6 +101,7 @@ export default class ReceptionForm implements OnInit {
       .subscribe(() => this.recalculateTotalCost());
   }
   private loadCatalogs(): void {
+   this.branchId.set( this.branchService.active()?.branchId ?? 0);
     this.categoryService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(x => this.categories.set(x));
@@ -208,7 +208,6 @@ export default class ReceptionForm implements OnInit {
     this.receptionService.create(payload).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.saved.emit();
       },
       error: (err) => {
         this.isSubmitting.set(false);
@@ -265,9 +264,6 @@ export default class ReceptionForm implements OnInit {
     };
   }
 
-  onCancel(): void {
-    this.cancelled.emit();
-  }
 
   //----------------MODALS----------------------------------------------------------
   handleOpenCreation(event: CreateEntityEvent) {
@@ -324,5 +320,9 @@ export default class ReceptionForm implements OnInit {
     if (index >= 0 && index < xd.length - 1) {
       xd[index + 1].focus();
     }
+  }
+
+  protected onCancel() {
+    this.router.navigate(['dashboard','inventory','receptions']);
   }
 }

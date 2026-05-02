@@ -1,18 +1,17 @@
-import { Component, inject, input, output, signal} from '@angular/core';
-import {TransferDirection, TransferStatus} from '../../../dtos/tranfers/transfer-enums';
-import {StockTransferDetailDto} from '../../../dtos/tranfers/stock-transfer-detail-dto';
-import {TransferService} from '../../../services/transfer-service';
-import {DatePipe} from '@angular/common';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DatePipe } from '@angular/common';
+import { ResolveTransferModal } from '../resolve-transfer-modal/resolve-transfer-modal';
+import { ConfirmActionModal } from '../confirm-action-modal/confirm-action-modal';
 import {TotalQtyPipe} from '../../../dtos/tranfers/total-qty-pipe-pipe';
 import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
+import {TransferService} from '../../../services/transfer-service';
+import {TransferDirection, TransferStatus} from '../../../dtos/tranfers/transfer-enums';
+import {StockTransferDetailDto} from '../../../dtos/tranfers/stock-transfer-detail-dto';
 
 @Component({
   selector: 'app-transfer-details',
-  imports: [
-    DatePipe,
-    TotalQtyPipe,
-    SkeletonList
-  ],
+  imports: [DatePipe, TotalQtyPipe, SkeletonList, ResolveTransferModal, ConfirmActionModal],
   templateUrl: './transfer-details.html',
   styles: `
     @keyframes fade-up {
@@ -20,18 +19,12 @@ import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
       to   { opacity: 1; transform: translateY(0); }
     }
     .fade-up { animation: fade-up 240ms ease both; }
-
-
   `,
 })
-export class TransferDetails {
+export default class  TransferDetails implements OnInit {
   private transferService = inject(TransferService);
-
-  transferId = input.required<number>();
-
-  back           = output<void>();
-  requestResolve = output<number>();
-  requestCancel  = output<number>();
+  private route           = inject(ActivatedRoute);
+  readonly router         = inject(Router);
 
   readonly Status    = TransferStatus;
   readonly Direction = TransferDirection;
@@ -40,14 +33,19 @@ export class TransferDetails {
   loading  = signal(true);
   error    = signal<string | null>(null);
 
+  resolveModalId = signal<number | null>(null);
+  cancelModalId  = signal<number | null>(null);
+  submitting     = signal(false);
+
   ngOnInit(): void {
-    this.loadDetail();
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.loadDetail(id);
   }
 
-  private loadDetail(): void {
+  private loadDetail(id: number): void {
     this.loading.set(true);
     this.error.set(null);
-    this.transferService.getTransferDetail(this.transferId()).subscribe({
+    this.transferService.getTransferDetail(id).subscribe({
       next: data => {
         this.transfer.set(data);
         this.loading.set(false);
@@ -59,6 +57,43 @@ export class TransferDetails {
     });
   }
 
+  // ── Modal: Resolve ────────────────────────────────────────────────────────
+  openResolveModal(id: number): void { this.resolveModalId.set(id); }
+  closeResolveModal(): void          { this.resolveModalId.set(null); }
+
+  onResolveConfirm(action: 'complete' | 'reject'): void {
+    const id = this.resolveModalId();
+    if (!id) return;
+    this.submitting.set(true);
+    this.transferService.resolveTransfer(id, action).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.closeResolveModal();
+        this.router.navigate(['transfers']);
+      },
+      error: () => this.submitting.set(false),
+    });
+  }
+
+  // ── Modal: Cancel ─────────────────────────────────────────────────────────
+  openCancelModal(id: number): void { this.cancelModalId.set(id); }
+  closeCancelModal(): void          { this.cancelModalId.set(null); }
+
+  onCancelConfirm(): void {
+    const id = this.cancelModalId();
+    if (!id) return;
+    this.submitting.set(true);
+    this.transferService.cancelTransfer(id).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.closeCancelModal();
+        this.router.navigate(['transfers']);
+      },
+      error: () => this.submitting.set(false),
+    });
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
   statusLabel(s: TransferStatus): string {
     return ['Pendiente', 'En tránsito', 'Completada', 'Rechazada', 'Cancelada'][s];
   }
@@ -87,5 +122,4 @@ export class TransferDetails {
   variantLabel(item: { variantDescription: string; size: string; color: string }): string {
     return [item.variantDescription, item.size, item.color].filter(Boolean).join(' · ');
   }
-
 }

@@ -1,6 +1,6 @@
 import { Component, input, output} from '@angular/core';
-import {StockTransferListDto} from '../../../../dtos/tranfers/stock-transfer-list-dto';
-import {TransferDirection, TransferStatus} from '../../../../dtos/tranfers/transfer-enums';
+import {StockTransferListDto} from '../../../../../dtos/tranfers/stock-transfer-list-dto';
+import {TransferDirection, TransferStatus} from '../../../../../dtos/tranfers/transfer-enums';
 import {DatePipe} from '@angular/common';
 
 @Component({

@@ -1,6 +1,6 @@
 import { Component, input, output, signal } from '@angular/core';
-import {StockTransferListDto} from '../../../dtos/tranfers/stock-transfer-list-dto';
-import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
+import {StockTransferListDto} from '../../../../dtos/tranfers/stock-transfer-list-dto';
+import {SkeletonList} from '../../../../../core/ui/skeleton-list/skeleton-list';
 import {TransferListItem} from './transfer-list-item/transfer-list-item';
 
 

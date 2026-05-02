@@ -1,22 +1,76 @@
-<div class="grid grid-cols-[60px_1fr_100px_100px_auto] items-center p-4 bg-white border-b hover:bg-gray-50">
+<li
+  class="row-enter bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
+  [style.animation-delay]="index() * 35 + 'ms'"
+>
+  <div class="flex items-center gap-3 px-4 py-3.5">
 
-  <span class="font-mono text-xs text-gray-500 ">{{product().id}}</span>
-  <span class="font-medium text-gray-900">{{product().name}}</span>
-  <span class="px-2 py-1 rounded-full text-xs justify-self-center">{{product().stock}}</span>
-  <span class="px-2 py-1 rounded-full text-xs justify-self-center">{{product().basePrice}}</span>
+    <!-- Info principal -->
+    <div class="flex flex-col min-w-0 flex-1">
 
+      <div class="flex items-center gap-2 mb-0.5">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px]
+                     font-medium leading-none bg-gray-50 text-gray-500 ring-1 ring-gray-200">
+          {{ product().internalCode || '—' }}
+        </span>
+      </div>
 
-  <div class="flex-row space-x-2 justify-self-end">
-    <button class="rounded-full bg-gray-50 hover:bg-gray-300 transition-all text-gray-400 material-icons"
-    (click)=" this.viewDetail.emit(this.product().id)"
-    >
-      <span class="material-icons">visibility</span>
-    </button>
-    <button class="rounded-full bg-gray-50 hover:bg-gray-300 transition-all text-gray-400 material-icons">
-      <span class="material-icons">edit</span>
-    </button>
-    <button class="rounded-full bg-gray-50 hover:bg-gray-300 transition-all text-gray-400 material-icons">
-      <span class="material-icons">delete</span>
-    </button>
+      <p class="text-sm font-semibold text-gray-800 truncate leading-tight">
+        {{ product().name }}
+      </p>
+
+      <p class="text-xs text-gray-400 mt-0.5">
+        {{ product().variantsCount }}
+        {{ product().variantsCount === 1 ? 'variante' : 'variantes' }}
+        · {{ product().totalStock }} uds
+        · <span class="font-medium text-gray-500">
+            {{ product().displayPrice | currency:'BOB':'symbol':'1.2-2' }}
+          </span>
+      </p>
+
+      <div class="flex flex-wrap gap-1 mt-1.5">
+        @if (product().brandName) {
+          <span class="px-1.5 py-0.5 rounded text-[10px] bg-blue-50 text-blue-500">
+            {{ product().brandName }}
+          </span>
+        }
+        @if (product().categoryName) {
+          <span class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500">
+            {{ product().categoryName }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="flex gap-1.5 shrink-0">
+      <button
+        (click)="viewDetail.emit(product().id)"
+        title="Info y variantes"
+        class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
+               flex items-center justify-center
+               hover:border-gray-300 hover:text-gray-600 transition-colors"
+      >
+        <span class="material-icons text-base leading-none">open_in_new</span>
+      </button>
+      <button
+        (click)="viewStock.emit(product().id)"
+        title="Stock por sucursal"
+        class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
+               flex items-center justify-center
+               hover:border-gray-300 hover:text-gray-600 transition-colors"
+      >
+        <span class="material-icons text-base leading-none">inventory_2</span>
+      </button>
+      <button
+        (click)="viewMovements.emit(product().id)"
+        title="Movimientos"
+        class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
+               flex items-center justify-center
+               hover:border-gray-300 hover:text-gray-600 transition-colors"
+      >
+        <span class="material-icons text-base leading-none">history</span>
+      </button>
+    </div>
+
   </div>
-</div>
+</li>

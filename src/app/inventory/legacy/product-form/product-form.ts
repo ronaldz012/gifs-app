@@ -1,11 +1,11 @@
 import {Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {CreateProductDto} from '../../../dtos/products/create-product-dto';
-import {AutocompleteInput} from '../../../components/autocomplete-input/autocomplete-input';
-import {Category} from '../../../dtos/categories/category-dto';
-import {Brand} from '../../../dtos/brands/brand-dto';
-import {ProductService} from '../../../services/product-service';
-import {NewProductFormGroup} from '../../receptions-page/reception-form/common/item-form-group';
+import {CreateProductDto} from '../../dtos/products/create-product-dto';
+import {AutocompleteInput} from '../../components/autocomplete-input/autocomplete-input';
+import {Category} from '../../dtos/categories/category-dto';
+import {Brand} from '../../dtos/brands/brand-dto';
+import {ProductService} from '../../services/product-service';
+import {NewProductFormGroup} from '../../pages/receptions-page/reception-form/common/item-form-group';
 
 @Component({
   selector: 'app-product-form',

@@ -1,6 +1,8 @@
-import { Component, input, output} from '@angular/core';
-import {ReceptionStatus, StockReceptionListDto} from '../../../../dtos/Receptions/stock-reception-list-dto';
+import { Component, inject, input, output} from '@angular/core';
+import {ReceptionStatus, StockReceptionListDto} from '../../../../../dtos/Receptions/stock-reception-list-dto';
 import {CurrencyPipe, DatePipe} from '@angular/common';
+import {Router} from '@angular/router';
+import ReceptionDetails from '../../../reception-details/reception-details';
 
 @Component({
   selector: 'app-reception-list-item',
@@ -14,10 +16,9 @@ import {CurrencyPipe, DatePipe} from '@angular/common';
 export class ReceptionListItem {
   reception = input.required<StockReceptionListDto>();
   index     = input<number>(0);
-
-  viewDetail = output<number>();
-
+  viewDetails = output<number>();
   readonly Status = ReceptionStatus;
+  readonly router = inject(Router);
 
 
   statusClasses(s: ReceptionStatus): string {

@@ -6,8 +6,8 @@ export interface StockReceptionDetailDto {
   receivedAt: string;
   notes?: string;
   status: ReceptionStatus;
-  canRollback: boolean;
-  reasonCannotRollback:string;
+  canRollBack: boolean;
+  reasonCannotRollback:"OUTDATED" | "NOT_ENOUGH_STOCK" ;
   totalCost: number;
   items: StockReceptionItemDetailDto[];
 }

@@ -1,40 +1,30 @@
-import { Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import {ProductVariantSearch} from '../../../components/product-variant-search/product-variant-search';
-import {ConsoleLogger} from '@angular/compiler-cli';
+import {BranchSelectorDestination} from '../../../../core/branch-selector-destination/branch-selector-destination';
+import {CreateTransferItemList} from './create-transfer-item-list/create-transfer-item-list';
+import {TransferService} from '../../../services/transfer-service';
+import {BranchContextService} from '../../../../core/auth/branch-context-service';
 import {BranchDto} from '../../../../core/dtos/branch-dto';
 import {TransferItem} from '../../../interfaces/transfer-item';
-import {BranchContextService} from '../../../../core/auth/branch-context-service';
-import {ProductVariantBySkuDto} from '../../../dtos/products/product-variant-by-sku-dto';
 import {TransferForm} from '../../../dtos/tranfers/transfer-form';
-import {CreateTransferItemList} from './create-transfer-item-list/create-transfer-item-list';
-import {FormsModule} from '@angular/forms';
-import {BranchSelectorDestination} from '../../../../core/branch-selector-destination/branch-selector-destination';
-import {TransferService} from '../../../services/transfer-service';
-
+import {ProductVariantBySkuDto} from '../../../dtos/products/product-variant-by-sku-dto';
 
 
 @Component({
   selector: 'app-create-transfer',
-  imports: [
-    ProductVariantSearch,
-    CreateTransferItemList,
-    FormsModule,
-    BranchSelectorDestination
-  ],
+  imports: [ProductVariantSearch, CreateTransferItemList, FormsModule, BranchSelectorDestination],
   templateUrl: './create-transfer.html',
-  styles: ``,
 })
-export default class CreateTransfer {
+export default class CreateTransfer implements OnInit {
+  private transferService = inject(TransferService);
+  private branchService   = inject(BranchContextService);
+  readonly router         = inject(Router);
 
-  // ── Inputs del padre ────────────────────────────────────────────────────────
-  branches        = input.required<BranchDto[]>();
-  loadingBranches = input.required<boolean>();
+  branches        = signal<BranchDto[]>([]);
+  loadingBranches = signal(false);
 
-  // ── Outputs al padre ─────────────────────────────────────────────────────────
-  transferCreated = output<TransferForm>();
-  cancelled       = output<void>();
-
-  // ── Estado interno ────────────────────────────────────────────────────────────
   items = signal<TransferItem[]>([]);
 
   form = signal<TransferForm>({
@@ -51,7 +41,22 @@ export default class CreateTransfer {
     this.items().reduce((sum, i) => sum + i.quantity, 0)
   );
 
-  // ── Handlers ──────────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.loadBranches();
+  }
+
+  private loadBranches(): void {
+    this.loadingBranches.set(true);
+    this.branchService.getBranches().subscribe({
+      next: branches => {
+        const currentId = this.branchService.active()?.branchId ?? 0;
+        this.branches.set(branches.filter(b => b.id !== currentId));
+        this.loadingBranches.set(false);
+      },
+      error: () => this.loadingBranches.set(false),
+    });
+  }
+
   onBranchSelected(branch: BranchDto): void {
     this.form.update(f => ({ ...f, toBranchId: branch.id }));
   }
@@ -67,9 +72,7 @@ export default class CreateTransfer {
       if (existing.quantity >= variant.availableStockInBranch) return;
       this.items.update(items =>
         items.map(i =>
-          i.variantId === variant.id
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
+          i.variantId === variant.id ? { ...i, quantity: i.quantity + 1 } : i
         )
       );
     } else {
@@ -82,8 +85,8 @@ export default class CreateTransfer {
           variantLabel: [variant.description, variant.size, variant.color]
             .filter(Boolean)
             .join(' · '),
-          quantity:     1,
-          maxQuantity:  variant.availableStockInBranch,
+          quantity:    1,
+          maxQuantity: variant.availableStockInBranch,
         },
       ]);
     }
@@ -100,11 +103,13 @@ export default class CreateTransfer {
       })),
     };
 
-    this.transferCreated.emit(payload);
+    this.transferService.createTransfer(payload).subscribe({
+      next: ()  => this.router.navigate(['transfers']),
+      error: err => console.error('Error al crear transferencia:', err),
+    });
   }
 
   cancel(): void {
-    this.cancelled.emit();
+    this.router.navigate(['dashboard','transfer','transfers']);
   }
-
 }
