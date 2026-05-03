@@ -1,40 +1,60 @@
-<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<!-- transfer-list-page.html -->
+
+<!-- ── Header ────────────────────────────────────────────────────────────── -->
 <div class="bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 py-4">
   <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
-
     <h1 class="text-base font-semibold text-gray-800">Transferencias</h1>
-
-    <div class="flex items-center gap-3">
-      <!-- Buscador placeholder — se habilitará con filtros -->
-      <div class="hidden sm:flex items-center gap-2 px-3 h-9 rounded-lg
-                  border border-gray-200 bg-gray-50 text-sm text-gray-400 w-52
-                  cursor-not-allowed select-none">
-        <span class="text-xs">🔍</span>
-        <span>Buscar...</span>
-      </div>
-
-      <button
-        (click)="router.navigate(['dashboard','inventory','transfers','new'])"
-        class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
-               hover:bg-blue-700 transition-colors whitespace-nowrap"
-      >
-        <span class="hidden sm:inline">Nueva transferencia</span>
-        <span class="sm:hidden">+ Nueva</span>
-      </button>
-    </div>
-
+    <button
+      (click)="router.navigate(['dashboard','inventory','transfers','new'])"
+      class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
+             hover:bg-blue-700 transition-colors whitespace-nowrap">
+      <span class="hidden sm:inline">Nueva transferencia</span>
+      <span class="sm:hidden">+ Nueva</span>
+    </button>
   </div>
 </div>
 
-<!-- ── Lista ──────────────────────────────────────────────────────────────── -->
-<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+<!-- ── Contenido ─────────────────────────────────────────────────────────── -->
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-4">
+
+  <!-- Filtros -->
+  <app-transfer-filter-bar
+    [params]="query()"
+    (change)="patchQuery($event)" />
+
+  <!-- Lista -->
   <app-transfer-list
     [transfers]="transfers()"
     [loading]="loadingTransfers()"
     (viewDetail)="router.navigate(['dashboard','inventory','transfers', $event])"
     (requestResolve)="openResolveModal($event)"
-    (requestCancel)="openCancelModal($event)"
-  />
+    (requestCancel)="openCancelModal($event)" />
+
+  <!-- Estado vacío con filtros activos -->
+  @if (!loadingTransfers() && transfers().length === 0 && hasActiveFilters()) {
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10
+                flex flex-col items-center gap-3">
+      <span class="text-3xl opacity-30">🔄</span>
+      <p class="text-sm text-gray-400">No hay transferencias con esos filtros.</p>
+      <button
+        class="text-sm text-blue-500 hover:underline"
+        (click)="patchQuery({ status: undefined, direction: undefined,
+                               dateFrom: undefined, dateTo: undefined, page: 1 })">
+        Limpiar filtros
+      </button>
+    </div>
+  }
+
+  <!-- Paginador -->
+  @if (!loadingTransfers() && totalItems() > 0) {
+    <app-paginator
+      [page]="query().page!"
+      [pageSize]="query().pageSize!"
+      [totalItems]="totalItems()"
+      (pageChange)="patchQuery({ page: $event })"
+      (pageSizeChange)="patchQuery({ pageSize: $event, page: 1 })" />
+  }
+
 </div>
 
 <!-- ── Modales ────────────────────────────────────────────────────────────── -->
@@ -42,8 +62,7 @@
   <app-resolve-transfer-modal
     [submitting]="submitting()"
     (resolve)="onResolveConfirm($event)"
-    (close)="closeResolveModal()"
-  />
+    (close)="closeResolveModal()" />
 }
 
 @if (cancelModalId() !== null) {
@@ -53,6 +72,5 @@
     confirmLabel="Sí, Cancelar"
     [submitting]="submitting()"
     (confirm)="onCancelConfirm()"
-    (close)="closeCancelModal()"
-  />
+    (close)="closeCancelModal()" />
 }

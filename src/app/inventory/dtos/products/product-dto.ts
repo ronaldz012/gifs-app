@@ -1,5 +1,8 @@
 import {BaseQueryDto} from '../base-query-dto';
 
-export interface ProductQuery  extends  BaseQueryDto{
-  categoryId?:number |null;
+export interface ProductQueryParams extends  BaseQueryDto{
+  categoryId?: number;
+  brandId?: number;
+  gender?: 'Unisex' | 'Male' | 'Female';
+  lowStock?: boolean;
 }

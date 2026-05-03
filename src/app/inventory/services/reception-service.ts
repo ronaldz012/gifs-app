@@ -3,7 +3,7 @@ import createReceptionDto from '../dtos/Receptions/create-reception-dto';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
-import {queryReceptions, StockReceptionListDto} from '../dtos/Receptions/stock-reception-list-dto';
+import {ReceptionQueryParams, StockReceptionListDto} from '../dtos/Receptions/stock-reception-list-dto';
 import {PagedResult} from '../dtos/paged-result';
 import {StockReceptionDetailDto} from '../dtos/Receptions/stock-reception-details-dto';
 
@@ -18,7 +18,7 @@ export class ReceptionService {
     return this.http.post<boolean>(this.url, payload);
   }
 
-  getReceptions(query: queryReceptions):Observable<PagedResult<StockReceptionListDto>>{
+  getReceptions(query: ReceptionQueryParams):Observable<PagedResult<StockReceptionListDto>>{
 
       let params = new HttpParams();
 

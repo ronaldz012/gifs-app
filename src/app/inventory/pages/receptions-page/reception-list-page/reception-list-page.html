@@ -1,38 +1,59 @@
-<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<!-- reception-list-page.html -->
+
+<!-- ── Header ────────────────────────────────────────────────────────────── -->
 <div class="bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 py-4">
   <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
-
     <h1 class="text-base font-semibold text-gray-800">Recepciones</h1>
-
-    <div class="flex items-center gap-3">
-      <!-- Buscador placeholder — se habilitará con filtros -->
-      <div class="hidden sm:flex items-center gap-2 px-3 h-9 rounded-lg
-                  border border-gray-200 bg-gray-50 text-sm text-gray-400 w-52
-                  cursor-not-allowed select-none">
-        <span class="text-xs">🔍</span>
-        <span>Buscar...</span>
-      </div>
-
-      <button
-        (click)="router.navigate(['dashboard','inventory','receptions', 'new'])"
-        class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
-               hover:bg-blue-700 transition-colors whitespace-nowrap"
-      >
-        <span class="hidden sm:inline">Nueva recepción</span>
-        <span class="sm:hidden">+ Nueva</span>
-      </button>
-    </div>
-
+    <button
+      (click)="router.navigate(['dashboard','inventory','receptions', 'new'])"
+      class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
+             hover:bg-blue-700 transition-colors whitespace-nowrap">
+      <span class="hidden sm:inline">Nueva recepción</span>
+      <span class="sm:hidden">+ Nueva</span>
+    </button>
   </div>
 </div>
 
-<!-- ── Lista ──────────────────────────────────────────────────────────────── -->
-<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+<!-- ── Contenido ─────────────────────────────────────────────────────────── -->
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-4">
+
+  <!-- Filtros -->
+  <app-reception-filter-bar
+    [params]="query()"
+    (change)="patchQuery($event)" />
+
+  <!-- Lista -->
   <app-reception-list
     [receptions]="receptions()"
     [loading]="loadingReceptions()"
     (goToDetails)="router.navigate(['dashboard','inventory','receptions', $event])"
-  />
+    />
+
+  <!-- Estado vacío con filtros activos -->
+  @if (!loadingReceptions() && receptions().length === 0 && hasActiveFilters()) {
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10
+                flex flex-col items-center gap-3">
+      <span class="text-3xl opacity-30">📦</span>
+      <p class="text-sm text-gray-400">No hay recepciones con esos filtros.</p>
+      <button
+        class="text-sm text-blue-500 hover:underline"
+        (click)="patchQuery({ dateFrom: undefined, dateTo: undefined,
+                               status: undefined, brandId: undefined, page: 1 })">
+        Limpiar filtros
+      </button>
+    </div>
+  }
+
+  <!-- Paginador -->
+  @if (!loadingReceptions() && totalItems() > 0) {
+    <app-paginator
+      [page]="query().page!"
+      [pageSize]="query().pageSize!"
+      [totalItems]="totalItems()"
+      (pageChange)="patchQuery({ page: $event })"
+      (pageSizeChange)="patchQuery({ pageSize: $event, page: 1 })" />
+  }
+
 </div>
 
 <!-- ── Modal: Rollback ────────────────────────────────────────────────────── -->
@@ -43,6 +64,5 @@
     confirmLabel="Sí, revertir"
     [submitting]="submitting()"
     (confirm)="onRollbackConfirm()"
-    (close)="closeRollbackModal()"
-  />
+    (close)="closeRollbackModal()" />
 }

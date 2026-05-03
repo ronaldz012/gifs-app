@@ -5,7 +5,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {TransferForm} from '../dtos/tranfers/transfer-form';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
-import {StockTransferListDto} from '../dtos/tranfers/stock-transfer-list-dto';
+import {StockTransferListDto, TransferQueryParams} from '../dtos/tranfers/stock-transfer-list-dto';
 import {PagedResult} from '../dtos/paged-result';
 import {form} from '@angular/forms/signals';
 import {StockTransferDetailDto} from '../dtos/tranfers/stock-transfer-detail-dto';
@@ -31,8 +31,13 @@ export class TransferService {
     return this.http.post<boolean>(this.URL+'/Resolve/'+id, {complete: accepted, notes: ""})
   }
 
-  getTransfers():Observable<PagedResult<StockTransferListDto>> {
-    //let params = new HttpParams();
+  getTransfers(query: TransferQueryParams):Observable<PagedResult<StockTransferListDto>> {
+    let params = new HttpParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        params = params.set(key, value.toString());
+      }
+    });
     return this.http.get<PagedResult<StockTransferListDto>>(this.URL)
   }
 

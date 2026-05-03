@@ -77,6 +77,7 @@ export default class ReceptionDetails implements OnInit {
       [ReceptionStatus.Borrador]:   'bg-amber-50  text-amber-600  ring-1 ring-amber-200',
       [ReceptionStatus.Confirmado]: 'bg-green-50  text-green-600  ring-1 ring-green-200',
       [ReceptionStatus.Rechazado]:  'bg-red-50    text-red-500    ring-1 ring-red-200',
+      [ReceptionStatus.Revertida]: 'bg-red-50    text-red-600 ring-1 ring-red-200',
     };
     return map[s];
   }

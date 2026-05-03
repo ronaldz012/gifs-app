@@ -105,7 +105,7 @@ export default class ReceptionForm implements OnInit {
     this.categoryService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(x => this.categories.set(x));
-    this.brandService.GetAll()
+    this.brandService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(x => this.brands.set(x));
   }

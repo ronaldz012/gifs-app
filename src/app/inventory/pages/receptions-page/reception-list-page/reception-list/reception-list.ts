@@ -50,4 +50,5 @@ export default class ReceptionList {
   receptions = input.required<StockReceptionListDto[]>();
   loading    = input<boolean>(false);
   goToDetails = output<number>();
+  rollback = output<number>;
 }

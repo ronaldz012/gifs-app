@@ -1,14 +1,19 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+// features/transfers/pages/transfer-list-page/transfer-list-page.ts
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ResolveTransferModal } from '../resolve-transfer-modal/resolve-transfer-modal';
 import { ConfirmActionModal } from '../confirm-action-modal/confirm-action-modal';
-import {TransferList} from './transfer-list/transfer-list';
-import {StockTransferListDto} from '../../../dtos/tranfers/stock-transfer-list-dto';
-import {TransferService} from '../../../services/transfer-service';
+import { TransferList } from './transfer-list/transfer-list';
+import { StockTransferListDto, TransferQueryParams} from '../../../dtos/tranfers/stock-transfer-list-dto';
+import { TransferService } from '../../../services/transfer-service';
+import {Paginator} from '../../../../core/components/app-paginator/app-paginator';
+import {TransferFilterBar} from '../transfer-filter-bar/transfer-filter-bar';
+
 
 @Component({
   selector: 'app-transfer-list-page',
-  imports: [TransferList, ResolveTransferModal, ConfirmActionModal],
+  standalone: true,
+  imports: [TransferList, ResolveTransferModal, ConfirmActionModal, TransferFilterBar, Paginator],
   templateUrl: './transfer-list-page.html',
 })
 export default class TransferListPage implements OnInit {
@@ -16,28 +21,48 @@ export default class TransferListPage implements OnInit {
   readonly router         = inject(Router);
 
   transfers        = signal<StockTransferListDto[]>([]);
+  totalItems       = signal(0);
   loadingTransfers = signal(false);
 
   resolveModalId = signal<number | null>(null);
   cancelModalId  = signal<number | null>(null);
   submitting     = signal(false);
 
+  query = signal<TransferQueryParams>({
+    isPaged: true,
+    page: 1,
+    pageSize: 10,
+    sortBy: 'CreatedAt',
+    sortDirection: 'desc',
+  });
+
+  hasActiveFilters = computed(() => {
+    const q = this.query();
+    return !!(q.status?.length || q.direction !== undefined || q.dateFrom || q.dateTo);
+  });
+
   ngOnInit(): void {
-    this.loadTransfers();
+    this.load();
   }
 
-  private loadTransfers(): void {
+  patchQuery(patch: Partial<TransferQueryParams>): void {
+    this.query.update(q => ({ ...q, ...patch }));
+    this.load();
+  }
+
+  private load(): void {
     this.loadingTransfers.set(true);
-    this.transferService.getTransfers().subscribe({
+    this.transferService.getTransfers(this.query()).subscribe({
       next: data => {
         this.transfers.set(data.items);
+        this.totalItems.set(data.totalCount); // ajusta al campo real de tu PagedResult
         this.loadingTransfers.set(false);
       },
       error: () => this.loadingTransfers.set(false),
     });
   }
 
-  // ── Modal: Resolve ────────────────────────────────────────────────────────
+  // ── Modal: Resolve ───────────────────────────────────────────────────────
   openResolveModal(id: number): void  { this.resolveModalId.set(id); }
   closeResolveModal(): void           { this.resolveModalId.set(null); }
 
@@ -49,13 +74,13 @@ export default class TransferListPage implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.closeResolveModal();
-        this.loadTransfers();
+        this.load();
       },
       error: () => this.submitting.set(false),
     });
   }
 
-  // ── Modal: Cancel ─────────────────────────────────────────────────────────
+  // ── Modal: Cancel ────────────────────────────────────────────────────────
   openCancelModal(id: number): void { this.cancelModalId.set(id); }
   closeCancelModal(): void          { this.cancelModalId.set(null); }
 
@@ -67,7 +92,7 @@ export default class TransferListPage implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.closeCancelModal();
-        this.loadTransfers();
+        this.load();
       },
       error: () => this.submitting.set(false),
     });

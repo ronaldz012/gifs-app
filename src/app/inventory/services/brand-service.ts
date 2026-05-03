@@ -26,7 +26,7 @@ export class BrandService {
     return this.http.get<PagedResult<Brand>>(this.url, {params});
   }
 
-  GetAll(): Observable<Brand[]>
+  getAll(): Observable<Brand[]>
   {
     return this.GetBrands({isPaged:false}).pipe(
       map(result => result.items)

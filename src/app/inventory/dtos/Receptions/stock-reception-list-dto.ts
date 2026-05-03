@@ -12,7 +12,11 @@ export interface StockReceptionListDto {
   brandNames: string[];
   categoryNames: string[];
 }
-export interface queryReceptions extends BaseQueryDto {
+export interface ReceptionQueryParams extends BaseQueryDto {
+  dateFrom?: string;
+  dateTo?: string;
+  status?: ReceptionStatus;
+  brandId?: number;
 
 }
 // reception-enums.ts
@@ -20,4 +24,5 @@ export enum ReceptionStatus {
   Borrador= 0,
   Confirmado = 1,
   Rechazado = 2,
+  Revertida= 3,
 }

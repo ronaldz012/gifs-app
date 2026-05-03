@@ -3,7 +3,7 @@ import {CreateProductDto} from '../dtos/products/create-product-dto';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {environment} from '../../../environments/environment';
 import {Observable} from 'rxjs';
-import {ProductQuery} from '../dtos/products/product-dto';
+import {ProductQueryParams} from '../dtos/products/product-dto';
 import {PagedResult} from '../dtos/paged-result';
 import {ListProductDto} from '../interfaces/listProductDto';
 import {ProductSearchResult} from '../components/product-search/product-search-result';
@@ -21,7 +21,7 @@ export class ProductService {
   createProduct(dto : CreateProductDto): Observable<boolean> {
     return  this.http.post<boolean>(this.url, dto);
   }
-  getProducts(query : ProductQuery) : Observable<PagedResult<ListProductDto>>{
+  getProducts(query : ProductQueryParams) : Observable<PagedResult<ListProductDto>>{
     let params = new HttpParams();
 
     Object.entries(query).forEach(([key, value]) => {
