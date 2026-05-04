@@ -1,27 +1,20 @@
 <li
-  class="row-enter bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
+  class="row-enter bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden
+         lg:rounded-none lg:border-0 lg:shadow-none"
   [style.animation-delay]="index() * 35 + 'ms'"
 >
-  <div class="flex items-center gap-3 px-4 py-3.5">
-
-    <!-- Info principal -->
+  <!-- ====== MOBILE ====== -->
+  <div class="flex items-center gap-3 px-4 py-3.5 lg:hidden">
     <div class="flex flex-col min-w-0 flex-1">
-
-      <!-- Status badge -->
       <div class="flex items-center gap-2 mb-0.5">
         <span
-          class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px]
-                 font-medium leading-none"
+          class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none"
           [class]="statusClasses(reception().status)"
         >{{ Status[reception().status] }}</span>
       </div>
-
-      <!-- Marcas -->
       <p class="text-sm font-semibold text-gray-800 truncate leading-tight">
         {{ reception().brandNames.join(', ') || '—' }}
       </p>
-
-      <!-- Metadata secundaria -->
       <p class="text-xs text-gray-400 mt-0.5">
         {{ reception().productVariantsCount }}
         {{ reception().productVariantsCount === 1 ? 'variante' : 'variantes' }}
@@ -33,20 +26,14 @@
             {{ reception().receivedAt | date:'dd/MM/yy' }}
           </span>
       </p>
-
-      <!-- Categorías como chips — solo si hay más de una marca o para dar contexto -->
       @if (reception().categoryNames.length) {
         <div class="flex flex-wrap gap-1 mt-1.5">
           @for (cat of reception().categoryNames; track cat) {
-            <span class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500">
-              {{ cat }}
-            </span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500">{{ cat }}</span>
           }
         </div>
       }
     </div>
-
-    <!-- Acción: solo ver detalle -->
     <div class="shrink-0">
       <button
         (click)="viewDetails.emit(reception().id)"
@@ -56,6 +43,66 @@
                hover:border-gray-300 hover:text-gray-600 transition-colors"
       >↗</button>
     </div>
+  </div>
 
+  <!-- ====== DESKTOP ====== -->
+  <div
+    class="hidden lg:grid items-center px-4 py-2.5 hover:bg-gray-50/70 transition-colors group"
+    style="grid-template-columns: 7rem 1fr 9rem 6rem 5rem 7rem 5.5rem 3.5rem;"
+  >
+    <!-- Estado -->
+    <span
+      class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none w-fit"
+      [class]="statusClasses(reception().status)"
+    >{{ Status[reception().status] }}</span>
+
+    <!-- Marcas -->
+    <p class="text-sm font-semibold text-gray-800 truncate pr-3">
+      {{ reception().brandNames.join(', ') || '—' }}
+    </p>
+
+    <!-- Categorías -->
+    <div class="flex items-center gap-1 min-w-0 pr-2">
+      @for (cat of reception().categoryNames.slice(0, 2); track cat) {
+        <span class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500 truncate max-w-[4rem]"
+              [title]="cat">{{ cat }}</span>
+      }
+      @if (reception().categoryNames.length > 2) {
+        <span class="text-[10px] text-gray-400">+{{ reception().categoryNames.length - 2 }}</span>
+      }
+    </div>
+
+    <!-- Variantes -->
+    <span class="text-xs text-gray-400 text-right pr-4">
+      {{ reception().productVariantsCount }}
+      {{ reception().productVariantsCount === 1 ? 'var.' : 'vars.' }}
+    </span>
+
+    <!-- Unidades -->
+    <span class="text-xs text-gray-500 font-medium text-right pr-4">
+      {{ reception().totalItems }} uds
+    </span>
+
+    <!-- Costo -->
+    <span class="text-sm font-semibold text-gray-700 text-right pr-4">
+      {{ reception().totalCost | currency:'BOB':'symbol':'1.2-2' }}
+    </span>
+
+    <!-- Fecha -->
+    <span class="text-xs text-gray-400 text-right pr-4">
+      {{ reception().receivedAt | date:'dd/MM/yy' }}
+    </span>
+
+    <!-- Acción -->
+    <div class="flex justify-end">
+      <button
+        (click)="viewDetails.emit(reception().id)"
+        title="Ver detalle"
+        class="w-7 h-7 rounded-lg border border-transparent text-gray-300
+               flex items-center justify-center text-sm
+               group-hover:border-gray-200 group-hover:text-gray-500
+               hover:!border-gray-300 hover:!text-gray-700 transition-colors"
+      >↗</button>
+    </div>
   </div>
 </li>

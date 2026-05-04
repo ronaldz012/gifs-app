@@ -12,31 +12,47 @@ import {TransferListItem} from './transfer-list-item/transfer-list-item';
   ],
   template:`
     @if (loading()) {
-
       <app-skeleton-list [rows]="4" [columns]="3" />
-
     } @else if (transfers().length === 0) {
-
       <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-12
-                  flex flex-col items-center gap-3">
+              flex flex-col items-center gap-3">
         <span class="text-3xl opacity-30">⇅</span>
         <p class="text-sm text-gray-400">No hay transferencias registradas.</p>
       </div>
-
     } @else {
+      <div class="flex flex-col gap-2.5
+              lg:gap-0 lg:border lg:border-gray-200 lg:rounded-xl lg:overflow-hidden lg:shadow-sm lg:bg-white">
 
-      <ul class="flex flex-col gap-2.5">
-        @for (t of transfers(); track t.id; let i = $index) {
-          <app-transfer-list-item
-            [transfer]="t"
-            [index]="i"
-            (viewDetail)="viewDetail.emit($event)"
-            (requestResolve)="requestResolve.emit($event)"
-            (requestCancel)="requestCancel.emit($event)"
-          />
-        }
-      </ul>
+        <!-- Header — solo desktop -->
+        <div
+          class="hidden lg:grid px-4 py-2 border-b border-gray-100 bg-gray-50/80
+             text-[10px] font-semibold uppercase tracking-wider text-gray-400"
+          style="grid-template-columns: 3.5rem 5rem 6rem 1fr 8rem 4.5rem 5.5rem 5.5rem 9rem;"
+        >
+          <span>ID</span>
+          <span>Dirección</span>
+          <span>Estado</span>
+          <span>Sucursal</span>
+          <span>Solicitante</span>
+          <span class="text-right pr-4">Uds</span>
+          <span class="text-right pr-4">Creado</span>
+          <span class="text-right pr-4">Resuelto</span>
+          <span></span>
+        </div>
 
+        <!-- Items -->
+        <ul class="flex flex-col gap-2.5 lg:gap-0 lg:divide-y lg:divide-gray-100">
+          @for (t of transfers(); track t.id; let i = $index) {
+            <app-transfer-list-item
+              [transfer]="t"
+              [index]="i"
+              (viewDetail)="viewDetail.emit($event)"
+              (requestResolve)="requestResolve.emit($event)"
+              (requestCancel)="requestCancel.emit($event)"
+            />
+          }
+        </ul>
+      </div>
     }
 
   `,

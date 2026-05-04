@@ -14,7 +14,6 @@ import { ProductQueryParams } from '../../../dtos/products/product-dto';
   imports: [ProductItem, SkeletonList, Paginator, ProductFilterBar, Paginator],
   template: `
     <div class="flex flex-col gap-3">
-
       <!-- Filtros -->
       <app-product-filter-bar
         [params]="query()"
@@ -25,32 +24,51 @@ import { ProductQueryParams } from '../../../dtos/products/product-dto';
         <app-skeleton-list [rows]="4" [columns]="3" />
       } @else if (products().length === 0) {
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-12
-                    flex flex-col items-center gap-3">
+                flex flex-col items-center gap-3">
           <span class="text-3xl opacity-30">👕</span>
           <p class="text-sm text-gray-400">No se encontraron productos.</p>
           @if (hasActiveFilters()) {
             <button
               class="text-sm text-indigo-500 hover:underline"
               (click)="patchQuery({ filter: undefined, categoryId: undefined,
-                                    brandId: undefined, gender: undefined,
-                                    lowStock: undefined, page: 1 })">
+                                brandId: undefined, gender: undefined,
+                                lowStock: undefined, page: 1 })">
               Limpiar filtros
             </button>
           }
         </div>
       } @else {
-        <ul class="flex flex-col gap-2.5">
-          @for (p of products(); track p.id; let i = $index) {
-            <app-product-item
-              class="row-enter"
-              [style.animation-delay.ms]="i * 30"
-              [product]="p"
-              [index]="i"
-              (viewDetail)="goToDetail($event)"
-              (viewStock)="goToStock($event)"
-              (viewMovements)="goToMovements($event)" />
-          }
-        </ul>
+        <!-- Wrapper desktop: borde + header + lista unificados -->
+        <div class="flex flex-col gap-2.5
+                lg:gap-0 lg:border lg:border-gray-200 lg:rounded-xl lg:overflow-hidden lg:shadow-sm lg:bg-white">
+
+          <!-- Header columnas — solo desktop -->
+          <div class="hidden lg:grid px-4 py-2 border-b border-gray-100
+                  text-[10px] font-semibold uppercase tracking-wider text-gray-400 bg-gray-50/80"
+               style="grid-template-columns: 7rem 1fr 10rem 7rem 5rem 6rem 6.5rem;">
+            <span>Código</span>
+            <span>Nombre</span>
+            <span>Marca / Cat.</span>
+            <span class="text-right pr-4">Variantes</span>
+            <span class="text-right pr-4">Stock</span>
+            <span class="text-right pr-4">Precio</span>
+            <span></span>
+          </div>
+
+          <!-- Items -->
+          <ul class="flex flex-col gap-2.5 lg:gap-0 lg:divide-y lg:divide-gray-100">
+            @for (p of products(); track p.id; let i = $index) {
+              <app-product-item
+                class="row-enter"
+                [style.animation-delay.ms]="i * 30"
+                [product]="p"
+                [index]="i"
+                (viewDetail)="goToDetail($event)"
+                (viewStock)="goToStock($event)"
+                (viewMovements)="goToMovements($event)" />
+            }
+          </ul>
+        </div>
       }
 
       <!-- Paginador -->
@@ -62,7 +80,6 @@ import { ProductQueryParams } from '../../../dtos/products/product-dto';
           (pageChange)="patchQuery({ page: $event })"
           (pageSizeChange)="patchQuery({ pageSize: $event, page: 1 })" />
       }
-
     </div>
   `,
   styles: [`
