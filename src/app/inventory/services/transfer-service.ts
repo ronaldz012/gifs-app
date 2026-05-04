@@ -38,7 +38,7 @@ export class TransferService {
         params = params.set(key, value.toString());
       }
     });
-    return this.http.get<PagedResult<StockTransferListDto>>(this.URL)
+    return this.http.get<PagedResult<StockTransferListDto>>(this.URL,{params: params})
   }
 
   getTransferDetail(number: number) {

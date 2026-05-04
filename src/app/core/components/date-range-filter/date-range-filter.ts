@@ -35,18 +35,14 @@ type DateShortcut = 'today' | 'week' | 'month' | 'custom';
         <div class="flex items-center gap-1.5">
           <input
             type="date"
-            class="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white
-                   focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-700"
             [max]="fromMax()"
-            [ngModel]="from()"
+            [ngModel]="localFrom()"
             (ngModelChange)="onFromChange($event)" />
           <span class="text-gray-400 text-xs">→</span>
           <input
             type="date"
-            class="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white
-                   focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-700"
             [min]="toMin()"
-            [ngModel]="to()"
+            [ngModel]="localTo()"
             (ngModelChange)="onToChange($event)" />
         </div>
       } @else if (activeShortcut() !== 'custom' && (from() || to())) {
@@ -62,8 +58,8 @@ type DateShortcut = 'today' | 'week' | 'month' | 'custom';
 })
 export class DateRangeFilter {
   /** Valores actuales desde el padre */
-  from  = input<string | undefined>(undefined);
-  to    = input<string | undefined>(undefined);
+  from = input<string | undefined>(undefined);
+  to = input<string | undefined>(undefined);
 
   /** Emite cuando cambia el rango */
   rangeChange = output<DateRange>();
@@ -71,15 +67,15 @@ export class DateRangeFilter {
   activeShortcut = signal<DateShortcut | null>(null);
 
   readonly shortcuts: { label: string; value: DateShortcut }[] = [
-    { label: 'Hoy',        value: 'today'  },
-    { label: 'Esta semana', value: 'week'  },
-    { label: 'Este mes',   value: 'month'  },
+    { label: 'Hoy', value: 'today' },
+    { label: 'Esta semana', value: 'week' },
+    { label: 'Este mes', value: 'month' },
     { label: 'Personalizado', value: 'custom' },
   ];
 
   // Constraints para los inputs
-  fromMax = computed(() => this.to() ?? this.todayStr());
-  toMin   = computed(() => this.from() ?? '');
+  fromMax = computed(() => this.localTo() || this.toISODate(new Date()));
+  toMin   = computed(() => this.localFrom() || '');
 
   applyShortcut(shortcut: DateShortcut) {
     this.activeShortcut.set(shortcut);
@@ -93,52 +89,76 @@ export class DateRangeFilter {
     this.rangeChange.emit({ from, to });
   }
 
+  localFrom = signal<string>('');
+  localTo   = signal<string>('');
+
   onFromChange(value: string) {
-    this.rangeChange.emit({ from: value || undefined, to: this.to() });
+    this.localFrom.set(value);
+    this.rangeChange.emit({
+      from: value ? this.toUtcIsoString(value, false) : undefined,
+      to:   this.to(),
+    });
   }
 
   onToChange(value: string) {
-    this.rangeChange.emit({ from: this.from(), to: value || undefined });
+    this.localTo.set(value);
+    this.rangeChange.emit({
+      from: this.from(),
+      to:   value ? this.toUtcIsoString(value, true) : undefined,
+    });
   }
 
   formatActiveBadge(): string {
     const f = this.from();
     const t = this.to();
     if (!f && !t) return '';
-    const fmt = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString('es-BO', {
-      day: '2-digit', month: 'short'
-    });
+
+    const fmt = (isoStr: string) =>
+      new Date(isoStr).toLocaleDateString('es-BO', {
+        day: '2-digit', month: 'short'
+      });
+
     if (f && t) return `${fmt(f)} – ${fmt(t)}`;
     if (f) return `Desde ${fmt(f)}`;
     return `Hasta ${fmt(t!)}`;
   }
 
-  clearShortcut() {
-    this.activeShortcut.set(null);
-    this.rangeChange.emit({ from: undefined, to: undefined });
-  }
 
   private getRangeForShortcut(shortcut: Exclude<DateShortcut, 'custom'>): DateRange {
     const today = new Date();
-    const todayStr = this.toISODate(today);
 
     switch (shortcut) {
       case 'today':
-        return { from: todayStr, to: todayStr };
+        return {
+          from: this.toUtcIsoString(this.toISODate(today), false),
+          to: this.toUtcIsoString(this.toISODate(today), true),
+        };
 
       case 'week': {
         const monday = new Date(today);
         const day = today.getDay();
-        // Lunes de esta semana (Bolivia usa semana Lu–Do)
         monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
-        return { from: this.toISODate(monday), to: todayStr };
+        return {
+          from: this.toUtcIsoString(this.toISODate(monday), false),
+          to: this.toUtcIsoString(this.toISODate(today), true),
+        };
       }
 
       case 'month': {
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        return { from: this.toISODate(firstDay), to: todayStr };
+        return {
+          from: this.toUtcIsoString(this.toISODate(firstDay), false),
+          to: this.toUtcIsoString(this.toISODate(today), true),
+        };
       }
     }
+  }
+
+  private toUtcIsoString(dateStr: string, endOfDay: boolean): string {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const local = new Date(year, month - 1, day);
+    if (endOfDay) local.setHours(23, 59, 59, 999);
+    return local.toISOString();
   }
 
   private todayStr(): string {

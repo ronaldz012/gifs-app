@@ -18,7 +18,7 @@ export class ReceptionService {
     return this.http.post<boolean>(this.url, payload);
   }
 
-  getReceptions(query: ReceptionQueryParams):Observable<PagedResult<StockReceptionListDto>>{
+  getAll(query: ReceptionQueryParams):Observable<PagedResult<StockReceptionListDto>>{
 
       let params = new HttpParams();
 

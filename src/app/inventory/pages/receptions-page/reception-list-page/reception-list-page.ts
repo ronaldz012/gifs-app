@@ -50,7 +50,7 @@ export default class ReceptionListPage implements OnInit {
 
   private load(): void {
     this.loadingReceptions.set(true);
-    this.receptionService.getReceptions(this.query()).subscribe({
+    this.receptionService.getAll(this.query()).subscribe({
       next: data => {
         this.receptions.set(data.items);
         this.totalItems.set(data.totalCount); // ajusta al campo real de tu PagedResult

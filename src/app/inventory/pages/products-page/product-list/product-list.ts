@@ -5,8 +5,8 @@ import { ListProductDto } from '../../../interfaces/listProductDto';
 import ProductItem from './product-item/product-item';
 import { SkeletonList } from '../../../../core/ui/skeleton-list/skeleton-list';
 import { ProductFilterBar } from '../product-filter-bar/product-filter-bar';
-import {Paginator} from '../../../../core/components/app-paginator/app-paginator';
-import {ProductQueryParams} from '../../../dtos/products/product-dto';
+import { Paginator } from '../../../../core/components/app-paginator/app-paginator';
+import { ProductQueryParams } from '../../../dtos/products/product-dto';
 
 @Component({
   selector: 'app-product-list',
@@ -75,11 +75,11 @@ import {ProductQueryParams} from '../../../dtos/products/product-dto';
 })
 export default class ProductList implements OnInit {
   private productService = inject(ProductService);
-  private router         = inject(Router);
+  private router = inject(Router);
 
-  products   = signal<ListProductDto[]>([]);
+  products = signal<ListProductDto[]>([]);
   totalItems = signal(0);
-  loading    = signal(false);
+  loading = signal(false);
 
   query = signal<ProductQueryParams>({
     isPaged: true,
@@ -113,7 +113,7 @@ export default class ProductList implements OnInit {
     });
   }
 
-  goToDetail(id: number)    { this.router.navigate(['dashboard','inventory','products', id, 'detail']); }
-  goToStock(id: number)     { this.router.navigate(['products', id, 'stock']); }
+  goToDetail(id: number) { this.router.navigate(['dashboard', 'inventory', 'products', id, 'detail']); }
+  goToStock(id: number) { this.router.navigate(['products', id, 'stock']); }
   goToMovements(id: number) { this.router.navigate(['products', id, 'movements']); }
 }

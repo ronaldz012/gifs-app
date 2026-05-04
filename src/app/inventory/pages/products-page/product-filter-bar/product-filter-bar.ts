@@ -1,8 +1,9 @@
-import { Component, effect, inject, input, output, signal} from '@angular/core';
-import {CategoryService} from '../../../services/category-service';
-import {BrandService} from '../../../services/brand-service';
-import {FormsModule} from '@angular/forms';
-import {ProductQueryParams} from '../../../dtos/products/product-dto';
+import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { CategoryService } from '../../../services/category-service';
+import { BrandService } from '../../../services/brand-service';
+import { FormsModule } from '@angular/forms';
+import { ProductQueryParams } from '../../../dtos/products/product-dto';
+import { Gender } from '../../../interfaces/gender';
 
 @Component({
   selector: 'app-product-filter-bar',
@@ -13,14 +14,15 @@ import {ProductQueryParams} from '../../../dtos/products/product-dto';
   styles: ``,
 })
 export class ProductFilterBar {
-  params  = input.required<ProductQueryParams>();
-  change  = output<Partial<ProductQueryParams>>();
+  params = input.required<ProductQueryParams>();
+  change = output<Partial<ProductQueryParams>>();
+  Gender = Gender
 
   private categoryService = inject(CategoryService);
-  private brandService    = inject(BrandService);
+  private brandService = inject(BrandService);
 
   categories = signal<{ id: number; name: string }[]>([]);
-  brands     = signal<{ id: number; name: string }[]>([]);
+  brands = signal<{ id: number; name: string }[]>([]);
   searchValue = signal('');
 
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -56,5 +58,6 @@ export class ProductFilterBar {
       brandId: undefined, gender: undefined,
       lowStock: undefined, page: 1
     });
-}
+
+  }
 }

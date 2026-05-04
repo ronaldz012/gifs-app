@@ -1,4 +1,4 @@
-import {BaseQueryDto} from '../base-query-dto';
+import { BaseQueryDto } from '../base-query-dto';
 
 export interface StockReceptionListDto {
   id: number;
@@ -21,8 +21,8 @@ export interface ReceptionQueryParams extends BaseQueryDto {
 }
 // reception-enums.ts
 export enum ReceptionStatus {
-  Borrador= 0,
+  Borrador = 0,
   Confirmado = 1,
   Rechazado = 2,
-  Revertida= 3,
+  Revertida = 3,
 }

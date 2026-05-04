@@ -1,8 +1,9 @@
-import {BaseQueryDto} from '../base-query-dto';
+import { Gender } from '../../interfaces/gender';
+import { BaseQueryDto } from '../base-query-dto';
 
-export interface ProductQueryParams extends  BaseQueryDto{
+export interface ProductQueryParams extends BaseQueryDto {
   categoryId?: number;
   brandId?: number;
-  gender?: 'Unisex' | 'Male' | 'Female';
+  gender?: Gender;
   lowStock?: boolean;
 }
