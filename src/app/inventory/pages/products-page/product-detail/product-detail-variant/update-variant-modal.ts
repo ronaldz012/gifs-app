@@ -1,0 +1,169 @@
+import { Component, input, output, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import {ProductVariantDto} from '../../../../dtos/products/product-detail-dto';
+import {UpdateProductVariantDto} from '../../../../dtos/products/update-product-variant-dto';
+
+
+
+/**
+ * Modal for updating a product variant's fields.
+ *
+ * Usage:
+ *   @if (editVariant()) {
+ *     <app-update-variant-modal
+ *       [variant]="editVariant()!"
+ *       [submitting]="submitting()"
+ *       (save)="onUpdateVariant($event)"
+ *       (close)="editVariant.set(null)"
+ *     />
+ *   }
+ */
+@Component({
+  selector: 'app-update-variant-modal',
+  imports: [FormsModule],
+  template: `
+    <!-- Overlay -->
+    <div
+      class="fixed inset-0 bg-black/30 z-40 flex items-end sm:items-center justify-center
+             backdrop-blur-[2px]"
+      (click)="close.emit()"
+    >
+      <!-- Sheet / Dialog -->
+      <div
+        class="modal-enter w-full sm:w-[420px] bg-white
+               rounded-t-2xl sm:rounded-2xl shadow-xl z-50
+               px-5 pt-5 pb-7 sm:pb-5"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Handle (mobile) -->
+        <div class="sm:hidden w-10 h-1 rounded-full bg-gray-200 mx-auto mb-5"></div>
+
+        <p class="text-sm font-semibold text-gray-800 mb-0.5">Editar variante</p>
+        <p class="font-mono text-[11px] text-gray-400 mb-5">{{ variant().sku }}</p>
+
+        <div class="flex flex-col gap-4">
+
+          <!-- Talla -->
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Talla</label>
+            <input
+              type="text"
+              [(ngModel)]="form.size"
+              class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg
+                     focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              placeholder="Ej: S, M, L, XL, 42..."
+            />
+          </div>
+
+          <!-- Color -->
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Color</label>
+            <input
+              type="text"
+              [(ngModel)]="form.color"
+              class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg
+                     focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              placeholder="Ej: Negro, Blanco, Azul marino..."
+            />
+          </div>
+
+          <!-- Precio -->
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Precio</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">BOB</span>
+              <input
+                type="number"
+                [(ngModel)]="form.price"
+                min="0.01"
+                step="0.01"
+                class="w-full pl-10 pr-3 py-2 text-sm border border-gray-200 rounded-lg
+                       focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+
+          <!-- Descripción -->
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Descripción <span class="text-gray-300">(opcional)</span></label>
+            <textarea
+              [(ngModel)]="form.description"
+              rows="2"
+              class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg resize-none
+                     focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              placeholder="Detalles adicionales de la variante..."
+            ></textarea>
+          </div>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-3 mt-6">
+          <button
+            (click)="close.emit()"
+            class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500
+                   text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            (click)="onSave()"
+            [disabled]="submitting()"
+            class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white
+                   text-sm font-medium hover:bg-blue-700 transition-colors
+                   disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            @if (submitting()) {
+              <span class="opacity-70">Guardando...</span>
+            } @else {
+              Guardar cambios
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: `
+    @keyframes modal-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .modal-enter {
+      animation: modal-in 180ms ease both;
+    }
+  `,
+})
+export class UpdateVariantModal implements OnInit {
+  variant    = input.required<ProductVariantDto>();
+  submitting = input<boolean>(false);
+
+  save  = output<UpdateProductVariantDto>();
+  close = output<void>();
+
+  form: UpdateProductVariantDto = {
+    description: '',
+    size:        '',
+    color:       '',
+    price:       undefined,
+  };
+
+  ngOnInit(): void {
+    const v = this.variant();
+    this.form.size        = v.size;
+    this.form.color       = v.color;
+    this.form.price       = v.price;
+    this.form.description = v.description ?? '';
+  }
+
+  onSave(): void {
+    const dto: UpdateProductVariantDto = {};
+
+    if (this.form.size?.trim())        dto.size        = this.form.size.trim();
+    if (this.form.color?.trim())       dto.color       = this.form.color.trim();
+    if (this.form.price != null)       dto.price       = this.form.price;
+    if (this.form.description?.trim()) dto.description = this.form.description.trim();
+
+    this.save.emit(dto);
+  }
+}

@@ -10,16 +10,20 @@ import {ProductSearchResult} from '../components/product-search/product-search-r
 import ProductDetail from '../pages/products-page/product-detail/product-detail';
 import {ProductDetailDto} from '../dtos/products/product-detail-dto';
 import {ProductVariantBySkuDto} from '../dtos/products/product-variant-by-sku-dto';
+import {UpdateProductDto} from '../dtos/products/update-product-dto';
+import {UpdateProductVariantDto} from '../dtos/products/update-product-variant-dto';
+import {UpdateProductVariantStockDto} from '../dtos/products/update-product-variant-stock-dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
   private http = inject(HttpClient);
-  private url = environment.BACKEND_URL + '/api/Product';
+  private product_url = environment.BACKEND_URL + '/api/Product';
+  private productVariant_url = environment.BACKEND_URL + '/api/ProductVariant';
 
   createProduct(dto : CreateProductDto): Observable<boolean> {
-    return  this.http.post<boolean>(this.url, dto);
+    return  this.http.post<boolean>(this.product_url, dto);
   }
   getProducts(query : ProductQueryParams) : Observable<PagedResult<ListProductDto>>{
     let params = new HttpParams();
@@ -29,21 +33,47 @@ export class ProductService {
         params = params.set(key, value.toString());
       }
     });
-    return this.http.get<PagedResult<ListProductDto>>(this.url, {params});
+    return this.http.get<PagedResult<ListProductDto>>(this.product_url, {params});
   }
   searchProduct(query :string )
   {
     let params = new HttpParams();
     params = params.set('request', query);
-    return this.http.get<ProductSearchResult[]>(this.url+ '/Search', {params});
+    return this.http.get<ProductSearchResult[]>(this.product_url+ '/Search', {params});
   }
 
   getById(number: number) {
-    return this.http.get<ProductDetailDto>(this.url + '/' + number);
+    return this.http.get<ProductDetailDto>(this.product_url + '/' + number);
   }
+  update(productId: number, dto: UpdateProductDto) {
+    return this.http.put<void>(this.product_url + '/' + productId, dto);
+  }
+
+  delete(productId: number) {
+    return this.http.delete<void>(this.product_url + '/' + productId);
+  }
+
+
+  /////////////VARIANTS//////////////////////////////////////////////////
+
+
   getVariantBySku(code : string) : Observable<ProductVariantBySkuDto>{
     let params = new HttpParams();
     params = params.set('request', code);
-    return this.http.get<ProductVariantBySkuDto>(this.url + '/productVariant',{params});
+    return this.http.get<ProductVariantBySkuDto>(this.productVariant_url,{params});
+  }
+
+  deleteVariant(productId: number, variantId: number) {
+    return this.http.delete<void>(this.productVariant_url+'/'+ variantId);
+  }
+
+  updateVariant(productId: number, variantId: number, dto: UpdateProductVariantDto) {
+
+    return this.http.put<void>(this.productVariant_url + '/' + variantId, dto);
+  }
+
+  adjustVariantStock(productId: number, variantId: number, dto: UpdateProductVariantStockDto) {
+
+    return this.http.patch<void>(this.productVariant_url + '/' + variantId, dto);
   }
 }

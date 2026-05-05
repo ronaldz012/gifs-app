@@ -1,11 +1,15 @@
+import {Gender} from '../../interfaces/gender';
+
 export interface ProductDetailDto {
   id: number;
   name: string;
   internalCode: string;
   description: string;
   basePrice: number;
-  gender: string;
+  gender: Gender;
+  categoryId: number;
   categoryName: string;
+  brandId: number;
   brandName: string;
   totalStock: number;
   variants: ProductVariantDto[];
