@@ -115,9 +115,15 @@
                  text-sm font-medium hover:bg-red-50 transition-colors"
         >Revertir recepción</button>
       }
+      <button
+        (click)="openLabels()"
+        class="w-full py-3 rounded-xl border border-blue-200 blue-red-400
+                 text-sm font-medium hover:bg-red-50 transition-colors"
+      >Imprimir etiquetas</button>
 
     </div>
   }
+
 
 </div>
 
@@ -131,4 +137,17 @@
     (confirm)="onRollbackConfirm()"
     (close)="closeRollbackModal()"
   />
+
 }
+@if(showLabels())
+{
+  <div class="print-only">
+    <app-print-labels
+      [receptionId]="reception()?.id ?? 0"
+      (closed)="closeLabels()"
+    />
+  </div>
+
+
+}
+

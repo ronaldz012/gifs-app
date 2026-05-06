@@ -6,6 +6,7 @@ import {environment} from '../../../environments/environment';
 import {ReceptionQueryParams, StockReceptionListDto} from '../dtos/Receptions/stock-reception-list-dto';
 import {PagedResult} from '../dtos/paged-result';
 import {StockReceptionDetailDto} from '../dtos/Receptions/stock-reception-details-dto';
+import {ReceptionLabelsDto} from '../interfaces/reception-labels';
 
 @Injectable({
   providedIn: 'root',
@@ -36,5 +37,8 @@ export class ReceptionService {
 
   getReceptionDetail(number: number) {
     return this.http.get<StockReceptionDetailDto>(this.url+"/"+number,);
+  }
+  getReceptionLabels(id: number): Observable<ReceptionLabelsDto>{
+    return this.http.get<ReceptionLabelsDto>(this.url+"/"+id+"/labels");
   }
 }

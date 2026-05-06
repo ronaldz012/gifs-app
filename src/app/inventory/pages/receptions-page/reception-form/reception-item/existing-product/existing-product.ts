@@ -95,9 +95,13 @@ export class ExistingProduct implements OnInit, OnDestroy {
 
 
 
+
   ngOnDestroy(): void {
-    this.productIdCtrl().setValue(null);
-    this.productIdCtrl().clearValidators();
+    const control = this.productIdCtrl();
+    control.setValue(null);
+    control.clearValidators();
+    control.updateValueAndValidity();
     this.searchResults.set([]);
   }
+
 }

@@ -63,6 +63,7 @@ export default class NewProduct implements OnInit,OnDestroy {
       control.clearValidators();
       control.updateValueAndValidity({ emitEvent: false, onlySelf: true });
     });
+    group
     group.clearValidators();
     group.reset();
     group.updateValueAndValidity({ emitEvent: false });

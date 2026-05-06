@@ -1,19 +1,74 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import "tailwindcss";
+
+/* ── Nav ───────────────────────────────────────────────────────────────────── */
 .nav-link {
   @apply flex items-center text-base text-gray-200 p-3 rounded-lg hover:bg-gray-700 transition-colors;
 }
+
 .material-icons {
   display: inline-flex;
   vertical-align: middle;
   align-items: center;
   justify-content: center;
 }
+
+/* ── Reception form grid ────────────────────────────────────────────────────── */
 .grid-cols-new {
   grid-template-columns: 1fr 80px 96px 88px 88px 100px 96px 32px;
 }
 
 .grid-cols-existing {
   grid-template-columns: 80px 1fr 80px 96px 88px 88px 100px 96px 32px;
+}
+
+/* ── Print ──────────────────────────────────────────────────────────────────── */
+/*
+ * Estrategia limpia:
+ * El componente PrintLabelsComponent ya maneja todo su print layout
+ * internamente con position: static en @media print.
+ * No se necesita ninguna clase "printing-labels" ni hacks globales.
+ *
+ * Lo único que ponemos aquí es ocultar el resto de la app cuando
+ * se imprime, dejando que el overlay sea lo único visible.
+ */
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Oculta toda la app */
+  body > * {
+    display: none !important;
+  }
+
+  /* Muestra app-root */
+  body > app-root {
+    display: block !important;
+  }
+
+  /* Oculta todo dentro de app-root */
+  app-root * {
+    display: none !important;
+  }
+
+  /* Muestra reception-details */
+  app-reception-details {
+    display: block !important;
+  }
+
+  /* Oculta todo dentro de reception-details */
+  app-reception-details * {
+    display: none !important;
+  }
+
+  /* Muestra SOLO el overlay de impresión */
+  app-print-labels,
+  app-print-labels * {
+    display: block !important;
+    visibility: visible !important;
+  }
 }

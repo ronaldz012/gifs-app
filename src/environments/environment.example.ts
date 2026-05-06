@@ -1,5 +1,4 @@
 export const environment = {
-    xd:"hola",
-    giphyApiKey :"123123123123",
-    giphyUrl: "URL"
+  BACKEND_URL: "http://localhost:5253",
+  tenant:"client1"
 };

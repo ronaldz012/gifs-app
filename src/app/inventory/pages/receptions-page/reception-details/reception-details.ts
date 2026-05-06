@@ -6,10 +6,11 @@ import {SkeletonList} from '../../../../core/ui/skeleton-list/skeleton-list';
 import {ReceptionService} from '../../../services/reception-service';
 import {ReceptionStatus} from '../../../dtos/Receptions/stock-reception-list-dto';
 import {StockReceptionDetailDto, StockReceptionItemDetailDto} from '../../../dtos/Receptions/stock-reception-details-dto';
+import {PrintLabelsComponent} from '../print-labels/print-labels';
 
 @Component({
   selector: 'app-reception-details',
-  imports: [DatePipe, CurrencyPipe, SkeletonList, ConfirmActionModal],
+  imports: [DatePipe, CurrencyPipe, SkeletonList, ConfirmActionModal, PrintLabelsComponent],
   templateUrl: './reception-details.html',
   styles: `
     @keyframes fade-up {
@@ -89,4 +90,16 @@ export default class ReceptionDetails implements OnInit {
   get totalQuantity(): number {
     return this.reception()?.items.reduce((sum, i) => sum + i.quantityReceived, 0) ?? 0;
   }
+
+  showLabels = signal(false);
+
+  openLabels(): void {
+    console.log("imprimiendo para: ", this.reception()?.id)
+    this.showLabels.set(true);
+  }
+
+  closeLabels(): void {
+    this.showLabels.set(false);
+  }
+
 }
