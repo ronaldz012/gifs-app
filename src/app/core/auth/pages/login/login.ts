@@ -26,7 +26,7 @@ export default class Login {
     {
       this.authService.login(this.loginForm.value.email!, this.loginForm.value.password!).subscribe(
         {
-          next:() => this.router.navigate(['/dashboard']),
+          next:() => this.router.navigate(['/home']),
           error:() => alert('error al loguear')
         }
       )
