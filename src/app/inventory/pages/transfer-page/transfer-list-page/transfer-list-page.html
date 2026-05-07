@@ -5,7 +5,7 @@
   <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
     <h1 class="text-base font-semibold text-gray-800">Transferencias</h1>
     <button
-      (click)="router.navigate(['dashboard','inventory','transfers','new'])"
+      (click)="router.navigate(['inventory','transfers','new'])"
       class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
              hover:bg-blue-700 transition-colors whitespace-nowrap">
       <span class="hidden sm:inline">Nueva transferencia</span>
@@ -26,7 +26,7 @@
   <app-transfer-list
     [transfers]="transfers()"
     [loading]="loadingTransfers()"
-    (viewDetail)="router.navigate(['dashboard','inventory','transfers', $event])"
+    (viewDetail)="router.navigate(['inventory','transfers', $event])"
     (requestResolve)="openResolveModal($event)"
     (requestCancel)="openCancelModal($event)" />
 

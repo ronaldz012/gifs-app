@@ -34,41 +34,19 @@
  * se imprime, dejando que el overlay sea lo único visible.
  */
 @media print {
-
   @page {
     size: A4 portrait;
     margin: 0;
   }
 
-  /* Oculta toda la app */
-  body > * {
+  /* Oculta todo */
+  body.printing-labels * {
     display: none !important;
   }
 
-  /* Muestra app-root */
-  body > app-root {
-    display: block !important;
-  }
-
-  /* Oculta todo dentro de app-root */
-  app-root * {
-    display: none !important;
-  }
-
-  /* Muestra reception-details */
-  app-reception-details {
-    display: block !important;
-  }
-
-  /* Oculta todo dentro de reception-details */
-  app-reception-details * {
-    display: none !important;
-  }
-
-  /* Muestra SOLO el overlay de impresión */
-  app-print-labels,
-  app-print-labels * {
-    display: block !important;
-    visibility: visible !important;
+  /* Muestra solo app-print-labels y todo su contenido */
+  body.printing-labels app-print-labels,
+  body.printing-labels app-print-labels * {
+    display: revert !important;
   }
 }

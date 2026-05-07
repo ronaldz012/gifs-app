@@ -215,6 +215,7 @@ export default class ReceptionForm implements OnInit {
         console.error(err);
       },
     });
+    this.router.navigate(['inventory','receptions',])
   }
 
   private buildPayload(): createReceptionDto {
@@ -311,7 +312,7 @@ export default class ReceptionForm implements OnInit {
 
     const xd = Array.from(
       document.querySelectorAll<HTMLElement>(
-        'input, button, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'input, button, select, textarea, [tabindex]:not([tabindaex="-1"])'
       )
     ).filter(el => !el.hasAttribute('disabled'));
 
@@ -323,6 +324,6 @@ export default class ReceptionForm implements OnInit {
   }
 
   protected onCancel() {
-    this.router.navigate(['dashboard','inventory','receptions']);
+    this.router.navigate(['inventory','receptions']);
   }
 }

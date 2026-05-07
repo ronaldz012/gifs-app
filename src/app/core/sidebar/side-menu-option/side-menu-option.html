@@ -10,7 +10,7 @@
           <a
             class="flex items-center gap-2 mx-2 px-3 py-2 text-sm text-gray-200
             rounded-lg hover:bg-white/10 transition-colors"
-            [routerLink]="['/', 'dashboard', module.route, menu.route]"
+            [routerLink]="['/', module.route, menu.route]"
             routerLinkActive="bg-white/15 text-white font-medium"
             (click)="onNavigate.emit()">
             <span class="material-icons text-[18px]">{{ menu.icon }}</span>

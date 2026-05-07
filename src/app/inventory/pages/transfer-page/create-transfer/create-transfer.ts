@@ -104,12 +104,12 @@ export default class CreateTransfer implements OnInit {
     };
 
     this.transferService.createTransfer(payload).subscribe({
-      next: ()  => this.router.navigate(['transfers']),
+      next: ()  => this.router.navigate(['inventory','transfers']),
       error: err => console.error('Error al crear transferencia:', err),
     });
   }
 
   cancel(): void {
-    this.router.navigate(['dashboard','transfer','transfers']);
+    this.router.navigate(['inventory','transfers']);
   }
 }

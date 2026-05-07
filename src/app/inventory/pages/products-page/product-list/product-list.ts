@@ -130,7 +130,7 @@ export default class ProductList implements OnInit {
     });
   }
 
-  goToDetail(id: number) { this.router.navigate(['dashboard', 'inventory', 'products', id, 'detail']); }
-  goToStock(id: number) { this.router.navigate(['products', id, 'stock']); }
-  goToMovements(id: number) { this.router.navigate(['products', id, 'movements']); }
+  goToDetail(id: number) { this.router.navigate(['inventory', 'products', id, 'detail']); }
+  goToStock(id: number) { this.router.navigate(['inventory','products', id, 'stock']); }
+  goToMovements(id: number) { this.router.navigate(['inventory','products', id, 'movements']); }
 }
