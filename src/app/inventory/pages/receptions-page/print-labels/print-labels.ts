@@ -133,7 +133,7 @@ export default class PrintLabelsPage implements OnInit {
     this.error.set(null);
     this.http
       .get<ReceptionLabelsDto>(
-        `http://192.168.100.124:5253/api/Reception/${this.receptionId()}/labels`
+        `http://localhost:5253/api/Reception/${this.receptionId()}/labels`
       )
       .subscribe({
         next:  data => { this.reception.set(data); this.loading.set(false); },

@@ -9,6 +9,17 @@ export const routes: Routes = [
     loadComponent: () => import('./core/auth/pages/login/login'),
   },
   {
+    path: 'print',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'receptions/:id',
+        title: 'Imprimir Etiquetas',
+        loadComponent: () => import('./inventory/pages/receptions-page/print-labels/print-labels'),
+      },
+    ],
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./core/Dashboard/pages/dashboard/dashboard'),
@@ -134,17 +145,7 @@ export const routes: Routes = [
   },
 
   // ── Print — fuera del layout ───────────────────────────────────────────────
-  {
-    path: 'print',
-    canActivate: [authGuard],
-    children: [
-      {
-        path: 'receptions/:id',
-        title: 'Imprimir Etiquetas',
-        loadComponent: () => import('./inventory/pages/receptions-page/print-labels/print-labels'),
-      },
-    ],
-  },
+
 
   // ── Auth ───────────────────────────────────────────────────────────────────
   { path: '**', redirectTo: '' },

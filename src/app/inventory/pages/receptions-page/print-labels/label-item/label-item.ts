@@ -25,6 +25,8 @@ import {GenderLabel, LabelData} from '../../../../interfaces/reception-labels';
         <span class="color">{{ label().color }}</span>
         <span class="sep">•</span>
         <span>{{ genderLabel() }}</span>
+        <span class="sep">•</span>
+        <span class="reception-badge">#{{ label().receptionId }}</span>
       </div>
 
       <div class="barcode-wrapper">
@@ -33,118 +35,102 @@ import {GenderLabel, LabelData} from '../../../../interfaces/reception-labels';
 
       <div class="label-footer">
         <span class="sku">{{ label().sku }}</span>
-        <span class="reception">#{{ label().receptionId }}</span>
+        <span class="price">Bs. {{ label().price }}</span>
       </div>
     </div>
   `,
   styles: [`
-    .label {
-      width: 62mm;
-      height: 26mm;
-      box-sizing: border-box;
-      padding: 2mm 2.5mm 1.5mm;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      border: 0.3mm solid #d1d5db;
-      overflow: hidden;
-      background: white;
-      font-family: 'DM Sans', 'Segoe UI', sans-serif;
-    }
-
-    /* ── Header ── */
-    .label-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 1.5mm;
-    }
-
-    .product-name {
-      font-size: 7.5pt;
-      font-weight: 700;
-      color: #111827;
-      flex: 1;
-      line-height: 1.2;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-
-    .brand {
-      font-size: 6pt;
-      font-weight: 600;
-      color: #6b7280;
-      white-space: nowrap;
-      text-transform: uppercase;
-      letter-spacing: 0.2pt;
-      padding-top: 0.5mm;
-    }
-
-    /* ── Atributos ── */
-    .label-attrs {
-      display: flex;
-      align-items: center;
-      gap: 1mm;
-      font-size: 7pt;
-      font-weight: 500;
-      color: #374151;
-      flex-wrap: nowrap;
-      margin-top: 0.8mm;
-    }
-
-    .color {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .sep {
-      color: #9ca3af;
-      font-size: 6pt;
-      flex-shrink: 0;
-    }
-
-    /* ── Barcode ── */
-    .barcode-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 1mm 0 0.5mm;
-    }
-
-    .barcode-wrapper svg {
-      display: block;
-      /* JsBarcode controla el tamaño real via width/height params */
-    }
-
-    /* ── Footer ── */
-    .label-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .sku {
-      font-size: 7pt;
-      color: #6b7280;
-      font-family: 'Courier New', monospace;
-    }
-
-    .reception {
-      font-size: 7pt;
-      color: #9ca3af;
-      font-weight: 600;
-    }
-
-    @media print {
-      .label {
-        border-color: #e5e7eb;
-      }
-    }
-  `],
+  .label {
+    width: 62mm;
+    height: 32mm;        /* era 26mm */
+    box-sizing: border-box;
+    padding: 1.8mm 2.5mm 1.5mm;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 0.3mm solid #d1d5db;
+    overflow: hidden;
+    background: white;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  }
+  .label-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;  /* era flex-start — baseline alinea mejor texto */
+    gap: 1.5mm;
+    line-height: 1.2;
+  }
+  .product-name {
+    font-size: 7.5pt;
+    font-weight: 700;
+    color: #111827;
+    flex: 1;
+    white-space: nowrap;          /* una sola línea como dijiste */
+    overflow: hidden;
+    text-overflow: ellipsis;      /* corta limpio si es muy largo */
+  }
+  .brand {
+    font-size: 6pt;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.2pt;
+    flex-shrink: 0;
+  }
+  .label-attrs {
+    display: flex;
+    align-items: center;
+    gap: 1mm;
+    font-size: 6.5pt;
+    font-weight: 500;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-top: 0.6mm;
+    line-height: 1.2;
+  }
+  .color {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sep {
+    color: #9ca3af;
+    font-size: 5.5pt;
+    flex-shrink: 0;
+  }
+  .barcode-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;              /* ocupa todo el espacio disponible */
+    margin: 1mm 0 0.5mm;
+  }
+  .label-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    line-height: 1;
+  }
+  .sku {
+    font-size: 6pt;
+    color: #6b7280;
+    font-family: 'Courier New', monospace;
+  }
+  .price {                /* nuevo — reemplaza .reception en footer */
+    font-size: 7pt;
+    font-weight: 700;
+    color: #111827;
+  }
+  .reception-badge {      /* nuevo — va en attrs row */
+    font-size: 6pt;
+    color: #9ca3af;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+`]
 })
 export class LabelItem implements AfterViewInit {
   label = input.required<LabelData>();
@@ -157,8 +143,8 @@ export class LabelItem implements AfterViewInit {
 
     JsBarcode(el, this.label().sku, {
       format: 'CODE128',
-      width: 1.2,
-      height: 18,
+      width: 1.4,      // era 1.2 — módulo un poco más ancho
+      height: 62,      // era 18 — en px, equivale a ~22mm a 72dpi
       displayValue: false,
       margin: 0,
       background: 'transparent',
