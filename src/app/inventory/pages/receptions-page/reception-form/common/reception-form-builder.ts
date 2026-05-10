@@ -13,7 +13,7 @@ export class ReceptionFormBuilders {
 
   static buildItemGroup(fb: FormBuilder, mode: 'ex' | 'new'): ItemFormGroup {
     return fb.group<ItemFormGroup['controls']>({
-      productId: fb.control<GUID | null>(null, {validators: [Validators.required]}),
+      productId: fb.control<GUID | null>(null,),
       mode: fb.control<string>(mode, {nonNullable: true}),
       newProduct: fb.group<NewProductFormGroup['controls']>({
         name:        fb.control('', {nonNullable: true}),

@@ -52,7 +52,7 @@
       </div>
     }
 
-    @for (itemForm of itemsArray.controls; track $index) {
+    @for (itemForm of itemsArray.controls; track itemForm) {
       <app-reception-item
         [categories]="categories()"
         [brands]="brands()"
