@@ -4,11 +4,11 @@ import {
   output,
   signal,
   untracked,
-  forwardRef, inject, DestroyRef
+  forwardRef, inject, DestroyRef, computed
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ProductSearchResult } from './product-search-result';
-import { CurrencyPipe, NgClass } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Gender } from '../../interfaces/gender';
 import {debounceTime, distinctUntilChanged, finalize, Subject, switchMap} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
@@ -17,7 +17,7 @@ import {ProductService} from '../../services/product-service';
 @Component({
   selector: 'app-product-search',
   standalone: true,
-  imports: [CurrencyPipe, NgClass],
+  imports: [CurrencyPipe],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -33,19 +33,21 @@ import {ProductService} from '../../services/product-service';
         (input)="onSearchInput($event)"
         (focus)="onFocus()"
         (keydown)="onKeyDown($event)"
-        placeholder="Buscar producto..."
-        class="w-full px-2 py-1.5 border border-gray-300 rounded text-[11px] text-gray-900
-               focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400
-               transition-colors"
+        placeholder="Nombre, marca o código..."
+        class="w-full px-2.5 py-1.5 border-[1.5px] border-gray-300 rounded-md text-[12px]
+           text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-3
+           focus:ring-blue-100 transition-all"
         [class.bg-blue-50]="value"
+        [class.border-blue-300]="value"
       />
 
-      @if (showDropdown() && (searchResults().length > 0 || isSearching())) {
-        <div class="absolute z-[100] left-0 right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg max-h-52 overflow-y-auto min-w-70">
+      @if (showDropdown() && (searchResults().length > 0 || isSearching() || showEmpty())) {
+        <div class="absolute z-100 left-0 right-0 mt-1 bg-white border-[1.5px]
+                border-gray-200 rounded-lg shadow-xl overflow-hidden min-w-72">
 
           @if (isSearching()) {
-            <div class="px-3 py-2 text-[10px] text-gray-400 animate-pulse">
-              Buscando productos...
+            <div class="px-3 py-2.5 text-[10px] text-gray-400 animate-pulse">
+              Buscando...
             </div>
           }
 
@@ -55,81 +57,92 @@ import {ProductService} from '../../services/product-service';
               (mousedown)="$event.preventDefault()"
               (click)="selectProduct(product)"
               (mouseenter)="activeIndex.set(i)"
-              class="w-full text-left px-4 py-3 border-b border-gray-100 last:border-0
-                     flex items-center justify-between gap-4 transition-all"
+              class="w-full text-left px-3 py-2.5 border-b border-gray-50 last:border-0
+                 flex items-center justify-between gap-4 transition-colors"
               [class.bg-blue-600]="activeIndex() === i"
               [class.text-white]="activeIndex() === i"
               [class.bg-white]="activeIndex() !== i"
             >
-
               <!-- LEFT -->
-              <div class="flex flex-col min-w-0 flex-1">
+              <div class="flex flex-col gap-0.5 min-w-0 flex-1">
 
-                <div class="flex items-center gap-2 min-w-0">
+                <!-- fila 1: código + nombre -->
+                <div class="flex items-center gap-1.5 min-w-0">
+              <span
+                class="text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0"
+                [class.bg-gray-100]="activeIndex() !== i"
+                [class.text-gray-500]="activeIndex() !== i"
+                [class.bg-blue-500]="activeIndex() === i"
+                [class.text-blue-100]="activeIndex() === i"
+              >{{ product.internalCode }}</span>
+                  <span class="font-semibold text-[13px] truncate">{{ product.name }}</span>
+                </div>
 
-                  <!-- código -->
+                <!-- fila 2: género + categoría -->
+                <div class="flex items-center gap-1">
+              <span
+                class="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded border shrink-0"
+                [class.border-gray-200]="activeIndex() !== i"
+                [class.text-gray-500]="activeIndex() !== i"
+                [class.border-blue-400]="activeIndex() === i"
+                [class.text-blue-100]="activeIndex() === i"
+              >{{ Gender[product.gender] }}</span>
                   <span
-                    class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 shrink-0"
-                    [ngClass]="{
-                      'bg-white/20 text-white': activeIndex() === i
-                    }"
-                  >
-                    {{ product.internalCode }}
-                  </span>
-
-                  <!-- nombre -->
-                  <span class="font-semibold text-[13px] truncate">
-                    {{ product.name }}
-                  </span>
-
-                  <!-- genero -->
-                  <span
-                    class="px-1.5 py-0.5 rounded text-[9px] uppercase font-bold border shrink-0"
-                    [class.border-white]="activeIndex() === i"
+                    class="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded border shrink-0"
                     [class.border-gray-200]="activeIndex() !== i"
-                  >
-                    {{ Gender[product.gender] }}
-                  </span>
+                    [class.text-gray-500]="activeIndex() !== i"
+                    [class.border-blue-400]="activeIndex() === i"
+                    [class.text-blue-100]="activeIndex() === i"
+                  >{{ product.categoryName }}</span>
                 </div>
 
-                <div class="flex items-center gap-2 mt-1">
-                  <span class="text-[10px] opacity-80 uppercase tracking-wider font-medium">
-                    {{ product.brandName }}
-                  </span>
-                  <span class="text-[10px] opacity-50">•</span>
-                  <span class="text-[10px] opacity-80 italic">
-                    {{ product.categoryName }}
-                  </span>
-                </div>
+                <!-- fila 3: marca -->
+                <span
+                  class="text-[10px] mt-0.5"
+                  [class.text-gray-400]="activeIndex() !== i"
+                  [class.text-blue-200]="activeIndex() === i"
+                >{{ product.brandName }}</span>
+
               </div>
 
               <!-- RIGHT -->
               <div class="flex flex-col items-end shrink-0">
-                <span class="text-[14px] font-bold">
-                  {{ product.basePrice | currency:'Bs' }}
-                </span>
-                <span class="text-[9px] opacity-70">
-                  {{ product.productVariants.length }} vars.
-                </span>
+                <span class="text-[14px] font-bold">{{ product.basePrice | currency:'Bs' }}</span>
+                <span
+                  class="text-[9px]"
+                  [class.text-gray-400]="activeIndex() !== i"
+                  [class.text-blue-200]="activeIndex() === i"
+                >{{ product.productVariants.length }} vars.</span>
               </div>
 
             </button>
           }
 
-
-          @if (!isSearching() && searchResults().length === 0 && productSearch().length > 2) {
-            <button type="button"
-                    (mousedown)="$event.preventDefault()"
-                    (click)="onCreateNew()"
-                    class="w-full text-left px-3 py-2 text-xs text-blue-600 hover:bg-blue-50
-               border-t border-gray-100 flex items-center gap-1">
-              <span>+ Producto no encontrado, crear nuevo</span>
-            </button>
+          <!-- Empty state -->
+          @if (showEmpty()) {
+            <div class="px-3 py-3 flex flex-col gap-2">
+          <span class="text-[12px] text-gray-500">
+            No se encontró <strong class="text-gray-800">"{{ productSearch() }}"</strong>
+          </span>
+              @if (allowCreate()) {
+                <button
+                  type="button"
+                  (mousedown)="$event.preventDefault()"
+                  (click)="onCreateNew()"
+                  class="self-start flex items-center gap-1.5 px-3 py-1.5 bg-blue-600
+                     hover:bg-blue-700 text-white text-[11px] font-semibold rounded-md
+                     transition-colors"
+                >
+                  + Crear nuevo producto
+                </button>
+              }
+            </div>
           }
 
         </div>
       }
     </div>
+
   `,
 })
 export class ProductSearch implements ControlValueAccessor {
@@ -144,6 +157,7 @@ export class ProductSearch implements ControlValueAccessor {
 
   // ── Estado ────────────────────────────────────────────────────────────
   productSearch = signal('');
+  allowCreate = input<boolean>(true); // el padre controla si se muestra "crear nuevo"
   showDropdown = signal(false);
   activeIndex = signal(0);
   isSearching = signal(false);
@@ -221,6 +235,11 @@ export class ProductSearch implements ControlValueAccessor {
     this.createNew.emit(this.productSearch());
     this.showDropdown.set(false);
   }
+  showEmpty = computed(() =>
+    !this.isSearching() &&
+    this.searchResults().length === 0 &&
+    this.productSearch().length >= 2
+  );
 
   onKeyDown(event: KeyboardEvent): void {
     const results = this.searchResults();
