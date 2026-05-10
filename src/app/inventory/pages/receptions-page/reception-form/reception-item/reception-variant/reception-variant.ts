@@ -30,7 +30,7 @@ export default class ReceptionVariant implements OnInit {
   availableVariants = input<ProductVariantOption[]>([]);
   index             = input<number>(0);
   forceNew          = input.required<boolean>();
-  usedVariantIds    = input<number[]>([]);
+  usedVariantIds    = input<GUID[]>([]);
   mode              = input.required<'new' | 'existing'>();
 
   // ── Outputs ───────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ export default class ReceptionVariant implements OnInit {
   showDropdown  = signal(false);
 
   // ── Puentes reactivos ─────────────────────────────────────────────────
-  private selectedVariantId = signal<number | null>(null);
+  private selectedVariantId = signal<GUID | null>(null);
   private qtySignal         = signal(0);
   private costSignal        = signal(0);
 
@@ -172,7 +172,7 @@ export default class ReceptionVariant implements OnInit {
   }
 
   // ── Accessors ─────────────────────────────────────────────────────────
-  get productVariantIdCtrl(): FormControl<number | null> {
+  get productVariantIdCtrl(): FormControl<GUID | null> {
     return this.form().controls.productVariantId;
   }
 

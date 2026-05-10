@@ -187,8 +187,8 @@ export class UpdateProductModal implements OnInit {
     description: string;
     basePrice:   number | null;
     gender:      Gender | null;
-    categoryId:  number | null;
-    brandId:     number | null;
+    categoryId:  GUID | null;
+    brandId:     GUID | null;
   } = {
     name:        '',
     description: '',

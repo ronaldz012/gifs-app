@@ -10,7 +10,7 @@ export class CurrentUserService {
 
   get username(): string { return this._user()?.userName ?? ''; }
   get email(): string { return this._user()?.email ?? ''; }
-  get id(): number { return this._user()?.id ?? 0; }
+  get id(): GUID { return this._user()?.id ?? ''; }
 
   set(user: User): void {
     this._user.set(user);

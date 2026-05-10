@@ -75,7 +75,7 @@ export default class VariantNewRow implements OnInit {
   }
 
   // ── Accessors ─────────────────────────────────────────────────────────
-  get productVariantIdCtrl(): FormControl<number | null> {
+  get productVariantIdCtrl(): FormControl<GUID | null> {
     return this.form().controls.productVariantId;
   }
 

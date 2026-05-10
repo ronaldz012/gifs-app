@@ -16,7 +16,7 @@ import ReceptionDetails from '../../../reception-details/reception-details';
 export class ReceptionListItem {
   reception = input.required<StockReceptionListDto>();
   index     = input<number>(0);
-  viewDetails = output<number>();
+  viewDetails = output<GUID>();
   readonly Status = ReceptionStatus;
   readonly router = inject(Router);
 

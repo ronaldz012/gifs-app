@@ -14,9 +14,9 @@ export default class ProductItem {
   product       = input.required<ListProductDto>();
   index         = input<number>(0);
 
-  viewDetail    = output<number>();
-  viewStock     = output<number>();
-  viewMovements = output<number>();
+  viewDetail    = output<GUID>();
+  viewStock     = output<GUID>();
+  viewMovements = output<GUID>();
 
 
 }

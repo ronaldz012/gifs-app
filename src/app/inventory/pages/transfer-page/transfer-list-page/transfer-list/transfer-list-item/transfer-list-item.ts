@@ -13,11 +13,11 @@ import {DatePipe} from '@angular/common';
 })
 export class TransferListItem {
   transfer = input.required<StockTransferListDto>();
-  index    = input<number>(0);
+  index    = input<GUID>('');
 
-  viewDetail     = output<number>();
-  requestResolve = output<number>();
-  requestCancel  = output<number>();
+  viewDetail     = output<GUID>();
+  requestResolve = output<GUID>();
+  requestCancel  = output<GUID>();
 
   readonly Status    = TransferStatus;
   readonly Direction = TransferDirection;

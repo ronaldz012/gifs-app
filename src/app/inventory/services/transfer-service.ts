@@ -22,11 +22,11 @@ export class TransferService {
     return this.http.post<boolean>(this.URL, form)
   }
 
-  cancelTransfer(id: number) {
+  cancelTransfer(id: GUID) {
     return this.http.patch<boolean>(this.URL+'/Cancel/'+id,{});
   }
 
-  resolveTransfer(id: number, action: "complete" | "reject") :Observable<boolean>{
+  resolveTransfer(id: GUID, action: "complete" | "reject") :Observable<boolean>{
     let accepted = action === "complete";
     return this.http.post<boolean>(this.URL+'/Resolve/'+id, {complete: accepted, notes: ""})
   }
@@ -41,7 +41,7 @@ export class TransferService {
     return this.http.get<PagedResult<StockTransferListDto>>(this.URL,{params: params})
   }
 
-  getTransferDetail(number: number) {
+  getTransferDetail(number: GUID) {
     return this.http.get<StockTransferDetailDto>(this.URL+'/'+number);
   }
 }

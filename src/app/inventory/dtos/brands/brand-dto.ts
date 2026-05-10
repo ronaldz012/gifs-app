@@ -1,7 +1,7 @@
 import {BaseQueryDto} from '../base-query-dto';
 
 export interface Brand {
-  id: number;
+  id: GUID;
   name: string;
   description: string;
 }

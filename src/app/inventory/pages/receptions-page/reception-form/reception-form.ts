@@ -56,7 +56,7 @@ export default class ReceptionForm implements OnInit {
   private branchService = inject(BranchContextService)
   private router = inject(Router);
 
-  branchId = signal<number>(0);
+  branchId = signal<GUID>('');
 
   // ── Estates ────────────────────────────────────────────────────────────────
   isSubmitting = signal(false);
@@ -101,7 +101,7 @@ export default class ReceptionForm implements OnInit {
       .subscribe(() => this.recalculateTotalCost());
   }
   private loadCatalogs(): void {
-   this.branchId.set( this.branchService.active()?.branchId ?? 0);
+   this.branchId.set( this.branchService.active()?.branchId ?? '');
     this.categoryService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(x => this.categories.set(x));
@@ -148,12 +148,12 @@ export default class ReceptionForm implements OnInit {
 
   private buildItemGroup(): ItemFormGroup {
     return this.fb.group<ItemFormGroup['controls']>({
-      productId: this.fb.control<number | null>(null, { validators: [Validators.required] }),
+      productId: this.fb.control<GUID | null>(null, { validators: [Validators.required] }),
       newProduct: this.fb.group<NewProductFormGroup['controls']>({
         name: this.fb.control('', { nonNullable: true }),
         description: this.fb.control('', { nonNullable: true }),
-        categoryId: this.fb.control<number | null>(null),
-        brandId: this.fb.control<number | null>(null),
+        categoryId: this.fb.control<GUID | null>(null),
+        brandId: this.fb.control<GUID | null>(null),
         gender: this.fb.control<number | null>(null),
         basePrice: this.fb.control<number>(0, { nonNullable: true }),
       }),

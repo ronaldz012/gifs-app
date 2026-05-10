@@ -31,7 +31,7 @@ export class ReceptionService {
       return this.http.get<PagedResult<StockReceptionListDto>>(this.url, { params:params });
   }
 
-  rollbackReception(id: number) {
+  rollbackReception(id: GUID) {
     return this.http.get<PagedResult<StockReceptionListDto>>(this.url, {});
   }
 

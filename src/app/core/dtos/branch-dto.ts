@@ -1,4 +1,4 @@
 export interface BranchDto {
-  id: number;
+  id: GUID;
   name: string;
 }

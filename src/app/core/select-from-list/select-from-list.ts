@@ -63,7 +63,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class SelectFromList implements ControlValueAccessor {
 
   // Inputs
-  options = input.required<{ id: number; name: string }[]>();
+  options = input.required<{ id: GUID; name: string }[]>();
   placeholder = input<string>('');
 
   // Outputs opcionales
@@ -73,7 +73,7 @@ export class SelectFromList implements ControlValueAccessor {
   query = signal('');
   isOpen = signal(false);
   activeIndex = signal(0);
-  value: number | null = null;
+  value: GUID | null = null;
 
   // CVA callbacks
   private onChange = (value: number | null) => {};
@@ -109,7 +109,7 @@ export class SelectFromList implements ControlValueAccessor {
   });
 
   // CVA methods
-  writeValue(value: number | null): void {
+  writeValue(value: GUID | null): void {
     this.value = value;
   }
 

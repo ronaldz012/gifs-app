@@ -45,7 +45,7 @@ import {TransferListItem} from './transfer-list-item/transfer-list-item';
           @for (t of transfers(); track t.id; let i = $index) {
             <app-transfer-list-item
               [transfer]="t"
-              [index]="i"
+              [index]="t.id"
               (viewDetail)="viewDetail.emit($event)"
               (requestResolve)="requestResolve.emit($event)"
               (requestCancel)="requestCancel.emit($event)"
@@ -74,8 +74,8 @@ export class TransferList {
   transfers = input.required<StockTransferListDto[]>();
   loading   = input<boolean>(false);
 
-  viewDetail     = output<number>();
-  requestResolve = output<number>();
-  requestCancel  = output<number>();
+  viewDetail     = output<GUID>();
+  requestResolve = output<GUID>();
+  requestCancel  = output<GUID>();
 
 }

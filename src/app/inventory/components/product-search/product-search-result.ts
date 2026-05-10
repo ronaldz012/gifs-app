@@ -1,7 +1,7 @@
 import {Gender} from '../../interfaces/gender';
 
 export interface ProductSearchResult {
-  id: number;
+  id: GUID;
   name: string;
   internalCode : string;
   description: string;
@@ -12,7 +12,7 @@ export interface ProductSearchResult {
   gender: Gender;
 }
 export interface ProductVariantOption {
-  id: number;
+  id: GUID;
   sku: string;
   description: string;
   size: string;

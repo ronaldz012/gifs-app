@@ -1,22 +1,22 @@
 import {Gender} from '../../interfaces/gender';
 
 export interface ProductDetailDto {
-  id: number;
+  id: GUID;
   name: string;
   internalCode: string;
   description: string;
   basePrice: number;
   gender: Gender;
-  categoryId: number;
+  categoryId: GUID;
   categoryName: string;
-  brandId: number;
+  brandId: GUID;
   brandName: string;
   totalStock: number;
   variants: ProductVariantDto[];
 }
 
 export interface ProductVariantDto {
-  id: number;
+  id: GUID;
   sku: string;
   description: string;
   size: string;

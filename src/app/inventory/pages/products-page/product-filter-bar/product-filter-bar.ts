@@ -21,8 +21,8 @@ export class ProductFilterBar {
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
 
-  categories = signal<{ id: number; name: string }[]>([]);
-  brands = signal<{ id: number; name: string }[]>([]);
+  categories = signal<{ id: GUID; name: string }[]>([]);
+  brands = signal<{ id: GUID; name: string }[]>([]);
   searchValue = signal('');
 
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;

@@ -5,6 +5,6 @@ export interface UpdateProductDto {
   description?: string,
   basePrice?:   number,
   gender?:      Gender ,
-  categoryId?:  number | null,
-  brandId?:     number | null,
+  categoryId?:  GUID | null,
+  brandId?:     GUID | null,
 }

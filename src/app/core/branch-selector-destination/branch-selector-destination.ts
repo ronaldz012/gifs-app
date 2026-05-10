@@ -24,12 +24,18 @@ import {BranchDto} from '../dtos/branch-dto';
   styles:``,
 })
 export class BranchSelectorDestination {
+
   branches = input.required<BranchDto[]>();
   branchSelected = output<BranchDto>();
 
   onSelect(event: Event): void {
-    const id = Number((event.target as HTMLSelectElement).value);
+    const target = event.target as HTMLSelectElement;
+    const id = target.value;
+
     const branch = this.branches().find(b => b.id === id);
-    if (branch) this.branchSelected.emit(branch);
+
+    if (branch) {
+      this.branchSelected.emit(branch);
+    }
   }
 }

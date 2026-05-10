@@ -3,7 +3,7 @@
 import {BaseQueryDto} from '../base-query-dto';
 
 export interface Category {
-  id: number;
+  id: GUID;
   name: string;
   description: string;
 }

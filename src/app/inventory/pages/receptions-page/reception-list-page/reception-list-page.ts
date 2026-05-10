@@ -23,7 +23,7 @@ export default class ReceptionListPage implements OnInit {
   totalItems        = signal(0);
   loadingReceptions = signal(false);
 
-  rollbackModalId = signal<number | null>(null);
+  rollbackModalId = signal<GUID | null>(null);
   submitting      = signal(false);
 
   query = signal<ReceptionQueryParams>({
@@ -61,7 +61,7 @@ export default class ReceptionListPage implements OnInit {
   }
 
   // ── Modal: Rollback ──────────────────────────────────────────────────────
-  openRollbackModal(id: number): void  { this.rollbackModalId.set(id); }
+  openRollbackModal(id: GUID): void  { this.rollbackModalId.set(id); }
   closeRollbackModal(): void           { this.rollbackModalId.set(null); }
 
   onRollbackConfirm(): void {

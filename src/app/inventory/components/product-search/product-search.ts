@@ -141,16 +141,16 @@ export class ProductSearch implements ControlValueAccessor {
   protected readonly Gender = Gender;
 
   // CVA
-  value: number | null = null;
+  value: GUID | null = null;
 
-  private onChange = (value: number | null) => {};
+  private onChange = (value: GUID | null) => {};
   private onTouched = () => {};
 
   // ========================
   // CVA METHODS
   // ========================
 
-  writeValue(value: number | null): void {
+  writeValue(value: GUID | null): void {
     this.value = value;
 
     const match = this.searchResults().find(p => p.id === value);

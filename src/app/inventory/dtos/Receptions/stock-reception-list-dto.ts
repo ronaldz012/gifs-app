@@ -1,7 +1,7 @@
 import { BaseQueryDto } from '../base-query-dto';
 
 export interface StockReceptionListDto {
-  id: number;
+  id: GUID;
   branchId: number;
   receivedAt: Date;
   canRollback: boolean;
@@ -16,7 +16,7 @@ export interface ReceptionQueryParams extends BaseQueryDto {
   dateFrom?: string;
   dateTo?: string;
   status?: ReceptionStatus;
-  brandId?: number;
+  brandId?: GUID;
 
 }
 // reception-enums.ts

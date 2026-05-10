@@ -24,13 +24,13 @@ export class CreateTransferItemList {
     this.emit(item.variantId, item.quantity - 1);
   }
 
-  remove(variantId: number): void {
+  remove(variantId: GUID): void {
     this.itemsChange.emit(
       this.items().filter(i => i.variantId !== variantId)
     );
   }
 
-  private emit(variantId: number, newQty: number): void {
+  private emit(variantId: GUID, newQty: number): void {
     this.itemsChange.emit(
       this.items().map(i =>
         i.variantId === variantId ? { ...i, quantity: newQty } : i

@@ -12,7 +12,7 @@ export default interface LoginResponse {
 }
 
 export interface User {
-  id: number;
+  id: GUID;
   username: string;
   email: string;
   name: string;
@@ -21,14 +21,14 @@ export interface User {
 }
 
 export interface Branch {
-  branchId: number;
+  branchId: GUID;
   branchName: string;
   roles: Role[];
   modules: Module[];
 }
 
 export interface Role {
-  id: number;
+  id: GUID;
   name: string;
 }
 

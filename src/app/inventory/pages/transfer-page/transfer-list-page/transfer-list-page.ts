@@ -24,8 +24,8 @@ export default class TransferListPage implements OnInit {
   totalItems       = signal(0);
   loadingTransfers = signal(false);
 
-  resolveModalId = signal<number | null>(null);
-  cancelModalId  = signal<number | null>(null);
+  resolveModalId = signal<GUID | null>(null);
+  cancelModalId  = signal<GUID | null>(null);
   submitting     = signal(false);
 
   query = signal<TransferQueryParams>({
@@ -63,7 +63,7 @@ export default class TransferListPage implements OnInit {
   }
 
   // ── Modal: Resolve ───────────────────────────────────────────────────────
-  openResolveModal(id: number): void  { this.resolveModalId.set(id); }
+  openResolveModal(id: GUID): void  { this.resolveModalId.set(id); }
   closeResolveModal(): void           { this.resolveModalId.set(null); }
 
   onResolveConfirm(action: 'complete' | 'reject'): void {
@@ -81,7 +81,7 @@ export default class TransferListPage implements OnInit {
   }
 
   // ── Modal: Cancel ────────────────────────────────────────────────────────
-  openCancelModal(id: number): void { this.cancelModalId.set(id); }
+  openCancelModal(id: GUID): void { this.cancelModalId.set(id); }
   closeCancelModal(): void          { this.cancelModalId.set(null); }
 
   onCancelConfirm(): void {

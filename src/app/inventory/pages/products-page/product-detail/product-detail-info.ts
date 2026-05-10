@@ -94,7 +94,7 @@ import { CurrencyPipe} from '@angular/common';
 export class ProductDetailInfo {
   product = input.required<ProductDetailDto>();
 
-  editProduct   = output<number>();
-  deleteProduct = output<number>();
+  editProduct   = output<GUID>();
+  deleteProduct = output<GUID>();
 
 }

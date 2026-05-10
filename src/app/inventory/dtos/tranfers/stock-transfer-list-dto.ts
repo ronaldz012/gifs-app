@@ -2,7 +2,7 @@ import {TransferDirection, TransferStatus} from './transfer-enums';
 import {BaseQueryDto} from '../base-query-dto';
 
 export interface StockTransferListDto {
-  id: number;
+  id: GUID;
   direction : TransferDirection;
   counterpartBranchName: string;
   requesterName: string;

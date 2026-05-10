@@ -64,6 +64,6 @@ export default class ReceptionList {
   router = inject(Router);
   receptions = input.required<StockReceptionListDto[]>();
   loading    = input<boolean>(false);
-  goToDetails = output<number>();
-  rollback = output<number>;
+  goToDetails = output<GUID>();
+  rollback = output<GUID>;
 }

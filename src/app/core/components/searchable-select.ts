@@ -1,7 +1,7 @@
 import { Component, input, output, signal, computed, effect, ElementRef, viewChild } from '@angular/core';
 
 export interface SelectOption {
-  id: number;
+  id: GUID;
   name: string;
 }
 
@@ -103,9 +103,9 @@ export class SearchableSelect {
   label       = input<string>('Seleccionar');
   placeholder = input<string>('Seleccionar...');
   options     = input<SelectOption[]>([]);
-  selectedId  = input<number | null>(null);
+  selectedId  = input<GUID | null>(null);
 
-  selected = output<number | null>();
+  selected = output<GUID | null>();
 
   open  = signal(false);
   query = signal('');

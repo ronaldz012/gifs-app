@@ -1,4 +1,4 @@
-import { Component, output, signal, computed, OnDestroy, ElementRef, viewChild, AfterViewInit } from '@angular/core';
+import { Component, output, signal, computed, OnDestroy } from '@angular/core';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { BarcodeFormat } from '@zxing/library';
 
@@ -28,17 +28,17 @@ export class CameraScannerModalComponent implements OnDestroy {
   codeScanned = output<string>();
   close       = output<void>();
 
+  // Formatos: Si ahora usas mayormente QR, deja QR_CODE de primero.
   allowedFormats = [
-    BarcodeFormat.EAN_13,
-    BarcodeFormat.EAN_8,
-    BarcodeFormat.CODE_128,
     BarcodeFormat.QR_CODE,
   ];
 
   videoConstraints = {
     facingMode: 'environment',
-    width:  { ideal: 1920 },
-    height: { ideal: 1080 },
+    // 720p es mucho más rápido para el procesado de imagen en JS que 1080p
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+    aspectRatio: { ideal: 1 }
   } as MediaTrackConstraints;
 
   lastScannedCode = signal<string | null>(null);
@@ -48,8 +48,6 @@ export class CameraScannerModalComponent implements OnDestroy {
   private lockTimeout?: ReturnType<typeof setTimeout>;
   private streamWatcher?: ReturnType<typeof setInterval>;
 
-  // ─── Cuando zxing encuentra cámaras, el stream todavía no existe.
-  // Sondeamos hasta que el elemento <video> tenga srcObject.
   onCamerasFound(_devices: MediaDeviceInfo[]) {
     this.debugInfo.set('📷 cámara lista, esperando stream...');
     this.startStreamWatcher();
@@ -58,7 +56,7 @@ export class CameraScannerModalComponent implements OnDestroy {
   private startStreamWatcher() {
     this.clearStreamWatcher();
     let attempts = 0;
-    const MAX    = 30; // 30 × 200ms = 6 s máximo
+    const MAX    = 30;
 
     this.streamWatcher = setInterval(() => {
       attempts++;
@@ -78,17 +76,29 @@ export class CameraScannerModalComponent implements OnDestroy {
     }, 200);
   }
 
-  private applyFocusConstraints(track: MediaStreamTrack) {
-    // applyConstraints es best-effort: si el dispositivo no soporta
-    // focusMode simplemente lo ignora, no tira error visible.
-    track.applyConstraints({
-      advanced: [{ focusMode: 'continuous' } as any],
-    } as any).catch(() => {});
+  private async applyFocusConstraints(track: MediaStreamTrack) {
+    const capabilities = track.getCapabilities() as any;
 
-    const caps = track.getCapabilities() as any;
-    this.debugInfo.set(
-      `✅ stream ok | foco: ${caps.focusMode?.join(',') ?? 'auto'}`
-    );
+    // Configuramos las restricciones de foco de forma robusta
+    const constraints: any = {};
+
+    if (capabilities.focusMode?.includes('continuous')) {
+      constraints.focusMode = 'continuous';
+    }
+
+    try {
+      // Aplicamos de forma "advanced" para forzar el comportamiento en hardware compatible
+      await track.applyConstraints({
+        advanced: [constraints]
+      } as any);
+
+      this.debugInfo.set(
+        `✅ Foco automático activo (${constraints.focusMode ?? 'estándar'})`
+      );
+    } catch (e) {
+      this.debugInfo.set('⚠️ Error aplicando foco, usando default');
+      console.warn('Error aplicando focus constraints:', e);
+    }
   }
 
   private clearStreamWatcher() {
@@ -101,6 +111,7 @@ export class CameraScannerModalComponent implements OnDestroy {
   onCodeDetected(code: string) {
     if (this.isLocked) return;
     this.isLocked = true;
+    this.debugInfo.set(code);
     this.lastScannedCode.set(code);
     this.codeScanned.emit(code);
 
@@ -113,6 +124,17 @@ export class CameraScannerModalComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.clearStreamWatcher();
-    clearTimeout(this.lockTimeout);
+    if (this.lockTimeout) clearTimeout(this.lockTimeout);
+  }
+  onScanError(error: any) {
+
+    console.error('Error de escaneo:', error);
+  }
+
+  onScanFailure(result: any) {
+    // Esto se dispara muchas veces por segundo si no encuentra nada,
+    // pero sirve para saber si el motor está "vivo".
+    if (this.isLocked) return;
+    this.debugInfo.set('Buscando código...');
   }
 }

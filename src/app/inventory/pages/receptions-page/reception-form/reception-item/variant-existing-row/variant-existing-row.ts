@@ -31,7 +31,7 @@ export default class VariantExistingRow implements OnInit {
   // ── Inputs ────────────────────────────────────────────────────────────
   form              = input.required<VariantFormGroup>();
   availableVariants = input<ProductVariantOption[]>([]);
-  usedVariantIds    = input<number[]>([]);
+  usedVariantIds    = input<GUID[]>([]);
   index             = input<number>(0);
   canSwitchToNew    = input<boolean>(true);
 
@@ -44,7 +44,7 @@ export default class VariantExistingRow implements OnInit {
   showDropdown  = signal(false);
 
   // ── Puentes reactivos ─────────────────────────────────────────────────
-  private selectedVariantId = signal<number | null>(null);
+  private selectedVariantId = signal<GUID | null>(null);
   private qtySignal         = signal(0);
   private costSignal        = signal(0);
 
@@ -126,7 +126,7 @@ export default class VariantExistingRow implements OnInit {
   }
 
   // ── Accessors ─────────────────────────────────────────────────────────
-  get productVariantIdCtrl(): FormControl<number | null> {
+  get productVariantIdCtrl(): FormControl<GUID | null> {
     return this.form().controls.productVariantId;
   }
 

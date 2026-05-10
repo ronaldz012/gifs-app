@@ -1,11 +1,11 @@
 export default interface createReceptionDto {
-   branchId: number;
+   branchId: GUID;
    notes: string;
    items: Item[];
 }
 
 export interface Item {
-   productId: number | null;
+   productId: GUID | null;
    newProduct: NewProduct | null;
    variants: Variants[];
 }
@@ -13,8 +13,8 @@ export interface Item {
 export interface NewProduct {
    name: string;
    description: string;
-   categoryId: number;
-   brandId: number;
+   categoryId: GUID;
+   brandId: GUID;
    basePrice: number;
    gender : number;
    unitMeasurementSin?: number;
@@ -23,7 +23,7 @@ export interface NewProduct {
 }
 
 export interface Variants {
-   productVariantId: number | null;
+   productVariantId: GUID | null;
    newVariant: NewVariant | null;
    quantityReceived: number;
    unitCost: number;

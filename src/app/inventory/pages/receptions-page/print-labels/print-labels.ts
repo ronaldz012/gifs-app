@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { LabelSheet } from './label-sheet/label-sheet';
 import {PrintHeader} from '../../../../core/print/print-header';
 import {LabelData, ReceptionLabelsDto} from '../../../interfaces/reception-labels';
+import {environment} from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-print-labels',
@@ -132,12 +133,12 @@ export default class PrintLabelsPage implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     this.http
-      .get<ReceptionLabelsDto>(
-        `http://localhost:5253/api/Reception/${this.receptionId()}/labels`
+      .get<ReceptionLabelsDto>(`${this.url}/api/Reception/${this.receptionId()}/labels`
       )
       .subscribe({
         next:  data => { this.reception.set(data); this.loading.set(false); },
         error: ()   => { this.error.set('No se pudieron cargar las etiquetas.'); this.loading.set(false); },
       });
   }
+  url = environment.BACKEND_URL;
 }

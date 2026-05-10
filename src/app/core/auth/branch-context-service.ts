@@ -41,7 +41,7 @@ export class BranchContextService {
   // restaurar desde localStorage al arrancar la app
   restoreFromStorage(branches: Branch[]): void {
     const savedId = localStorage.getItem(this.ACTIVE_BRANCH_ID_KEY);
-    const saved = branches.find(b => b.branchId === Number(savedId));
+    const saved = branches.find(b => b.branchId === savedId);
     this._available.set(branches);
     this._active.set(saved ?? branches[0] ?? null);
   }
@@ -52,7 +52,7 @@ export class BranchContextService {
     localStorage.setItem(this.BRANCHES_KEY, JSON.stringify(branches));
     this._available.set(branches);
 
-    const savedId = Number(localStorage.getItem(this.ACTIVE_BRANCH_ID_KEY));
+    const savedId = localStorage.getItem(this.ACTIVE_BRANCH_ID_KEY);
     const saved = branches.find(b => b.branchId === savedId);
     this._active.set(saved ?? branches[0] ?? null);
 

@@ -1,8 +1,8 @@
 import {ReceptionStatus} from './stock-reception-list-dto';
 
 export interface StockReceptionDetailDto {
-  id: number;
-  branchId: number;
+  id: GUID;
+  branchId: GUID;
   receivedAt: string;
   notes?: string;
   status: ReceptionStatus;
@@ -13,7 +13,7 @@ export interface StockReceptionDetailDto {
 }
 
 export interface StockReceptionItemDetailDto {
-  id: number;
+  id: GUID;
   productVariantId: number;
   productName: string;
   variantDescription: string;

@@ -62,7 +62,7 @@ export class ReceptionFilterBar {
   readonly ReceptionStatus = ReceptionStatus;
 
   private brandService = inject(BrandService);
-  brands = signal<{ id: number; name: string }[]>([]);
+  brands = signal<{ id: GUID; name: string }[]>([]);
 
   constructor() {
     this.brandService.getAll().subscribe(r => this.brands.set(r));

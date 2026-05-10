@@ -41,19 +41,20 @@ export class ProductService {
     return this.http.get<ProductSearchResult[]>(this.product_url+ '/Search', {params});
   }
 
-  getById(number: number) {
+  getById(number: GUID) {
     return this.http.get<ProductDetailDto>(this.product_url + '/' + number);
   }
-  update(productId: number, dto: UpdateProductDto) {
+  update(productId: GUID, dto: UpdateProductDto) {
     return this.http.put<void>(this.product_url + '/' + productId, dto);
   }
 
-  delete(productId: number) {
+  delete(productId: GUID) {
     return this.http.delete<void>(this.product_url + '/' + productId);
   }
 
 
-  /////////////VARIANTS//////////////////////////////////////////////////
+  /////////////VARIANTS/////////////////////////////////////////////////mber) {
+  //     return this.http/
 
 
   getVariantBySku(code : string) : Observable<ProductVariantBySkuDto>{
@@ -62,16 +63,16 @@ export class ProductService {
     return this.http.get<ProductVariantBySkuDto>(this.productVariant_url,{params});
   }
 
-  deleteVariant(productId: number, variantId: number) {
+  deleteVariant(productId: GUID, variantId: GUID) {
     return this.http.delete<void>(this.productVariant_url+'/'+ variantId);
   }
 
-  updateVariant(productId: number, variantId: number, dto: UpdateProductVariantDto) {
+  updateVariant(productId: GUID, variantId: GUID, dto: UpdateProductVariantDto) {
 
     return this.http.put<void>(this.productVariant_url + '/' + variantId, dto);
   }
 
-  adjustVariantStock(productId: number, variantId: number, dto: UpdateProductVariantStockDto) {
+  adjustVariantStock(productId: GUID, variantId: GUID, dto: UpdateProductVariantStockDto) {
 
     return this.http.patch<void>(this.productVariant_url + '/' + variantId, dto);
   }

@@ -31,7 +31,7 @@ export default class ReceptionDetails implements OnInit {
   loading   = signal(true);
   error     = signal<string | null>(null);
 
-  rollbackModalId = signal<number | null>(null);
+  rollbackModalId = signal<GUID | null>(null);
   submitting      = signal(false);
 
   ngOnInit(): void {
@@ -55,7 +55,7 @@ export default class ReceptionDetails implements OnInit {
   }
 
   // ── Modal: Rollback ───────────────────────────────────────────────────────
-  openRollbackModal(id: number): void { this.rollbackModalId.set(id); }
+  openRollbackModal(id: GUID): void { this.rollbackModalId.set(id); }
   closeRollbackModal(): void          { this.rollbackModalId.set(null); }
 
   onRollbackConfirm(): void {

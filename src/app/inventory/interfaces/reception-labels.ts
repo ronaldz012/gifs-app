@@ -9,7 +9,7 @@ export const GenderLabel: Record<Gender, string> = {
 // ─── DTOs (espejo del backend) ───────────────────────────────────────────────
 
 export interface ReceptionLabelItemDto {
-  variantId: number;
+  variantId: GUID;
   sku: string;
   size: string;
   color: string;
@@ -22,7 +22,7 @@ export interface ReceptionLabelItemDto {
 }
 
 export interface ReceptionLabelsDto {
-  receptionId: number;
+  receptionId: GUID;
   receptionDate: string; // ISO date string
   items: ReceptionLabelItemDto[];
 }
@@ -30,7 +30,7 @@ export interface ReceptionLabelsDto {
 // ─── Modelo interno (una etiqueta ya expandida) ───────────────────────────────
 
 export interface LabelData {
-  variantId: number;
+  variantId: GUID;
   sku: string;
   productName: string;
   brandName: string;
@@ -38,7 +38,7 @@ export interface LabelData {
   color: string;
   gender: Gender;
   price: number;
-  receptionId: number;
+  receptionId: GUID;
 }
 
 export const LABELS_PER_SHEET = 27; // 3 columnas × 6 filas en A4

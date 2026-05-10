@@ -35,7 +35,7 @@ export class ExistingProduct implements OnInit, OnDestroy {
 
 
   // ── Inputs ────────────────────────────────────────────────────────────
-  productIdCtrl = input.required<FormControl<number | null>>();
+  productIdCtrl = input.required<FormControl<GUID | null>>();
   selectedProduct = signal<ProductSearchResult | null>(null);
 
   // ── Outputs ───────────────────────────────────────────────────────────

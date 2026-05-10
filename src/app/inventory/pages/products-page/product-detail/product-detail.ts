@@ -138,11 +138,11 @@ export default class ProductDetail implements OnInit {
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
-      this.loadProduct(Number(idParam));
+      this.loadProduct(idParam);
     }
   }
 
-  private loadProduct(id: number): void {
+  private loadProduct(id: GUID): void {
     this.loading.set(true);
     this.productService.getById(id).subscribe({
       next: (p) => {
@@ -153,7 +153,7 @@ export default class ProductDetail implements OnInit {
     });
   }
 
-  private get productId(): number {
+  private get productId(): GUID {
     return this.product()!.id;
   }
 

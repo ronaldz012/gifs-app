@@ -6,148 +6,177 @@ import {
   input,
   viewChild,
 } from '@angular/core';
-import JsBarcode from 'jsbarcode';
-import {GenderLabel, LabelData} from '../../../../interfaces/reception-labels';
+import * as QRCode from 'qrcode'; // Reemplazamos JsBarcode
+import { GenderLabel, LabelData } from '../../../../interfaces/reception-labels';
 
 @Component({
   selector: 'app-label-item',
   standalone: true,
   template: `
     <div class="label">
-      <div class="label-header">
-        <span class="product-name">{{ label().productName }}</span>
-        <span class="brand">{{ label().brandName }}</span>
+      <!-- Columna Izquierda: Información -->
+      <div class="info-side">
+        <div class="header">
+          <span class="brand">{{ label().brandName }}</span>
+          <span class="product-name">{{ label().productName }}</span>
+        </div>
+
+        <div class="attrs">
+          <div class="attr-row">
+            <span class="badge">Talla: {{ label().size }}</span>
+            <span class="badge">Género: {{ genderLabel() }}</span>
+          </div>
+          <div class="color-row">Color: {{ label().color }}</div>
+        </div>
+
+        <div class="footer">
+          <div class="reception">ID: #{{ label().receptionId }}</div>
+          <div class="sku">{{ label().sku }}</div>
+          <div class="price">Bs. {{ label().price }}</div>
+        </div>
       </div>
 
-      <div class="label-attrs">
-        <span>{{ label().size }}</span>
-        <span class="sep">•</span>
-        <span class="color">{{ label().color }}</span>
-        <span class="sep">•</span>
-        <span>{{ genderLabel() }}</span>
-        <span class="sep">•</span>
-        <span class="reception-badge">#{{ label().receptionId }}</span>
-      </div>
-
-      <div class="barcode-wrapper">
-        <svg #barcode></svg>
-      </div>
-
-      <div class="label-footer">
-        <span class="sku">{{ label().sku }}</span>
-        <span class="price">Bs. {{ label().price }}</span>
+      <!-- Columna Derecha: QR Gigante -->
+      <div class="qr-side">
+        <canvas #qrcode></canvas>
       </div>
     </div>
   `,
-  styles: [`
-  .label {
-    width: 62mm;
-    height: 32mm;        /* era 26mm */
-    box-sizing: border-box;
-    padding: 1.8mm 2.5mm 1.5mm;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    border: 0.3mm solid #d1d5db;
-    overflow: hidden;
-    background: white;
-    font-family: 'DM Sans', 'Segoe UI', sans-serif;
-  }
-  .label-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;  /* era flex-start — baseline alinea mejor texto */
-    gap: 1.5mm;
-    line-height: 1.2;
-  }
-  .product-name {
-    font-size: 7.5pt;
-    font-weight: 700;
-    color: #111827;
-    flex: 1;
-    white-space: nowrap;          /* una sola línea como dijiste */
-    overflow: hidden;
-    text-overflow: ellipsis;      /* corta limpio si es muy largo */
-  }
-  .brand {
-    font-size: 6pt;
-    font-weight: 600;
-    color: #6b7280;
-    white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.2pt;
-    flex-shrink: 0;
-  }
-  .label-attrs {
-    display: flex;
-    align-items: center;
-    gap: 1mm;
-    font-size: 6.5pt;
-    font-weight: 500;
-    color: #374151;
-    white-space: nowrap;
-    overflow: hidden;
-    margin-top: 0.6mm;
-    line-height: 1.2;
-  }
-  .color {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .sep {
-    color: #9ca3af;
-    font-size: 5.5pt;
-    flex-shrink: 0;
-  }
-  .barcode-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;              /* ocupa todo el espacio disponible */
-    margin: 1mm 0 0.5mm;
-  }
-  .label-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    line-height: 1;
-  }
-  .sku {
-    font-size: 6pt;
-    color: #6b7280;
-    font-family: 'Courier New', monospace;
-  }
-  .price {                /* nuevo — reemplaza .reception en footer */
-    font-size: 7pt;
-    font-weight: 700;
-    color: #111827;
-  }
-  .reception-badge {      /* nuevo — va en attrs row */
-    font-size: 6pt;
-    color: #9ca3af;
-    font-weight: 600;
-    flex-shrink: 0;
-  }
-`]
+  styles: [
+    `
+    .label {
+      width: 62mm;
+      height: 32mm;
+      box-sizing: border-box;
+      padding: 1.5mm;
+      display: flex;
+      flex-direction: row; /* Cambio a horizontal */
+      gap: 2mm;
+      border: 0.3mm solid #d1d5db;
+      background: white;
+      font-family: 'DM Sans', 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Lado de la información */
+    .info-side {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0; /* Permite que el texto se corte con ellipsis */
+    }
+
+    .brand {
+      display: block;
+      font-size: 6pt;
+      font-weight: 800;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5pt;
+    }
+
+    .product-name {
+      display: block;
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.1;
+      margin-top: 0.5mm;
+    }
+
+    .attrs {
+      margin-top: 1mm;
+      font-size: 7pt;
+      color: #374151;
+    }
+
+    .attr-row {
+      display: flex;
+      gap: 2mm;
+      margin-bottom: 0.5mm;
+    }
+
+    .badge {
+      background: #f3f4f6;
+      padding: 0.2mm 1.5mm;
+      border-radius: 1mm;
+      font-weight: 600;
+    }
+
+    .color-row {
+      font-size: 6.5pt;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .footer {
+      margin-top: auto;
+      border-top: 0.2mm solid #e5e7eb;
+      padding-top: 1mm;
+    }
+
+    .sku {
+      font-size: 6.5pt;
+      font-family: 'Courier New', monospace;
+      color: #6b7280;
+    }
+
+    .reception {
+      font-size: 6pt;
+      color: #9ca3af;
+    }
+
+    .price {
+      font-size: 11pt; /* Precio más grande para destacar */
+      font-weight: 800;
+      color: #111827;
+      margin-top: 0.5mm;
+    }
+
+    /* Lado del QR */
+    .qr-side {
+      width: 29mm; /* Casi la mitad de la etiqueta */
+      height: 29mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    `,
+  ],
 })
 export class LabelItem implements AfterViewInit {
   label = input.required<LabelData>();
-  private barcodeEl = viewChild<ElementRef<SVGElement>>('barcode');
+  private qrCodeEl = viewChild<ElementRef<HTMLCanvasElement>>('qrcode');
   genderLabel = computed(() => GenderLabel[this.label().gender]);
 
   ngAfterViewInit(): void {
-    const el = this.barcodeEl()?.nativeElement;
-    if (!el) return;
+    this.generateQR();
+  }
 
-    JsBarcode(el, this.label().sku, {
-      format: 'CODE128',
-      width: 1.4,      // era 1.2 — módulo un poco más ancho
-      height: 62,      // era 18 — en px, equivale a ~22mm a 72dpi
-      displayValue: false,
-      margin: 0,
-      background: 'transparent',
-    });
+  async generateQR() {
+    const canvas = this.qrCodeEl()?.nativeElement;
+    if (!canvas) return;
+
+    try {
+      await QRCode.toCanvas(canvas, this.label().sku, {
+        margin: 0,
+        width: 150, // Resolución interna
+        color: {
+          dark: '#000000',
+          light: '#ffffff',
+        },
+        errorCorrectionLevel: 'M', // Nivel medio para que sea fácil de leer pero robusto
+      });
+    } catch (err) {
+      console.error('Error generando QR:', err);
+    }
   }
 }

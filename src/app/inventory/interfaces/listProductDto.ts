@@ -1,5 +1,5 @@
 export interface ListProductDto {
-  id:            number;
+  id:            GUID;
   name:          string;
   internalCode:  string;
   categoryName:  string;

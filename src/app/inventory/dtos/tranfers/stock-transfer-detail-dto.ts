@@ -1,7 +1,7 @@
 import {TransferDirection, TransferStatus} from './transfer-enums';
 
 export interface StockTransferDetailDto {
-  id:number,
+  id:GUID,
   direction: TransferDirection,
   fromBranchName:string,
   toBranchName:string,
@@ -16,7 +16,7 @@ export interface StockTransferDetailDto {
 
 export interface StockTransferItemDetailDto
 {
-  productVariantId: number;
+  productVariantId: GUID;
   sku  :string;
   productName :string;
   variantDescription  :string;

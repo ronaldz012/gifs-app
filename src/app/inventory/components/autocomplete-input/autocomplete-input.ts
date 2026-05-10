@@ -13,10 +13,10 @@ export class AutocompleteInput {
   value = model<number>(0);
   forceTouched = input<boolean>(false);
   valueTouched = output<void>();
-  options = input<{ id: number, name: string }[]>([])
+  options = input<{ id: GUID, name: string, description: string }[]>([])
   inputValue = signal<string>("");
   placeHolder = input<string>("")
-  selected = output<number>()
+  selected = output<GUID>()
 
   showBrands = signal<boolean>(false)
 
