@@ -2,7 +2,7 @@ import { Component, input, output, signal, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { ProductDetailDto } from '../../../dtos/products/product-detail-dto';
 import { CategoryService } from '../../../services/category-service';
-import { BrandService } from '../../../services/brand-service';
+import BrandService from '../../../services/brand-service';
 import {SearchableSelect, SelectOption} from '../../../../core/components/searchable-select';
 import {UpdateProductDto} from '../../../dtos/products/update-product-dto';
 import {Gender} from '../../../interfaces/gender';

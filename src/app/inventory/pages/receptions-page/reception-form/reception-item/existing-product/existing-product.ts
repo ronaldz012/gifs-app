@@ -89,13 +89,6 @@ export class ExistingProduct implements OnInit, OnDestroy {
       this.searchResults.set([]);
     }
   }
-
-
-
-
-
-
-
   ngOnDestroy(): void {
     const control = this.productIdCtrl();
     control.setValue(null);

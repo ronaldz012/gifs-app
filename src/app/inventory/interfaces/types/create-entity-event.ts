@@ -1,5 +1,5 @@
 export type CreateEntityEvent = {
-  type: 'category' | 'brand';
+  type: 'category' | 'brand' | 'color';
   query: string;
   itemIndex: number;
 };

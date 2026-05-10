@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 export default interface LoginResponse {
   accessToken: string;
@@ -15,7 +14,6 @@ export interface User {
   id: GUID;
   username: string;
   email: string;
-  name: string;
   firstName: string;
   lastName: string;
 }

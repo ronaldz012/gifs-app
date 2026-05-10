@@ -1,5 +1,5 @@
 <div class="bg-white border border-blue-200 rounded-lg shadow-lg p-3 w-64">
-  <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">Nueva marca</p>
+  <p class="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">Nuevo color</p>
   <div [formGroup]="form" class="space-y-2">
 
     <input #nameInput formControlName="name" type="text" placeholder="Nombre..."
@@ -10,22 +10,19 @@
     }
 
     <div class="relative">
-      <input formControlName="prefix" type="text" placeholder="PRE"
+      <input formControlName="code" type="text" placeholder="COL"
              maxlength="3"
-             (input)="onPrefixInput($event)"
+             (input)="onCodeInput($event)"
              class="w-full px-2 py-1.5 border rounded text-sm uppercase font-mono tracking-widest focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
-             [class.border-red-400]="prefixInvalid" [class.border-gray-300]="!prefixInvalid" />
+             [class.border-red-400]="codeInvalid" [class.border-gray-300]="!codeInvalid" />
       <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs"
-            [class.text-gray-400]="!prefixInvalid" [class.text-red-400]="prefixInvalid">
-        {{ form.controls.prefix.value?.length ?? 0 }}/3
+            [class.text-gray-400]="!codeInvalid" [class.text-red-400]="codeInvalid">
+        {{ form.controls.code.value?.length ?? 0 }}/3
       </span>
     </div>
-    @if (prefixInvalid) {
-      <p class="text-xs text-red-500">{{ prefixErrorMessage }}</p>
+    @if (codeInvalid) {
+      <p class="text-xs text-red-500">{{ codeErrorMessage }}</p>
     }
-
-    <input formControlName="description" type="text" placeholder="Descripción (opcional)"
-           class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400" />
 
     <div class="flex gap-2 pt-1">
       <button type="button" (click)="save()"
@@ -37,5 +34,6 @@
         Cancelar
       </button>
     </div>
+
   </div>
 </div>

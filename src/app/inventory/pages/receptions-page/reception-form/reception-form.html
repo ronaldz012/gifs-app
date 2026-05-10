@@ -56,10 +56,12 @@
       <app-reception-item
         [categories]="categories()"
         [brands]="brands()"
+        [colors]="colors()"
         [form]="itemForm"
         (remove)="removeItem($index)"
         (create)="handleOpenCreation($event)"
         [index]="$index"
+
       />
     }
 
@@ -128,6 +130,15 @@
         (created)="onBrandCreated($event)"
         (closed)="activeModal.set(null)"
       />
+    }
+    @if(activeModal()?.type ==='color')
+    {
+      <app-create-color
+      [initialName]="activeModal()!.query"
+      (created)="onColorCreated($event)"
+      (closed)="activeModal.set(null)"
+      />
+
     }
 
   </div>

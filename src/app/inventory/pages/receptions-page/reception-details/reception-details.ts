@@ -35,11 +35,11 @@ export default class ReceptionDetails implements OnInit {
   submitting      = signal(false);
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.route.snapshot.paramMap.get('id') ?? '';
     this.loadDetail(id);
   }
 
-  private loadDetail(id: number): void {
+  private loadDetail(id: GUID): void {
     this.loading.set(true);
     this.error.set(null);
     this.receptionService.getReceptionDetail(id).subscribe({

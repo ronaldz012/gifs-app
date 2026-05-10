@@ -57,6 +57,8 @@
                 [canSwitchToExisting]="!isNewProduct()"
                 (switchToExisting)="switchVariantMode(i, 'ex')"
                 (remove)="removeVariant(i)"
+                (openCreation) ="handleOpenCreation($event)"
+                [colors]="colors()"
               />
             }
           </div>

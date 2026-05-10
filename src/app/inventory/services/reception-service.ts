@@ -35,10 +35,10 @@ export class ReceptionService {
     return this.http.get<PagedResult<StockReceptionListDto>>(this.url, {});
   }
 
-  getReceptionDetail(number: number) {
+  getReceptionDetail(number: GUID) {
     return this.http.get<StockReceptionDetailDto>(this.url+"/"+number,);
   }
-  getReceptionLabels(id: number): Observable<ReceptionLabelsDto>{
+  getReceptionLabels(id: GUID): Observable<ReceptionLabelsDto>{
     return this.http.get<ReceptionLabelsDto>(this.url+"/"+id+"/labels");
   }
 }

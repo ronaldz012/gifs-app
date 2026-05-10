@@ -1,6 +1,6 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { CategoryService } from '../../../services/category-service';
-import { BrandService } from '../../../services/brand-service';
+import BrandService from '../../../services/brand-service';
 import { FormsModule } from '@angular/forms';
 import { ProductQueryParams } from '../../../dtos/products/product-dto';
 import { Gender } from '../../../interfaces/gender';

@@ -33,7 +33,7 @@ export class BranchContextService {
     return this._active()?.branchId?.toString() ?? null;
   }
 
-  // para estadísticas: pasa los branches que quieras
+  // para estadísticas: pasa los branches que quierasget
   getBranchIds(branches: Branch[]): string {
     return branches.map(b => b.branchId).join(',');
   }
@@ -42,14 +42,15 @@ export class BranchContextService {
   restoreFromStorage(branches: Branch[]): void {
     const savedId = localStorage.getItem(this.ACTIVE_BRANCH_ID_KEY);
     const saved = branches.find(b => b.branchId === savedId);
-    this._available.set(branches);
-    this._active.set(saved ?? branches[0] ?? null);
+    this.setAvailable(branches);
+    this.setActive(saved ?? branches[0] ?? null);
   }
 
 
   // Reemplaza setAvailable + setActive + localStorage suelto
   initialize(branches: Branch[]): void {
     localStorage.setItem(this.BRANCHES_KEY, JSON.stringify(branches));
+    console.log("BRANCH EN LOCAL STORAGE: ",localStorage.getItem(this.BRANCHES_KEY));
     this._available.set(branches);
 
     const savedId = localStorage.getItem(this.ACTIVE_BRANCH_ID_KEY);

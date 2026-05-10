@@ -12,7 +12,7 @@
     </div>
   </div>
 
-  <div class="px-1 py-1" formGroupName="newVariant">
+  <div class="px-1 py-1" [formGroup]="newVariantGroup">
     <input
       type="text"
       formControlName="description"
@@ -24,7 +24,7 @@
     />
   </div>
 
-  <div class="px-1 py-1" formGroupName="newVariant">
+  <div class="px-1 py-1"  [formGroup]="newVariantGroup">
     <input
       type="text"
       formControlName="size"
@@ -34,19 +34,26 @@
              group-hover:border-gray-200"
     />
   </div>
+  <!-- sin formGroupName ni formControlName -->
+  <app-select-ctrl
+    [ctrl]="colorIdCtrl"
+    [options]="colors()"
+    (createNew)="handleCreateColor($event)"
+  />
 
-  <div class="px-1 py-1" formGroupName="newVariant">
-    <input
-      type="text"
-      formControlName="color"
-      placeholder="Color"
-      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400
-             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400
-             group-hover:border-gray-200"
-    />
-  </div>
 
-  <div class="px-1 py-1" formGroupName="newVariant">
+<!--  <div class="px-1 py-1" formGroupName="newVariant">-->
+<!--    <input-->
+<!--      type="text"-->
+<!--      formControlName="color"-->
+<!--      placeholder="Color"-->
+<!--      class="w-full px-2 py-1.5 border border-transparent rounded text-sm text-gray-900 placeholder-gray-400-->
+<!--             focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-400-->
+<!--             group-hover:border-gray-200"-->
+<!--    />-->
+<!--  </div>-->
+
+  <div class="px-1 py-1"  [formGroup]="newVariantGroup">
     <input
       type="number"
       formControlName="price"
@@ -57,7 +64,7 @@
     />
   </div>
 
-  <div class="px-1 py-1">
+  <div class="px-1 py-1" >
     <input
       type="number"
       formControlName="quantityReceived"

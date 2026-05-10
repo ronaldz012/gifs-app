@@ -32,6 +32,8 @@ import VariantExistingRow from './variant-existing-row/variant-existing-row';
 import VariantNewRow from './variant-new-row/variant-new-row';
 import { ExistingProduct } from './existing-product/existing-product';
 import NewProduct from './new-product/new-product';
+import {Color} from '../../../../dtos/Colors/color';
+import {ReceptionFormBuilders} from '../common/reception-form-builder';
 
 @Component({
   selector: 'app-reception-item',
@@ -54,29 +56,23 @@ export default class ReceptionItem implements OnInit {
   form = input.required<ItemFormGroup>();
   index = input.required<number>();
   categories = input.required<Category[]>();
+  colors = input.required<Color[]>();
   brands = input.required<Brand[]>();
 
   remove = output<number>();
   create = output<CreateEntityEvent>();
 
   // ---------------- STATE ----------------
-  selectedProductSignal = signal<ProductSearchResult | null>(null);
   isNewProduct = signal(false);
   availableVariants = signal<ProductVariantOption[]>([]);
   selectedProduct = signal<ProductSearchResult | null>(null);
 
   // ---------------- FORM GETTERS ----------------
-  get vArray() {
-    return this.form().controls.variants;
-  }
+  get vArray() {return this.form().controls.variants;}
 
-  get productIdCtrl() {
-    return this.form().controls.productId;
-  }
+  get productIdCtrl() {return this.form().controls.productId;}
 
-  get newProductGroup() {
-    return this.form().controls.newProduct;
-  }
+  get newProductGroup() {return this.form().controls.newProduct;}
 
   // ---------------- REACTIVE BRIDGE ----------------
   private formValue!: Signal<any>;
@@ -111,8 +107,8 @@ export default class ReceptionItem implements OnInit {
   );
 
   // ---------------- VARIANTS ----------------
-  addVariant(mode:'new' | 'ex'): void {
-    this.vArray.push(this.buildVariantGroup(mode));
+  addVariant(mode: 'new' | 'ex'): void {
+    this.vArray.push(ReceptionFormBuilders.buildVariantGroup(this.fb, mode));
   }
 
   removeVariant(i: number): void {
@@ -129,15 +125,10 @@ export default class ReceptionItem implements OnInit {
     console.log(group.controls.mode.value);
   }
 
-  resetVariants(): void {
+  private resetVariants(): void {
     this.vArray.clear();
-
-    // evita glitches de render
-    if(this.isNewProduct())
-      queueMicrotask(() => this.addVariant('new'));
-    else
-      queueMicrotask(() => this.addVariant('ex'));
-
+    const mode = this.isNewProduct() ? 'new' : 'ex';
+    queueMicrotask(() => this.vArray.push(ReceptionFormBuilders.buildVariantGroup(this.fb, mode)));
   }
 
   // ---------------- PRODUCT ----------------
@@ -183,35 +174,14 @@ export default class ReceptionItem implements OnInit {
     }
   }
 
-  private buildVariantGroup(mode : 'ex' | 'new'): VariantFormGroup {
-    return this.fb.group({
-      productVariantId: [null as number | null],
-      mode: [mode],
-      newVariant: this.fb.group({
-        description: ['', { nonNullable: true }],
-        size: ['', { nonNullable: true }],
-        color: ['', { nonNullable: true }],
-        price: [null as number | null],
-      }),
-
-      quantityReceived: [
-        null as number | null,
-        [Validators.required, Validators.min(1)],
-      ],
-
-      unitCost: [
-        null as number | null,
-        [Validators.required, Validators.min(0.01)],
-      ],
-    }) as unknown as VariantFormGroup;
-  }
-
   // ---------------- OUTPUTS ----------------
   onRemove(): void {
     this.remove.emit(this.index());
   }
 
   handleOpenCreation(event: CreateEntityEvent): void {
+    console.log("PETICIÖN DE CREAR: ", event);
     this.create.emit(event);
   }
+
 }

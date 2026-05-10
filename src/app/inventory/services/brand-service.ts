@@ -10,7 +10,7 @@ import {CreateBrandDto} from '../dtos/brands/create-brand-dto';
 @Injectable({
   providedIn: 'root',
 })
-export class BrandService {
+class BrandService {
   private  http = inject(HttpClient);
   private url = environment.BACKEND_URL + '/api/Brand';
 
@@ -37,3 +37,5 @@ export class BrandService {
     return this.http.post<Brand>(this.url, newBrand);
   }
 }
+
+export default BrandService

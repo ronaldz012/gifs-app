@@ -1,16 +1,16 @@
 export default interface createReceptionDto {
    branchId: GUID;
    notes: string;
-   items: Item[];
+   items: CreateReceptionItem[];
 }
 
-export interface Item {
+export interface CreateReceptionItem {
    productId: GUID | null;
-   newProduct: NewProduct | null;
-   variants: Variants[];
+   newProduct: NewProductDto | null;
+   variants: StockReceptionVariantsDto[];
 }
 
-export interface NewProduct {
+export interface NewProductDto {
    name: string;
    description: string;
    categoryId: GUID;
@@ -22,17 +22,16 @@ export interface NewProduct {
    productCodeSin?: number;
 }
 
-export interface Variants {
+export interface StockReceptionVariantsDto {
    productVariantId: GUID | null;
-   newVariant: NewVariant | null;
+   newVariant: NewProductVariantDto | null;
    quantityReceived: number;
    unitCost: number;
 }
 
-export interface NewVariant {
-   productId: number;
+export interface NewProductVariantDto {
    description: string;
    size: string;
-   color: string;
+   colorId: GUID;
    price: number;
 }

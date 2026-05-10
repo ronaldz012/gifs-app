@@ -1,6 +1,5 @@
 import {
   Component,
-  forwardRef,
   input,
   output,
   signal,
@@ -9,10 +8,10 @@ import {
   untracked,
   OnInit
 } from '@angular/core';
-import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR} from '@angular/forms';
+import {FormControl} from '@angular/forms';
 
 @Component({
-  selector: 'app-select-from-list',
+  selector: 'app-select-ctrl',
   standalone: true,
   template: `
     <div class="relative w-full" (focusout)="handleFocusOut($event)">
@@ -51,38 +50,27 @@ import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR} from '@angular/for
       }
     </div>
   `,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SelectFromList),
-      multi: true,
-    },
-  ],
 })
-export class SelectFromList implements ControlValueAccessor, OnInit {
+export class SelectCtrl implements OnInit {
 
-  options    = input.required<{ id: GUID; name: string }[]>();
+  ctrl        = input.required<FormControl>();
+  options     = input.required<{ id: GUID; name: string }[]>();
   placeholder = input<string>('');
-  ctrl       = input<FormControl | null>(null);  // ← escape hatch para display:contents
-
-  createNew = output<string>();
+  createNew   = output<string>();
 
   query       = signal('');
   isOpen      = signal(false);
   activeIndex = signal(0);
-  value: GUID | null = null;
-
-  private onChange   = (value: any) => {};
-  private onTouched  = () => {};
 
   constructor() {
     effect(() => {
       const opts = this.options();
       untracked(() => {
-        if (this.value == null) {
+        const val = this.ctrl().value;
+        if (!val) {
           this.query.set('');
         } else {
-          const match = opts.find(o => o.id === this.value);
+          const match = opts.find(o => o.id === val);
           if (match) this.query.set(match.name);
         }
       });
@@ -90,12 +78,10 @@ export class SelectFromList implements ControlValueAccessor, OnInit {
   }
 
   ngOnInit(): void {
-    const ctrl = this.ctrl();
-    if (ctrl) {
-      // modo directo: sincroniza valor inicial y suscríbete a cambios externos
-      this.writeValue(ctrl.value);
-      this.registerOnChange((val: any) => ctrl.setValue(val));
-      this.registerOnTouched(() => ctrl.markAsTouched());
+    const val = this.ctrl().value;
+    if (val) {
+      const match = this.options().find(o => o.id === val);
+      if (match) this.query.set(match.name);
     }
   }
 
@@ -112,44 +98,29 @@ export class SelectFromList implements ControlValueAccessor, OnInit {
     return !this.options().some(o => o.name.toLowerCase() === q.toLowerCase());
   });
 
-  // CVA
-  writeValue(value: GUID | null): void {
-    this.value = value;
-    // si ya hay options cargadas, sincroniza el query
-    const match = this.options().find(o => o.id === value);
-    if (match) this.query.set(match.name);
-    else if (!value) this.query.set('');
-  }
-
-  registerOnChange(fn: any): void { this.onChange = fn; }
-  registerOnTouched(fn: any): void { this.onTouched = fn; }
-
   onFocus() { this.isOpen.set(true); }
 
   handleFocusOut(event: FocusEvent) {
     const next = event.relatedTarget as HTMLElement;
     if (next && (event.currentTarget as HTMLElement).contains(next)) return;
     this.isOpen.set(false);
-    this.onTouched();
+    this.ctrl()?.markAsTouched();
   }
-
   onInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.query.set(value);
     this.isOpen.set(true);
     if (!value) {
-      this.value = null;
-      this.onChange(null);
+      this.ctrl()?.setValue(null);
     }
   }
 
   selectOption(opt: any, event?: MouseEvent) {
     if (event) event.preventDefault();
-    this.value = opt.id;
     this.query.set(opt.name);
-    this.onChange(opt.id);
-    this.onTouched();
-    console.log('valor del ctrl al seleccionar',this.ctrl()?.getRawValue())
+    this.ctrl()?.setValue(opt.id);
+    this.ctrl()?.markAsTouched();
+    console.log('value of colorId:', this.ctrl().getRawValue())
     this.isOpen.set(false);
   }
 

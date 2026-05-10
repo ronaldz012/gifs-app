@@ -13,17 +13,11 @@ import {
 import {FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ReceptionService} from '../../../services/reception-service';
 import {ItemFormGroup, NewProductFormGroup, NewReceptionForm} from './common/item-form-group';
-import {VariantFormGroup} from './common/variant-form-group';
-import createReceptionDto, {
-  Item,
-  NewProduct,
-  NewVariant
-} from '../../../dtos/Receptions/create-reception-dto';
 import ReceptionItem from './reception-item/reception-item';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DecimalPipe} from '@angular/common';
 import {CategoryService} from '../../../services/category-service';
-import {BrandService} from '../../../services/brand-service';
+import BrandService from '../../../services/brand-service';
 import {Category} from '../../../dtos/categories/category-dto';
 import {Brand} from '../../../dtos/brands/brand-dto';
 import {CreateCategory} from '../../../components/create-category/create-category';
@@ -31,6 +25,11 @@ import {CreateEntityEvent} from '../../../interfaces/types/create-entity-event';
 import CreateBrand from '../../../components/create-brand/create-brand';
 import {BranchContextService} from '../../../../core/auth/branch-context-service';
 import {ActivatedRoute, Router} from '@angular/router';
+import CreateColor from '../../../components/create-color/create-color';
+import {Color} from '../../../dtos/Colors/color';
+import {ColorService} from '../../../services/color-service';
+import {ReceptionFormBuilders} from './common/reception-form-builder';
+import {buildReceptionPayload} from './common/build-payload-reception';
 
 
 @Component({
@@ -42,6 +41,7 @@ import {ActivatedRoute, Router} from '@angular/router';
     ReceptionItem,
     CreateCategory,
     CreateBrand,
+    CreateColor,
   ],
   templateUrl: './reception-form.html',
   styles: ``,
@@ -53,6 +53,7 @@ export default class ReceptionForm implements OnInit {
   private destroyRef = inject(DestroyRef);
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
+  private colorService = inject(ColorService);
   private branchService = inject(BranchContextService)
   private router = inject(Router);
 
@@ -66,14 +67,12 @@ export default class ReceptionForm implements OnInit {
   //────DATA─────────────────────────────────────────────────────────────────────────────
   categories = signal<Category[]>([])
   brands = signal<Brand[]>([])
+  colors = signal<Color[]>([])
   categoryModal = viewChild(CreateCategory);
   brandModal = viewChild(CreateBrand);
   lastFocusedElement: HTMLElement | null = null;
   // ── Form ──────────────────────────────────────────────────────────────────
-  form: NewReceptionForm = this.fb.group<NewReceptionForm['controls']>({
-    notes: this.fb.control('', { nonNullable: true }),
-    items: this.fb.array<ItemFormGroup>([]),
-  });
+  form: NewReceptionForm = ReceptionFormBuilders.buildReceptionForm(this.fb);
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   constructor() {
@@ -108,6 +107,10 @@ export default class ReceptionForm implements OnInit {
     this.brandService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(x => this.brands.set(x));
+
+    this.colorService.getAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(x => this.colors.set(x))
   }
 
   // ── Totales ───────────────────────────────────────────────────────────────
@@ -134,10 +137,7 @@ export default class ReceptionForm implements OnInit {
 
   // ── Gestión de items ──────────────────────────────────────────────────────
   addItem(): void {
-    const newItem = this.buildItemGroup();
-    this.itemsArray.push(newItem);
-    const variantsArray = newItem.get('variants') as FormArray;
-    console.log('Cantidad de variantes en el nuevo item:', variantsArray.length);
+    this.itemsArray.push(ReceptionFormBuilders.buildItemGroup(this.fb));
   }
 
   removeItem(i: number): void {
@@ -145,43 +145,6 @@ export default class ReceptionForm implements OnInit {
     console.log('deleting: ',i+1);
     this.itemsArray.removeAt(i);
   }
-
-  private buildItemGroup(): ItemFormGroup {
-    return this.fb.group<ItemFormGroup['controls']>({
-      productId: this.fb.control<GUID | null>(null, { validators: [Validators.required] }),
-      newProduct: this.fb.group<NewProductFormGroup['controls']>({
-        name: this.fb.control('', { nonNullable: true }),
-        description: this.fb.control('', { nonNullable: true }),
-        categoryId: this.fb.control<GUID | null>(null),
-        brandId: this.fb.control<GUID | null>(null),
-        gender: this.fb.control<number | null>(null),
-        basePrice: this.fb.control<number>(0, { nonNullable: true }),
-      }),
-      variants: this.fb.array<VariantFormGroup>([this.buildVariantGroup('new')]),
-    });
-  }
-
-  private buildVariantGroup(mode: 'ex' | 'new'): VariantFormGroup {
-    return this.fb.group({
-      productVariantId: this.fb.control<number | null>(null),
-      mode: this.fb.control<string>(mode),
-      newVariant: this.fb.group({
-        description: this.fb.control('', { nonNullable: true }),
-        size: this.fb.control('', { nonNullable: true }),
-        color: this.fb.control('', { nonNullable: true }),
-        price: this.fb.control<number | null>(null),
-      }),
-      quantityReceived: this.fb.control<number | null>(null, [
-        Validators.required,
-        Validators.min(1),
-      ]),
-      unitCost: this.fb.control<number | null>(null, [
-        Validators.required,
-        Validators.min(0.5),
-      ]),
-    }) as VariantFormGroup;
-  }
-
   // ── Submit ────────────────────────────────────────────────────────────────
   onSubmit(): void {
     this.form.markAllAsTouched();
@@ -201,13 +164,14 @@ export default class ReceptionForm implements OnInit {
 
     if (this.form.invalid || this.itemsArray.length === 0) return;
 
-    const payload = this.buildPayload();
+   const payload = buildReceptionPayload(this.form, this.itemsArray,this.branchId());
 
     this.isSubmitting.set(true);
     this.submitError.set(null);
     this.receptionService.create(payload).subscribe({
       next: () => {
         this.isSubmitting.set(false);
+        this.router.navigate(['inventory','receptions',])
       },
       error: (err) => {
         this.isSubmitting.set(false);
@@ -215,54 +179,7 @@ export default class ReceptionForm implements OnInit {
         console.error(err);
       },
     });
-    this.router.navigate(['inventory','receptions',])
-  }
 
-  private buildPayload(): createReceptionDto {
-    const raw = this.form.getRawValue();
-
-    return {
-      branchId: this.branchId(),
-      notes: raw.notes,
-      items: this.itemsArray.controls.map((itemCtrl) => {
-        const item = itemCtrl.getRawValue();
-        const isNewProduct = !item.productId;
-
-        return {
-          productId: isNewProduct ? null : item.productId,
-          newProduct: isNewProduct
-            ? ({
-              name: item.newProduct.name,
-              description: item.newProduct.description,
-              categoryId: item.newProduct.categoryId,
-              brandId: item.newProduct.brandId,
-              basePrice:item.newProduct.basePrice,
-              gender : item.newProduct.gender,
-
-            } as NewProduct)
-            : null,
-          variants: itemCtrl.controls.variants.controls.map((varCtrl) => {
-            const variant = varCtrl.getRawValue();
-            const isNewVariant = !variant.productVariantId;
-
-            return {
-              productVariantId: isNewVariant ? null : variant.productVariantId,
-              quantityReceived: variant.quantityReceived,
-              unitCost: variant.unitCost,
-              newVariant: isNewVariant
-                ? ({
-                  description: variant.newVariant.description,
-                  size: variant.newVariant.size,
-                  color: variant.newVariant.color,
-                  price: variant.newVariant.price,
-                  productId: item.productId ?? 0,
-                } as NewVariant)
-                : null,
-            };
-          }),
-        } as Item;
-      }),
-    };
   }
 
 
@@ -296,6 +213,18 @@ export default class ReceptionForm implements OnInit {
     const item = this.itemsArray.at(modal.itemIndex);
     item.get('newProduct.brandId')?.setValue(newBrand.id);
 
+    this.activeModal.set(null);
+    setTimeout(() => {
+      this.focusNextElement(this.lastFocusedElement);
+    });
+  }
+  onColorCreated(newColor: Color)
+  {
+    const modal = this.activeModal();
+    if (!modal) return;
+    this.colors.update(list => [...list, newColor]);
+    const item = this.itemsArray.at(modal.itemIndex);
+    //COMPLETAR: PARA QUE SE LLENE AUTOMATICO
     this.activeModal.set(null);
     setTimeout(() => {
       this.focusNextElement(this.lastFocusedElement);

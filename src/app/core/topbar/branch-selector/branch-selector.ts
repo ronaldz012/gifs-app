@@ -1,4 +1,4 @@
-import {Component, HostListener, inject, signal} from '@angular/core';
+import {Component, HostListener, inject, OnInit, signal} from '@angular/core';
 import {BranchContextService} from '../../auth/branch-context-service';
 import {Branch} from '../../auth/interfaces/Respones/LoginResponse';
 import {CommonModule} from '@angular/common';
@@ -10,7 +10,10 @@ import {SideBarService} from '../../Dashboard/services/side-bar-service';
   templateUrl: './branch-selector.html',
   styles: ``,
 })
-export class BranchSelector {
+export class BranchSelector implements OnInit {
+  ngOnInit(): void {
+      console.log("local storage readed rfrom selector: ",localStorage.getItem('branches'));
+  }
   private readonly branchContext = inject(BranchContextService);
   private readonly sidebarSvc   = inject(SideBarService);
   readonly available = this.branchContext.available;

@@ -12,10 +12,14 @@ import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validator
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { VariantFormGroup } from '../../common/variant-form-group';
+import {SelectFromList} from '../../../../../../core/select-from-list/select-from-list';
+import {Color} from '../../../../../dtos/Colors/color';
+import {CreateEntityEvent} from '../../../../../interfaces/types/create-entity-event';
+import {SelectCtrl} from '../../../../../../core/components/selec-from-list-ctrl';
 
 @Component({
   selector: 'app-variant-new-row',
-  imports: [ReactiveFormsModule, DecimalPipe],
+  imports: [ReactiveFormsModule, DecimalPipe, SelectFromList, SelectCtrl],
   templateUrl: './variant-new-row.html',
   styles: [`
     :host {
@@ -29,12 +33,15 @@ export default class VariantNewRow implements OnInit {
 
   // ── Inputs ────────────────────────────────────────────────────────────
   form                = input.required<VariantFormGroup>();
+
   index               = input<number>(0);
   canSwitchToExisting = input<boolean>(true);
+  colors = input<Color[]>([]);
 
   // ── Outputs ───────────────────────────────────────────────────────────
   remove           = output<void>();
   switchToExisting = output<void>();
+  openCreation = output<CreateEntityEvent>();
 
   // ── Puentes reactivos ─────────────────────────────────────────────────
   private qtySignal  = signal(0);
@@ -45,6 +52,8 @@ export default class VariantNewRow implements OnInit {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────
   ngOnInit(): void {
+    console.log('newVariantGroup:', this.newVariantGroup);
+    console.log('colorId ctrl:', this.newVariantGroup.get('colorId')?.getRawValue());
     this.activateValidators();
     this.syncSubtotalSignals();
   }
@@ -53,8 +62,12 @@ export default class VariantNewRow implements OnInit {
     const nv = this.newVariantGroup;
     nv.get('description')?.setValidators([Validators.required]);
     nv.get('price')?.setValidators([Validators.required, Validators.min(0.5)]);
+    nv.get('colorId')?.setValidators([Validators.required]);
+
     nv.get('description')?.updateValueAndValidity();
     nv.get('price')?.updateValueAndValidity();
+    nv.get('colorId')?.updateValueAndValidity();
+
 
     this.productVariantIdCtrl.clearValidators();
     this.productVariantIdCtrl.updateValueAndValidity();
@@ -79,8 +92,11 @@ export default class VariantNewRow implements OnInit {
     return this.form().controls.productVariantId;
   }
 
-  get newVariantGroup(): FormGroup {
+  get newVariantGroup() {
     return this.form().controls.newVariant;
+  }
+  get colorIdCtrl() {
+    return this.newVariantGroup.get('colorId') as FormControl;
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────
@@ -92,6 +108,8 @@ export default class VariantNewRow implements OnInit {
     this.newVariantGroup.get('price')?.clearValidators();
     this.newVariantGroup.get('description')?.updateValueAndValidity();
     this.newVariantGroup.get('price')?.updateValueAndValidity();
+    this.colorIdCtrl?.clearValidators();
+    this.colorIdCtrl?.updateValueAndValidity();
     this.productVariantIdCtrl.setValidators([]);
     this.productVariantIdCtrl.updateValueAndValidity();
     this.switchToExisting.emit();
@@ -101,4 +119,11 @@ export default class VariantNewRow implements OnInit {
     if (!ctrl) return false;
     return ctrl.hasError(error) && ctrl.touched;
   }
+
+
+  handleCreateColor(text:string){
+    console.log('mandando desde new ROW: ',text);
+    this.openCreation.emit({type: 'color', query: text, itemIndex: this.index()});
+  }
+
 }

@@ -22,10 +22,11 @@ export class AuthService {
     const tenant = this.tenantService.getTenant();
 
     return this.http.post<LoginResponse>(this.url + '/Login', { email, password }, {
-      headers: { 'X-Tenant': "client1" }
+      headers: { 'X-Forwarded-Host': "livican" }
     }).pipe(
       tap(res => {
         if (res == null) return;
+        console.log(res);
         this.cookieService.set(this.TOKEN_KEY, res.accessToken ?? '', 7, '/');
         this.currentUserService.set({
           id: res.user.id,
