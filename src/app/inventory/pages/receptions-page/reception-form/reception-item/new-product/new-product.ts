@@ -20,7 +20,6 @@ export default class NewProduct implements OnInit,OnDestroy {
   brands = input.required<Brand[]>();
   index = input.required<number>();
 
-  switchMode = output<void>();
   remove = output<void>();
   openCreation = output<CreateEntityEvent>();
   productSelected = output<ProductSearchResult>()

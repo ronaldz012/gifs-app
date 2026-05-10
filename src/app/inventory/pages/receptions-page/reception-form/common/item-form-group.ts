@@ -8,6 +8,7 @@ export type NewReceptionForm = FormGroup<{
 }>;
 export type ItemFormGroup = FormGroup<{
   productId: FormControl<GUID | null>;
+  mode: FormControl<string>;
   newProduct: NewProductFormGroup;
   variants: FormArray<VariantFormGroup>;
 }>;
@@ -17,10 +18,7 @@ export type NewProductFormGroup = FormGroup<{
   description: FormControl<string>;
   categoryId: FormControl<GUID | null>;
   brandId: FormControl<GUID | null>;
-  gender: FormControl<number | null>; // 0 unisex | 1
+  gender: FormControl<number | null>;
   basePrice: FormControl<number>;
-  // unitMeasurementSin: FormControl<number | null>;
-  // economicActivity: FormControl<string>;
-  // productCodeSin: FormControl<number | null>;
 }>;
 

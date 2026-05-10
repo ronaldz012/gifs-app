@@ -33,12 +33,10 @@ export default class VariantExistingRow implements OnInit {
   availableVariants = input<ProductVariantOption[]>([]);
   usedVariantIds    = input<GUID[]>([]);
   index             = input<number>(0);
-  canSwitchToNew    = input<boolean>(true);
 
   // ── Outputs ───────────────────────────────────────────────────────────
   remove      = output<void>();
-  switchToNew = output<void>();
-
+  createNew = output<string>(); // emite el texto que tenía escrito el usuario
   // ── Estado UI ─────────────────────────────────────────────────────────
   variantSearch = signal('');
   showDropdown  = signal(false);
@@ -140,13 +138,28 @@ export default class VariantExistingRow implements OnInit {
     return parts.join(' · ');
   }
 
-  onRemove():      void { this.remove.emit(); }
-  onSwitchToNew(): void {
-    console.log('onSwitchToNew');
-    this.switchToNew.emit(); }
+  onRemove():      void {
+    const currentId = this.productVariantIdCtrl.value;
+    if (currentId) {
+      this.productVariantIdCtrl.setValue(null);
+    }
+    this.createNew.emit(this.variantSearch());
+
+    this.remove.emit();
+  }
+
 
   hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
     if (!ctrl) return false;
     return ctrl.hasError(error) && ctrl.touched;
+  }
+
+  onCreateNew(): void {
+    // libera la variante que tenía seleccionada antes de destruirse
+    const currentId = this.productVariantIdCtrl.value;
+    if (currentId) {
+      this.productVariantIdCtrl.setValue(null);
+    }
+    this.createNew.emit(this.variantSearch());
   }
 }

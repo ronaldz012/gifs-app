@@ -11,9 +11,10 @@ export class ReceptionFormBuilders {
     });
   }
 
-  static buildItemGroup(fb: FormBuilder): ItemFormGroup {
+  static buildItemGroup(fb: FormBuilder, mode: 'ex' | 'new'): ItemFormGroup {
     return fb.group<ItemFormGroup['controls']>({
       productId: fb.control<GUID | null>(null, {validators: [Validators.required]}),
+      mode: fb.control<string>(mode, {nonNullable: true}),
       newProduct: fb.group<NewProductFormGroup['controls']>({
         name:        fb.control('', {nonNullable: true}),
         description: fb.control('', {nonNullable: true}),
@@ -22,7 +23,9 @@ export class ReceptionFormBuilders {
         gender:      fb.control<number | null>(null),
         basePrice:   fb.control<number>(0, {nonNullable: true}),
       }),
-      variants: fb.array<VariantFormGroup>([ReceptionFormBuilders.buildVariantGroup(fb, 'new')]),
+      variants: mode === 'new'
+        ? fb.array<VariantFormGroup>([ReceptionFormBuilders.buildVariantGroup(fb, 'new')])
+        : fb.array<VariantFormGroup>([]),
     });
   }
 

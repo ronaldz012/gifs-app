@@ -5,21 +5,12 @@
       Modo
     </span>
 
-    <div class="p-1">
-      <div class="flex border border-gray-200 rounded overflow-hidden text-[9px] h-[26px]">
-        <button
-          type="button"
-          (click)="this.switchMode.emit()"
-          class="flex-1 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors font-bold"
-        >
-          NEW
-        </button>
-        <span class="flex-1 flex items-center justify-center bg-blue-600 text-white font-bold">
-          EX
-        </span>
-      </div>
+    <div class="flex items-center justify-center h-[26px]">
+      <span class="px-2 py-1 bg-blue-600 text-white font-bold text-[9px] rounded">
+        EXISTENTE
+      </span>
     </div>
-  </div>
+    </div>
 
   <div class="px-2 pt-1.5 pb-1 flex flex-col border-r border-gray-100 min-h-[60px]">
     <label class="text-[9px] text-blue-600 font-bold uppercase mb-1">
@@ -28,10 +19,8 @@
 
     <app-product-search
       [formControl]="productIdCtrl()"
-      [searchResults]="searchResults()"
-      [isSearching]="isSearching()"
-      (searchChanged)="handleSearchChanged($event)"
       (productSelected)="handleProductSelected($event)"
+      (createNew)="createNew.emit($event)"
     />
 
     @if (productIdCtrl().invalid && productIdCtrl().touched) {
@@ -103,3 +92,4 @@
   </div>
 
 </div>
+

@@ -1,18 +1,15 @@
 import {
   Component,
   inject,
-  input,
   OnInit,
-  output,
   signal,
   DestroyRef,
-  ViewChild,
   viewChild,
   effect
 } from '@angular/core';
-import {FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormControl, ReactiveFormsModule} from '@angular/forms';
 import {ReceptionService} from '../../../services/reception-service';
-import {ItemFormGroup, NewProductFormGroup, NewReceptionForm} from './common/item-form-group';
+import {ItemFormGroup, NewReceptionForm} from './common/item-form-group';
 import ReceptionItem from './reception-item/reception-item';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DecimalPipe} from '@angular/common';
@@ -24,7 +21,7 @@ import {CreateCategory} from '../../../components/create-category/create-categor
 import {CreateEntityEvent} from '../../../interfaces/types/create-entity-event';
 import CreateBrand from '../../../components/create-brand/create-brand';
 import {BranchContextService} from '../../../../core/auth/branch-context-service';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import CreateColor from '../../../components/create-color/create-color';
 import {Color} from '../../../dtos/Colors/color';
 import {ColorService} from '../../../services/color-service';
@@ -127,24 +124,16 @@ export default class ReceptionForm implements OnInit {
   }
 
   // ── Accessors ─────────────────────────────────────────────────────────────
-  get notesCtrl(): FormControl {
-    return this.form.controls.notes;
-  }
+  get notesCtrl(): FormControl {return this.form.controls.notes;}
 
-  get itemsArray(): FormArray<ItemFormGroup> {
-    return this.form.controls.items;
-  }
+  get itemsArray(): FormArray<ItemFormGroup> {return this.form.controls.items;}
 
   // ── Gestión de items ──────────────────────────────────────────────────────
-  addItem(): void {
-    this.itemsArray.push(ReceptionFormBuilders.buildItemGroup(this.fb));
+  addItem(mode: 'ex' | 'new'): void {
+    this.itemsArray.push(ReceptionFormBuilders.buildItemGroup(this.fb, mode));
   }
 
-  removeItem(i: number): void {
-    if (this.itemsArray.length === 1) return;
-    console.log('deleting: ',i+1);
-    this.itemsArray.removeAt(i);
-  }
+  removeItem(i: number): void {this.itemsArray.removeAt(i);}
   // ── Submit ────────────────────────────────────────────────────────────────
   onSubmit(): void {
     this.form.markAllAsTouched();

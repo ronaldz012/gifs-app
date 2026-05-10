@@ -63,7 +63,7 @@ export default class ReceptionItem implements OnInit {
   create = output<CreateEntityEvent>();
 
   // ---------------- STATE ----------------
-  isNewProduct = signal(false);
+  isNewProduct = computed(() => this.formValue()?.mode === 'new');
   availableVariants = signal<ProductVariantOption[]>([]);
   selectedProduct = signal<ProductSearchResult | null>(null);
 
@@ -83,7 +83,6 @@ export default class ReceptionItem implements OnInit {
       { injector: this.injector }
     );
   }
-
   // ---------------- COMPUTEDS ----------------
   usedIds = computed(() =>
     (this.formValue()?.variants ?? [])
@@ -127,7 +126,7 @@ export default class ReceptionItem implements OnInit {
 
   private resetVariants(): void {
     this.vArray.clear();
-    const mode = this.isNewProduct() ? 'new' : 'ex';
+    const mode = this.form().controls.mode.value === 'new' ? 'new' : 'ex';
     queueMicrotask(() => this.vArray.push(ReceptionFormBuilders.buildVariantGroup(this.fb, mode)));
   }
 
@@ -147,14 +146,14 @@ export default class ReceptionItem implements OnInit {
   }
 
   switchToNewProduct(): void {
-    this.isNewProduct.set(true);
+    this.form().controls.mode.setValue('new');
     this.resetVariants();
   }
 
   switchToExistingProduct(): void {
-    this.isNewProduct.set(false);
-    this.form().controls.productId.reset()
-    this.resetVariants();
+    this.form().controls.mode.setValue('ex');
+    this.form().controls.productId.reset();
+    this.vArray.clear();
   }
 
   private setNewProductValidators(active: boolean): void {
@@ -184,4 +183,12 @@ export default class ReceptionItem implements OnInit {
     this.create.emit(event);
   }
 
+  onVariantCreateNew(i: number, searchText: string): void {
+    this.vArray.removeAt(i);
+    const newGroup = ReceptionFormBuilders.buildVariantGroup(this.fb, 'new');
+    this.vArray.insert(i, newGroup);
+    if (searchText) {
+      newGroup.controls.newVariant.controls.description.setValue(searchText);
+    }
+  }
 }

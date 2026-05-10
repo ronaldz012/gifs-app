@@ -8,7 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { VariantFormGroup } from '../../common/variant-form-group';
@@ -35,12 +35,10 @@ export default class VariantNewRow implements OnInit {
   form                = input.required<VariantFormGroup>();
 
   index               = input<number>(0);
-  canSwitchToExisting = input<boolean>(true);
   colors = input<Color[]>([]);
 
   // ── Outputs ───────────────────────────────────────────────────────────
   remove           = output<void>();
-  switchToExisting = output<void>();
   openCreation = output<CreateEntityEvent>();
 
   // ── Puentes reactivos ─────────────────────────────────────────────────
@@ -102,24 +100,10 @@ export default class VariantNewRow implements OnInit {
   // ── Helpers ───────────────────────────────────────────────────────────
   onRemove(): void { this.remove.emit(); }
 
-  onSwitchToExisting(): void {
-    this.newVariantGroup.reset();
-    this.newVariantGroup.get('description')?.clearValidators();
-    this.newVariantGroup.get('price')?.clearValidators();
-    this.newVariantGroup.get('description')?.updateValueAndValidity();
-    this.newVariantGroup.get('price')?.updateValueAndValidity();
-    this.colorIdCtrl?.clearValidators();
-    this.colorIdCtrl?.updateValueAndValidity();
-    this.productVariantIdCtrl.setValidators([]);
-    this.productVariantIdCtrl.updateValueAndValidity();
-    this.switchToExisting.emit();
-  }
-
   hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
     if (!ctrl) return false;
     return ctrl.hasError(error) && ctrl.touched;
   }
-
 
   handleCreateColor(text:string){
     console.log('mandando desde new ROW: ',text);

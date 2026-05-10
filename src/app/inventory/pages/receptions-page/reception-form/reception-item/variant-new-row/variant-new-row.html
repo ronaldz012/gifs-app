@@ -1,15 +1,9 @@
 <div [formGroup]="form()" class="contents group">
 
   <div class="px-2 py-1.5 flex items-center justify-center">
-    <div class="flex border border-gray-300 rounded overflow-hidden text-[10px]">
-      <span class="px-2 py-1 bg-blue-600 text-white font-medium">New</span>
-      @if (canSwitchToExisting()) {
-        <button type="button" (click)="onSwitchToExisting()"
-                class="px-2 py-1 text-gray-400 hover:bg-gray-100">
-          Ex
-        </button>
-      }
-    </div>
+    <span class="px-2 py-1 bg-green-600 text-white font-medium text-[10px] rounded">
+      Nueva
+    </span>
   </div>
 
   <div class="px-1 py-1" [formGroup]="newVariantGroup">

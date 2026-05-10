@@ -65,13 +65,14 @@
       />
     }
 
-    <div class="py-1">
-      <button
-        type="button"
-        (click)="addItem()"
-        class="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
-      >
-        <span class="text-lg font-light">+</span> Agregar producto
+    <div class="py-1 flex items-center gap-4">
+      <button type="button" (click)="addItem('new')"
+              class="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
+        <span class="text-lg font-light">+</span> Nuevo producto
+      </button>
+      <button type="button" (click)="addItem('ex')"
+              class="text-sm text-gray-600 hover:text-gray-800 hover:underline flex items-center gap-1">
+        <span class="text-lg font-light">+</span> Producto existente
       </button>
     </div>
 

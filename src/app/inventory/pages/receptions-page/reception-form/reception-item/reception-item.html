@@ -6,7 +6,6 @@
         <app-existing-product
           [productIdCtrl]="productIdCtrl"
           (productSelected)="onProductSelected($event)"
-          (selectionCleared)="onSelectionCleared()"
           (switchMode)="switchToNewProduct()"
           (remove)="onRemove()"
         />
@@ -46,16 +45,14 @@
                 [availableVariants]="availableVariants()"
                 [usedVariantIds]="usedIds()"
                 [index]="i"
-                [canSwitchToNew]="!isNewProduct()"
-                (switchToNew)="switchVariantMode(i, 'new')"
+                (createNew)="onVariantCreateNew(i,$event)"
+
                 (remove)="removeVariant(i)"
               />
             } @else {
               <app-variant-new-row
                 [form]="$any(variant)"
                 [index]="i"
-                [canSwitchToExisting]="!isNewProduct()"
-                (switchToExisting)="switchVariantMode(i, 'ex')"
                 (remove)="removeVariant(i)"
                 (openCreation) ="handleOpenCreation($event)"
                 [colors]="colors()"
@@ -65,27 +62,21 @@
         }
       </div>
 
-    <div class="flex items-center justify-between px-3 py-2 bg-gray-50 border-t border-gray-200">
-      @if(isNewProduct() || productIdCtrl.value !== null){
-        <button type="button" (click)="addVariant('new')"
-                class="text-xs text-blue-600 font-semibold hover:text-blue-800 transition-colors">
-          + AGREGAR VARIANTE
-        </button>
-      }
-
-      <div class="ml-auto text-[11px] text-gray-500 flex gap-4 items-center">
-        <button
-          (click)="addVariant('new')"
-        >
-        Agregar variante
-        </button>
-        <span>{{ vArray.length }} VARIANTES</span>
-        <span>{{ totalUnits() }} UNIDADES</span>
-        <div class="bg-white px-2 py-1 border border-gray-200 rounded shadow-sm">
-          TOTAL ITEM: <span class="font-bold text-gray-900 ml-1">Bs {{ itemTotalCost() | number:'1.0-0' }}</span>
+      <div class="flex items-center justify-between px-3 py-2 bg-gray-50 border-t border-gray-200">
+        @if (isNewProduct() || productIdCtrl.value !== null) {
+          <button type="button" (click)="addVariant(isNewProduct() ? 'new' : 'ex')"
+                  class="text-xs text-blue-600 font-semibold hover:text-blue-800 transition-colors">
+            + AGREGAR VARIANTE
+          </button>
+        }
+        <div class="ml-auto text-[11px] text-gray-500 flex gap-4 items-center">
+          <span>{{ vArray.length }} VARIANTES</span>
+          <span>{{ totalUnits() }} UNIDADES</span>
+          <div class="bg-white px-2 py-1 border border-gray-200 rounded shadow-sm">
+            TOTAL ITEM: <span class="font-bold text-gray-900 ml-1">Bs {{ itemTotalCost() | number:'1.0-0' }}</span>
+          </div>
         </div>
       </div>
-    </div>
   </div>
     </div>
 </div>
