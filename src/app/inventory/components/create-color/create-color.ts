@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, input, OnInit, output, ViewChild, signal } from '@angular/core';
+import { Component, ElementRef, inject, input, OnInit, output, ViewChild, signal, AfterViewInit} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ColorService } from '../../services/color-service';
 import { Color } from '../../dtos/Colors/color';
@@ -9,7 +9,7 @@ import { Color } from '../../dtos/Colors/color';
   imports: [ReactiveFormsModule],
   templateUrl: './create-color.html'
 })
-export default class CreateColor implements OnInit {
+export default class CreateColor implements OnInit, AfterViewInit {
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
 
   private fb = inject(FormBuilder);
@@ -33,11 +33,17 @@ export default class CreateColor implements OnInit {
       this.form.controls.code.setValue(this.initialName().substring(0, 3).toUpperCase());
     }
   }
-
+  ngAfterViewInit(): void {
+    // Esto asegura el foco cuando el componente se carga
+    this.focus();
+  }
   onCodeInput(event: Event) {
     const input = event.target as HTMLInputElement;
     input.value = input.value.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 3);
     this.form.controls.code.setValue(input.value, { emitEvent: false });
+  }
+  focus() {
+    this.nameInput?.nativeElement.focus();
   }
 
   save() {

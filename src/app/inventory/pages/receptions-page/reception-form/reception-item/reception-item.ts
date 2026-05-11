@@ -74,6 +74,24 @@ export default class ReceptionItem implements OnInit {
 
   get newProductGroup() {return this.form().controls.newProduct;}
 
+  // En ReceptionItem
+  allNewVariantsDuplicated = computed(() => {
+    const rows = this.formValue()?.variants || [];
+
+    // Filtramos solo las nuevas que tengan datos completos
+    const newOnes = rows.filter((r: any) =>
+      r.mode === 'new' &&
+      r.newVariant?.size?.trim() &&
+      r.newVariant?.colorId
+    );
+
+    const combinations = newOnes.map((r: any) =>
+      `${r.newVariant.size.trim().toUpperCase()}-${r.newVariant.colorId}`
+    );
+
+    return new Set(combinations).size !== combinations.length;
+  });
+
   // ---------------- REACTIVE BRIDGE ----------------
   private formValue!: Signal<any>;
 
@@ -182,6 +200,7 @@ export default class ReceptionItem implements OnInit {
     console.log("PETICIÖN DE CREAR: ", event);
     this.create.emit(event);
   }
+
 
   onVariantCreateNew(i: number, searchText: string): void {
     this.vArray.removeAt(i);

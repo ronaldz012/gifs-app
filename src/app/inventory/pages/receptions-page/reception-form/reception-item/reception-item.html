@@ -7,6 +7,7 @@
           [productIdCtrl]="productIdCtrl"
           (productSelected)="onProductSelected($event)"
           (remove)="onRemove()"
+          (createNew)="switchToNewProduct()"
         />
       } @else {
         <app-new-product
@@ -32,7 +33,14 @@
         <div class="px-2 py-2 text-right">Subtotal</div>
         <div class="w-8"></div>
       </div>
-
+      @if (allNewVariantsDuplicated()) {
+        <div class="mx-2 mb-2 flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-md">
+          <span class="text-red-500 text-lg">⚠️</span>
+          <p class="text-xs text-red-700 font-medium">
+            Hay variantes nuevas con la **misma talla y color**. Cada combinación debe ser única.
+          </p>
+        </div>
+      }
       <div class="flex flex-col">
         @for (variant of vArray.controls; track $index; let i = $index) {
           <!--        Mode | Sku + description   |  Size | Colore | Venta  | Cantidad  | Costo subtotal -->
