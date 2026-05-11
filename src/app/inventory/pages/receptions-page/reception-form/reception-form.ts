@@ -207,13 +207,42 @@ export default class ReceptionForm implements OnInit {
       this.focusNextElement(this.lastFocusedElement);
     });
   }
-  onColorCreated(newColor: Color)
-  {
+  onColorCreated(newColor: Color) {
     const modal = this.activeModal();
-    if (!modal) return;
+    // Verificación de seguridad para los índices
+    if (!modal || modal.itemIndex === null || modal.subIndex === null) return;
+
+    // 1. Actualizar la lista de colores
     this.colors.update(list => [...list, newColor]);
-    const item = this.itemsArray.at(modal.itemIndex);
-    //COMPLETAR: PARA QUE SE LLENE AUTOMATICO
+
+    // 2. Obtener el item (producto) del FormArray principal
+    const itemGroup = this.form.controls.items.at(modal.itemIndex);
+
+    if (itemGroup) {
+      // 3. Obtener el FormArray de variantes dentro de ese producto
+      const variantsArray = itemGroup.controls.variants;
+
+      // 4. Obtener la variante específica (subIndex)
+      const variantGroup = variantsArray.at(modal.subIndex!);
+
+      if (variantGroup) {
+        // 5. IMPORTANTE: En tu VariantFormGroup, colorId está dentro de 'newVariant'
+        // Usamos .get() con el path completo
+        const colorControl = variantGroup.get('newVariant.colorId');
+
+        if (colorControl) {
+          colorControl.setValue(newColor.id);
+          colorControl.markAsDirty();
+          colorControl.updateValueAndValidity();
+        }
+      } else {
+        console.error(`No se encontró la variante en el subIndex: ${modal.subIndex}`);
+      }
+    } else {
+      console.error(`No se encontró el item en el itemIndex: ${modal.itemIndex}`);
+    }
+
+    // Cerrar y restaurar foco
     this.activeModal.set(null);
     setTimeout(() => {
       this.focusNextElement(this.lastFocusedElement);

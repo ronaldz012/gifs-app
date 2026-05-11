@@ -2,24 +2,24 @@ import {
   Component,
   computed,
   DestroyRef,
-  inject,
+  inject, Input,
   input,
   OnInit,
   output,
   signal,
 } from '@angular/core';
-import { AbstractControl, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { VariantFormGroup } from '../../common/variant-form-group';
-import {SelectFromList} from '../../../../../../core/select-from-list/select-from-list';
 import {Color} from '../../../../../dtos/Colors/color';
 import {CreateEntityEvent} from '../../../../../interfaces/types/create-entity-event';
 import {SelectCtrl} from '../../../../../../core/components/selec-from-list-ctrl';
+import {ProductVariantOption} from '../../../../../components/product-search/product-search-result';
 
 @Component({
   selector: 'app-variant-new-row',
-  imports: [ReactiveFormsModule, DecimalPipe, SelectFromList, SelectCtrl],
+  imports: [ReactiveFormsModule, DecimalPipe, SelectCtrl],
   templateUrl: './variant-new-row.html',
   styles: [`
     :host {
@@ -36,6 +36,8 @@ export default class VariantNewRow implements OnInit {
 
   index               = input<number>(0);
   colors = input<Color[]>([]);
+  existingVariants = input<ProductVariantOption[]>([]);
+  itemIndex = input.required<number>();
 
   // ── Outputs ───────────────────────────────────────────────────────────
   remove           = output<void>();
@@ -50,14 +52,17 @@ export default class VariantNewRow implements OnInit {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────
   ngOnInit(): void {
-    console.log('newVariantGroup:', this.newVariantGroup);
-    console.log('colorId ctrl:', this.newVariantGroup.get('colorId')?.getRawValue());
     this.activateValidators();
     this.syncSubtotalSignals();
   }
 
   private activateValidators(): void {
     const nv = this.newVariantGroup;
+
+    nv.setValidators([
+      Validators.required,
+      this.uniqueVariantValidator()
+    ]);
     nv.get('description')?.setValidators([Validators.required]);
     nv.get('price')?.setValidators([Validators.required, Validators.min(0.5)]);
     nv.get('colorId')?.setValidators([Validators.required]);
@@ -69,6 +74,22 @@ export default class VariantNewRow implements OnInit {
 
     this.productVariantIdCtrl.clearValidators();
     this.productVariantIdCtrl.updateValueAndValidity();
+  }
+  private uniqueVariantValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const size = control.get('size')?.value?.toString().trim().toUpperCase();
+      const colorId = control.get('colorId')?.value;
+
+      if (!size || !colorId) return null;
+
+      // Buscamos si ya existe esa combinación en el producto actual
+      const alreadyExists = this.existingVariants().some(v =>
+        v.size.trim().toUpperCase() === size &&
+        v.colorId === colorId
+      );
+
+      return alreadyExists ? { duplicateVariant: true } : null;
+    };
   }
 
   private syncSubtotalSignals(): void {
@@ -107,7 +128,7 @@ export default class VariantNewRow implements OnInit {
 
   handleCreateColor(text:string){
     console.log('mandando desde new ROW: ',text);
-    this.openCreation.emit({type: 'color', query: text, itemIndex: this.index()});
+    this.openCreation.emit({type: 'color', query: text, itemIndex: this.itemIndex(), subIndex: this.index()});
   }
 
 }

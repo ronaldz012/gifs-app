@@ -6,7 +6,6 @@
         <app-existing-product
           [productIdCtrl]="productIdCtrl"
           (productSelected)="onProductSelected($event)"
-          (switchMode)="switchToNewProduct()"
           (remove)="onRemove()"
         />
       } @else {
@@ -15,7 +14,6 @@
           [index]="index()"
           [categories]="categories()"
           [brands]="brands()"
-          (switchMode)="switchToExistingProduct()"
           (remove)="onRemove()"
           (openCreation)="handleOpenCreation($event)"
         />
@@ -37,7 +35,8 @@
 
       <div class="flex flex-col">
         @for (variant of vArray.controls; track $index; let i = $index) {
-          <div class="grid grid-cols-[80px_1fr_80px_96px_88px_88px_100px_96px_32px] items-center border-b border-gray-100 hover:bg-gray-50">
+          <!--        Mode | Sku + description   |  Size | Colore | Venta  | Cantidad  | Costo subtotal -->
+          <div class="grid grid-cols-[80px_1fr_80px_150px_88px_88px_100px_96px_32px] items-center border-b border-gray-100 hover:bg-gray-50">
 
             @if (variant.get('mode')?.value === 'ex' && !isNewProduct()) {
               <app-variant-existing-row
@@ -53,6 +52,8 @@
               <app-variant-new-row
                 [form]="$any(variant)"
                 [index]="i"
+                [itemIndex]="index()"
+                [existingVariants]="selectedProduct()?.productVariants ?? []"
                 (remove)="removeVariant(i)"
                 (openCreation) ="handleOpenCreation($event)"
                 [colors]="colors()"
