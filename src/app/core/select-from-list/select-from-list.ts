@@ -23,17 +23,18 @@ import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR} from '@angular/for
         (input)="onInput($event)"
         (keydown)="handleKeydown($event)"
         [placeholder]="placeholder()"
-        class="w-full px-2 py-1.5 border border-gray-300 rounded text-[11px]
-               focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400
-               transition-colors bg-white"
+        class="w-full px-2 py-0.5 border border-gray-200 rounded text-[11px]
+           focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400
+           transition-colors bg-white font-medium"
       />
+
       @if (isOpen() && (filteredOptions().length > 0 || showCreateOption())) {
         <ul class="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-y-auto">
           @for (opt of filteredOptions(); track opt.id; let i = $index) {
             <li
               (mousedown)="selectOption(opt, $event)"
               [class.bg-blue-50]="activeIndex() === i"
-              class="px-3 py-2 text-[11px] cursor-pointer hover:bg-blue-50 text-gray-700"
+              class="px-3 py-1.5 text-[11px] cursor-pointer hover:bg-blue-50 text-gray-700"
             >
               {{ opt.name }}
             </li>
@@ -42,7 +43,7 @@ import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR} from '@angular/for
             <li
               (mousedown)="emitCreate($event)"
               [class.bg-green-50]="activeIndex() === filteredOptions().length"
-              class="px-3 py-2 text-[11px] font-bold text-green-600 border-t border-gray-100 cursor-pointer hover:bg-green-50"
+              class="px-3 py-1.5 text-[11px] font-bold text-green-600 border-t border-gray-100 cursor-pointer hover:bg-green-50"
             >
               + CREAR "{{ query() }}"
             </li>

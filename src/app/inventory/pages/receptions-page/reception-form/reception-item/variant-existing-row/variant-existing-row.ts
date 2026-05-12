@@ -22,6 +22,13 @@ import { VariantFormGroup } from '../../common/variant-form-group';
     :host {
       display: contents; /* Esto permite que los divs hijos se alineen con el grid del padre */
     }
+    /* Ocultar flechas de input number en Firefox y Chrome */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] { -moz-appearance: textfield; }
   `]
 })
 export default class VariantExistingRow implements OnInit {

@@ -65,14 +65,25 @@
       />
     }
 
-    <div class="py-1 flex items-center gap-4">
+    <div class="py-3 flex items-center gap-4">
+      <!-- Botón Producto Nuevo -->
       <button type="button" (click)="addItem('new')"
-              class="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1">
-        <span class="text-lg font-light">+</span> Nuevo producto
+              class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm group">
+        <span class="text-xl font-bold group-hover:scale-110">+</span>
+        <div class="text-left">
+          <p class="text-sm font-bold leading-none">Crear Producto Nuevo</p>
+          <p class="text-[10px] opacity-80">Para artículos que entran por primera vez</p>
+        </div>
       </button>
+
+      <!-- Botón Producto Existente -->
       <button type="button" (click)="addItem('ex')"
-              class="text-sm text-gray-600 hover:text-gray-800 hover:underline flex items-center gap-1">
-        <span class="text-lg font-light">+</span> Producto existente
+              class="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 shadow-sm group">
+        <span class="text-xl font-bold group-hover:scale-110">🔍</span>
+        <div class="text-left">
+          <p class="text-sm font-bold leading-none">Buscar en Catálogo</p>
+          <p class="text-[10px] opacity-80">Añadir stock de algo ya registrado</p>
+        </div>
       </button>
     </div>
 

@@ -16,7 +16,7 @@ import {
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, NgClass} from '@angular/common';
 
 import { VariantFormGroup } from '../common/variant-form-group';
 import { ItemFormGroup } from '../common/item-form-group';
@@ -45,6 +45,7 @@ import {ReceptionFormBuilders} from '../common/reception-form-builder';
     DecimalPipe,
     ExistingProduct,
     NewProduct,
+    NgClass,
   ],
   templateUrl: './reception-item.html',
 })
