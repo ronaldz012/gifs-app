@@ -28,10 +28,10 @@ import { Category } from '../../../../dtos/categories/category-dto';
 import { Brand } from '../../../../dtos/brands/brand-dto';
 import { CreateEntityEvent } from '../../../../interfaces/types/create-entity-event';
 
-import VariantExistingRow from './variant-existing-row/variant-existing-row';
-import VariantNewRow from './variant-new-row/variant-new-row';
-import { ExistingProduct } from './existing-product/existing-product';
-import NewProduct from './new-product/new-product';
+import VariantExistingRow from '../variant-existing-row/variant-existing-row';
+import VariantNewRow from '../variant-new-row/variant-new-row';
+import { ExistingProduct } from '../../../../legacy/existing-product/existing-product';
+import NewProduct from '../../../../legacy/new-product/new-product';
 import {Color} from '../../../../dtos/Colors/color';
 import {ReceptionFormBuilders} from '../common/reception-form-builder';
 
@@ -44,8 +44,7 @@ import {ReceptionFormBuilders} from '../common/reception-form-builder';
     ReactiveFormsModule,
     DecimalPipe,
     ExistingProduct,
-    NewProduct,
-    NgClass,
+    NewProduct
   ],
   templateUrl: './reception-item.html',
 })
