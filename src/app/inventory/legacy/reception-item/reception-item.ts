@@ -18,22 +18,22 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { DecimalPipe, NgClass} from '@angular/common';
 
-import { VariantFormGroup } from '../common/variant-form-group';
-import { ItemFormGroup } from '../common/item-form-group';
+import { VariantFormGroup } from '../../pages/receptions-page/reception-form/common/variant-form-group';
+import { ItemFormGroup } from '../../pages/receptions-page/reception-form/common/item-form-group';
 import {
   ProductSearchResult,
   ProductVariantOption,
-} from '../../../../components/product-search/product-search-result';
-import { Category } from '../../../../dtos/categories/category-dto';
-import { Brand } from '../../../../dtos/brands/brand-dto';
-import { CreateEntityEvent } from '../../../../interfaces/types/create-entity-event';
+} from '../../components/product-search/product-search-result';
+import { Category } from '../../dtos/categories/category-dto';
+import { Brand } from '../../dtos/brands/brand-dto';
+import { CreateEntityEvent } from '../../interfaces/types/create-entity-event';
 
-import VariantExistingRow from '../variant-existing-row/variant-existing-row';
-import VariantNewRow from '../variant-new-row/variant-new-row';
-import { ExistingProduct } from '../../../../legacy/existing-product/existing-product';
-import NewProduct from '../../../../legacy/new-product/new-product';
-import {Color} from '../../../../dtos/Colors/color';
-import {ReceptionFormBuilders} from '../common/reception-form-builder';
+import VariantExistingRow from '../../pages/receptions-page/reception-form/variant-existing-row/variant-existing-row';
+import VariantNewRow from '../../pages/receptions-page/reception-form/variant-new-row/variant-new-row';
+import { ExistingProduct } from '../existing-product/existing-product';
+import NewProduct from '../new-product/new-product';
+import {Color} from '../../dtos/Colors/color';
+import {ReceptionFormBuilders} from '../../pages/receptions-page/reception-form/common/reception-form-builder';
 
 @Component({
   selector: 'app-reception-item',

@@ -11,8 +11,8 @@ import {
 import { AbstractControl, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
-import { ProductVariantOption } from '../../../../../components/product-search/product-search-result';
-import { VariantFormGroup } from '../../common/variant-form-group';
+import { ProductVariantOption } from '../../../../components/product-search/product-search-result';
+import { VariantFormGroup } from '../common/variant-form-group';
 
 @Component({
   selector: 'app-variant-existing-row',

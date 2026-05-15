@@ -1,0 +1,88 @@
+<div [formGroup]="form()" class="grid grid-cols-2 gap-x-4 gap-y-3">
+
+  <!-- Fila 1: Categoría + Marca -->
+  <div class="flex flex-col gap-1">
+    <label class="text-[10px] font-bold uppercase text-gray-400">Categoría</label>
+    <app-category-select-ctrl
+      [ctrl]="form().controls.categoryId"
+      [categories]="categories()"
+      (categoryCreated)="handleCreateCategory($event)"
+    />
+    @if (getError(form().controls.categoryId); as err) {
+      <span tabindex="-1" class="text-[10px] text-red-500">{{ err }}</span>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label class="text-[10px] font-bold uppercase text-gray-400">Marca</label>
+    <app-brand-select-ctrl
+      [ctrl]="form().controls.brandId"
+      [brands]="brands()"
+      (brandCreated)="handleCreateBrand($event)"
+    />
+    @if (getError(form().controls.brandId); as err) {
+      <span tabindex="-1" class="text-[10px] text-red-500">{{ err }}</span>
+    }
+  </div>
+
+  <!-- Fila 2: Nombre full width -->
+  <div class="col-span-2 flex flex-col gap-1">
+    <label class="text-[10px] font-bold uppercase text-green-700">Nombre del modelo</label>
+    <input
+      type="text"
+      formControlName="name"
+      placeholder="Ej. 505 semiclásico..."
+      autofocus
+      class="w-full px-2.5 py-1.5 border rounded-md text-[12px] text-gray-900
+             placeholder-gray-300 bg-white font-medium outline-none transition-all
+             focus:ring-2 focus:ring-green-400 focus:border-green-400"
+      [class.border-gray-200]="!getError(form().controls.name)"
+      [class.border-red-300]="getError(form().controls.name)"
+      [class.focus:ring-red-300]="getError(form().controls.name)"
+      [class.focus:border-red-400]="getError(form().controls.name)"
+    />
+    @if (getError(form().controls.name); as err) {
+      <span tabindex="-1" class="text-[10px] text-red-500">{{ err }}</span>
+    }
+  </div>
+
+  <!-- Fila 3: Género (compacto) + Descripción (flex-1) — sale del grid -->
+  <div class="col-span-2 flex items-start gap-3">
+
+    <div class="flex flex-col gap-1 w-32.5 shrink-0">
+      <label class="text-[10px] font-bold uppercase text-gray-400">Género</label>
+      <select
+        formControlName="gender"
+        class="w-full px-2.5 py-1.5 border rounded-md text-[11px] font-bold bg-white
+               text-gray-700 outline-none transition-all cursor-pointer
+               focus:ring-2 focus:ring-green-400 focus:border-green-400"
+        [class.border-gray-200]="!getError(form().controls.gender)"
+        [class.border-red-300]="getError(form().controls.gender)"
+      >
+        @for (opt of genderOptions; track opt.value) {
+          <option [ngValue]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+      @if (getError(form().controls.gender); as err) {
+        <span tabindex="-1" class="text-[10px] text-red-500">{{ err }}</span>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1 flex-1">
+      <label class="text-[10px] font-bold uppercase text-gray-400">
+        Descripción
+        <span class="text-[9px] font-normal lowercase">(opcional)</span>
+      </label>
+      <input
+        type="text"
+        formControlName="description"
+        placeholder="Añadir nota..."
+        class="w-full px-2.5 py-1.5 border border-gray-200 rounded-md text-[11px] text-gray-500
+               italic placeholder-gray-300 outline-none transition-all bg-white
+               focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
+      />
+    </div>
+
+  </div>
+
+</div>

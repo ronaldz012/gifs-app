@@ -33,15 +33,15 @@
     <!-- SECCIÓN 2: TABLA DE VARIANTES -->
     <div class="w-full">
       <!-- Header de variantes ULTRA COMPACTO (py-1 y texto más pequeño) -->
-      <div class="grid grid-cols-[80px_1fr_80px_96px_88px_88px_100px_96px_32px] bg-gray-100/80 border-b border-gray-200 text-[9px] font-bold text-gray-500 uppercase tracking-tighter">
+      <div class="grid grid-cols-[80px_150px_80px_88px_88px_88px_100px_1fr_32px] bg-gray-100/80 border-b border-gray-200 text-[9px] font-bold text-gray-500 uppercase tracking-tighter">
         <div class="px-2 py-1 text-center">Modo</div>
-        <div class="px-2 py-1">Variante / Descrip.</div>
-        <div class="px-2 py-1 text-center">Talle</div>
         <div class="px-2 py-1 text-center">Color</div>
-        <div class="px-2 py-1 text-right">P. Venta</div>
+        <div class="px-2 py-1 text-center">Talle</div>
         <div class="px-2 py-1 text-right">Cant.</div>
         <div class="px-2 py-1 text-right">Costo U.</div>
+        <div class="px-2 py-1 text-right">P. Venta</div>
         <div class="px-2 py-1 text-right">Subtotal</div>
+        <div class="px-2 py-1">Variante / Descrip.</div>
         <div class="w-8"></div>
       </div>
 
@@ -56,11 +56,11 @@
       <!-- Filas de variantes -->
       <div class="flex flex-col">
         @for (variant of vArray.controls; track $index; let i = $index) {
-          <div class="grid grid-cols-[80px_1fr_80px_150px_88px_88px_100px_96px_32px] items-center border-b border-gray-50 hover:bg-blue-50/40 transition-colors">
+          <div class="grid grid-cols-[80px_150px_80px_88px_88px_88px_100px_1fr_32px] items-center border-b border-gray-50 hover:bg-blue-50/40 transition-colors">
             @if (variant.get('mode')?.value === 'ex' && !isNewProduct()) {
               <app-variant-existing-row [form]="$any(variant)" [availableVariants]="availableVariants()" [usedVariantIds]="usedIds()" [index]="i" (createNew)="onVariantCreateNew(i,$event)" (remove)="removeVariant(i)" />
             } @else {
-              <app-variant-new-row [form]="$any(variant)" [index]="i" [itemIndex]="index()" [existingVariants]="selectedProduct()?.productVariants ?? []" (remove)="removeVariant(i)" (openCreation) ="handleOpenCreation($event)" [colors]="colors()" />
+              <app-variant-new-row [form]="$any(variant)" [index]="i" [itemIndex]="index()" [existingVariants]="selectedProduct()?.productVariants ?? []" (remove)="removeVariant(i)"  [colors]="colors()" />
             }
           </div>
         }

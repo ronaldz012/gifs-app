@@ -1,11 +1,11 @@
 import {Component, DestroyRef, inject, input, output, ViewChild, ElementRef, OnInit, OnDestroy} from '@angular/core';
 import {ReactiveFormsModule, Validators} from '@angular/forms';
-import { NewProductFormGroup } from '../../common/item-form-group';
-import { Category } from '../../../../../dtos/categories/category-dto';
-import { Brand } from '../../../../../dtos/brands/brand-dto';
-import { SelectFromList } from '../../../../../../core/select-from-list/select-from-list';
-import { CreateEntityEvent } from '../../../../../interfaces/types/create-entity-event';
-import {ProductSearchResult} from '../../../../../components/product-search/product-search-result';
+import { NewProductFormGroup } from '../../pages/receptions-page/reception-form/common/item-form-group';
+import { Category } from '../../dtos/categories/category-dto';
+import { Brand } from '../../dtos/brands/brand-dto';
+import { SelectFromList } from '../../../core/select-from-list/select-from-list';
+import { CreateEntityEvent } from '../../interfaces/types/create-entity-event';
+import {ProductSearchResult} from '../../components/product-search/product-search-result';
 
 @Component({
   selector: 'app-new-product',
@@ -35,7 +35,6 @@ export default class NewProduct implements OnInit,OnDestroy {
      this.form().controls.categoryId.setValidators([Validators.required]);
      this.form().controls.brandId.setValidators([Validators.required]);
      this.form().controls.gender.setValidators([Validators.required]);
-    this.form().controls.basePrice.setValidators([Validators.required]);
   }
 
   onCategorySelected(category: Category | null) {

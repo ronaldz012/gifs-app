@@ -22,6 +22,7 @@ import {FormControl} from '@angular/forms';
         (input)="onInput($event)"
         (keydown)="handleKeydown($event)"
         [placeholder]="placeholder()"
+        autocomplete="off"
         class="w-full px-2 py-1 border border-transparent rounded text-[11px]
            focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400
            focus:bg-white group-hover:border-gray-200 transition-all bg-transparent font-medium"
@@ -88,9 +89,7 @@ export class SelectCtrl implements OnInit {
 
   filteredOptions = computed(() => {
     const q = this.query().toLowerCase().trim();
-    const list = this.options().filter(o => o.name.toLowerCase().includes(q));
-    untracked(() => this.activeIndex.set(0));
-    return list;
+    return this.options().filter(o => o.name.toLowerCase().includes(q));
   });
 
   showCreateOption = computed(() => {
@@ -110,6 +109,7 @@ export class SelectCtrl implements OnInit {
   onInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.query.set(value);
+    this.activeIndex.set(0); // ← acá, fuera del computed
     this.isOpen.set(true);
     if (!value) {
       this.ctrl()?.setValue(null);

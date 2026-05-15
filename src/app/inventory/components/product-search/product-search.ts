@@ -17,7 +17,7 @@ import {ProductService} from '../../services/product-service';
 @Component({
   selector: 'app-product-search',
   standalone: true,
-  imports: [CurrencyPipe, DecimalPipe],
+  imports: [DecimalPipe],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

@@ -10,7 +10,7 @@ import {
 import {FormArray, FormBuilder, FormControl, ReactiveFormsModule} from '@angular/forms';
 import {ReceptionService} from '../../../services/reception-service';
 import {ItemFormGroup, NewReceptionForm} from './common/item-form-group';
-import ReceptionItem from './reception-item/reception-item';
+import { ReceptionItem } from './reception-item/reception-item';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DecimalPipe} from '@angular/common';
 import {CategoryService} from '../../../services/category-service';
@@ -27,6 +27,8 @@ import {Color} from '../../../dtos/Colors/color';
 import {ColorService} from '../../../services/color-service';
 import {ReceptionFormBuilders} from './common/reception-form-builder';
 import {buildReceptionPayload} from './common/build-payload-reception';
+import {NewProductModal} from '../new-product-modal/new-product-modal';
+import {ExistingProductModal} from '../existing-product-modal/existing-product-modal';
 
 
 @Component({
@@ -35,17 +37,19 @@ import {buildReceptionPayload} from './common/build-payload-reception';
     ReactiveFormsModule,
     ReceptionItem,
     DecimalPipe,
-    ReceptionItem,
     CreateCategory,
     CreateBrand,
     CreateColor,
+    NewProductModal,
+    ExistingProductModal,
   ],
   templateUrl: './reception-form.html',
   styles: ``,
 })
 export default class ReceptionForm implements OnInit {
+
   // ── Dependencies ──────────────────────────────────────────────────────────
-  private fb = inject(FormBuilder);
+   fb = inject(FormBuilder);
   private receptionService = inject(ReceptionService);
   private destroyRef = inject(DestroyRef);
   private categoryService = inject(CategoryService);
@@ -61,6 +65,10 @@ export default class ReceptionForm implements OnInit {
   submitError = signal<string | null>(null);
   totalCost = signal<number>(0);
   activeModal = signal<CreateEntityEvent | null>(null);
+  activateNewProductModal = signal<boolean>(false);
+  activateExistingProductModal = signal<boolean>(false);
+  editingItem = signal<ItemFormGroup | null>(null);
+  editingIndex = signal<number | null>(null);
   //────DATA─────────────────────────────────────────────────────────────────────────────
   categories = signal<Category[]>([])
   brands = signal<Brand[]>([])
@@ -78,16 +86,6 @@ export default class ReceptionForm implements OnInit {
       const modalRefCategory = this.categoryModal();
       const modalRefBrand = this.brandModal();
 
-      if (modal?.type === 'category' && modalRefCategory) {
-        setTimeout(() => {
-          modalRefCategory.focus(); // 🔥 foco automático
-        });
-      }
-      if(modal?.type === 'brand' && modalRefBrand) {
-        setTimeout(() => {
-          modalRefBrand.focus();
-        })
-      }
     });
   }
   ngOnInit(): void {
@@ -131,6 +129,16 @@ export default class ReceptionForm implements OnInit {
   // ── Gestión de items ──────────────────────────────────────────────────────
   addItem(mode: 'ex' | 'new'): void {
     this.itemsArray.push(ReceptionFormBuilders.buildItemGroup(this.fb, mode));
+  }
+
+  onEditItem(itemForm: ItemFormGroup, index: number): void {
+    this.editingIndex.set(index);
+    this.editingItem.set(itemForm);
+    if (itemForm.controls.mode.value === 'new') {
+      this.activateNewProductModal.set(true);
+    } else {
+      this.activateExistingProductModal.set(true);
+    }
   }
 
   removeItem(i: number): void {this.itemsArray.removeAt(i);}
@@ -273,4 +281,26 @@ export default class ReceptionForm implements OnInit {
   protected onCancel() {
     this.router.navigate(['inventory','receptions']);
   }
+
+  onNewProductConfirmed($event: ItemFormGroup) {
+    const index = this.editingIndex();
+
+    if (index === null) {
+      console.log("adding new Product");
+      this.itemsArray.push($event);
+    } else {
+      console.log("updating Product at index", index);
+      this.itemsArray.setControl(index, $event);
+    }
+
+    this.closeNewProductModal();
+    this.recalculateTotalCost();
+  }
+
+  closeNewProductModal() {
+    this.activateNewProductModal.set(false);
+    this.editingItem.set(null);
+    this.editingIndex.set(null);
+  }
+
 }

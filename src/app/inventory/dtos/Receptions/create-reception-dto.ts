@@ -15,7 +15,6 @@ export interface NewProductDto {
    description: string;
    categoryId: GUID;
    brandId: GUID;
-   basePrice: number;
    gender : number;
    unitMeasurementSin?: number;
    economicActivity?: string;

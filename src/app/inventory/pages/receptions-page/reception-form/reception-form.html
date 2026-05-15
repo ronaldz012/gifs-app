@@ -59,15 +59,14 @@
         [colors]="colors()"
         [form]="itemForm"
         (remove)="removeItem($index)"
-        (create)="handleOpenCreation($event)"
+        (edit)="onEditItem($event, $index)"
         [index]="$index"
-
       />
     }
 
     <div class="py-3 flex items-center gap-4">
       <!-- Botón Producto Nuevo -->
-      <button type="button" (click)="addItem('new')"
+      <button type="button" (click)="editingItem.set(null); activateNewProductModal.set(true)"
               class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm group">
         <span class="text-xl font-bold group-hover:scale-110">+</span>
         <div class="text-left">
@@ -77,7 +76,7 @@
       </button>
 
       <!-- Botón Producto Existente -->
-      <button type="button" (click)="addItem('ex')"
+      <button type="button" (click)="editingItem.set(null); activateExistingProductModal.set(true);"
               class="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 shadow-sm group">
         <span class="text-xl font-bold group-hover:scale-110">🔍</span>
         <div class="text-left">
@@ -123,6 +122,24 @@
   </div>
 
 </form>
+@if(activateNewProductModal()){
+  <app-new-product-modal
+    [categories]="categories()"
+    [colors]="colors()"
+    [brands]="brands()"
+    [itemForm]="editingItem()"
+    (confirm)="onNewProductConfirmed($event)"
+    (close)="closeNewProductModal()"
+  />
+}
+@if(activateExistingProductModal())
+{
+  <app-existing-product-modal
+  [colors]="colors()"
+  [itemForm]="editingItem()"
+  (close)="activateExistingProductModal.set(false); editingItem.set(null)"
+  />
+}
 @if (activeModal()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/20"
   tabindex="0"

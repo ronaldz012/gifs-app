@@ -19,6 +19,5 @@ export type NewProductFormGroup = FormGroup<{
   categoryId: FormControl<GUID | null>;
   brandId: FormControl<GUID | null>;
   gender: FormControl<number | null>;
-  basePrice: FormControl<number>;
 }>;
 

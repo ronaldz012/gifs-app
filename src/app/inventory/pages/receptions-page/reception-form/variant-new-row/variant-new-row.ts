@@ -2,100 +2,62 @@ import {
   Component,
   computed,
   DestroyRef,
-  inject, Input,
+  inject,
   input,
   OnInit,
   output,
   signal,
+  ElementRef
 } from '@angular/core';
-import { AbstractControl, FormControl, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, ReactiveFormsModule, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DecimalPipe } from '@angular/common';
-import { VariantFormGroup } from '../../common/variant-form-group';
-import {Color} from '../../../../../dtos/Colors/color';
-import {CreateEntityEvent} from '../../../../../interfaces/types/create-entity-event';
-import {SelectCtrl} from '../../../../../../core/components/selec-from-list-ctrl';
-import {ProductVariantOption} from '../../../../../components/product-search/product-search-result';
+import { DecimalPipe, CommonModule } from '@angular/common';
+import { VariantFormGroup } from '../common/variant-form-group';
+import { Color } from '../../../../dtos/Colors/color';
+import { ProductVariantOption } from '../../../../components/product-search/product-search-result';
+import { ColorSelectCtrl } from '../../../../components/color-select-ctrl/color-select-ctrl';
 
 @Component({
   selector: 'app-variant-new-row',
-  imports: [ReactiveFormsModule, DecimalPipe, SelectCtrl],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, DecimalPipe, ColorSelectCtrl],
   templateUrl: './variant-new-row.html',
-  styles: [`
-    :host {
-      display: contents; /* Esto es vital para que no rompa el CSS Grid del padre */
-    }
-  `]
+  styles: ``
 })
 export default class VariantNewRow implements OnInit {
-  // ── Dependencies ──────────────────────────────────────────────────────
   private destroyRef = inject(DestroyRef);
+  private el = inject(ElementRef);
 
-  // ── Inputs ────────────────────────────────────────────────────────────
-  form                = input.required<VariantFormGroup>();
-
-  index               = input<number>(0);
-  colors = input<Color[]>([]);
+  // Inputs Originales
+  form             = input.required<VariantFormGroup>();
+  index            = input<number>(0);
+  colors           = input<Color[]>([]);
   existingVariants = input<ProductVariantOption[]>([]);
-  itemIndex = input.required<number>();
+  itemIndex        = input.required<number>();
 
-  // ── Outputs ───────────────────────────────────────────────────────────
-  remove           = output<void>();
-  openCreation = output<CreateEntityEvent>();
+  // Outputs
+  remove = output<void>();
 
-  // ── Puentes reactivos ─────────────────────────────────────────────────
-  private qtySignal  = signal(0);
-  private costSignal = signal(0);
+  // Signals para Subtotal
+  private qtySignal   = signal(0);
+  private costSignal  = signal(0);
+  private priceSignal = signal(0);
 
-  // ── Computados ────────────────────────────────────────────────────────
   subtotal = computed(() => this.qtySignal() * this.costSignal());
+  priceSubtotal = computed(() => this.qtySignal() * this.priceSignal());
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────
   ngOnInit(): void {
-    this.activateValidators();
     this.syncSubtotalSignals();
-  }
-
-  private activateValidators(): void {
-    const nv = this.newVariantGroup;
-
-    nv.setValidators([
-      Validators.required,
-      this.uniqueVariantValidator()
-    ]);
-    nv.get('description')?.setValidators([Validators.required]);
-    nv.get('price')?.setValidators([Validators.required, Validators.min(0.5)]);
-    nv.get('colorId')?.setValidators([Validators.required]);
-
-    nv.get('description')?.updateValueAndValidity();
-    nv.get('price')?.updateValueAndValidity();
-    nv.get('colorId')?.updateValueAndValidity();
-
-
-    this.productVariantIdCtrl.clearValidators();
-    this.productVariantIdCtrl.updateValueAndValidity();
-  }
-  private uniqueVariantValidator(): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const size = control.get('size')?.value?.toString().trim().toUpperCase();
-      const colorId = control.get('colorId')?.value;
-
-      if (!size || !colorId) return null;
-
-      // Buscamos si ya existe esa combinación en el producto actual
-      const alreadyExists = this.existingVariants().some(v =>
-        v.size.trim().toUpperCase() === size &&
-        v.colorId === colorId
-      );
-
-      return alreadyExists ? { duplicateVariant: true } : null;
-    };
+    this.newVariantGroup.setValidators([this.uniqueVariantValidator()]);
   }
 
   private syncSubtotalSignals(): void {
     const { quantityReceived, unitCost } = this.form().controls;
+    const { price } = this.newVariantGroup.controls;
+
     this.qtySignal.set(quantityReceived.value ?? 0);
     this.costSignal.set(unitCost.value ?? 0);
+    this.priceSignal.set(price.value ?? 0);
 
     quantityReceived.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -104,31 +66,54 @@ export default class VariantNewRow implements OnInit {
     unitCost.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(val => this.costSignal.set(val ?? 0));
+
+    price.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(val => this.priceSignal.set(val ?? 0));
   }
 
-  // ── Accessors ─────────────────────────────────────────────────────────
-  get productVariantIdCtrl(): FormControl<GUID | null> {
-    return this.form().controls.productVariantId;
+  private uniqueVariantValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const group = control as VariantFormGroup['controls']['newVariant'];
+      const size = group.controls.size.value?.toString().trim().toUpperCase();
+      const colorId = group.controls.colorId.value;
+      if (!size || !colorId) return null;
+
+      const alreadyExists = this.existingVariants().some(v =>
+        v.size.trim().toUpperCase() === size && v.colorId === colorId
+      );
+      return alreadyExists ? { duplicateVariant: true } : null;
+    };
   }
 
-  get newVariantGroup() {
-    return this.form().controls.newVariant;
-  }
-  get colorIdCtrl() {
-    return this.newVariantGroup.get('colorId') as FormControl;
+  // Accessors
+  get newVariantGroup() { return this.form().controls.newVariant; }
+  get colorIdCtrl()    { return this.newVariantGroup.controls.colorId; }
+  get sizeCtrl()       { return this.newVariantGroup.controls.size; }
+  get qtyCtrl()        { return this.form().controls.quantityReceived; }
+  get costCtrl()       { return this.form().controls.unitCost; }
+  get priceCtrl()      { return this.newVariantGroup.controls.price; }
+  get descCtrl()       { return this.newVariantGroup.controls.description; }
+
+  getError(ctrl: AbstractControl | null): string | null {
+    if (!ctrl || ctrl.valid || !ctrl.touched) return null;
+    if (ctrl.hasError('required'))  return 'Obligatorio';
+    if (ctrl.hasError('min'))       return `Mín: ${ctrl.getError('min').min}`;
+    if (ctrl.hasError('minlength')) return `Mín: ${ctrl.getError('minlength').requiredLength} carac.`;
+    return 'Inválido';
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────
+  // Acciones
   onRemove(): void { this.remove.emit(); }
+  handleCreateColor(event: any) {}
 
-  hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
-    if (!ctrl) return false;
-    return ctrl.hasError(error) && ctrl.touched;
+  focusFirst(): void {
+    const el = this.el.nativeElement.querySelector('app-color-select-ctrl input') as HTMLElement;
+    if (el) {
+      el.focus();
+    } else {
+      const sizeInput = this.el.nativeElement.querySelector('input[formcontrolname="size"]') as HTMLElement;
+      if (sizeInput) sizeInput.focus();
+    }
   }
-
-  handleCreateColor(text:string){
-    console.log('mandando desde new ROW: ',text);
-    this.openCreation.emit({type: 'color', query: text, itemIndex: this.itemIndex(), subIndex: this.index()});
-  }
-
 }

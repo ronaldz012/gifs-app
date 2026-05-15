@@ -1,6 +1,7 @@
 <div [formGroup]="form()" class="contents group">
 
   <!-- MODO: Dinámico. Cambia si es una variante nueva dentro de producto existente -->
+  <!-- 1. MODO -->
   <div class="px-2 py-1 flex items-center justify-center">
     @if (form().get('mode')?.value === 'new') {
       <span class="px-1.5 py-0.5 bg-green-100 text-green-700 font-bold text-[8px] rounded border border-green-200 uppercase">
@@ -13,7 +14,45 @@
     }
   </div>
 
-  <!-- BUSCADOR DE VARIANTE -->
+  <!-- 2. COLOR -->
+  <div class="px-2 py-1 text-[11px] text-gray-500 truncate flex items-center justify-center">
+    {{ selectedVariantColor() || '—' }}
+  </div>
+
+  <!-- 3. TALLA -->
+  <div class="px-2 py-1 text-[11px] text-gray-500 truncate flex items-center justify-center">
+    {{ selectedVariantSize() || '—' }}
+  </div>
+
+  <!-- 4. CANTIDAD -->
+  <div class="px-1 py-0.5">
+    <input type="number" formControlName="quantityReceived" placeholder="0"
+           class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 text-right
+                  focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-100
+                  group-hover:border-gray-200 [appearance:textfield]"/>
+  </div>
+
+  <!-- 5. COSTO (P. COMPRA) -->
+  <div class="px-1 py-0.5">
+    <input type="number" formControlName="unitCost" placeholder="0"
+           class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 text-right
+                  focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-100
+                  group-hover:border-gray-200 [appearance:textfield]"/>
+  </div>
+
+  <!-- 6. PRECIO (P. VENTA) -->
+  <div class="px-2 py-1 text-[11px] text-gray-400 text-right flex items-center justify-end font-mono">
+    {{ selectedVariantPrice() != null ? (selectedVariantPrice() | number:'1.0-0') : '—' }}
+  </div>
+
+  <!-- 7. SUBTOTAL -->
+  <div class="px-2 py-1 text-right flex items-center justify-end">
+    <span class="text-[11px] font-mono" [class]="subtotal() > 0 ? 'font-bold text-gray-800' : 'text-gray-300'">
+      {{ subtotal() > 0 ? (subtotal() | number:'1.0-0') : '0' }}
+    </span>
+  </div>
+
+  <!-- 8. BUSCADOR DE VARIANTE (DESCRIPCIÓN) -->
   <div class="px-1 py-0.5 relative">
     <input
       type="text"
@@ -51,39 +90,7 @@
     }
   </div>
 
-  <!-- COLUMNAS INFORMATIVAS (Talla, Color, Precio) -->
-  <div class="px-2 py-1 text-[11px] text-gray-500 truncate flex items-center">
-    {{ selectedVariantSize() || '—' }}
-  </div>
-  <div class="px-2 py-1 text-[11px] text-gray-500 truncate flex items-center">
-    {{ selectedVariantColor() || '—' }}
-  </div>
-  <div class="px-2 py-1 text-[11px] text-gray-400 text-right flex items-center justify-end font-mono">
-    {{ selectedVariantPrice() != null ? (selectedVariantPrice() | number:'1.0-0') : '—' }}
-  </div>
-
-  <!-- INPUTS NUMÉRICOS (Cantidad y Costo) -->
-  <div class="px-1 py-0.5">
-    <input type="number" formControlName="quantityReceived" placeholder="0"
-           class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 text-right
-                  focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-100
-                  group-hover:border-gray-200 [appearance:textfield]"/>
-  </div>
-  <div class="px-1 py-0.5">
-    <input type="number" formControlName="unitCost" placeholder="0"
-           class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 text-right
-                  focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-100
-                  group-hover:border-gray-200 [appearance:textfield]"/>
-  </div>
-
-  <!-- SUBTOTAL -->
-  <div class="px-2 py-1 text-right flex items-center justify-end">
-    <span class="text-[11px] font-mono" [class]="subtotal() > 0 ? 'font-bold text-gray-800' : 'text-gray-300'">
-      {{ subtotal() > 0 ? (subtotal() | number:'1.0-0') : '0' }}
-    </span>
-  </div>
-
-  <!-- BOTÓN ELIMINAR -->
+  <!-- 9. BOTÓN ELIMINAR -->
   <div class="flex items-center justify-center">
     <button
       type="button"

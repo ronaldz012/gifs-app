@@ -28,7 +28,6 @@ export function buildReceptionPayload(
             description: item.newProduct.description,
             categoryId: item.newProduct.categoryId,
             brandId: item.newProduct.brandId,
-            basePrice: item.newProduct.basePrice,
             gender: item.newProduct.gender,
           } as NewProductDto)
           : null,

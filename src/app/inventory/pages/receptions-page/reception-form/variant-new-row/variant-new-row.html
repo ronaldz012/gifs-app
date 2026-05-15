@@ -1,83 +1,101 @@
-<div [formGroup]="form()" class="contents group">
-
-  <div class="px-2 py-1 flex items-center justify-center bg-gray-50/30 border-r border-gray-100">
+<div
+  class="relative grid grid-cols-subgrid col-span-full items-center rounded transition-all group pb-3"
+>
+  <!-- 1. MODO / INDEX -->
+  <div class="px-2 py-1 flex items-center justify-center border-r border-gray-50 h-full">
     <span class="px-1.5 py-0.5 bg-green-100 text-green-700 font-bold text-[8px] rounded border border-green-200 uppercase">
-      Nueva
+      {{index() + 1}}
     </span>
   </div>
 
-  <div class="px-1 py-0.5 relative" [formGroup]="newVariantGroup">
-    <input
-      type="text"
-      formControlName="description"
-      placeholder="Descripción..."
-      class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 placeholder-gray-400
-             focus:outline-none focus:border-green-400 focus:bg-white focus:ring-1 focus:ring-green-100
-             group-hover:border-gray-200 transition-all italic"
+  <!-- 2. COLOR -->
+  <div class="relative px-1">
+    <app-color-select-ctrl
+      [ctrl]="colorIdCtrl"
+      [colors]="colors()"
+      (colorCreated)="handleCreateColor($event)"
     />
+    @if (getError(colorIdCtrl)) {
+      <span tabindex="-1" class="absolute bottom-0 left-1 text-[8px] text-red-500 leading-none translate-y-full pt-0.5">{{ getError(colorIdCtrl) }}</span>
+    }
   </div>
 
-  <div class="px-1 py-0.5 relative" [formGroup]="newVariantGroup">
+  <!-- 3. TALLE -->
+  <div class="relative px-1" [formGroup]="newVariantGroup">
     <input
       type="text"
       formControlName="size"
-      [placeholder]="newVariantGroup.hasError('duplicateVariant') ? '¡Duplicado!' : 'S/M/L...'"
-      class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900
-             focus:outline-none focus:border-green-400 focus:bg-white focus:ring-1 focus:ring-green-100
-             group-hover:border-gray-200 transition-all font-medium"
-      [class.placeholder-red-500]="newVariantGroup.hasError('duplicateVariant')"
-      [class.border-red-300]="newVariantGroup.hasError('duplicateVariant')"
+      placeholder="S/M..."
+      [class.border-red-400]="getError(sizeCtrl) || newVariantGroup.hasError('duplicateVariant')"
+      class="w-full px-2 py-1 border border-transparent group-hover:border-gray-200 rounded text-[11px] font-medium focus:outline-none focus:border-green-400 focus:bg-white"
     />
+    @if (newVariantGroup.hasError('duplicateVariant')) {
+      <span class="absolute bottom-0 left-1 text-[8px] text-red-600 font-bold leading-none translate-y-full pt-0.5">Duplicado</span>
+    } @else if (getError(sizeCtrl)) {
+      <span class="absolute bottom-0 left-1 text-[8px] text-red-500 leading-none translate-y-full pt-0.5">{{ getError(sizeCtrl) }}</span>
+    }
   </div>
 
-  <div class="px-1 py-0.5 flex items-center">
-    <app-select-ctrl
-      [ctrl]="colorIdCtrl"
-      [options]="colors()"
-      (createNew)="handleCreateColor($event)"
-      class="w-full"
-    />
-  </div>
-
-  <div class="px-1 py-0.5" [formGroup]="newVariantGroup">
-    <input
-      type="number"
-      formControlName="price"
-      placeholder="0"
-      class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 text-right font-mono
-             focus:outline-none focus:border-green-400 focus:bg-white focus:ring-1 focus:ring-green-100
-             group-hover:border-gray-200 [appearance:textfield]"
-    />
-  </div>
-
-  <div class="px-1 py-0.5">
+  <!-- 4. CANTIDAD -->
+  <div class="relative px-1" [formGroup]="form()">
     <input
       type="number"
       formControlName="quantityReceived"
       placeholder="0"
-      class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 text-right font-bold
-             focus:outline-none focus:border-green-400 focus:bg-white focus:ring-1 focus:ring-green-100
-             group-hover:border-gray-200 [appearance:textfield]"
+      [class.border-red-400]="getError(qtyCtrl)"
+      class="w-full px-2 py-1 border border-transparent group-hover:border-gray-200 rounded text-[11px] text-right font-bold focus:outline-none focus:border-green-400 focus:bg-white [appearance:textfield]"
     />
+    @if (getError(qtyCtrl)) {
+      <span class="absolute bottom-0 right-1 text-[8px] text-red-500 leading-none translate-y-full pt-0.5">{{ getError(qtyCtrl) }}</span>
+    }
   </div>
 
-  <div class="px-1 py-0.5">
+  <!-- 5. P. COMPRA (UNIT COST) -->
+  <div class="relative px-1" [formGroup]="form()">
     <input
       type="number"
       formControlName="unitCost"
       placeholder="0"
-      class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 text-right
-             focus:outline-none focus:border-green-400 focus:bg-white focus:ring-1 focus:ring-green-100
-             group-hover:border-gray-200 [appearance:textfield]"
+      [class.border-red-400]="getError(costCtrl)"
+      class="w-full px-2 py-1 border border-transparent group-hover:border-gray-200 rounded text-[11px] text-right font-mono focus:outline-none focus:border-green-400 focus:bg-white [appearance:textfield]"
     />
+    @if (getError(costCtrl)) {
+      <span class="absolute bottom-0 right-1 text-[8px] text-red-500 leading-none translate-y-full pt-0.5">{{ getError(costCtrl) }}</span>
+    }
   </div>
 
+  <!-- 6. P. VENTA (PRICE) -->
+  <div class="relative px-1" [formGroup]="newVariantGroup">
+    <input
+      type="number"
+      formControlName="price"
+      placeholder="0"
+      [class.border-red-400]="getError(priceCtrl)"
+      class="w-full px-2 py-1 border border-transparent group-hover:border-gray-200 rounded text-[11px] text-right text-green-700 font-bold focus:outline-none focus:border-green-400 focus:bg-white [appearance:textfield]"
+    />
+    @if (getError(priceCtrl)) {
+      <span class="absolute bottom-0 right-1 text-[8px] text-red-500 leading-none translate-y-full pt-0.5">{{ getError(priceCtrl) }}</span>
+    }
+  </div>
+
+  <!-- 7. SUBTOTAL (Qty x Price) -->
   <div class="px-2 py-1 text-right flex items-center justify-end">
-    <span class="text-[11px] font-mono" [class]="subtotal() > 0 ? 'font-bold text-gray-800' : 'text-gray-300'">
-      {{ subtotal() > 0 ? (subtotal() | number:'1.0-0') : '0' }}
+    <span class="text-[11px] font-mono" [class]="priceSubtotal() > 0 ? 'font-bold text-gray-800' : 'text-gray-300'">
+      {{ priceSubtotal() > 0 ? (priceSubtotal() | number:'1.0-0') : '0' }}
     </span>
   </div>
 
+  <!-- 8. DESCRIPCIÓN (VARIANTE / DESCRIP.) -->
+  <div class="px-1" [formGroup]="newVariantGroup">
+    <input
+      type="text"
+      formControlName="description"
+      placeholder="Descripción..."
+      class="w-full px-2 py-1 border border-transparent rounded text-[11px] italic focus:outline-none focus:border-green-400 focus:bg-white transition-all"
+    />
+  </div>
+
+  <!-- 9. ACCIONES (ELIMINAR) -->
   <div class="flex items-center justify-center">
     <button
       type="button"

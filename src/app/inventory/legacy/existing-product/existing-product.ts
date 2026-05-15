@@ -1,9 +1,9 @@
 import {Component, input, OnDestroy, OnInit, output, signal} from '@angular/core';
-import {ProductSearchResult} from '../../../../../components/product-search/product-search-result';
+import {ProductSearchResult} from '../../components/product-search/product-search-result';
 import {FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ProductSearch} from '../../../../../components/product-search/product-search';
+import {ProductSearch} from '../../components/product-search/product-search';
 import {DecimalPipe} from '@angular/common';
-import {Gender} from '../../../../../interfaces/gender';
+import {Gender} from '../../interfaces/gender';
 
 @Component({
   selector: 'app-existing-product',
