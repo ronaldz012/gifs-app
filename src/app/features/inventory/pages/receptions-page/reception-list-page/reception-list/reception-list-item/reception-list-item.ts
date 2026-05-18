@@ -23,10 +23,10 @@ export class ReceptionListItem {
 
   statusClasses(s: ReceptionStatus): string {
     const map: Record<ReceptionStatus, string> = {
-      [ReceptionStatus.Borrador]:     'bg-amber-50  text-amber-600  ring-1 ring-amber-200',
-      [ReceptionStatus.Confirmado]: 'bg-green-50  text-green-600  ring-1 ring-green-200',
-      [ReceptionStatus.Rechazado]:  'bg-red-50    text-red-500    ring-1 ring-red-200',
-      [ReceptionStatus.Revertida]: 'bg-red-50    text-red-600 ring-1 ring-red-200',
+      [ReceptionStatus.Borrador]:   'bg-feedback-warning text-feedback-warning-text',
+      [ReceptionStatus.Confirmado]: 'bg-feedback-success text-feedback-success-text',
+      [ReceptionStatus.Rechazado]:  'bg-feedback-error text-feedback-error-text',
+      [ReceptionStatus.Revertida]:  'bg-feedback-error text-feedback-error-text',
     };
     return map[s];
   }

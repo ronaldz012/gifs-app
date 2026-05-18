@@ -9,5 +9,7 @@
         "angular-page": {
             "skipChangeDetectionOnPush": true
         }
-    }
+    },
+    "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+    "angular.angular-language-service.enable-strict-mode": true
 }

@@ -1,11 +1,275 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import "tailwindcss";
 
-/* ── Nav ───────────────────────────────────────────────────────────────────── */
-.nav-link {
-  @apply flex items-center text-base text-gray-200 p-3 rounded-lg hover:bg-gray-700 transition-colors;
+@variant dark (&:where(.dark, .dark *));
+/* ─────────────────────────────────────────────
+   GLOBAL DESIGN SYSTEM
+   Starship-inspired ERP Theme
+   ───────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+
+  /* ─────────────────────────────
+     CORE BRAND
+     Tu azul marino es el negro de Cal.com — autoridad en botones y acciones
+     ───────────────────────────── */
+  --raw-navy:      #1E3A5F;   /* Botón primario / CTA principal */
+  --raw-navy-deep: #0F1E32;   /* Hover del primario */
+  --raw-navy-mid:  #2C4F7C;   /* Texto de info, links secundarios */
+
+  --raw-blue:       var(--raw-navy);
+  --raw-blue-hover: var(--raw-navy-deep);
+  --raw-blue-soft:  #D8EDFE;  /* Highlight azul suave (tu color extraído) */
+
+  /* ─────────────────────────────
+     ESTADOS VIVOS — La firma de Cal.com
+     Colores puros, sin atenuar. Los pasteles son solo para el fondo del badge.
+     ───────────────────────────── */
+  --raw-success: #00B67A;   /* Verde Cal.com — Confirmado, activo, OK */
+  --raw-warning: #E9A944;   /* Amarillo Cal.com — Pendiente, atención */
+  --raw-error:   #FF492C;   /* Rojo Cal.com — Cancelado, error, peligro */
+
+  /* Código de producto / folio / chip neutro */
+  --raw-cyan-soft: #D8EDF0;
+  --raw-cyan-text: #0B6E7C;
+
+  /* ─────────────────────────────
+     SURFACES — Más frescos que antes, menos crema pesada
+     ───────────────────────────── */
+  --bg-main:    #F7F7F7;   /* Fondo raíz — casi blanco, aireado (Cal.com feel) */
+  --bg-surface: #FFFFFF;   /* Tarjetas, modales, paneles */
+  --bg-elevated:#FFFFFF;
+  --bg-muted:   #F4F4F4;   /* Gris exacto Cal.com — fondos secundarios, inputs */
+
+  --bg-layout-topbar: #F4F4F4;  /* Topbar idéntico a Cal.com */
+
+  /* ─────────────────────────────
+     TEXTO — Contraste Cal.com
+     ───────────────────────────── */
+  --text-main:    #292929;  /* Negro Cal.com — peso visual limpio, no agresivo */
+  --text-muted:   #555555;
+  --text-soft:    #888888;
+  --text-inverse: #FFFFFF;
+
+  /* ─────────────────────────────
+     BORDERS — Muy delicados, dejan respirar el contenido
+     ───────────────────────────── */
+  --border-ui:    #E8E8E8;
+  --border-strong:#D0D0D0;
+
+  /* ─────────────────────────────
+     BOTONES INTERACTIVOS
+     Primario: azul marino con texto blanco (tu identidad de marca)
+     Secundario: blanco puro con borde sutil (Cal.com style)
+     ───────────────────────────── */
+  --btn-primary-bg:   var(--raw-navy);
+  --btn-primary-hover:var(--raw-navy-deep);
+  --btn-primary-text: #FFFFFF;
+
+  --btn-secondary-bg:   #FFFFFF;
+  --btn-secondary-hover:#F4F4F4;
+  --btn-secondary-text: var(--text-main);
+
+  --accent-ui:      var(--raw-navy);
+  --accent-ui-hover:var(--raw-navy-deep);
+  --accent-ui-text: #FFFFFF;
+
+  --focus-ring:        rgba(0, 182, 122, 0.25);  /* Verde vivo — anillo llamativo */
+  --focus-ring-offset: #FFFFFF;
+
+  /* ─────────────────────────────
+     FEEDBACK / BADGES
+     Fondo pastel muy suave + color vivo al 100% para texto e ícono
+     Cal.com hace exactamente esto — los colores vivos no fatigan porque
+     el fondo del badge es casi blanco.
+     ───────────────────────────── */
+  --feedback-success:      #E6F9F3;
+  --feedback-success-text: #00B67A;
+
+  --feedback-warning:      #FEF6E8;
+  --feedback-warning-text: #E9A944;
+
+  --feedback-error:        #FFF0ED;
+  --feedback-error-text:   #FF492C;
+
+  --feedback-info:         #EAF2FD;
+  --feedback-info-text:    var(--raw-navy-mid);
+
+  /* ─────────────────────────────
+     SIDEBAR — Oscura y contrastada para balancear el fondo claro del contenido
+     ───────────────────────────── */
+  --bg-layout-sidebar:         #111827;
+  --bg-layout-sidebar-elevated:#182030;
+  --text-layout-sidebar:       #F4F4F4;
+  --text-layout-sidebar-muted: #8A99AD;
+  --sidebar-hover:             rgba(255, 255, 255, 0.05);
+  --sidebar-active:            rgba(0, 182, 122, 0.14);  /* Verde activo */
+  --sidebar-active-border:     var(--raw-success);
+
+  /* ─────────────────────────────
+     SHADOWS — Sutiles, SaaS moderno
+     ───────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }
+
+.dark {
+  color-scheme: dark;
+
+  /* ─────────────────────────────
+     SURFACES — Carbón para el canvas general
+     Solo bg-main, bg-surface, bg-elevated, bg-muted cambian
+     ───────────────────────────── */
+  --bg-main:    #141414;   /* Reemplaza el crema/blanco del día */
+  --bg-surface: #1C1C1C;   /* Reemplaza el blanco de tarjetas */
+  --bg-elevated:#242424;   /* Modales, dropdowns */
+  --bg-muted:   #2A2A2A;   /* Inputs, headers de tabla — reemplaza #F4F4F4 */
+
+  --bg-layout-topbar: rgba(20, 20, 20, 0.85);
+
+  /* ─────────────────────────────
+     TEXTO — Crema cálido sobre carbón
+     ───────────────────────────── */
+  --text-main:    #F0EDE8;
+  --text-muted:   #A8A29E;
+  --text-soft:    #6B6560;
+  --text-inverse: #141414;
+
+  /* ─────────────────────────────
+     BORDERS
+     ───────────────────────────── */
+  --border-ui:    #2E2E2E;
+  --border-strong:#3A3A3A;
+
+  /* ─────────────────────────────
+     BRAND — Azul marino se mantiene, solo se aclara
+     un paso para respirar sobre carbón
+     ───────────────────────────── */
+  --raw-blue:       #4A7AB5;
+  --raw-blue-hover: #5C8BC4;
+  --raw-blue-soft:  rgba(74, 122, 181, 0.15);
+
+  --btn-primary-bg:   #4A7AB5;
+  --btn-primary-hover:#5C8BC4;
+  --btn-primary-text: #FFFFFF;
+
+  --btn-secondary-bg:   #2A2A2A;
+  --btn-secondary-hover:#333333;
+  --btn-secondary-text: #F0EDE8;
+
+  --accent-ui:      #4A7AB5;
+  --accent-ui-hover:#5C8BC4;
+  --accent-ui-text: #FFFFFF;
+
+  --focus-ring:        rgba(74, 122, 181, 0.35);
+  --focus-ring-offset: #1C1C1C;
+
+  /* ─────────────────────────────
+     ESTADOS — Igual que light, levemente suavizados
+     ───────────────────────────── */
+  --raw-success: #00A86E;
+  --raw-warning: #D4983C;
+  --raw-error:   #E8402A;
+
+  --feedback-success:      rgba(0, 168, 110, 0.12);
+  --feedback-success-text: #4DD4A0;
+
+  --feedback-warning:      rgba(212, 152, 60, 0.12);
+  --feedback-warning-text: #F0C070;
+
+  --feedback-error:        rgba(232, 64, 42, 0.12);
+  --feedback-error-text:   #F09080;
+
+  --feedback-info:         rgba(74, 122, 181, 0.12);
+  --feedback-info-text:    #93B7E3;
+
+  /* ─────────────────────────────
+     SIDEBAR — Azul marino intacto, igual que en light
+     ───────────────────────────── */
+  --bg-layout-sidebar:         #111827;
+  --bg-layout-sidebar-elevated:#182030;
+  --text-layout-sidebar:       #F4F4F4;
+  --text-layout-sidebar-muted: #8A99AD;
+  --sidebar-hover:             rgba(255, 255, 255, 0.05);
+  --sidebar-active:            rgba(0, 182, 122, 0.14);
+  --sidebar-active-border:     #00B67A;
+
+  /* ─────────────────────────────
+     SHADOWS
+     ───────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.40);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.50);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.65);
+}
+
+/* ─────────────────────────────────────────────
+   TAILWIND TOKENS
+   ───────────────────────────────────────────── */
+
+@theme inline {
+  /* Typography */
+  --font-sora: "Sora", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  /* Surfaces */
+  --color-bg-main:     var(--bg-main);
+  --color-bg-surface:  var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-muted:    var(--bg-muted);
+
+  /* Text */
+  --color-text-main:  var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-text-soft:  var(--text-soft);
+
+  /* Borders */
+  --color-border:        var(--border-ui);
+  --color-border-strong: var(--border-strong);
+
+  /* Buttons */
+  --color-btn-primary-bg:    var(--btn-primary-bg);
+  --color-btn-primary-hover: var(--btn-primary-hover);
+  --color-btn-primary-text:  var(--btn-primary-text);
+
+  --color-btn-secondary-bg:    var(--btn-secondary-bg);
+  --color-btn-secondary-hover: var(--btn-secondary-hover);
+  --color-btn-secondary-text:  var(--btn-secondary-text);
+
+  /* Interactive */
+  --color-accent-ui:      var(--accent-ui);
+  --color-accent-ui-hover:var(--accent-ui-hover);
+  --color-accent-ui-text: var(--accent-ui-text);
+
+  --color-ring-focus-ring:              var(--focus-ring);
+  --color-ring-offset-focus-ring-offset:var(--focus-ring-offset);
+
+  /* Analytics */
+  --color-data-high: var(--data-high);
+  --color-data-mid:  var(--data-mid);
+  --color-data-low:  var(--data-low);
+
+  /* Feedback */
+  --color-feedback-error:        var(--feedback-error);
+  --color-feedback-error-text:   var(--feedback-error-text);
+  --color-feedback-success:      var(--feedback-success);
+  --color-feedback-success-text: var(--feedback-success-text);
+  --color-feedback-warning:      var(--feedback-warning);
+  --color-feedback-warning-text: var(--feedback-warning-text);
+  --color-feedback-info:         var(--feedback-info);
+  --color-feedback-info-text:    var(--feedback-info-text);
+
+  /* Layout */
+  --color-layout-sidebar:          var(--bg-layout-sidebar);
+  --color-layout-sidebar-elevated: var(--bg-layout-sidebar-elevated);
+  --color-layout-sidebar-text:     var(--text-layout-sidebar);
+  --color-layout-sidebar-text-muted:var(--text-layout-sidebar-muted);
+  --color-layout-topbar:           var(--bg-layout-topbar);
+}
+
+
+
 
 .material-icons {
   display: inline-flex;
@@ -14,39 +278,25 @@
   justify-content: center;
 }
 
-/* ── Reception form grid ────────────────────────────────────────────────────── */
-.grid-cols-new {
-  grid-template-columns: 1fr 80px 96px 88px 88px 100px 96px 32px;
-}
 
-.grid-cols-existing {
-  grid-template-columns: 80px 1fr 80px 96px 88px 88px 100px 96px 32px;
-}
 
-/* ── Print ──────────────────────────────────────────────────────────────────── */
-/*
- * Estrategia limpia:
- * El componente PrintLabelsComponent ya maneja todo su print layout
- * internamente con position: static en @media print.
- * No se necesita ninguna clase "printing-labels" ni hacks globales.
- *
- * Lo único que ponemos aquí es ocultar el resto de la app cuando
- * se imprime, dejando que el overlay sea lo único visible.
- */
+/* Print */
+
 @media print {
+
   @page {
     size: A4 portrait;
     margin: 0;
   }
 
-  /* Oculta todo */
   body.printing-labels * {
     display: none !important;
   }
 
-  /* Muestra solo app-print-labels y todo su contenido */
   body.printing-labels app-print-labels,
   body.printing-labels app-print-labels * {
     display: revert !important;
   }
+
 }
+

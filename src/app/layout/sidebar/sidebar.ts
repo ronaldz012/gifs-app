@@ -5,22 +5,19 @@ import { SideBarService } from '@layout/services/side-bar-service';
 import { AuthService } from '@features/auth/services/auth-service';
 import { Module } from '@features/auth/models/LoginResponse';
 
-
 @Component({
   selector: 'app-sidebar',
   imports: [SideMenuOption],
   template: `
     @if (sidebarSvc.isOpen()) {
       <div
-        class="fixed inset-0 bg-black/30 z-20 md:hidden"
+        class="fixed inset-0 z-20 md:hidden bg-black/40"
         (click)="sidebarSvc.close()">
       </div>
     }
 
     <aside
-      class="fixed top-0 left-0 h-screen w-64 bg-blue-800 z-30 flex flex-col
-         md:sticky md:translate-x-0 md:z-auto"
-      [class.transition-transform]="ready()"
+  class="fixed top-0 left-0 z-30 md:sticky md:z-auto md:translate-x-0 flex flex-col w-64 h-screen bg-layout-sidebar text-layout-sidebar-text"      [class.transition-transform]="ready()"
       [class.duration-300]="ready()"
       [class.ease-in-out]="ready()"
       [class.-translate-x-full]="!sidebarSvc.isOpen()"
@@ -33,7 +30,6 @@ import { Module } from '@features/auth/models/LoginResponse';
       </div>
 
     </aside>
-
   `,
 })
 export default class Sidebar {
@@ -43,9 +39,12 @@ export default class Sidebar {
   readonly ready        = signal(false);
 
   constructor() {
+    // Evita el parpadeo del sidebar al calcular el layout inicial en el cliente
     afterNextRender(() => this.ready.set(true));
   }
 
   @HostListener('document:keydown.escape')
-  onEscape(): void { this.sidebarSvc.close(); }
+  onEscape(): void { 
+    this.sidebarSvc.close(); 
+  }
 }

@@ -1,13 +1,13 @@
 <!-- reception-list-page.html -->
 
 <!-- ── Header ────────────────────────────────────────────────────────────── -->
-<div class="bg-white border-b border-gray-100 shadow-sm px-4 sm:px-6 py-4">
-  <div class="max-w-5xl mx-auto flex items-center justify-between gap-4">
-    <h1 class="text-base font-semibold text-gray-800">Recepciones</h1>
+<div class="border-b border-border bg-bg-surface shadow-sm px-4 sm:px-6 py-4">
+  <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <h1 class="font-inter text-base font-bold text-text-main">Recepciones</h1>
     <button
       (click)="router.navigate(['inventory','receptions', 'new'])"
-      class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium
-             hover:bg-blue-700 transition-colors whitespace-nowrap">
+      class="px-4 py-2 rounded-lg bg-btn-primary-bg text-btn-primary-text text-sm font-semibold
+             hover:bg-btn-primary-hover transition-colors duration-150 whitespace-nowrap shadow-sm">
       <span class="hidden sm:inline">Nueva recepción</span>
       <span class="sm:hidden">+ Nueva</span>
     </button>
@@ -15,7 +15,7 @@
 </div>
 
 <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
-<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-4">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-4">
 
   <!-- Filtros -->
   <app-reception-filter-bar
@@ -31,12 +31,11 @@
 
   <!-- Estado vacío con filtros activos -->
   @if (!loadingReceptions() && receptions().length === 0 && hasActiveFilters()) {
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10
-                flex flex-col items-center gap-3">
-      <span class="text-3xl opacity-30">📦</span>
-      <p class="text-sm text-gray-400">No hay recepciones con esos filtros.</p>
+    <div class="flex flex-col items-center gap-3 p-12 rounded border border-border bg-bg-surface shadow-sm">
+      <span class="text-3xl opacity-60">📦</span>
+      <p class="font-inter text-sm font-medium text-text-muted">No hay recepciones con esos filtros.</p>
       <button
-        class="text-sm text-blue-500 hover:underline"
+        class="font-inter text-xs font-bold text-accent-ui transition-colors duration-150 hover:underline"
         (click)="patchQuery({ dateFrom: undefined, dateTo: undefined,
                                status: undefined, brandId: undefined, page: 1 })">
         Limpiar filtros

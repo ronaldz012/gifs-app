@@ -1,35 +1,37 @@
 <li
-  class="row-enter bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden
-         lg:rounded-none lg:border-0 lg:shadow-none"
-  [style.animation-delay]="index() * 35 + 'ms'"
+  class="row-enter bg-bg-surface relative overflow-hidden border-b border-border transition-all duration-200 hover:shadow-md group"
+  [style.animation-delay.ms]="index() * 30"
 >
+  <!-- Indicador lateral izquierdo -->
+  <div class="absolute bottom-0 left-0 top-0 w-[4px] bg-accent-ui opacity-0 transition-opacity duration-150 group-hover:opacity-100 lg:block hidden"></div>
+
   <!-- ====== MOBILE ====== -->
   <div class="flex items-center gap-3 px-4 py-3.5 lg:hidden">
     <div class="flex flex-col min-w-0 flex-1">
-      <div class="flex items-center gap-2 mb-0.5">
+      <div class="flex items-center gap-2 mb-1">
         <span
           class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none"
           [class]="statusClasses(reception().status)"
         >{{ Status[reception().status] }}</span>
       </div>
-      <p class="text-sm font-semibold text-gray-800 truncate leading-tight">
+      <p class="truncate font-inter text-sm font-bold leading-tight text-text-main">
         {{ reception().brandNames.join(', ') || '—' }}
       </p>
-      <p class="text-xs text-gray-400 mt-0.5">
+      <p class="mt-1 font-inter text-xs text-text-muted">
         {{ reception().productVariantsCount }}
         {{ reception().productVariantsCount === 1 ? 'variante' : 'variantes' }}
         · {{ reception().totalItems }} uds
-        · <span class="font-medium text-gray-500">
+        · <span class="font-bold text-accent-ui">
             {{ reception().totalCost | currency:'BOB':'symbol':'1.2-2' }}
           </span>
-        · <span class="text-gray-300">
+        · <span class="text-text-soft">
             {{ reception().receivedAt | date:'dd/MM/yy' }}
           </span>
       </p>
       @if (reception().categoryNames.length) {
         <div class="flex flex-wrap gap-1 mt-1.5">
           @for (cat of reception().categoryNames; track cat) {
-            <span class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500">{{ cat }}</span>
+            <span class="rounded border border-border bg-bg-muted px-1.5 py-0.5 font-inter text-[10px] font-medium text-text-muted">{{ cat }}</span>
           }
         </div>
       }
@@ -38,16 +40,16 @@
       <button
         (click)="viewDetails.emit(reception().id)"
         title="Ver detalle"
-        class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
-               flex items-center justify-center text-sm
-               hover:border-gray-300 hover:text-gray-600 transition-colors"
-      >↗</button>
+        class="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-btn-secondary-bg text-btn-primary-bg hover:bg-btn-primary-bg hover:text-btn-primary-text transition-all duration-150"
+      >
+        <span class="material-icons text-base">open_in_new</span>
+      </button>
     </div>
   </div>
 
   <!-- ====== DESKTOP ====== -->
   <div
-    class="hidden lg:grid items-center px-4 py-2.5 hover:bg-gray-50/70 transition-colors group"
+    class="hidden lg:grid items-center px-4 py-2.5 hover:bg-bg-muted transition-colors duration-150"
     style="grid-template-columns: 7rem 1fr 9rem 6rem 5rem 7rem 5.5rem 3.5rem;"
   >
     <!-- Estado -->
@@ -57,52 +59,51 @@
     >{{ Status[reception().status] }}</span>
 
     <!-- Marcas -->
-    <p class="text-sm font-semibold text-gray-800 truncate pr-3">
+    <p class="truncate pr-4 font-inter text-sm font-semibold text-text-main group-hover:text-accent-ui transition-colors duration-150">
       {{ reception().brandNames.join(', ') || '—' }}
     </p>
 
     <!-- Categorías -->
     <div class="flex items-center gap-1 min-w-0 pr-2">
       @for (cat of reception().categoryNames.slice(0, 2); track cat) {
-        <span class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500 truncate max-w-[4rem]"
+        <span class="max-w-[4rem] truncate rounded border border-border bg-bg-muted px-1.5 py-0.5 font-inter text-[10px] font-medium text-text-muted"
               [title]="cat">{{ cat }}</span>
       }
       @if (reception().categoryNames.length > 2) {
-        <span class="text-[10px] text-gray-400">+{{ reception().categoryNames.length - 2 }}</span>
+        <span class="font-inter text-[10px] text-text-soft">+{{ reception().categoryNames.length - 2 }}</span>
       }
     </div>
 
     <!-- Variantes -->
-    <span class="text-xs text-gray-400 text-right pr-4">
+    <span class="pr-4 text-right font-inter text-xs font-medium text-text-soft">
       {{ reception().productVariantsCount }}
       {{ reception().productVariantsCount === 1 ? 'var.' : 'vars.' }}
     </span>
 
     <!-- Unidades -->
-    <span class="text-xs text-gray-500 font-medium text-right pr-4">
+    <span class="pr-4 text-right font-inter text-xs font-medium text-text-muted">
       {{ reception().totalItems }} uds
     </span>
 
     <!-- Costo -->
-    <span class="text-sm font-semibold text-gray-700 text-right pr-4">
+    <span class="pr-4 text-right font-inter text-sm font-extrabold text-accent-ui">
       {{ reception().totalCost | currency:'BOB':'symbol':'1.2-2' }}
     </span>
 
     <!-- Fecha -->
-    <span class="text-xs text-gray-400 text-right pr-4">
+    <span class="pr-4 text-right font-inter text-xs font-medium text-text-soft">
       {{ reception().receivedAt | date:'dd/MM/yy' }}
     </span>
 
     <!-- Acción -->
-    <div class="flex justify-end">
+    <div class="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity duration-150">
       <button
         (click)="viewDetails.emit(reception().id)"
         title="Ver detalle"
-        class="w-7 h-7 rounded-lg border border-transparent text-gray-300
-               flex items-center justify-center text-sm
-               group-hover:border-gray-200 group-hover:text-gray-500
-               hover:!border-gray-300 hover:!text-gray-700 transition-colors"
-      >↗</button>
+        class="flex h-8 w-8 items-center justify-center rounded border border-border bg-btn-secondary-bg text-text-muted hover:bg-btn-primary-bg hover:text-btn-primary-text hover:border-btn-primary-bg transition-all duration-150"
+      >
+        <span class="material-icons text-base leading-none">open_in_new</span>
+      </button>
     </div>
   </div>
 </li>

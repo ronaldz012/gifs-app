@@ -1,85 +1,66 @@
-<li class="row-enter bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden
-           lg:rounded-none lg:border-0 lg:shadow-none"
-    [style.animation-delay]="index() * 35 + 'ms'">
+<li class="row-enter bg-bg-surface relative overflow-hidden border-b border-border transition-all duration-200 hover:shadow-md">
 
-  <!-- ====== MOBILE: layout card original ====== -->
-  <div class="flex items-center gap-3 px-4 py-3.5 lg:hidden">
-    <div class="flex flex-col min-w-0 flex-1">
-      <div class="flex items-center gap-2 mb-0.5">
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px]
-                     font-medium leading-none bg-gray-50 text-gray-500 ring-1 ring-gray-200">
+  <!-- Indicador lateral izquierdo -->
+  <div class="absolute bottom-0 left-0 top-0 w-[4px] bg-accent-ui opacity-0 transition-opacity duration-150 group-hover:opacity-100 lg:block hidden"></div>
+
+  <!-- ====== MOBILE: Layout Card ====== -->
+  <div class="flex items-center gap-4 px-4 py-3.5 lg:hidden">
+    <div class="flex min-w-0 flex-1 flex-col">
+
+      <!-- Código -->
+      <div class="mb-1 flex items-center gap-2">
+        <span class="inline-flex items-center rounded border border-border bg-bg-muted px-2 py-0.5 font-mono text-xs font-bold text-text-muted">
           {{ product().internalCode || '—' }}
         </span>
       </div>
-      <p class="text-sm font-semibold text-gray-800 truncate leading-tight">
+
+      <p class="truncate font-inter text-sm font-bold leading-tight text-text-main">
         {{ product().name }}
       </p>
-      <p class="text-xs text-gray-400 mt-0.5">
-        {{ product().variantsCount }}
-        {{ product().variantsCount === 1 ? 'variante' : 'variantes' }}
+      <p class="mt-1 font-inter text-xs text-text-muted">
+        {{ product().variantsCount }} {{ product().variantsCount === 1 ? 'variante' : 'variantes' }}
         · {{ product().totalStock }} uds
-        · <span class="font-medium text-gray-500">
-            {{ product().displayPrice | currency:'BOB':'symbol':'1.2-2' }}
-          </span>
+        · <span class="font-bold text-accent-ui">{{ product().displayPrice | currency:'BOB':'symbol':'1.2-2' }}</span>
       </p>
-      <div class="flex flex-wrap gap-1 mt-1.5">
-        @if (product().brandName) {
-          <span class="px-1.5 py-0.5 rounded text-[10px] bg-blue-50 text-blue-500">
-            {{ product().brandName }}
-          </span>
-        }
-        @if (product().categoryName) {
-          <span class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500">
-            {{ product().categoryName }}
-          </span>
-        }
-      </div>
     </div>
-    <div class="flex gap-1.5 shrink-0">
-      <button (click)="viewDetail.emit(product().id)" title="Info y variantes"
-              class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
-               flex items-center justify-center hover:border-gray-300 hover:text-gray-600 transition-colors">
-        <span class="material-icons text-base leading-none">open_in_new</span>
+
+    <!-- Botones mobile -->
+    <div class="flex shrink-0 gap-1.5">
+      <button (click)="viewDetail.emit(product().id)"
+              class="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-btn-secondary-bg text-btn-primary-bg hover:bg-btn-primary-bg hover:text-btn-primary-text transition-all duration-150">
+        <span class="material-icons text-base">open_in_new</span>
       </button>
-      <button (click)="viewStock.emit(product().id)" title="Stock por sucursal"
-              class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
-               flex items-center justify-center hover:border-gray-300 hover:text-gray-600 transition-colors">
-        <span class="material-icons text-base leading-none">inventory_2</span>
-      </button>
-      <button (click)="viewMovements.emit(product().id)" title="Movimientos"
-              class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
-               flex items-center justify-center hover:border-gray-300 hover:text-gray-600 transition-colors">
-        <span class="material-icons text-base leading-none">history</span>
+      <button (click)="viewStock.emit(product().id)"
+              class="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-btn-secondary-bg text-btn-primary-bg hover:bg-btn-primary-bg hover:text-btn-primary-text transition-all duration-150">
+        <span class="material-icons text-base">inventory_2</span>
       </button>
     </div>
   </div>
 
-  <!-- ====== DESKTOP: fila densa tipo tabla ====== -->
-  <div class="hidden lg:grid items-center gap-0 px-4 py-2.5
-              hover:bg-gray-50/70 transition-colors group"
-       style="grid-template-columns: 7rem 1fr 10rem 7rem 5rem 6rem auto;">
+  <!-- ====== DESKTOP: Fila Densa Tipo Tabla ====== -->
+  <div class="group hidden items-center lg:grid px-4 py-3 transition-colors duration-150 hover:bg-bg-muted"
+       style="grid-template-columns: 9rem 1fr 13rem 8rem 6rem 7rem 7.5rem;">
 
-    <!-- Código -->
-    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium
-                 bg-gray-50 text-gray-500 ring-1 ring-gray-200 w-fit truncate">
+    <!-- Código: Token mono -->
+    <span class="inline-flex w-fit truncate items-center rounded border border-border bg-bg-muted px-2 py-0.5 font-mono text-xs font-bold text-text-muted">
       {{ product().internalCode || '—' }}
     </span>
 
     <!-- Nombre -->
-    <p class="text-sm font-semibold text-gray-800 truncate pr-4">
+    <p class="truncate pr-4 font-inter text-sm font-semibold text-text-main group-hover:text-accent-ui transition-colors duration-150">
       {{ product().name }}
     </p>
 
     <!-- Marca + Categoría -->
-    <div class="flex items-center gap-1.5 min-w-0">
+    <div class="flex min-w-0 items-center gap-1.5">
       @if (product().brandName) {
-        <span class="px-1.5 py-0.5 rounded text-[10px] bg-blue-50 text-blue-500 truncate max-w-[5rem]"
+        <span class="max-w-24 truncate rounded border border-border bg-bg-muted px-2 py-0.5 font-inter text-xs font-medium text-text-main"
               [title]="product().brandName">
           {{ product().brandName }}
         </span>
       }
       @if (product().categoryName) {
-        <span class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500 truncate max-w-[5rem]"
+        <span class="max-w-24 truncate rounded border border-border bg-feedback-info px-2 py-0.5 font-inter text-xs font-medium text-feedback-info-text"
               [title]="product().categoryName">
           {{ product().categoryName }}
         </span>
@@ -87,48 +68,34 @@
     </div>
 
     <!-- Variantes -->
-    <span class="text-xs text-gray-400 text-right pr-4">
-      {{ product().variantsCount }}
-      {{ product().variantsCount === 1 ? 'variante' : 'variantes' }}
+    <span class="pr-4 text-right font-inter text-xs font-medium text-text-soft">
+      {{ product().variantsCount }} {{ product().variantsCount === 1 ? 'variante' : 'variantes' }}
     </span>
 
-    <!-- Stock -->
-    <span class="text-xs font-medium text-right pr-4"
+    <!-- Stock: semántica de colores por cantidad -->
+    <span class="pr-4 text-right font-inter text-sm font-bold"
           [class]="product().totalStock === 0
-            ? 'text-red-400'
+            ? 'text-feedback-error-text'
             : product().totalStock < 5
-              ? 'text-amber-500'
-              : 'text-gray-600'">
+              ? 'text-feedback-warning-text'
+              : 'text-feedback-success-text'">
       {{ product().totalStock }} uds
     </span>
 
     <!-- Precio -->
-    <span class="text-sm font-semibold text-gray-700 text-right pr-4">
+    <span class="pr-4 text-right font-inter text-sm font-extrabold text-accent-ui">
       {{ product().displayPrice | currency:'BOB':'symbol':'1.2-2' }}
     </span>
 
     <!-- Acciones -->
-    <div class="flex gap-1 shrink-0">
+    <div class="flex shrink-0 justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity duration-150">
       <button (click)="viewDetail.emit(product().id)" title="Info y variantes"
-              class="w-7 h-7 rounded-lg border border-transparent text-gray-300
-               flex items-center justify-center
-               group-hover:border-gray-200 group-hover:text-gray-500
-               hover:border-gray-300! hover:text-gray-700! transition-colors">
-        <span class="material-icons text-[15px] leading-none">open_in_new</span>
+              class="flex h-8 w-8 items-center justify-center rounded border border-border bg-btn-secondary-bg text-text-muted hover:bg-btn-primary-bg hover:text-btn-primary-text hover:border-btn-primary-bg transition-all duration-150">
+        <span class="material-icons text-base leading-none">open_in_new</span>
       </button>
       <button (click)="viewStock.emit(product().id)" title="Stock por sucursal"
-              class="w-7 h-7 rounded-lg border border-transparent text-gray-300
-               flex items-center justify-center
-               group-hover:border-gray-200 group-hover:text-gray-500
-               hover:border-gray-300! hover:text-gray-700! transition-colors">
-        <span class="material-icons text-[15px] leading-none">inventory_2</span>
-      </button>
-      <button (click)="viewMovements.emit(product().id)" title="Movimientos"
-              class="w-7 h-7 rounded-lg border border-transparent text-gray-300
-               flex items-center justify-center
-               group-hover:border-gray-200 group-hover:text-gray-500
-               hover:border-gray-300! hover:text-gray-700! transition-colors">
-        <span class="material-icons text-[15px] leading-none">history</span>
+              class="flex h-8 w-8 items-center justify-center rounded border border-border bg-btn-secondary-bg text-text-muted hover:bg-btn-primary-bg hover:text-btn-primary-text hover:border-btn-primary-bg transition-all duration-150">
+        <span class="material-icons text-base leading-none">inventory_2</span>
       </button>
     </div>
   </div>

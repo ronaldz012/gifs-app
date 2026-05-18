@@ -5,7 +5,7 @@ import {RouterOutlet} from '@angular/router';
   selector: 'app-products-page',
   imports: [RouterOutlet],
   template: `
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
       <!-- Aquí es donde se cargarán los componentes de las rutas hijas -->
       <router-outlet />
     </div>

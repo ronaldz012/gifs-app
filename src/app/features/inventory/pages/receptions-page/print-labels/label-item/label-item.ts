@@ -1,17 +1,14 @@
 import {
-  AfterViewInit,
   Component,
-  ElementRef,
   computed,
   input,
-  viewChild,
 } from '@angular/core';
-import * as QRCode from 'qrcode'; // Reemplazamos JsBarcode
 import { GenderLabel, LabelData } from '../../../../interfaces/reception-labels';
+import { QRCodeComponent } from 'angularx-qrcode';
 
 @Component({
   selector: 'app-label-item',
-  standalone: true,
+  imports: [QRCodeComponent],
   template: `
     <div class="label">
       <!-- Columna Izquierda: Información -->
@@ -38,7 +35,13 @@ import { GenderLabel, LabelData } from '../../../../interfaces/reception-labels'
 
       <!-- Columna Derecha: QR Gigante -->
       <div class="qr-side">
-        <canvas #qrcode></canvas>
+        <qrcode
+          [qrdata]="label().sku"
+          [width]="150"
+          [margin]="0"
+          [errorCorrectionLevel]="'M'"
+          elementType="canvas"
+        ></qrcode>
       </div>
     </div>
   `,
@@ -145,38 +148,25 @@ import { GenderLabel, LabelData } from '../../../../interfaces/reception-labels'
       flex-shrink: 0;
     }
 
-    canvas {
+    qrcode {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    qrcode ::ng-deep canvas,
+    qrcode ::ng-deep img {
       width: 100% !important;
       height: 100% !important;
+      display: block;
     }
     `,
   ],
 })
-export class LabelItem implements AfterViewInit {
+export class LabelItem {
   label = input.required<LabelData>();
-  private qrCodeEl = viewChild<ElementRef<HTMLCanvasElement>>('qrcode');
   genderLabel = computed(() => GenderLabel[this.label().gender]);
-
-  ngAfterViewInit(): void {
-    this.generateQR();
-  }
-
-  async generateQR() {
-    const canvas = this.qrCodeEl()?.nativeElement;
-    if (!canvas) return;
-
-    try {
-      await QRCode.toCanvas(canvas, this.label().sku, {
-        margin: 0,
-        width: 150, // Resolución interna
-        color: {
-          dark: '#000000',
-          light: '#ffffff',
-        },
-        errorCorrectionLevel: 'M', // Nivel medio para que sea fácil de leer pero robusto
-      });
-    } catch (err) {
-      console.error('Error generando QR:', err);
-    }
-  }
 }
+
