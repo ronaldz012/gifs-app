@@ -16,10 +16,10 @@ interface StatusPill {
   selector: 'app-transfer-filter-bar',
   imports: [DateRangeFilter],
   template: `
-    <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-2 items-stretch sm:items-center">
+    <div class="flex flex-col gap-3 sm:gap-3 items-stretch sm:items-start w-full">
 
-      <!-- Status pills -->
-      <div class="flex flex-wrap items-center gap-1.5">
+      <!-- Fila 1: Status pills -->
+      <div class="flex flex-wrap items-center gap-1.5 w-full">
         @for (pill of statusPills; track pill.value) {
           <button
             class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-lg border transition-colors whitespace-nowrap text-center"
@@ -34,57 +34,57 @@ interface StatusPill {
         }
       </div>
 
-      <!-- Separador -->
-      <div class="hidden sm:block w-px h-6 bg-gray-200"></div>
+      <!-- Fila 2: Resto de filtros -->
+      <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-2 w-full">
+        <!-- Direction toggle -->
+        <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 w-full sm:w-auto">
+          <button
+            class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors text-center"
+            [class]="params().direction === undefined
+              ? 'bg-white text-gray-800 font-medium shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'"
+            (click)="emit({ direction: undefined, page: 1 })">
+            Todas
+          </button>
+          <button
+            class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors text-center"
+            [class]="params().direction === Direction.Salida
+              ? 'bg-white text-gray-800 font-medium shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'"
+            (click)="emit({ direction: Direction.Salida, page: 1 })">
+            ↑ Salientes
+          </button>
+          <button
+            class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors text-center"
+            [class]="params().direction === Direction.Entrada
+              ? 'bg-white text-gray-800 font-medium shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'"
+            (click)="emit({ direction: Direction.Entrada, page: 1 })">
+            ↓ Entrantes
+          </button>
+        </div>
 
-      <!-- Direction toggle -->
-      <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 w-full sm:w-auto">
-        <button
-          class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors text-center"
-          [class]="params().direction === undefined
-            ? 'bg-white text-gray-800 font-medium shadow-sm'
-            : 'text-gray-500 hover:text-gray-700'"
-          (click)="emit({ direction: undefined, page: 1 })">
-          Todas
-        </button>
-        <button
-          class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors text-center"
-          [class]="params().direction === Direction.Salida
-            ? 'bg-white text-gray-800 font-medium shadow-sm'
-            : 'text-gray-500 hover:text-gray-700'"
-          (click)="emit({ direction: Direction.Salida, page: 1 })">
-          ↑ Salientes
-        </button>
-        <button
-          class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors text-center"
-          [class]="params().direction === Direction.Entrada
-            ? 'bg-white text-gray-800 font-medium shadow-sm'
-            : 'text-gray-500 hover:text-gray-700'"
-          (click)="emit({ direction: Direction.Entrada, page: 1 })">
-          ↓ Entrantes
-        </button>
+        <!-- Separador -->
+        <div class="hidden sm:block w-px h-6 bg-gray-200"></div>
+
+        <!-- Rango de fechas -->
+        <div class="w-full sm:w-auto min-w-[200px]">
+          <app-date-range-filter
+            [from]="params().dateFrom"
+            [to]="params().dateTo"
+            (rangeChange)="emit({ dateFrom: $event.from, dateTo: $event.to, page: 1 })" />
+        </div>
+
+        <!-- Clear -->
+        @if (hasActiveFilters()) {
+          <button
+            class="w-full sm:w-auto px-3 py-1.5 sm:py-1 text-sm sm:text-xs text-gray-400 hover:text-gray-600
+                   hover:bg-gray-100 rounded-xl sm:rounded-lg transition-colors border border-dashed border-gray-300 sm:border-transparent bg-white sm:bg-transparent"
+            (click)="clearAll()">
+            ✕ Limpiar
+          </button>
+        }
       </div>
-
-      <!-- Separador -->
-      <div class="hidden sm:block w-px h-6 bg-gray-200"></div>
-
-      <!-- Rango de fechas -->
-      <div class="w-full sm:w-auto flex-1 min-w-[200px]">
-        <app-date-range-filter
-          [from]="params().dateFrom"
-          [to]="params().dateTo"
-          (rangeChange)="emit({ dateFrom: $event.from, dateTo: $event.to, page: 1 })" />
-      </div>
-
-      <!-- Clear -->
-      @if (hasActiveFilters()) {
-        <button
-          class="w-full sm:w-auto px-3 py-1.5 sm:py-1 text-sm sm:text-xs text-gray-400 hover:text-gray-600
-                 hover:bg-gray-100 rounded-xl sm:rounded-lg transition-colors border border-dashed border-gray-300 sm:border-transparent bg-white sm:bg-transparent"
-          (click)="clearAll()">
-          ✕ Limpiar
-        </button>
-      }
 
     </div>
   `,
