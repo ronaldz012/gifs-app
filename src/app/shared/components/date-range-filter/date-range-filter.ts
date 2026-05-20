@@ -14,13 +14,13 @@ type DateShortcut = 'today' | 'week' | 'month' | 'custom';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="flex items-center gap-2 flex-wrap">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
 
       <!-- Shortcuts -->
-      <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+      <div class="grid grid-cols-2 sm:flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 w-full sm:w-auto">
         @for (s of shortcuts; track s.value) {
           <button
-            class="px-2.5 py-1 text-xs rounded-md transition-colors whitespace-nowrap"
+            class="px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors whitespace-nowrap text-center"
             [class]="activeShortcut() === s.value
               ? 'bg-white text-gray-800 font-medium shadow-sm'
               : 'text-gray-500 hover:text-gray-700'"
@@ -32,25 +32,29 @@ type DateShortcut = 'today' | 'week' | 'month' | 'custom';
 
       <!-- Custom date inputs — visible solo cuando activeShortcut = 'custom' -->
       @if (activeShortcut() === 'custom') {
-        <div class="flex items-center gap-1.5">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 w-full sm:w-auto">
           <input
             type="date"
+            class="px-2 py-1.5 sm:py-1 text-sm border border-gray-200 rounded-md w-full sm:w-auto"
             [max]="fromMax()"
             [ngModel]="localFrom()"
             (ngModelChange)="onFromChange($event)" />
-          <span class="text-gray-400 text-xs">→</span>
+          <span class="hidden sm:inline text-gray-400 text-xs">→</span>
           <input
             type="date"
+            class="px-2 py-1.5 sm:py-1 text-sm border border-gray-200 rounded-md w-full sm:w-auto"
             [min]="toMin()"
             [ngModel]="localTo()"
             (ngModelChange)="onToChange($event)" />
         </div>
       } @else if (activeShortcut() !== 'custom' && (from() || to())) {
         <!-- Badge mostrando rango activo de shortcut -->
-        <span class="text-xs text-indigo-600 bg-indigo-50 border border-indigo-200
-                     px-2 py-1 rounded-lg font-medium">
-          {{ formatActiveBadge() }}
-        </span>
+        <div class="flex justify-center sm:block">
+          <span class="text-xs text-indigo-600 bg-indigo-50 border border-indigo-200
+                       px-2 py-1 rounded-lg font-medium inline-block text-center">
+            {{ formatActiveBadge() }}
+          </span>
+        </div>
       }
 
     </div>
