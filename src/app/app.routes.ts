@@ -23,7 +23,7 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    loadComponent: () => import('@layout/dashboard/dashboard'),
+    loadComponent: () => import('@layout/maint-layout/main-layout'),
     children: [
       // Home
       {

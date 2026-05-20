@@ -1,36 +1,43 @@
-<div class="flex flex-wrap gap-2 items-center">
+<div class="flex flex-wrap items-center gap-2">
 
   <!-- Search -->
   <div class="relative flex-1 min-w-[200px]">
-    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-    <input type="text" placeholder="Buscar por nombre o código..." class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl bg-white
-                 focus:outline-none focus:ring-2 focus:ring-indigo-300 placeholder:text-gray-400"
-      [ngModel]="searchValue()" (ngModelChange)="onSearch($event)" />
+    <span class="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-text-soft">🔍</span>
+    <input
+      type="text"
+      placeholder="Buscar por nombre o código..."
+      class="w-full pl-9 pr-3 py-2 text-sm bg-bg-muted border border-border rounded-xl text-text-main placeholder:text-text-soft focus:outline-none focus:ring-2 focus:ring-ring-focus-ring transition-colors"
+      [ngModel]="searchValue()"
+      (ngModelChange)="onSearch($event)"
+    />
   </div>
 
   <!-- Categoría -->
-  <select class="py-2 px-3 text-sm border border-gray-200 rounded-xl bg-white
-               focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-600"
-    [ngModel]="params().categoryId ?? ''" (ngModelChange)="emit({ categoryId: $event || undefined, page: 1 })">
+  <select
+    class="py-2 px-3 text-sm bg-bg-muted border border-border rounded-xl text-text-muted focus:outline-none focus:ring-2 focus:ring-ring-focus-ring transition-colors"
+    [ngModel]="params().categoryId ?? ''"
+    (ngModelChange)="emit({ categoryId: $event || undefined, page: 1 })">
     <option value="">Todas las categorías</option>
     @for (c of categories(); track c.id) {
-    <option [value]="c.id">{{ c.name }}</option>
+      <option [value]="c.id">{{ c.name }}</option>
     }
   </select>
 
   <!-- Marca -->
-  <select class="py-2 px-3 text-sm border border-gray-200 rounded-xl bg-white
-               focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-600" [ngModel]="params().brandId ?? ''"
+  <select
+    class="py-2 px-3 text-sm bg-bg-muted border border-border rounded-xl text-text-muted focus:outline-none focus:ring-2 focus:ring-ring-focus-ring transition-colors"
+    [ngModel]="params().brandId ?? ''"
     (ngModelChange)="emit({ brandId: $event || undefined, page: 1 })">
     <option value="">Todas las marcas</option>
     @for (b of brands(); track b.id) {
-    <option [value]="b.id">{{ b.name }}</option>
+      <option [value]="b.id">{{ b.name }}</option>
     }
   </select>
 
   <!-- Género -->
-  <select class="py-2 px-3 text-sm border border-gray-200 rounded-xl bg-white
-               focus:outline-none focus:ring-2 focus:ring-indigo-300 text-gray-600" [ngModel]="params().gender ?? ''"
+  <select
+    class="py-2 px-3 text-sm bg-bg-muted border border-border rounded-xl text-text-muted focus:outline-none focus:ring-2 focus:ring-ring-focus-ring transition-colors"
+    [ngModel]="params().gender ?? ''"
     (ngModelChange)="emit({ gender: $event || undefined, page: 1 })">
     <option value="">Todos los géneros</option>
     <option [value]="Gender.Hombre">Masculino</option>
@@ -39,9 +46,11 @@
   </select>
 
   <!-- Low stock toggle -->
-  <button class="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl border transition-colors" [class]="params().lowStock
-          ? 'bg-amber-50 border-amber-300 text-amber-700 font-medium'
-          : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'"
+  <button
+    class="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl border transition-colors"
+    [class]="params().lowStock
+      ? 'bg-feedback-warning border-feedback-warning-text text-feedback-warning-text font-medium'
+      : 'bg-bg-muted border-border text-text-soft hover:bg-bg-surface hover:text-text-muted'"
     (click)="emit({ lowStock: !params().lowStock || undefined, page: 1 })"
     title="Mostrar solo productos con stock bajo o agotado">
     ⚠️ Stock bajo
@@ -49,9 +58,11 @@
 
   <!-- Clear filters -->
   @if (hasActiveFilters()) {
-  <button class="px-3 py-2 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-100
-                 rounded-xl transition-colors" (click)="clearAll()">
-    ✕ Limpiar
-  </button>
+    <button
+      class="px-3 py-2 text-sm bg-btn-secondary-bg border border-border rounded-xl text-text-soft hover:bg-btn-secondary-hover hover:text-text-muted transition-colors"
+      (click)="clearAll()">
+      ✕ Limpiar
+    </button>
   }
+
 </div>

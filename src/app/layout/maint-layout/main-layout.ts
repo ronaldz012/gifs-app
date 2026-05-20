@@ -4,8 +4,8 @@ import { RouterOutlet } from '@angular/router';
 import Topbar from '../topbar/topbar';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-main-layout',
   imports: [sidebar, RouterOutlet, Topbar],
-  templateUrl: './dashboard.html',
+  templateUrl: './main-layout.html',
 })
-export default class Dashboard { }
+export default class MainLayout { }
