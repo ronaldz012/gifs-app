@@ -41,6 +41,7 @@
   --bg-muted:   #F4F4F4;   /* Gris exacto Cal.com — fondos secundarios, inputs */
 
   --bg-layout-topbar: #F4F4F4;  /* Topbar idéntico a Cal.com */
+  --overlay-bg: rgba(0, 0, 0, 0.60);
 
   /* ─────────────────────────────
      TEXTO — Contraste Cal.com
@@ -64,6 +65,9 @@
   --btn-primary-bg:   var(--raw-navy);
   --btn-primary-hover:var(--raw-navy-deep);
   --btn-primary-text: #FFFFFF;
+  
+   --btn-danger-bg:   #FF492C;
+   --btn-danger-hover:#E03820;
 
   --btn-secondary-bg:   #FFFFFF;
   --btn-secondary-hover:#F4F4F4;
@@ -125,6 +129,7 @@
   --bg-surface: #1C1C1C;   /* Reemplaza el blanco de tarjetas */
   --bg-elevated:#242424;   /* Modales, dropdowns */
   --bg-muted:   #2A2A2A;   /* Inputs, headers de tabla — reemplaza #F4F4F4 */
+  --overlay-bg: rgba(0, 0, 0, 0.60);
 
   --bg-layout-topbar: rgba(20, 20, 20, 0.85);
 
@@ -153,6 +158,9 @@
   --btn-primary-bg:   #4A7AB5;
   --btn-primary-hover:#5C8BC4;
   --btn-primary-text: #FFFFFF;
+
+  --btn-danger-bg:   #E8402A;
+  --btn-danger-hover:#D03520;
 
   --btn-secondary-bg:   #2A2A2A;
   --btn-secondary-hover:#333333;
@@ -218,6 +226,7 @@
   --color-bg-surface:  var(--bg-surface);
   --color-bg-elevated: var(--bg-elevated);
   --color-bg-muted:    var(--bg-muted);
+  --color-overlay: var(--overlay-bg);
 
   /* Text */
   --color-text-main:  var(--text-main);
@@ -236,6 +245,9 @@
   --color-btn-secondary-bg:    var(--btn-secondary-bg);
   --color-btn-secondary-hover: var(--btn-secondary-hover);
   --color-btn-secondary-text:  var(--btn-secondary-text);
+
+    --color-btn-danger-bg:    var(--btn-danger-bg);
+  --color-btn-danger-hover: var(--btn-danger-hover);
 
   /* Interactive */
   --color-accent-ui:      var(--accent-ui);
@@ -268,7 +280,7 @@
   --color-layout-topbar:           var(--bg-layout-topbar);
 }
 
-
+@import "./components.css";
 
 
 .material-icons {

@@ -24,61 +24,60 @@ import {UpdateProductVariantDto} from '../../../../dtos/products/update-product-
   template: `
     <!-- Overlay -->
     <div
-      class="fixed inset-0 bg-black/30 z-40 flex items-end sm:items-center justify-center
-             backdrop-blur-[2px]"
+      class="fixed inset-0 bg-overlay z-40 flex items-end sm:items-center justify-center backdrop-blur-[2px]"
       (click)="close.emit()"
     >
       <!-- Sheet / Dialog -->
       <div
-        class="modal-enter w-full sm:w-[420px] bg-white
-               rounded-t-2xl sm:rounded-2xl shadow-xl z-50
+        class="modal-enter w-full sm:w-[420px] bg-bg-surface
+               rounded-t-2xl sm:rounded-2xl shadow-lg z-50
                px-5 pt-5 pb-7 sm:pb-5"
         (click)="$event.stopPropagation()"
       >
         <!-- Handle (mobile) -->
-        <div class="sm:hidden w-10 h-1 rounded-full bg-gray-200 mx-auto mb-5"></div>
+        <div class="sm:hidden w-10 h-1 rounded-full bg-bg-muted mx-auto mb-5"></div>
 
-        <p class="text-sm font-semibold text-gray-800 mb-0.5">Editar variante</p>
-        <p class="font-mono text-[11px] text-gray-400 mb-5">{{ variant().sku }}</p>
+        <p class="text-sm font-semibold text-text-main mb-0.5">Editar variante</p>
+        <p class="font-mono text-[11px] text-text-soft mb-5">{{ variant().sku }}</p>
 
         <div class="flex flex-col gap-4">
 
           <!-- Talla -->
           <div>
-            <label class="block text-xs text-gray-400 mb-1">Talla</label>
+            <label class="field-label block">Talla</label>
             <input
               type="text"
               [(ngModel)]="form.size"
-              class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg
-                     focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
+                     focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
               placeholder="Ej: S, M, L, XL, 42..."
             />
           </div>
 
           <!-- Color -->
           <div>
-            <label class="block text-xs text-gray-400 mb-1">Color</label>
+            <label class="field-label block">Color</label>
             <input
               type="text"
               [(ngModel)]="form.color"
-              class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg
-                     focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
+                     focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
               placeholder="Ej: Negro, Blanco, Azul marino..."
             />
           </div>
 
           <!-- Precio -->
           <div>
-            <label class="block text-xs text-gray-400 mb-1">Precio</label>
+            <label class="field-label block">Precio</label>
             <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">BOB</span>
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-text-soft">BOB</span>
               <input
                 type="number"
                 [(ngModel)]="form.price"
                 min="0.01"
                 step="0.01"
-                class="w-full pl-10 pr-3 py-2 text-sm border border-gray-200 rounded-lg
-                       focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+                class="w-full pl-10 pr-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
+                       focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
                 placeholder="0.00"
               />
             </div>
@@ -86,12 +85,14 @@ import {UpdateProductVariantDto} from '../../../../dtos/products/update-product-
 
           <!-- Descripción -->
           <div>
-            <label class="block text-xs text-gray-400 mb-1">Descripción <span class="text-gray-300">(opcional)</span></label>
+            <label class="field-label block">
+              Descripción <span class="text-text-soft/50">(opcional)</span>
+            </label>
             <textarea
               [(ngModel)]="form.description"
               rows="2"
-              class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg resize-none
-                     focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg resize-none
+                     focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
               placeholder="Detalles adicionales de la variante..."
             ></textarea>
           </div>
@@ -100,19 +101,13 @@ import {UpdateProductVariantDto} from '../../../../dtos/products/update-product-
 
         <!-- Actions -->
         <div class="flex flex-col sm:flex-row gap-3 mt-6">
-          <button
-            (click)="close.emit()"
-            class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500
-                   text-sm font-medium hover:bg-gray-50 transition-colors"
-          >
+          <button (click)="close.emit()" class="btn-secondary flex-1 py-2.5 rounded-xl">
             Cancelar
           </button>
           <button
             (click)="onSave()"
             [disabled]="submitting()"
-            class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white
-                   text-sm font-medium hover:bg-blue-700 transition-colors
-                   disabled:opacity-40 disabled:cursor-not-allowed"
+            class="btn-primary flex-1 py-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
           >
             @if (submitting()) {
               <span class="opacity-70">Guardando...</span>

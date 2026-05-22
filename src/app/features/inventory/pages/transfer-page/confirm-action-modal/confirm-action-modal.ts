@@ -18,40 +18,33 @@ import { Component, input, output } from '@angular/core';
  **/
 @Component({
   selector: 'app-confirm-action-modal',
-  template: `
+template: `
     <!-- Overlay -->
     <div
-      class="fixed inset-0 bg-black/30 z-40 flex items-end sm:items-center justify-center
-             backdrop-blur-[2px]"
+      class="fixed inset-0 bg-overlay z-40 flex items-end sm:items-center justify-center backdrop-blur-[2px]"
       (click)="close.emit()"
     >
       <!-- Sheet / Dialog -->
       <div
-        class="confirm-enter w-full sm:w-auto sm:min-w-80 bg-white
-               rounded-t-2xl sm:rounded-2xl shadow-xl z-50
+        class="confirm-enter w-full sm:w-auto sm:min-w-80 bg-bg-surface
+               rounded-t-2xl sm:rounded-2xl shadow-lg z-50
                px-5 pt-5 pb-7 sm:pb-5"
         (click)="$event.stopPropagation()"
       >
         <!-- Handle (mobile) -->
-        <div class="sm:hidden w-10 h-1 rounded-full bg-gray-200 mx-auto mb-5"></div>
+        <div class="sm:hidden w-10 h-1 rounded-full bg-bg-muted mx-auto mb-5"></div>
 
-        <p class="text-sm font-semibold text-gray-800 mb-1">{{ title() }}</p>
-        <p class="text-xs text-gray-400 mb-5">{{ description() }}</p>
+        <p class="text-sm font-semibold text-text-main mb-1">{{ title() }}</p>
+        <p class="text-xs text-text-soft mb-5">{{ description() }}</p>
 
         <div class="flex flex-col sm:flex-row gap-3">
-          <button
-            (click)="close.emit()"
-            class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500
-                   text-sm font-medium hover:bg-gray-50 transition-colors"
-          >
+          <button (click)="close.emit()" class="btn-secondary flex-1 py-2.5 rounded-xl">
             {{ cancelLabel() }}
           </button>
           <button
             (click)="confirm.emit()"
             [disabled]="submitting()"
-            class="flex-1 py-2.5 rounded-xl text-white text-sm font-medium
-                   transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            [class]="confirmButtonClass()"
+            class="btn-danger flex-1 py-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
           >
             @if (submitting()) {
               <span class="opacity-70">{{ submittingLabel() }}</span>
@@ -63,7 +56,7 @@ import { Component, input, output } from '@angular/core';
 
         <button
           (click)="close.emit()"
-          class="w-full mt-3 py-2 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          class="w-full mt-3 py-2 text-xs text-text-soft hover:text-text-muted transition-colors"
         >
           Cerrar
         </button>

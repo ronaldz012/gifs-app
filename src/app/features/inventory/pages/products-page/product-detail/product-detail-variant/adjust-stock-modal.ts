@@ -31,22 +31,21 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
   template: `
     <!-- Overlay -->
     <div
-      class="fixed inset-0 bg-black/30 z-40 flex items-end sm:items-center justify-center
-             backdrop-blur-[2px]"
+      class="fixed inset-0 bg-black/30 z-40 flex items-end sm:items-center justify-center backdrop-blur-[2px]"
       (click)="close.emit()"
     >
       <!-- Sheet / Dialog -->
       <div
-        class="modal-enter w-full sm:w-[380px] bg-white
-               rounded-t-2xl sm:rounded-2xl shadow-xl z-50
+        class="modal-enter w-full sm:w-[380px] bg-bg-surface
+               rounded-t-2xl sm:rounded-2xl shadow-lg z-50
                px-5 pt-5 pb-7 sm:pb-5"
         (click)="$event.stopPropagation()"
       >
         <!-- Handle (mobile) -->
-        <div class="sm:hidden w-10 h-1 rounded-full bg-gray-200 mx-auto mb-5"></div>
+        <div class="sm:hidden w-10 h-1 rounded-full bg-bg-muted mx-auto mb-5"></div>
 
-        <p class="text-sm font-semibold text-gray-800 mb-0.5">Ajustar stock</p>
-        <p class="font-mono text-[11px] text-gray-400 mb-5">{{ variant().sku }}</p>
+        <p class="text-sm font-semibold text-text-main mb-0.5">Ajustar stock</p>
+        <p class="font-mono text-[11px] text-text-soft mb-5">{{ variant().sku }}</p>
 
         <!-- Stock adjuster -->
         <div class="flex items-center justify-center gap-4 py-4 mb-2">
@@ -54,21 +53,20 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
             type="button"
             (click)="decrement()"
             [disabled]="newStock() <= 0"
-            class="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center
-                   text-gray-500 hover:border-gray-300 hover:bg-gray-50 transition-colors
+            class="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center
+                   text-text-muted hover:border-border-strong hover:bg-bg-muted transition-colors
                    disabled:opacity-30 disabled:cursor-not-allowed text-lg font-light"
           >−</button>
 
           <div class="text-center min-w-[80px]">
-            <p class="text-4xl font-bold tabular-nums"
-               [class]="deltaClass()">{{ newStock() }}</p>
-            <p class="text-xs text-gray-400 mt-1">
+            <p class="text-4xl font-bold tabular-nums" [class]="deltaClass()">{{ newStock() }}</p>
+            <p class="text-xs text-text-soft mt-1">
               @if (delta() === 0) {
                 Sin cambios
               } @else if (delta() > 0) {
-                <span class="text-emerald-600">+{{ delta() }} unidades</span>
+                <span class="text-feedback-success-text">+{{ delta() }} unidades</span>
               } @else {
-                <span class="text-red-500">{{ delta() }} unidades</span>
+                <span class="text-feedback-error-text">{{ delta() }} unidades</span>
               }
             </p>
           </div>
@@ -76,53 +74,47 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
           <button
             type="button"
             (click)="increment()"
-            class="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center
-                   text-gray-500 hover:border-gray-300 hover:bg-gray-50 transition-colors
+            class="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center
+                   text-text-muted hover:border-border-strong hover:bg-bg-muted transition-colors
                    text-lg font-light"
           >+</button>
         </div>
 
         <!-- Current stock reference -->
-        <p class="text-center text-xs text-gray-400 mb-5">
-          Stock actual: <span class="font-medium text-gray-600">{{ variant().stock }} u</span>
+        <p class="text-center text-xs text-text-soft mb-5">
+          Stock actual: <span class="font-medium text-text-muted">{{ variant().stock }} u</span>
         </p>
 
         <!-- Notes -->
         <div>
-          <label class="block text-xs text-gray-400 mb-1">
-            Motivo del ajuste <span class="text-gray-300">(mínimo 3 caracteres)</span>
+          <label class="block text-xs text-text-soft mb-1">
+            Motivo del ajuste <span class="text-text-soft/60">(mínimo 3 caracteres)</span>
           </label>
           <textarea
             [value]="notes()"
             (input)="notes.set($any($event.target).value)"
             rows="2"
             class="w-full px-3 py-2 text-sm border rounded-lg resize-none transition-colors
-                   focus:outline-none focus:ring-2 focus:ring-blue-100"
+                   focus:outline-none focus:ring-2"
             [class]="notesInvalid()
-              ? 'border-red-300 focus:border-red-300 focus:ring-red-100'
-              : 'border-gray-200 focus:border-blue-300'"
+              ? 'border-feedback-error-text focus:ring-feedback-error'
+              : 'border-border focus:border-border-strong focus:ring-ring-focus-ring'"
             placeholder="Ej: Conteo físico, corrección de error, devolución..."
           ></textarea>
           @if (notesInvalid()) {
-            <p class="text-xs text-red-400 mt-1">El motivo es obligatorio (mínimo 3 caracteres).</p>
+            <p class="text-xs text-feedback-error-text mt-1">El motivo es obligatorio (mínimo 3 caracteres).</p>
           }
         </div>
 
         <!-- Actions -->
         <div class="flex flex-col sm:flex-row gap-3 mt-5">
-          <button
-            (click)="close.emit()"
-            class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-500
-                   text-sm font-medium hover:bg-gray-50 transition-colors"
-          >
+          <button (click)="close.emit()" class="btn-secondary flex-1 py-2.5 rounded-xl">
             Cancelar
           </button>
           <button
             (click)="onSave()"
             [disabled]="submitting() || !canSave()"
-            class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white
-                   text-sm font-medium hover:bg-blue-700 transition-colors
-                   disabled:opacity-40 disabled:cursor-not-allowed"
+            class="btn-primary flex-1 py-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
           >
             @if (submitting()) {
               <span class="opacity-70">Guardando...</span>
@@ -158,11 +150,11 @@ export class AdjustStockModal implements OnInit {
   delta = computed(() => this.newStock() - this.variant().stock);
 
   deltaClass = computed(() => {
-    const d = this.delta();
-    if (d > 0) return 'text-emerald-600';
-    if (d < 0) return 'text-red-500';
-    return 'text-gray-800';
-  });
+  const d = this.delta();
+  if (d > 0) return 'text-feedback-success-text';
+  if (d < 0) return 'text-feedback-error-text';
+  return 'text-text-main';
+});
 
   notesInvalid = computed(() => this.touched() && this.notes().trim().length < 3);
   canSave      = computed(() => this.notes().trim().length >= 3);

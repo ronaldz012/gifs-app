@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* ...todo tu :root y .dark... */
+
+@utility btn {
+  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+@utility btn-primary {
+  @apply btn bg-btn-primary-bg text-btn-primary-text hover:bg-btn-primary-hover;
+}
+
+@utility btn-secondary {
+  @apply btn bg-btn-secondary-bg text-btn-secondary-text border border-border-strong hover:bg-btn-secondary-hover;
+}
+
+@utility btn-sm {
+  @apply px-3 py-1.5 text-sm;
+}
+@utility btn-danger {
+  @apply btn bg-btn-danger-bg text-white hover:bg-btn-danger-hover;
+}
+@utility btn-icon {
+  @apply w-7 h-7 rounded-lg flex items-center justify-center text-text-soft transition-colors;
+}
+
+@utility btn-icon-md {
+  @apply w-8 h-8 rounded-lg border border-border flex items-center justify-center text-text-soft transition-colors;
+}
+
+@utility field-label {
+  @apply text-[11px] text-text-soft mb-0.5;
+}
+
+@utility field-value {
+  @apply text-sm font-medium text-text-main;
+}
+@utility section-title {
+  @apply text-[11px] font-semibold text-text-soft uppercase tracking-wide mb-4;
+}
