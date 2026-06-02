@@ -1,16 +1,14 @@
 <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 fade-up">
 
   @if (loading()) {
-
     <app-skeleton-list [rows]="3" [columns]="2" />
 
   } @else if (error()) {
-
-    <div class="bg-white rounded-xl border border-red-100 shadow-sm p-8 text-center">
-      <p class="text-sm text-red-400">{{ error() }}</p>
+    <div class="bg-bg-surface rounded-xl border border-feedback-error shadow-xs p-8 text-center">
+      <p class="text-sm text-feedback-error-text">{{ error() }}</p>
       <button
         (click)="router.navigate(['dashboard','inventory','receptions'])"
-        class="mt-4 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        class="mt-4 text-xs text-text-muted hover:text-text-main transition-colors"
       >← Volver</button>
     </div>
 
@@ -19,75 +17,70 @@
     <div class="flex flex-col gap-4">
 
       <!-- Info general -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="bg-bg-surface rounded-xl border border-border shadow-xs p-5">
         <div class="flex items-center justify-between mb-4">
-          <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-            Información general
-          </p>
+          <p class="section-title">Información general</p>
           <span
-            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
             [class]="statusClasses(r.status)"
           >{{ Status[r.status] }}</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
           <div>
-            <p class="text-[11px] text-gray-400 mb-0.5">Fecha de recepción</p>
-            <p class="text-sm font-medium text-gray-800">
-              {{ r.receivedAt | date:'dd/MM/yyyy HH:mm' }}
-            </p>
+            <p class="field-label">Fecha de recepción</p>
+            <p class="field-value">{{ r.receivedAt | date:'dd/MM/yyyy HH:mm' }}</p>
           </div>
           <div>
-            <p class="text-[11px] text-gray-400 mb-0.5">Total</p>
-            <p class="text-sm font-semibold text-gray-800">
+            <p class="field-label">Total</p>
+            <p class="text-sm font-semibold text-text-main">
               {{ r.totalCost | currency:'BOB':'symbol':'1.2-2' }}
             </p>
           </div>
           @if (r.notes) {
             <div class="sm:col-span-2">
-              <p class="text-[11px] text-gray-400 mb-0.5">Notas</p>
-              <p class="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">{{ r.notes }}</p>
+              <p class="field-label">Notas</p>
+              <p class="text-sm text-text-muted bg-bg-muted rounded-lg px-3 py-2">{{ r.notes }}</p>
             </div>
           }
         </div>
       </div>
 
       <!-- Productos -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-4">
+      <div class="bg-bg-surface rounded-xl border border-border shadow-xs p-5">
+        <p class="section-title">
           Productos · {{ r.items.length }} {{ r.items.length === 1 ? 'ítem' : 'ítems' }}
         </p>
 
-        <ul class="flex flex-col divide-y divide-gray-100">
+        <ul class="flex flex-col divide-y divide-border">
           @for (item of r.items; track item.id) {
             <li class="flex items-center gap-3 py-3">
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-800 truncate">{{ item.productName }}</p>
-                <p class="text-xs text-gray-400">{{ variantLabel(item) }}</p>
+                <p class="text-sm font-medium text-text-main truncate">{{ item.productName }}</p>
+                <p class="field-label">{{ variantLabel(item) }}</p>
               </div>
               <div class="shrink-0 text-right">
-                <p class="text-sm font-semibold tabular-nums text-gray-800">
+                <p class="text-sm font-semibold tabular-nums text-text-main">
                   {{ item.quantityReceived }}
-                  <span class="text-xs font-normal text-gray-400">uds</span>
+                  <span class="text-xs font-normal text-text-soft">uds</span>
                 </p>
-                <p class="text-[11px] text-gray-400 tabular-nums">
+                <p class="field-label tabular-nums">
                   {{ item.unitCost | currency:'BOB':'symbol':'1.2-2' }} c/u
                 </p>
               </div>
               <div class="shrink-0 text-right w-20 hidden sm:block">
-                <p class="text-sm tabular-nums text-gray-600">
+                <p class="text-sm tabular-nums text-text-muted">
                   {{ item.subtotal | currency:'BOB':'symbol':'1.2-2' }}
                 </p>
-                <p class="text-[11px] text-gray-300">subtotal</p>
+                <p class="field-label">subtotal</p>
               </div>
             </li>
           }
         </ul>
 
-        <div class="pt-3 mt-1 border-t border-gray-100 flex flex-col sm:flex-row
+        <div class="pt-3 mt-1 border-t border-border flex flex-col sm:flex-row
                     sm:items-center justify-between gap-1">
-          <span class="text-xs text-gray-400">{{ totalQuantity }} unidades en total</span>
-          <span class="text-sm font-semibold text-gray-700 tabular-nums">
+          <span class="text-xs text-text-soft">{{ totalQuantity }} unidades en total</span>
+          <span class="text-sm font-semibold text-text-main tabular-nums">
             {{ r.totalCost | currency:'BOB':'symbol':'1.2-2' }}
           </span>
         </div>
@@ -96,38 +89,36 @@
       <!-- Razón por la que no se puede revertir -->
       @switch (r.reasonCannotRollback) {
         @case ('OUTDATED') {
-          <p class="text-sm text-gray-400 text-center">
+          <p class="text-sm text-text-soft text-center">
             No se puede revertir: la recepción supera las 24 horas.
           </p>
         }
         @case ('NOT_ENOUGH_STOCK') {
-          <p class="text-sm text-gray-400 text-center">
+          <p class="text-sm text-text-soft text-center">
             No se puede revertir: stock insuficiente en la sucursal.
           </p>
         }
       }
 
-      <!-- Acción rollback -->
+      <!-- Acciones -->
       @if (r.canRollBack) {
         <button
           (click)="openRollbackModal(r.id)"
-          class="w-full py-3 rounded-xl border border-red-200 text-red-400
-                 text-sm font-medium hover:bg-red-50 transition-colors"
+          class="btn-danger btn-sm w-full py-3 rounded-xl"
         >Revertir recepción</button>
       }
+
       <button
         (click)="openLabels()"
-        class="w-full py-3 rounded-xl border border-blue-200 blue-red-400
-                 text-sm font-medium hover:bg-red-50 transition-colors"
+        class="btn-secondary w-full py-3 rounded-xl"
       >Imprimir etiquetas</button>
 
     </div>
   }
 
-
 </div>
 
-<!-- ── Modal: Rollback ────────────────────────────────────────────────────── -->
+<!-- ── Modal: Rollback ── -->
 @if (rollbackModalId() !== null) {
   <app-confirm-action-modal
     title="¿Revertir recepción?"
@@ -137,6 +128,4 @@
     (confirm)="onRollbackConfirm()"
     (close)="closeRollbackModal()"
   />
-
 }
-

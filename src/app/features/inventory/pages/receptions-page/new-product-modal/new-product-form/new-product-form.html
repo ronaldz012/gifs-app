@@ -1,70 +1,77 @@
-<div [formGroup]="form()" class="grid grid-cols-2 gap-x-4 gap-y-3">
+<div class="grid grid-cols-2 gap-x-4 gap-y-3">
 
-  <!-- Fila 1: Categoría + Marca -->
+  <!-- Categoría -->
   <div class="flex flex-col gap-1">
     <label class="text-[10px] font-bold uppercase text-gray-400">Categoría</label>
     <app-category-select-ctrl
-      [ctrl]="form().controls.categoryId"
-      [categories]="categories()"
-      (categoryCreated)="handleCreateCategory($event)"
+      [fieldId]="form().categoryId()"
+      [fieldName]="form().categoryName()"
     />
-    @if (getError(form().controls.categoryId); as err) {
-      <span tabindex="-1" class="text-[10px] text-red-500">{{ err }}</span>
+    @if (form().categoryId().touched() && form().categoryId().invalid()) {
+      @for (error of form().categoryId().errors(); track error.kind) {
+        <span class="text-[10px] text-red-500">{{ error.message }}</span>
+      }
     }
   </div>
 
+  <!-- Marca -->
   <div class="flex flex-col gap-1">
     <label class="text-[10px] font-bold uppercase text-gray-400">Marca</label>
     <app-brand-select-ctrl
-      [ctrl]="form().controls.brandId"
-      [brands]="brands()"
-      (brandCreated)="handleCreateBrand($event)"
+      [fieldId]="form().brandId()"
+      [fieldName]="form().brandName()"
     />
-    @if (getError(form().controls.brandId); as err) {
-      <span tabindex="-1" class="text-[10px] text-red-500">{{ err }}</span>
+    @if (form().brandId().touched() && form().brandId().invalid()) {
+      @for (error of form().brandId().errors(); track error.kind) {
+        <span class="text-[10px] text-red-500">{{ error.message }}</span>
+      }
     }
   </div>
 
-  <!-- Fila 2: Nombre full width -->
+  <!-- Nombre -->
   <div class="col-span-2 flex flex-col gap-1">
     <label class="text-[10px] font-bold uppercase text-green-700">Nombre del modelo</label>
     <input
       type="text"
-      formControlName="name"
+      [formField]="form().name"
       placeholder="Ej. 505 semiclásico..."
       autofocus
       class="w-full px-2.5 py-1.5 border rounded-md text-[12px] text-gray-900
              placeholder-gray-300 bg-white font-medium outline-none transition-all
              focus:ring-2 focus:ring-green-400 focus:border-green-400"
-      [class.border-gray-200]="!getError(form().controls.name)"
-      [class.border-red-300]="getError(form().controls.name)"
-      [class.focus:ring-red-300]="getError(form().controls.name)"
-      [class.focus:border-red-400]="getError(form().controls.name)"
+      [class.border-gray-200]="!(form().name().touched() && form().name().invalid())"
+      [class.border-red-300]="form().name().touched() && form().name().invalid()"
     />
-    @if (getError(form().controls.name); as err) {
-      <span tabindex="-1" class="text-[10px] text-red-500">{{ err }}</span>
+    @if (form().name().touched() && form().name().invalid()) {
+      @for (error of form().name().errors(); track error.kind) {
+        <span class="text-[10px] text-red-500">{{ error.message }}</span>
+      }
     }
   </div>
 
-  <!-- Fila 3: Género (compacto) + Descripción (flex-1) — sale del grid -->
+  <!-- Género + Descripción -->
   <div class="col-span-2 flex items-start gap-3">
-
     <div class="flex flex-col gap-1 w-32.5 shrink-0">
       <label class="text-[10px] font-bold uppercase text-gray-400">Género</label>
       <select
-        formControlName="gender"
+        [value]="form().gender().value()"
+        (change)="form().gender().setControlValue(+$any($event.target).value)"
+        (blur)="form().gender().markAsTouched()"
         class="w-full px-2.5 py-1.5 border rounded-md text-[11px] font-bold bg-white
-               text-gray-700 outline-none transition-all cursor-pointer
-               focus:ring-2 focus:ring-green-400 focus:border-green-400"
-        [class.border-gray-200]="!getError(form().controls.gender)"
-        [class.border-red-300]="getError(form().controls.gender)"
+              text-gray-700 outline-none transition-all cursor-pointer
+              focus:ring-2 focus:ring-green-400 focus:border-green-400"
+        [class.border-gray-200]="!(form().gender().touched() && form().gender().invalid())"
+        [class.border-red-300]="form().gender().touched() && form().gender().invalid()"
       >
+        <option value="" disabled>Seleccionar...</option>
         @for (opt of genderOptions; track opt.value) {
-          <option [ngValue]="opt.value">{{ opt.label }}</option>
+          <option [value]="opt.value">{{ opt.label }}</option>
         }
       </select>
-      @if (getError(form().controls.gender); as err) {
-        <span tabindex="-1" class="text-[10px] text-red-500">{{ err }}</span>
+      @if (form().gender().touched() && form().gender().invalid()) {
+        @for (error of form().gender().errors(); track error.kind) {
+          <span class="text-[10px] text-red-500">{{ error.message }}</span>
+        }
       }
     </div>
 
@@ -75,14 +82,12 @@
       </label>
       <input
         type="text"
-        formControlName="description"
+        [formField]="form().description"
         placeholder="Añadir nota..."
         class="w-full px-2.5 py-1.5 border border-gray-200 rounded-md text-[11px] text-gray-500
-               italic placeholder-gray-300 outline-none transition-all bg-white
-               focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
+              italic placeholder-gray-300 outline-none transition-all bg-white
+              focus:ring-2 focus:ring-gray-300 focus:border-gray-400"
       />
     </div>
-
   </div>
-
 </div>

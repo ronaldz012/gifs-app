@@ -1,5 +1,4 @@
 // features/receptions/pages/reception-list-page/reception-list-page.ts
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import ReceptionList from './reception-list/reception-list';
 import { ConfirmActionModal } from '../../transfer-page/confirm-action-modal/confirm-action-modal';
@@ -7,6 +6,7 @@ import { ReceptionService } from '../../../services/reception-service';
 import {ReceptionQueryParams, StockReceptionListDto } from '../../../dtos/Receptions/stock-reception-list-dto';
 import {ReceptionFilterBar} from '../reception-filter-bar/reception-filter-bar';
 import {Paginator} from '@shared/components/app-paginator/app-paginator';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 
 
 @Component({

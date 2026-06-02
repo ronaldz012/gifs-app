@@ -1,48 +1,44 @@
-import { Component, input, OnInit} from '@angular/core';
-import {Brand} from '../../../../dtos/brands/brand-dto';
-import {Category} from '../../../../dtos/categories/category-dto';
-import {NewProductFormGroup} from '../../reception-form/common/item-form-group';
-import {Gender} from '../../../../interfaces/gender';
-import {AbstractControl, ReactiveFormsModule, Validators} from '@angular/forms';
-import { CategorySelectCtrl } from '@features/inventory/components/category-select-ctrl/category-select-ctrl';
-import { BrandSelectCtrl } from '@features/inventory/components/brand-select-crtl/brand-select-crtl';
+import { Component, input, inject } from "@angular/core";
+import { FormField, FieldTree } from "@angular/forms/signals";
+import { BrandSelectCtrl } from "@features/inventory/components/brand-select-crtl/brand-select-crtl";
+import { CategorySelectCtrl } from "@features/inventory/components/category-select-ctrl/category-select-ctrl";
+import { Brand } from "@features/inventory/dtos/brands/brand-dto";
+import { Category } from "@features/inventory/dtos/categories/category-dto";
+import { Gender } from "@features/inventory/interfaces/gender";
+import { newProductDataModel, NewProductModelForm } from "@features/inventory/models/new-product.model";
+import { BrandService } from "@features/inventory/services/brand-service";
+import { CategoryService } from "@features/inventory/services/category-service";
 
 @Component({
   selector: 'app-new-product-form',
-  imports: [
-    ReactiveFormsModule,
-    
-    CategorySelectCtrl,
-    BrandSelectCtrl
-  ],
+  imports: [FormField, CategorySelectCtrl, BrandSelectCtrl],
   templateUrl: './new-product-form.html',
-  styles: ``,
 })
 export class NewProductForm {
-
-  form       = input.required<NewProductFormGroup>();
-  categories = input<Category[]>([]);
-  brands     = input<Brand[]>([]);
+  form          = input.required<FieldTree<newProductDataModel>>();
+  categoryStore = inject(CategoryService);
+  brandStore    = inject(BrandService);
 
   readonly genderOptions = [
-    { label: 'UNISEX', value: Gender.Unixes },
+    { label: 'UNISEX', value: Gender.Unisex },
     { label: 'HOMBRE', value: Gender.Hombre },
-    { label: 'MUJER', value: Gender.Mujer }
+    { label: 'MUJER',  value: Gender.Mujer  },
   ];
-  getError(ctrl: AbstractControl): string | null {
-    if (ctrl.valid || !ctrl.touched) return null;
-    if (ctrl.hasError('required'))   return 'Este campo es obligatorio';
-    if (ctrl.hasError('minlength'))  return `Mínimo ${ctrl.getError('minlength').requiredLength} caracteres`;
-    if (ctrl.hasError('maxlength'))  return `Máximo ${ctrl.getError('maxlength').requiredLength} caracteres`;
-    return 'Valor inválido';
-  }
-  // Handlers de creación rápida — por ahora solo log; el padre los conectará
-  handleCreateCategory(name: Category): void {
-    console.log('[NewProductForm] crear categoría:', name);
+
+  constructor() {
+    this.categoryStore.load();
+    this.brandStore.load();
   }
 
-  handleCreateBrand(name: Brand): void {
-    console.log('[NewProductForm] crear marca:', name);
+  handleCreatedCategory(category: Category): void {
+    this.categoryStore.add(category);
+    this.form().categoryId().setControlValue(category.id);
+    this.form().categoryName().setControlValue(category.name);
   }
 
+  handleCreatedBrand(brand: Brand): void {
+    this.brandStore.add(brand);
+    this.form().brandId().setControlValue(brand.id);
+    this.form().brandName().setControlValue(brand.name);
+  }
 }

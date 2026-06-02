@@ -1,24 +1,23 @@
-import { Component, computed, input, output, signal} from '@angular/core';
-import {Color} from '../../dtos/Colors/color';
-import {FormControl} from '@angular/forms';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Color } from '../../dtos/Colors/color';
+import { FieldState } from '@angular/forms/signals';
 import CreateColor from '../create-color/create-color';
 import SelectCtrl from '@shared/components/selec-from-list-ctrl';
+import { Options } from 'jsbarcode';
+import { SelectOption } from '@shared/models/select-option.model';
+import { ColorService } from '@features/inventory/services/color-service';
 
 @Component({
   selector: 'app-color-select-ctrl',
-  imports: [
-    SelectCtrl,
-    CreateColor
-  ],
+  imports: [SelectCtrl, CreateColor],
   template: `
     <div class="relative w-full">
       <app-select-ctrl
-        [ctrl]="ctrl()"
+        [fieldState]="fieldState()"
         [options]="colorOptions()"
         [placeholder]="placeholder()"
         (createNew)="openInlineCreate($event)"
-      />
-
+        />
       @if (showCreate()) {
         <div class="absolute z-110 w-full mt-1">
           <app-create-color
@@ -29,26 +28,24 @@ import SelectCtrl from '@shared/components/selec-from-list-ctrl';
         </div>
       }
     </div>
-
   `,
-  styles: ``,
 })
 export class ColorSelectCtrl {
-  ctrl        = input.required<FormControl>();
-  colors      = input<Color[]>([]);
-  placeholder = input<string>('Color...');
-  colorOptions = computed(() =>
-    this.colors().map(c => ({ id: c.id, name: c.name }))
-  );
-  // ── Outputs ───────────────────────────────────────────────────────────
+
+  service = inject(ColorService);
+  fieldState   = input.required<FieldState<GUID>>();
+  colorCode    = input.required<FieldState<string>>();
+  colors       = this.service.colors;
+  placeholder  = input<string>('Color...');
   colorCreated = output<Color>();
 
-  // ── State interno ─────────────────────────────────────────────────────
+  colorOptions = computed(() => this.colors().map(c => ({
+  id: c.id, displayName: c.name})));
+
+
   showCreate  = signal(false);
   createQuery = signal('');
 
-
-  // ── Handlers ──────────────────────────────────────────────────────────
   openInlineCreate(query: string) {
     this.createQuery.set(query);
     this.showCreate.set(true);
@@ -60,10 +57,11 @@ export class ColorSelectCtrl {
   }
 
   onCreated(color: Color) {
-    this.ctrl().setValue(color.id);
-    this.ctrl().markAsTouched();
+    this.service.add(color);
+    this.fieldState().setControlValue(color.id);
+    this.colorCode().setControlValue(color.code);
+    this.fieldState().markAsTouched();
     this.closeInlineCreate();
-    this.colorCreated.emit(color);
+    
   }
-
 }

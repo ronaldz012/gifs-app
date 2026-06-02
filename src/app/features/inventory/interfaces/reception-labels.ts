@@ -1,7 +1,7 @@
 import {Gender} from './gender';
 
 export const GenderLabel: Record<Gender, string> = {
-  [Gender.Unixes]: 'Unisex',
+  [Gender.Unisex]: 'Unisex',
   [Gender.Hombre]: 'Masc.',
   [Gender.Mujer]: 'Fem.',
 };

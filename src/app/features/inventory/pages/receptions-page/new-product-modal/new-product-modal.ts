@@ -1,106 +1,147 @@
-import { Component, computed, inject, input, output, signal, ViewChildren, QueryList, OnInit } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
-import {ReceptionFormBuilders} from '../reception-form/common/reception-form-builder';
-import {VariantFormGroup} from '../reception-form/common/variant-form-group';
-import {FormArray, FormBuilder} from '@angular/forms';
-import {ItemFormGroup} from '../reception-form/common/item-form-group';
-import {Category} from '../../../dtos/categories/category-dto';
-import {Brand} from '../../../dtos/brands/brand-dto';
-import {Color} from '../../../dtos/Colors/color';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { ReceptionGroup } from '@features/inventory/models/reception-model';
+import { ProductService } from '@features/inventory/services/product-service';
 import VariantNewRow from '../reception-form/variant-new-row/variant-new-row';
-import {NewProductForm} from './new-product-form/new-product-form';
+import { mapCreatedVariantToReceptionVariant } from '../reception-form/common/mapper';
+import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
+import { CurrencyPipe } from '@angular/common';
+import { NewProductModelForm } from '@features/inventory/models/new-product.model';
+import { applyEach, form, FormField, required } from '@angular/forms/signals';
+import { buildNewVariant, newVariantSchema } from '@features/inventory/models/variant-form.model';
+import { Category } from '@features/inventory/dtos/categories/category-dto';
+import { Brand } from '@features/inventory/dtos/brands/brand-dto';
+import { Color } from '@features/inventory/dtos/Colors/color';
+import { BrandSelectCtrl } from "@features/inventory/components/brand-select-crtl/brand-select-crtl";
+import { CategorySelectCtrl } from "@features/inventory/components/category-select-ctrl/category-select-ctrl";
+import { Gender } from '@features/inventory/interfaces/gender';
 
 @Component({
   selector: 'app-new-product-modal',
-  imports: [
-    VariantNewRow,
-    NewProductForm,
-    CurrencyPipe
-  ],
+  imports: [VariantNewRow, CurrencyPipe, BrandSelectCtrl, CategorySelectCtrl,FormField],
   templateUrl: './new-product-modal.html',
-  styles: ``,
 })
-export class NewProductModal implements OnInit {
-  private fb = inject(FormBuilder);
+export class NewProductModal {
 
-  // ── Inputs ────────────────────────────────────────────────────────────
-  /** Null → modo nuevo. Formulario existente → modo edición (pendiente). */
-  itemForm = input<ItemFormGroup | null>(null);
+  
+    readonly genderOptions = [
+      { label: 'UNISEX', value: Gender.Unisex },
+      { label: 'HOMBRE', value: Gender.Hombre },
+      { label: 'MUJER',  value: Gender.Mujer  },
+    ];
 
-  categories = input<Category[]>([]);
-  brands     = input<Brand[]>([]);
-  colors     = input<Color[]>([]);
+  private productService = inject(ProductService);
+  close   = output<void>();
+  confirm = output<ReceptionGroup>();
 
-  // ── Outputs ───────────────────────────────────────────────────────────
-  close = output<void>();
-  /** Emite el ItemFormGroup completo y válido cuando el usuario confirma. */
-  confirm = output<ItemFormGroup>();
+  // ── Form ──────────────────────────────────────────────────────────────
+  newProduct = signal<NewProductModelForm>({
+    newProduct:{  
+    name:         '',
+    description:  '',
+    categoryId:   '',
+    categoryName: '',
+    brandId:      '',
+    brandName:    '',
+    gender:       null,
+   
+  },
+   variants:     []
+  });
 
-  // ── Estado interno ────────────────────────────────────────────────────
-  form = signal<ItemFormGroup | null>(null);
+  newProductForm = form(this.newProduct, (s) => {
+    required(s.newProduct.name,       { message: 'Requerido' });
+    required(s.newProduct.brandId,    { message: 'Requerido' });
+    required(s.newProduct.categoryId, { message: 'Requerido' });
+    required(s.newProduct.gender,     { message: 'Requerido' });
+    applyEach(s.variants,newVariantSchema);
+  });
 
-  variantsArray = computed(() =>
-    this.form()?.controls.variants as FormArray<VariantFormGroup> | null
-  );
+  isConfirming = signal(false);
+  error        = signal<string | null>(null);
 
-  summary = signal({ units: 0, cost: 0, sales: 0, margin: 0 });
-
-  @ViewChildren(VariantNewRow) variantRows!: QueryList<VariantNewRow>;
-
-  // ── Lifecycle ─────────────────────────────────────────────────────────
-  ngOnInit(): void {
-    const existing = this.itemForm();
-    const currentForm = existing ? existing : ReceptionFormBuilders.buildNewItemGroup(this.fb);
-    this.form.set(currentForm);
-
-    currentForm.controls.variants.valueChanges.subscribe(variants => {
-      this.updateSummary(variants as any[]);
-    });
-    this.updateSummary(currentForm.controls.variants.value as any[]);
-  }
-
-  private updateSummary(variants: any[]): void {
-    let units = 0;
-    let cost = 0;
-    let sales = 0;
-
-    for (const v of variants || []) {
-      const q = Number(v.quantityReceived) || 0;
-      const c = Number(v.unitCost) || 0;
-      const p = Number(v.newVariant?.price) || 0;
-
-      units += q;
-      cost += q * c;
-      sales += q * p;
-    }
-
-    this.summary.set({ units, cost, sales, margin: sales - cost });
-  }
-
-  // ── Variants ──────────────────────────────────────────────────────────
+  // ── Variantes ─────────────────────────────────────────────────────────
   addVariant(): void {
-    this.variantsArray()?.push(
-      ReceptionFormBuilders.buildNewVariantGroup(this.fb)
-    );
-    setTimeout(() => {
-      this.variantRows.last?.focusFirst();
-    }, 50);
+    this.newProduct.update(current => ({
+      ...current,
+      variants: [...current.variants, buildNewVariant()],
+    }));
   }
 
   removeVariant(index: number): void {
-    this.variantsArray()?.removeAt(index);
+    this.newProduct.update(current => ({
+      ...current,
+      variants: current.variants.filter((_, i) => i !== index),
+    }));
+  }
+  summary = computed(() => {
+  const variants = this.newProduct().variants;
+  let units = 0, cost = 0, sales = 0;
+
+  for (const v of variants) {
+    const q = v.quantityReceived ?? 0;
+    const u = v.unitCost        ?? 0;
+    const p = v.price           ?? 0;
+    units += q;
+    cost  += q * u;
+    sales += q * p;
   }
 
-  // ── Acciones ──────────────────────────────────────────────────────────
-  onClose(): void {
-    this.close.emit();
-  }
+  return { units, cost, sales, margin: sales - cost };
+});
 
-  /** Por ahora no hace nada funcional; se implementará en la siguiente iteración. */
+  // ── Confirm ───────────────────────────────────────────────────────────
   onConfirm(): void {
-    if(this.form()){
-      this.confirm.emit(this.form()!);
-    }
-  }
-}
+    this.newProductForm().markAsTouched();
+    if (this.newProductForm().invalid() || !this.newProduct().variants.length) return;
 
+    const val      = this.newProduct();
+    const variants = val.variants;
+
+    this.isConfirming.set(true);
+    this.error.set(null);
+
+    this.productService.createProductWithVariants({
+      name:        val.newProduct.name,
+      description: val.newProduct.description,
+      categoryId:  val.newProduct.categoryId,
+      brandId:     val.newProduct.brandId,
+      gender:      val.newProduct.gender ?? 0,
+      variants:    variants.map(v => ({
+        description: v.description,
+        size:        v.size,
+        colorId:     v.colorId,
+        price:       v.price,
+      } as CreateProductVariantDto)),
+    }).subscribe({
+      next: (created) => {
+        const group: ReceptionGroup = {
+          productId:    created.id,
+          productName:  created.name,
+          internalCode: created.internalCode,
+          brandName:    created.brandName,
+          categoryName: created.categoryName,
+          variants:     created.variants.map((cv, i) =>
+            mapCreatedVariantToReceptionVariant(cv, variants[i])
+          ),
+        };
+        this.isConfirming.set(false);
+        this.confirm.emit(group);
+        this.close.emit();
+      },
+      error: (err) => {
+        this.isConfirming.set(false);
+        this.error.set('Error al crear el producto. Intentá de nuevo.');
+        console.error(err);
+      }
+    });
+  }
+
+  onClose(): void { this.close.emit(); }
+  onGenderChange(event: Event): void {
+  const value = Number((event.target as HTMLSelectElement).value);
+  this.newProduct.update(m => ({
+    ...m,
+    newProduct: { ...m.newProduct, gender: value }
+  }));
+}
+}

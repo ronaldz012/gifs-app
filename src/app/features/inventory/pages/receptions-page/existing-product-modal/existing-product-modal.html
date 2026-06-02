@@ -1,163 +1,173 @@
-@if (form(); as itemForm) {
-  <!-- Overlay -->
+<div
+  class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 py-6"
+  (click)="onClose()"
+>
   <div
-    class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 overflow-y-auto py-6"
-    (click)="onClose()"
+    class="relative w-full mx-4 my-auto bg-white rounded-xl border border-gray-200 shadow-sm"
+    style="max-width: 960px;"
+    (click)="$event.stopPropagation()"
   >
-    <!-- Panel -->
-    <div
-      class="relative w-full mx-4 my-auto bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
-      style="max-width: 960px;"
-      (click)="$event.stopPropagation()"
-    >
 
-      <!-- ── Header ──────────────────────────────────────────────────── -->
-      <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
-        <div class="flex items-center gap-2.5">
-          <span class="px-2 py-0.5 bg-blue-100 text-blue-700 font-bold text-[10px] rounded border border-blue-200 uppercase tracking-wide">
-            Catálogo
-          </span>
-          <span class="text-sm font-medium text-gray-800">Agregar desde catálogo</span>
+    <!-- ── Header ────────────────────────────────────────────────────── -->
+    <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
+      <div class="flex items-center gap-2.5">
+        <span class="px-2 py-0.5 bg-blue-100 text-blue-700 font-bold text-[10px] rounded border border-blue-200 uppercase tracking-wide">
+          Catálogo
+        </span>
+        <span class="text-sm font-medium text-gray-800">Agregar desde catálogo</span>
+      </div>
+      <button type="button" (click)="onClose()"
+        class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ── Búsqueda + info readonly ──────────────────────────────────── -->
+    <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Producto</p>
+
+      <div class="flex gap-4 items-start">
+
+        <!-- Buscador -->
+        <div class="flex flex-col gap-1 flex-shrink-0" style="min-width: 260px;">
+          <label class="text-[10px] font-bold uppercase text-blue-600">
+            Buscar en catálogo
+            <span class="text-red-400 font-normal ml-1">* Obligatorio</span>
+          </label>
+          <app-product-search
+            (productSelected)="onProductSelected($event)"
+            (createNew)="onNotFound($event)"
+          />
         </div>
-        <button
-          type="button"
-          (click)="onClose()"
-          class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
 
-      <!-- ── Búsqueda + info del producto ───────────────────────────── -->
-      <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/40">
-        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Producto</p>
-        <app-existing-product-info
-          [productIdCtrl]="itemForm.controls.productId"
-          [selectedProduct]="selectedProduct()"
-          (productSelected)="onProductSelected($event)"
-          (productCleared)="onProductCleared()"
-        />
-      </div>
-
-      <!-- ── Variantes ───────────────────────────────────────────────── -->
-      <div class="px-5 py-4">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-            Variantes del pedido
-          </p>
-
-          @if (selectedProduct()) {
-            <div class="flex items-center gap-2">
-              <!-- Agregar variante de catálogo -->
-              <button
-                type="button"
-                (click)="addExistingVariant()"
-                class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-blue-700
-                       bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-all"
-              >
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                </svg>
-                Del catálogo
-              </button>
-              <!-- Agregar variante nueva -->
-              <button
-                type="button"
-                (click)="addNewVariant()"
-                class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-green-700
-                       bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-all"
-              >
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                </svg>
-                Nueva variante
-              </button>
+        <!-- Info readonly -->
+        <div class="flex-1 grid grid-cols-4 gap-3 pt-0.5">
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[10px] font-bold uppercase text-gray-400">Categoría</span>
+            <span class="text-[12px] font-medium text-gray-700 truncate">
+              {{ selectedProduct()?.categoryName || '—' }}
+            </span>
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[10px] font-bold uppercase text-gray-400">Marca</span>
+            <span class="text-[12px] font-medium text-gray-700 truncate">
+              {{ selectedProduct()?.brandName || '—' }}
+            </span>
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[10px] font-bold uppercase text-gray-400">Género</span>
+            <span class="text-[12px] font-medium text-gray-700">
+              {{ selectedProduct()?.gender || '—' }}
+            </span>
+          </div>
+          @if (selectedProduct()?.description) {
+            <div class="col-span-4 flex flex-col gap-0.5">
+              <span class="text-[10px] font-bold uppercase text-gray-400">Descripción</span>
+              <span class="text-[11px] text-gray-500 italic truncate">
+                {{ selectedProduct()!.description }}
+              </span>
             </div>
           }
         </div>
 
-        <!-- Tabla de variantes -->
-        <div class="border border-gray-100 rounded-lg overflow-hidden">
+      </div>
+    </div>
 
-          <!-- Cabecera -->
-          <div class="grid grid-cols-[60px_1fr_64px_120px_72px_72px_84px_72px_28px]
-                      bg-gray-50 border-b border-gray-100">
-            <div class="px-2 py-1.5 text-[10px] font-bold uppercase text-gray-400">Modo</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold uppercase text-gray-400">Variante</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold uppercase text-gray-400">Talla</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold uppercase text-gray-400">Color</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold uppercase text-gray-400 text-right">Precio</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold uppercase text-gray-400 text-right">Cant.</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold uppercase text-gray-400 text-right">Costo u.</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold uppercase text-gray-400 text-right">Subtotal</div>
-            <div></div>
+    <!-- ── Variantes ─────────────────────────────────────────────────── -->
+    <div class="px-5 py-4">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+          Variantes del pedido
+        </p>
+        @if (selectedProduct()) {
+          <div class="flex items-center gap-2">
+            <button type="button" (click)="addExistingVariant()"
+              class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-blue-700
+                     bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-all">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+              </svg>
+              Del catálogo
+            </button>
+            <button type="button" (click)="addNewVariant()"
+              class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-green-700
+                     bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-all">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+              </svg>
+              Nueva variante
+            </button>
           </div>
+        }
+      </div>
 
-          <!-- Filas -->
-          <div class="flex flex-col">
-            @if (variantsArray(); as vArray) {
-              @for (variant of vArray.controls; track $index; let i = $index) {
-                <div class="grid grid-cols-[60px_1fr_64px_120px_72px_72px_84px_72px_28px]
-                            items-center border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                  @if (variant.get('mode')?.value === 'ex') {
-                    <app-variant-existing-row
-                      [form]="$any(variant)"
-                      [index]="i"
-                      [availableVariants]="availableVariants()"
-                      [usedVariantIds]="usedVariantIds()"
-                      (remove)="removeVariant(i)"
-                      (createNew)="onVariantCreateNew(i)"
-                    />
-                  } @else {
-                    <app-variant-new-row
-                      [form]="$any(variant)"
-                      [index]="i"
-                      [itemIndex]="0"
-                      [colors]="colors()"
-                      [existingVariants]="availableVariants()"
-                      (remove)="removeVariant(i)"
-                    />
-                  }
-                </div>
+      <!-- Tabla -->
+      <div class="border border-border rounded-lg mt-4 font-inter">
+          <div class="grid grid-cols-[28px_120px_120px_80px_60px_80px_80px_1fr_28px]">
+                <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft text-center">#</div>
+                <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft">CÓDIGO</div>
+                <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft">COLOR</div>
+                <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft">TALLA</div>
+                <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft text-right">P. VENTA</div>
+                <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft text-right">CANT.</div>
+                <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft text-right">COSTO U.</div>
+                <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft">NOTAS</div>
+                <div></div>
+        </div>
+
+        <div class="flex flex-col">
+          @for (variant of itemModel().variants; track $index; let i = $index) {
+            <div class="grid grid-cols-[28px_120px_120px_80px_60px_80px_80px_1fr_28px]
+                        items-center border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
+              @if (variant.mode === 'ex') {
+                <app-variant-existing-row
+                  [formModel]="itemForm.variants[i]"
+                  [index]="i"
+                  [availableVariants]="availableVariantsForRow(i)"
+                  (remove)="removeVariant(i)" 
+                />
+              } @else {
+                <app-variant-new-row
+                  [formModel]="itemForm.variants[i]"
+                  [existingVariants]="selectedProduct()?.productVariants ?? []"
+                  [index]="i"
+                  (remove)="removeVariant(i)"
+                />
               }
-              @empty {
-                <div class="py-6 text-center text-[11px] italic"
-                     [class]="selectedProduct() ? 'text-gray-400' : 'text-gray-300'">
-                  @if (selectedProduct()) {
-                    Sin variantes. Agrega al menos una para continuar.
-                  } @else {
-                    Selecciona un producto para agregar variantes.
-                  }
-                </div>
+            </div>
+          } @empty {
+            <div class="py-6 text-center text-[11px] italic"
+                 [class]="selectedProduct() ? 'text-gray-400' : 'text-gray-300'">
+              @if (selectedProduct()) {
+                Sin variantes. Agrega al menos una para continuar.
+              } @else {
+                Selecciona un producto para agregar variantes.
               }
-            }
-          </div>
+            </div>
+          }
         </div>
       </div>
-
-      <!-- ── Footer ──────────────────────────────────────────────────── -->
-      <div class="flex justify-end gap-2 px-5 py-3 border-t border-gray-100 bg-gray-50/60">
-        <button
-          type="button"
-          (click)="onClose()"
-          class="px-4 py-1.5 text-[12px] text-gray-600 border border-gray-200 rounded-md
-                 hover:bg-gray-100 transition-all"
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          (click)="onConfirm()"
-          [disabled]="!selectedProduct()"
-          class="px-4 py-1.5 text-[12px] font-medium text-white rounded-md transition-all
-                 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          Agregar producto
-        </button>
-      </div>
-
     </div>
+
+    <!-- ── Footer ────────────────────────────────────────────────────── -->
+    <div class="flex justify-end gap-2 px-5 py-3 border-t border-gray-100 bg-gray-50/60">
+      @if (error()) {
+        <span class="text-[11px] text-red-500 mr-auto self-center">{{ error() }}</span>
+      }
+      <button type="button" (click)="onClose()"
+        class="px-4 py-1.5 text-[12px] text-gray-600 border border-gray-200 rounded-md
+               hover:bg-gray-100 transition-all">
+        Cancelar
+      </button>
+      <button type="button" (click)="onConfirm()"
+        [disabled]="isConfirming() || !selectedProduct()"
+        class="px-4 py-1.5 text-[12px] font-medium text-white rounded-md transition-all
+               bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed">
+        {{ isConfirming() ? 'Guardando...' : 'Agregar producto' }}
+      </button>
+    </div>
+
   </div>
-}
+</div>

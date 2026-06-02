@@ -139,14 +139,14 @@ export class UpdateVariantModal implements OnInit {
   form: UpdateProductVariantDto = {
     description: '',
     size:        '',
-    color:       '',
+    colorId:       '',
     price:       undefined,
   };
 
   ngOnInit(): void {
     const v = this.variant();
     this.form.size        = v.size;
-    this.form.color       = v.color;
+    this.form.colorId       = v.color;
     this.form.price       = v.price;
     this.form.description = v.description ?? '';
   }
@@ -155,7 +155,7 @@ export class UpdateVariantModal implements OnInit {
     const dto: UpdateProductVariantDto = {};
 
     if (this.form.size?.trim())        dto.size        = this.form.size.trim();
-    if (this.form.color?.trim())       dto.color       = this.form.color.trim();
+    if (this.form.colorId?.trim())       dto.colorId       = this.form.colorId.trim();
     if (this.form.price != null)       dto.price       = this.form.price;
     if (this.form.description?.trim()) dto.description = this.form.description.trim();
 

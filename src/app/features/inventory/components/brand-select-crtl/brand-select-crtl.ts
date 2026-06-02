@@ -1,8 +1,9 @@
-import { Component, computed, input, output, signal } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { Brand } from '@features/inventory/dtos/brands/brand-dto';
 import CreateBrand from '../create-brand/create-brand';
 import SelectCtrl from '@shared/components/selec-from-list-ctrl';
+import { FieldState } from '@angular/forms/signals';
+import { BrandService } from '@features/inventory/services/brand-service';
 
 @Component({
   selector: 'app-brand-select-ctrl',
@@ -11,9 +12,10 @@ import SelectCtrl from '@shared/components/selec-from-list-ctrl';
   template: `
     <div class="relative w-full">
       <app-select-ctrl
-        [ctrl]="ctrl()"
+        [fieldState]="fieldId()"
         [options]="brandOptions()"
         [placeholder]="placeholder()"
+        (selected)="brandSelected($event)"
         (createNew)="openInlineCreate($event)"
       />
       @if (showCreate()) {
@@ -29,18 +31,27 @@ import SelectCtrl from '@shared/components/selec-from-list-ctrl';
   `,
 })
 export class BrandSelectCtrl {
-  ctrl        = input.required<FormControl>();
-  brands      = input<Brand[]>([]);
+
+  fieldId        = input.required<FieldState<GUID>>();
+  fieldName       = input.required<FieldState<string>>();
+  service = inject(BrandService);
+  brands      = this.service.brands;
+  
   placeholder = input<string>('Marca...');
 
-  brandCreated = output<Brand>();
 
   showCreate  = signal(false);
   createQuery = signal('');
 
   brandOptions = computed(() =>
-    this.brands().map(b => ({ id: b.id, name: b.name }))
+    this.brands().map(b => ({ id: b.id, displayName: b.name }))
   );
+
+  brandSelected($event: GUID) {
+    const brand = this.brands().find(b => b.id === $event);
+    this.fieldName().setControlValue(brand?.name ?? '');
+    
+  }
 
   openInlineCreate(query: string) {
     this.createQuery.set(query);
@@ -53,9 +64,9 @@ export class BrandSelectCtrl {
   }
 
   onCreated(brand: Brand) {
-    this.ctrl().setValue(brand.id);
-    this.ctrl().markAsTouched();
+    this.service.add(brand);
+    this.fieldId().setControlValue(brand.id);
+    this.fieldId().markAsTouched();
     this.closeInlineCreate();
-    this.brandCreated.emit(brand);
   }
 }

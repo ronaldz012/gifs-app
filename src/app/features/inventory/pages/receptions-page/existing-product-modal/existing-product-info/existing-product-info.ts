@@ -4,6 +4,8 @@ import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {Gender} from '../../../../interfaces/gender';
 import {ProductSearch} from '../../../../components/product-search/product-search';
 import {DecimalPipe} from '@angular/common';
+import { FieldTree } from '@angular/forms/signals';
+import { ProductInfo } from '@features/inventory/models/item-form.model';
 
 @Component({
   selector: 'app-existing-product-info',
@@ -20,7 +22,7 @@ export class ExistingProductInfo {
   protected readonly Gender = Gender;
 
   // ── Inputs ────────────────────────────────────────────────────────────
-  productIdCtrl   = input.required<FormControl<GUID | null>>();
+  productIdCtrl   = input.required<FieldTree<ProductInfo>>();
   selectedProduct = input<ProductSearchResult | null>(null);
 
   // ── Outputs ───────────────────────────────────────────────────────────

@@ -1,121 +1,206 @@
-import { Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
-import {FormArray, FormBuilder} from '@angular/forms';
-import {ItemFormGroup} from '../reception-form/common/item-form-group';
-import {Color} from '../../../dtos/Colors/color';
-import {ProductSearchResult, ProductVariantOption} from '../../../components/product-search/product-search-result';
-import {VariantFormGroup} from '../reception-form/common/variant-form-group';
-import {ReceptionFormBuilders} from '../reception-form/common/reception-form-builder';
+import {
+  Component, inject, output, signal, computed, DestroyRef, OnInit
+} from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { debounceTime, distinctUntilChanged, finalize, of, Subject, switchMap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { applyEach, applyWhen, form, required } from '@angular/forms/signals';
+
+import { ProductSearch } from '../../../components/product-search/product-search';
+import { ProductSearchResult } from '../../../components/product-search/product-search-result';
 import VariantNewRow from '../reception-form/variant-new-row/variant-new-row';
 import VariantExistingRow from '../reception-form/variant-existing-row/variant-existing-row';
-import {ExistingProductInfo} from './existing-product-info/existing-product-info';
+
+import { ProductService } from '@features/inventory/services/product-service';
+import { ReceptionGroup } from '@features/inventory/models/reception-model';
+import { ItemForm } from '@features/inventory/models/item-form.model';
+import { Gender } from '@features/inventory/interfaces/gender';
+import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
+import { mapProductSearchToGroup } from '../reception-form/common/mapper';
+import {
+  buildExistingVariant,
+  buildNewVariant,
+  existingVariantSchema,
+  newVariantSchema,
+} from '@features/inventory/models/variant-form.model';
 
 @Component({
   selector: 'app-existing-product-modal',
-  imports: [
-    VariantNewRow,
-    VariantExistingRow,
-    ExistingProductInfo
-  ],
+  standalone: true,
+  imports: [ProductSearch, VariantNewRow, VariantExistingRow],
   templateUrl: './existing-product-modal.html',
-  styles: ``,
 })
-export class ExistingProductModal  implements OnInit {
-  private fb = inject(FormBuilder);
+export class ExistingProductModal implements OnInit {
 
-  // ── Inputs ────────────────────────────────────────────────────────────
-  /** Null → modo búsqueda/nuevo. Formulario existente → modo edición. */
-  itemForm = input<ItemFormGroup | null>(null);
-  colors   = input<Color[]>([]);
+  private productService = inject(ProductService);
+  private destroyRef     = inject(DestroyRef);
+  private searchInput$   = new Subject<string>();
+
+  protected readonly Gender = Gender;
 
   // ── Outputs ───────────────────────────────────────────────────────────
-  close   = output<void>();
-  confirm = output<ItemFormGroup>();
+  close    = output<void>();
+  confirm  = output<ReceptionGroup>();
+  notFound = output<string>();
 
-  // ── Estado interno ────────────────────────────────────────────────────
-  form            = signal<ItemFormGroup | null>(null);
-  selectedProduct = signal<ProductSearchResult | null>(null);
+  // ── Búsqueda ──────────────────────────────────────────────────────────
+  searchResults = signal<ProductSearchResult[]>([]);
+  isSearching   = signal(false);
 
-  variantsArray = computed(() =>
-    this.form()?.controls.variants as FormArray<VariantFormGroup> | null
-  );
-
-  /** IDs de variantes ya usadas en las filas actuales (para evitar duplicados). */
-  usedVariantIds = computed<GUID[]>(() => {
-    const arr = this.variantsArray();
-    if (!arr) return [];
-    return arr.controls
-      .map(v => v.controls.productVariantId.value)
-      .filter((id): id is GUID => id !== null);
+  // ── Form ──────────────────────────────────────────────────────────────
+  itemModel = signal<ItemForm>({
+    product: {
+      Id: null,
+      productName: '',
+      categoryName: '',
+      brandName: '',
+      genderName: '',
+      description: '',
+    },
+    variants: [],
   });
 
-  /** Variantes disponibles del producto seleccionado. */
-  availableVariants = computed<ProductVariantOption[]>(() =>
-    this.selectedProduct()?.productVariants ?? []
+  itemForm = form(this.itemModel, s => {
+    required(s.product.Id, { message: 'Requerido' });
+    applyEach(s.variants, item => {
+      applyWhen(item, ({ valueOf }) => valueOf(item.mode) === 'ex', existingVariantSchema);
+      applyWhen(item, ({ valueOf }) => valueOf(item.mode) === 'new', newVariantSchema);
+    });
+  });
+
+  usedVariantIds = computed<GUID[]>(() =>
+    this.itemModel().variants
+      .filter(v => v.mode === 'ex' && v.id)
+      .map(v => v.id as GUID)
   );
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────
+  // ── Estado UI ─────────────────────────────────────────────────────────
+  isConfirming = signal(false);
+  error        = signal<string | null>(null);
+
+  // ── Init ──────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    const existing = this.itemForm();
-    if (existing) {
-      this.form.set(existing);
-      // TODO: restaurar selectedProduct desde el producto ya cargado (modo edición)
-    } else {
-      this.form.set(ReceptionFormBuilders.buildItemGroup(this.fb, 'ex'));
-    }
+    this.searchInput$.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap(q => {
+        if (!q || q.length < 2) {
+          this.searchResults.set([]);
+          this.isSearching.set(false);
+          return [];
+        }
+        this.isSearching.set(true);
+        return this.productService.searchProduct(q).pipe(
+          finalize(() => this.isSearching.set(false))
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(results => this.searchResults.set(results));
   }
 
-  // ── Producto seleccionado ─────────────────────────────────────────────
-  onProductSelected(product: ProductSearchResult): void {
+  // ── Búsqueda ──────────────────────────────────────────────────────────
+  onSearchChanged(query: string): void {
+    this.searchInput$.next(query);
+  }
+
+  // ── Producto ──────────────────────────────────────────────────────────
+  selectedProduct = signal<ProductSearchResult | null>(null);
+  onProductSelected(product: ProductSearchResult | null): void {
+    if (!product) {
+      this.clearProduct();
+      return;
+    }
     this.selectedProduct.set(product);
-    this.form()?.controls.productId.setValue(product.id);
+    this.itemModel.set({
+      product: {
+        Id:           product.id,
+        productName:  product.name,
+        categoryName: product.categoryName,
+        brandName:    product.brandName,
+        genderName:   Gender[product.gender],
+        description:  product.description,
+      },
+      variants: [],
+    });
+  }
+    availableVariantsForRow(index: number) {
+    const product = this.selectedProduct();
+    if (!product) return [];
 
-    // Limpiar variantes anteriores y agregar una fila vacía para empezar
-    const arr = this.variantsArray();
-    if (arr) {
-      arr.clear();
-      arr.push(ReceptionFormBuilders.buildVariantGroup(this.fb, 'ex'));
-    }
+    const usedIds = new Set(
+      this.itemModel().variants
+        .filter((v, i) => v.mode === 'ex' && v.id && i !== index) // excluye la fila actual
+        .map(v => v.id as GUID)
+    );
+
+    return product.productVariants.filter(v => !usedIds.has(v.id as GUID));
   }
 
-  onProductCleared(): void {
-    this.selectedProduct.set(null);
-    this.form()?.controls.productId.setValue(null);
-    this.variantsArray()?.clear();
+  private clearProduct(): void {
+    this.itemModel.set({
+      product: { Id: null, productName: '', categoryName: '', brandName: '', genderName: '', description: '' },
+      variants: [],
+    });
   }
 
   // ── Variantes ─────────────────────────────────────────────────────────
   addExistingVariant(): void {
-    this.variantsArray()?.push(
-      ReceptionFormBuilders.buildVariantGroup(this.fb, 'ex')
-    );
+    this.itemModel.update(m => ({ ...m, variants: [...m.variants, buildExistingVariant()] }));
   }
 
   addNewVariant(): void {
-    this.variantsArray()?.push(
-      ReceptionFormBuilders.buildVariantGroup(this.fb, 'new')
-    );
+    this.itemModel.update(m => ({ ...m, variants: [...m.variants, buildNewVariant()] }));
   }
 
   removeVariant(index: number): void {
-    this.variantsArray()?.removeAt(index);
+    this.itemModel.update(m => ({ ...m, variants: m.variants.filter((_, i) => i !== index) }));
   }
 
-  /**
-   * Llamado desde variant-existing-row cuando el usuario pulsa "Crear nueva".
-   * Convierte esa fila a modo 'new' en lugar de agregar una fila extra,
-   * o simplemente agrega una fila nueva al final según prefieras.
-   * Por ahora agrega al final — ajusta según UX deseada.
-   */
-  onVariantCreateNew(index: number): void {
-    this.variantsArray()?.push(
-      ReceptionFormBuilders.buildVariantGroup(this.fb, 'new')
-    );
+  // ── Submit ────────────────────────────────────────────────────────────
+  onConfirm(): void {
+    this.itemForm().markAsTouched();
+
+    const { variants } = this.itemModel();
+    if (this.itemForm().invalid() || !variants.length) return;
+
+    const newVariants = variants.filter(v => v.mode === 'new');
+    const exVariants  = variants.filter(v => v.mode === 'ex');
+
+    const creates$ = newVariants.length
+      ? this.productService.createVariants(
+          this.itemModel().product.Id!,
+          newVariants.map(v => ({
+            description: v.description,
+            size:        v.size,
+            colorId:     v.colorId,
+            price:       v.price,
+          } as CreateProductVariantDto))
+        )
+      : of([]);
+
+    this.isConfirming.set(true);
+    this.error.set(null);
+
+    creates$.subscribe({
+      next: createdVariants => {
+        const group = mapProductSearchToGroup(this.itemModel(), exVariants, newVariants, createdVariants);
+        this.isConfirming.set(false);
+        this.confirm.emit(group);
+      },
+      error: err => {
+        this.isConfirming.set(false);
+        this.error.set('Error al crear variantes. Intentá de nuevo.');
+        console.error(err);
+      },
+    });
   }
 
-  // ── Acciones ──────────────────────────────────────────────────────────
-  onClose(): void { this.close.emit(); }
+  // ── Navegación ────────────────────────────────────────────────────────
+  onClose(): void    { this.close.emit(); }
+  onNotFound(query: string): void { this.notFound.emit(query); }
 
-  /** TODO: validar y emitir — se implementa en siguiente iteración. */
-  onConfirm(): void { }
 
+createNewProduct($event: string) {
+throw new Error('Method not implemented.');
+}
 }

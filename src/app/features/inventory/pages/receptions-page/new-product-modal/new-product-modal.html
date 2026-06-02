@@ -1,141 +1,221 @@
-@if (form(); as itemForm) {
-  <!-- Overlay -->
+<!-- Overlay -->
+<div
+  class="fixed inset-0 z-50 flex items-start justify-center bg-overlay overflow-y-auto py-6"
+  (click)="onClose()"
+>
+  <!-- Panel -->
   <div
-    class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 overflow-y-auto py-6"
-    (click)="onClose()"
+    class="relative w-full mx-4 my-auto bg-bg-surface rounded-xl border border-border shadow-md"
+    style="max-width: 900px;"
+    (click)="$event.stopPropagation()"
   >
-    <!-- Panel -->
-    <div
-      class="relative w-full mx-4 my-auto bg-white rounded-xl border border-gray-200 shadow-sm"
-      style="max-width: 900px;"
-      (click)="$event.stopPropagation()"
-    >
-
-      <!-- ── Header ──────────────────────────────────────────────────── -->
-      <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
-        <div class="flex items-center gap-2.5">
-          <span class="px-2 py-0.5 bg-green-100 text-green-700 font-bold text-[10px] rounded border border-green-200 uppercase tracking-wide">
-            Nuevo
-          </span>
-          <span class="text-sm font-medium text-gray-800">Agregar producto</span>
-        </div>
-        <button
-          type="button"
-          (click)="onClose()"
-          class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 py-3.5 border-b border-border">
+      <div class="flex items-center gap-2.5">
+        <span class="pill-success">Nuevo</span>
+        <span class="text-sm font-medium text-text-main">Agregar producto</span>
       </div>
-
-      <!-- ── Datos del producto padre ────────────────────────────────── -->
-      <div class="px-5 py-4 border-b border-gray-100">
-        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Datos del producto</p>
-        <app-new-product-form
-          [form]="itemForm.controls.newProduct"
-          [categories]="categories()"
-          [brands]="brands()"
-        />
-      </div>
-
-      <!-- Tabla de variantes -->
-      <div class="border border-gray-100 rounded-lg">
-        <div class="grid grid-cols-[28px_120px_80px_60px_100px_100px_100px_1fr_28px]">
-          <!-- Cabecera -->
-          <div class="col-span-full grid grid-cols-subgrid bg-gray-50 border-b border-gray-100 rounded-t-lg">
-            <div class="px-2 py-1.5 text-[10px] font-bold text-gray-400 text-center">#</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold text-gray-400">COLOR</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold text-gray-400">TALLA</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold text-gray-400 text-right">CANT.</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold text-gray-400 text-right">COSTO U.</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold text-gray-400 text-right">P. VENTA</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold text-gray-400 text-right">SUBTOTAL</div>
-            <div class="px-2 py-1.5 text-[10px] font-bold text-gray-400">NOTAS</div>
-            <div></div>
-          </div>
-
-          <!-- Filas -->
-          @if (variantsArray(); as vArray) {
-            @for (variant of vArray.controls; track $index; let i = $index) {
-              <app-variant-new-row
-                class="col-span-full grid grid-cols-subgrid border-b border-gray-50 hover:bg-blue-50/30 transition-colors"
-                [form]="$any(variant)"
-                [itemIndex]="i+1"
-                [colors]="colors()"
-                [existingVariants]="[]"
-                (remove)="removeVariant(i)"
-              />
-            }
-            @empty {
-              <div class="col-span-full py-6 text-center text-[11px] text-gray-400 italic">
-                Sin variantes. Agrega al menos una para continuar.
-              </div>
-            }
-
-            <!-- Botón Agregar Fila -->
-            <div class="col-span-full p-2 bg-gray-50">
-              <button
-                type="button"
-                (click)="addVariant()"
-                class="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-xl bg-white text-[11px] font-bold text-gray-500
-                       hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50/50 hover:shadow-sm transition-all outline-none
-                       focus:border-blue-500 focus:text-blue-600 focus:bg-blue-50 focus:ring-2 focus:ring-blue-200"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                AGREGAR NUEVA FILA (COLOR + TALLA)
-              </button>
-            </div>
-          }
-
-        </div>
-      </div>
-      <!-- ── Footer ──────────────────────────────────────────────────── -->
-      <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/60 rounded-b-xl">
-        <!-- Resumen -->
-        <div class="flex items-center gap-6">
-          <div class="flex flex-col">
-            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Unidades</span>
-            <span class="text-sm font-semibold text-gray-800">{{ summary().units }}</span>
-          </div>
-          <div class="w-px h-8 bg-gray-200"></div>
-          <div class="flex flex-col">
-            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Costo Total</span>
-            <span class="text-sm font-semibold text-gray-800">{{ summary().cost | currency:'VES':'Bs. ' }}</span>
-          </div>
-          <div class="w-px h-8 bg-gray-200"></div>
-          <div class="flex flex-col">
-            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Venta Proyectada</span>
-            <span class="text-sm font-semibold text-blue-600">{{ summary().sales | currency:'VES':'Bs. ' }}</span>
-          </div>
-          <div class="w-px h-8 bg-gray-200"></div>
-          <div class="flex flex-col">
-            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Margen</span>
-            <span class="text-sm font-semibold"
-                  [class.text-green-600]="summary().margin > 0"
-                  [class.text-red-500]="summary().margin < 0"
-                  [class.text-gray-800]="summary().margin === 0">
-              {{ summary().margin | currency:'VES':'Bs. ' }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Botones -->
-        <div class="flex gap-2">
-          <button
-            type="button"
-            (click)="onConfirm()"
-            class="px-4 py-1.5 text-[12px] font-medium text-white bg-green-600 rounded-md shadow-sm shadow-green-600/20
-                   hover:bg-green-700 transition-all focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-          >
-            Agregar producto
-          </button>
-        </div>
-      </div>
-
+      <button
+        type="button"
+        (click)="onClose()"
+        class="btn-icon hover:text-text-main hover:bg-bg-muted"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
+
+<div class="grid grid-cols-[1fr_1fr_2fr] gap-x-4 gap-y-3 font-inter p-3">
+
+  <!-- Categoría -->
+  <div class="flex flex-col gap-1">
+    <label class="field-label font-bold uppercase">Categoría</label>
+    <app-category-select-ctrl
+      [fieldId]="newProductForm.newProduct.categoryId()"
+      [fieldName]="newProductForm.newProduct.categoryName()"
+    />
+    @if (newProductForm.newProduct.categoryId().touched() && newProductForm.newProduct.categoryId().invalid()) {
+      @for (error of newProductForm.newProduct.categoryId().errors(); track error.kind) {
+        <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+      }
+    }
   </div>
-}
+
+  <!-- Marca -->
+  <div class="flex flex-col gap-1">
+    <label class="field-label font-bold uppercase">Marca</label>
+    <app-brand-select-ctrl
+      [fieldId]="newProductForm.newProduct.brandId()"
+      [fieldName]="newProductForm.newProduct.brandName()"
+    />
+    @if (newProductForm.newProduct.brandId().touched() && newProductForm.newProduct.brandId().invalid()) {
+      @for (error of newProductForm.newProduct.brandId().errors(); track error.kind) {
+        <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+      }
+    }
+  </div>
+
+  <!-- Nombre -->
+  <div class="flex flex-col gap-1">
+    <label class="field-label font-bold uppercase !text-feedback-success-text">Nombre del modelo</label>
+    <input
+      type="text"
+      [formField]="newProductForm.newProduct.name"
+      placeholder="Ej. 505 semiclásico..."
+      autofocus
+      class="w-full px-2.5 py-1.5 border rounded-md text-[12px] text-text-main
+             placeholder:text-text-soft bg-bg-surface font-medium outline-none transition-all
+             focus:ring-2 focus:ring-feedback-success-text/20 focus:border-feedback-success-text"
+      [class.border-border]="!(newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid())"
+      [class.border-feedback-error-text]="newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid()"
+    />
+    @if (newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid()) {
+      @for (error of newProductForm.newProduct.name().errors(); track error.kind) {
+        <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+      }
+    }
+  </div>
+
+  <!-- Género -->
+  <div class="flex flex-col gap-1">
+    <label class="field-label font-bold uppercase">Género</label>
+    <select
+      (change)="onGenderChange($event)"
+      [value]="newProduct().newProduct.gender ?? ''"
+      class="w-full px-2.5 py-1.5 border border-border rounded-md text-[12px] text-text-main bg-bg-surface
+             outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui">
+      <option value="" disabled>Seleccione</option>
+      @for (opt of genderOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    @if (newProductForm.newProduct.gender().touched() && newProductForm.newProduct.gender().invalid()) {
+      @for (error of newProductForm.newProduct.gender().errors(); track error.kind) {
+        <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+      }
+    }
+  </div>
+
+  <!-- Descripción -->
+  <div class="col-span-2 flex flex-col gap-1">
+    <label class="field-label font-bold uppercase">
+      Descripción
+      <span class="text-[9px] font-normal lowercase">(opcional)</span>
+    </label>
+    <input
+      type="text"
+      [formField]="newProductForm.newProduct.description"
+      placeholder="Añadir nota..."
+      class="w-full px-2.5 py-1.5 border border-border rounded-md text-[11px] text-text-muted
+             italic placeholder:text-text-soft outline-none transition-all bg-bg-surface
+             focus:ring-2 focus:ring-border/40 focus:border-border-strong"
+    />
+  </div>
+
+</div>
+
+<!-- Tabla de variantes -->
+<div class="border border-border rounded-lg mt-4 font-inter">
+  <div class="grid grid-cols-[28px_120px_120px_80px_60px_80px_80px_1fr_28px]">
+    
+    <!-- Cabecera -->
+    <div class="col-span-full grid grid-cols-subgrid bg-bg-muted border-b border-border rounded-t-lg">
+      <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft text-center">#</div>
+      <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft">CÓDIGO</div>
+      <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft">COLOR</div>
+      <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft">TALLA</div>
+      <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft text-right">P. VENTA</div>
+      <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft text-right">CANT.</div>
+      <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft text-right">COSTO U.</div>
+      <div class="px-2 py-1.5 text-[10px] font-bold text-text-soft">NOTAS</div>
+      <div></div>
+    </div>
+
+    <!-- Filas -->
+    @for (variant of newProductForm.variants; track $index; let i = $index) {
+      <app-variant-new-row
+        class="group col-span-full grid grid-cols-subgrid border-b border-border
+               last:border-b-0 hover:bg-accent-ui/5 transition-colors"
+        [formModel]="newProductForm.variants[$index]"
+        [existingVariants]="[]"
+        (remove)="removeVariant(i)"
+        [index]="i"
+      />
+    } @empty {
+      <div class="col-span-full py-6 text-center text-[11px] text-text-soft italic">
+        Sin variantes. Agrega al menos una para continuar.
+      </div>
+    }
+
+    <!-- Botón Agregar Fila -->
+    <div class="col-span-full p-2 bg-bg-muted rounded-b-lg">
+      <button
+        type="button"
+        (click)="addVariant()"
+        class="w-full flex items-center justify-center gap-2 py-3
+               border-2 border-dashed border-border rounded-xl
+               text-[11px] font-bold text-text-soft
+               hover:border-accent-ui hover:text-accent-ui hover:bg-accent-ui/5
+               focus:outline-none focus:border-accent-ui focus:ring-2 focus:ring-ring-focus-ring
+               transition-all"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+        AGREGAR NUEVA FILA (COLOR + TALLA)
+      </button>
+    </div>
+
+  </div>
+</div>
+<div class="flex items-center justify-between px-5 py-3 border-t border-border bg-bg-muted/40 rounded-b-xl">
+  
+  <!-- Resumen -->
+  <div class="flex items-center gap-6">
+    
+    <div class="flex flex-col">
+      <span class="field-label font-bold uppercase">Unidades</span>
+      <span class="field-value">{{ summary().units }}</span>
+    </div>
+
+    <div class="w-px h-8 bg-border"></div>
+
+    <div class="flex flex-col">
+      <span class="field-label font-bold uppercase">Costo Total</span>
+      <span class="field-value">{{ summary().cost | currency:'VES':'Bs. ' }}</span>
+    </div>
+
+    <div class="w-px h-8 bg-border"></div>
+
+    <div class="flex flex-col">
+      <span class="field-label font-bold uppercase">Venta Proyectada</span>
+      <span class="field-value text-feedback-info-text">{{ summary().sales | currency:'VES':'Bs. ' }}</span>
+    </div>
+
+    <div class="w-px h-8 bg-border"></div>
+
+    <div class="flex flex-col">
+      <span class="field-label font-bold uppercase">Margen</span>
+      <span class="field-value"
+        [class.text-feedback-success-text]="summary().margin > 0"
+        [class.text-feedback-error-text]="summary().margin < 0"
+        [class.text-text-main]="summary().margin === 0">
+        {{ summary().margin | currency:'VES':'Bs. ' }}
+      </span>
+    </div>
+
+  </div>
+
+  <!-- Botones -->
+  <div class="flex gap-2">
+    <button
+      type="button"
+      (click)="onConfirm()"
+      class="btn-primary btn-sm"
+    >
+      Agregar producto
+    </button>
+  </div>
+
+</div>

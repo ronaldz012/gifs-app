@@ -9,6 +9,7 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('@features/auth/login/login')
   },
+
   {
     path: 'print',
     canActivate: [authGuard],
@@ -25,6 +26,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('@layout/maint-layout/main-layout'),
     children: [
+      //dev
+      {path: 'dev',
+        loadComponent: () => import('./dev/dev.component/dev.component'),
+      },
       // Home
       {
         path: 'home',
@@ -139,6 +144,7 @@ export const routes: Routes = [
       { path: '**', redirectTo: 'not-found' }
     ]
   },
+
   // ── Print — fuera del layout (no specific routes defined here)
   // ── Auth ───────────────────────────────────────────────────────────────────
   { path: '**', redirectTo: '' }

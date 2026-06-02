@@ -1,0 +1,9 @@
+<div class="items-center m-auto p-8">
+  <h1 class="text-2xl font-bold mb-4">Preview: New Product Modal</h1>
+  <div class="border border-gray-300 rounded p-4 max-w-4xl" >
+    <app-new-product-modal 
+      (close)="onCloseModal()"
+      (confirm)="onConfirmModal($event)" 
+    />
+  </div>
+</div>

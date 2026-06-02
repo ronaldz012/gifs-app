@@ -2,15 +2,16 @@ import { Component, input, output, signal, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { ProductDetailDto } from '../../../dtos/products/product-detail-dto';
 import { CategoryService } from '../../../services/category-service';
-import BrandService from '../../../services/brand-service';
 import {UpdateProductDto} from '../../../dtos/products/update-product-dto';
 import {Gender} from '../../../interfaces/gender';
-import { SearchableSelect, SelectOption } from '@shared/components/searchable-select';
+import { SearchableSelect } from '@shared/components/searchable-select';
+import { SelectOption } from '@shared/models/select-option.model';
+import { BrandService } from '@features/inventory/services/brand-service';
 
 
 
 const GENDER_LABELS: Record<number, string> = {
-  [Gender.Unixes]: 'Unisex',
+  [Gender.Unisex]: 'Unisex',
   [Gender.Hombre]: 'Hombre',
   [Gender.Mujer]:  'Mujer',
 };
@@ -102,7 +103,7 @@ const GENDER_LABELS: Record<number, string> = {
                  focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
         >
           <option [ngValue]="null">Sin especificar</option>
-          <option [ngValue]="Gender.Unixes">Unisex</option>
+          <option [ngValue]="Gender.Unisex">Unisex</option>
           <option [ngValue]="Gender.Hombre">Hombre</option>
           <option [ngValue]="Gender.Mujer">Mujer</option>
         </select>
@@ -199,8 +200,8 @@ export class UpdateProductModal implements OnInit {
     this.form.categoryId  = p.categoryId ?? null;
     this.form.brandId     = p.brandId ?? null;
 
-    this.categoryService.getAll().subscribe(list => this.categories.set(list));
-    this.brandService.getAll().subscribe(list => this.brands.set(list));
+    // this.categoryService.getAll().subscribe(list => this.categories.set(list));
+    // this.brandService.getAll().subscribe(list => this.brands.set(list));
   }
 
   onSave(): void {

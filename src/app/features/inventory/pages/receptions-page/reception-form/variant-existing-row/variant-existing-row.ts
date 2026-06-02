@@ -1,172 +1,136 @@
-import {
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  input,
-  OnInit,
-  output,
-  signal,
-} from '@angular/core';
-import { AbstractControl, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, computed, effect, input, output, signal, WritableSignal } from '@angular/core';
+import { FieldTree, FormField } from '@angular/forms/signals';
 import { DecimalPipe } from '@angular/common';
 import { ProductVariantOption } from '../../../../components/product-search/product-search-result';
-import { VariantFormGroup } from '../common/variant-form-group';
+import { VariantForm } from '@features/inventory/models/variant-form.model';
+
 
 @Component({
   selector: 'app-variant-existing-row',
-  imports: [ReactiveFormsModule, DecimalPipe],
+  imports: [DecimalPipe, FormField],
   templateUrl: './variant-existing-row.html',
-  styles: [`
-    :host {
-      display: contents; /* Esto permite que los divs hijos se alineen con el grid del padre */
-    }
-    /* Ocultar flechas de input number en Firefox y Chrome */
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type=number] { -moz-appearance: textfield; }
-  `]
+  host: { class: 'contents' }
 })
-export default class VariantExistingRow implements OnInit {
-  // ── Dependencies ──────────────────────────────────────────────────────
-  private destroyRef = inject(DestroyRef);
+export default class VariantExistingRow {
+openDropdown() {
+  this.showDropdown.set(true)
+}
+closeDropdown() {
+  this.showDropdown.set(false)
+  this.formModel().id().markAsTouched();
 
-  // ── Inputs ────────────────────────────────────────────────────────────
-  form              = input.required<VariantFormGroup>();
+}
+  formModel = input.required<FieldTree<VariantForm>>();
+  index     = input.required<number>();
   availableVariants = input<ProductVariantOption[]>([]);
-  usedVariantIds    = input<GUID[]>([]);
-  index             = input<number>(0);
+  
+  remove    = output<void>();
+  createNew = output<string>();
 
-  // ── Outputs ───────────────────────────────────────────────────────────
-  remove      = output<void>();
-  createNew = output<string>(); // emite el texto que tenía escrito el usuario
-  // ── Estado UI ─────────────────────────────────────────────────────────
-  variantSearch = signal('');
-  showDropdown  = signal(false);
+  variantSearch  = signal('');
+  showDropdown   = signal(false);
 
-  // ── Puentes reactivos ─────────────────────────────────────────────────
-  private selectedVariantId = signal<GUID | null>(null);
-  private qtySignal         = signal(0);
-  private costSignal        = signal(0);
+  // Computeds corregidos para acceder al .value() de cada campo
+  subtotal = computed(() => {
+    const qty = this.formModel().quantityReceived().value() ?? 0;
+    const cost = this.formModel().unitCost().value() ?? 0;
+    return qty * cost;
+  });
 
-  // ── Computados ────────────────────────────────────────────────────────
-  private selectedVariant = computed<ProductVariantOption | undefined>(() =>
-    this.availableVariants().find(v => v.id === this.selectedVariantId())
-  );
-
-  selectedVariantSize  = computed(() => this.selectedVariant()?.size  ?? '');
-  selectedVariantColor = computed(() => this.selectedVariant()?.color ?? '');
-  selectedVariantPrice = computed(() => this.selectedVariant()?.price ?? null);
-  subtotal             = computed(() => this.qtySignal() * this.costSignal());
-
+  // variant-existing-row.ts — solo filtra por texto
   filteredVariants = computed(() => {
-    const q         = this.variantSearch().toLowerCase().trim();
-    const usedIds   = this.usedVariantIds();
-    const currentId = this.selectedVariantId();
-
-    const available = this.availableVariants().filter(
-      v => !usedIds.includes(v.id) || v.id === currentId
-    );
-
-    if (!q) return available;
-    return available.filter(v =>
-      v.description.toLowerCase().includes(q) ||
-      v.size?.toLowerCase().includes(q) ||
-      v.color?.toLowerCase().includes(q)
+    const q = this.variantSearch().toLowerCase().trim();
+    if (!q) return this.availableVariants();
+    return this.availableVariants().filter(v =>
+      v.sku?.toLowerCase().includes(q) ||
+      v.description?.toLowerCase().includes(q)
     );
   });
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────
-  ngOnInit(): void {
-    this.restoreSelectedVariant();
-    this.syncSubtotalSignals();
+  private patchModel(partial: VariantForm): void {
+    const model = this.formModel();
+
+    // Usamos el acceso como función model.campo() 
+    // para obtener el estado y aplicar el cambio.
+    if (partial.id !== undefined)               model.id().setControlValue(partial.id);
+    if (partial.description !== undefined)      model.description().setControlValue(partial.description);
+    if (partial.size !== undefined)             model.size().setControlValue(partial.size);
+    if (partial.colorId !== undefined)          model.colorId().setControlValue(partial.colorId);
+    if (partial.price !== undefined)            model.price().setControlValue(partial.price);
+    if (partial.mode !== undefined)             model.mode().setControlValue(partial.mode);
+    if (partial.quantityReceived !== undefined) model.quantityReceived().setControlValue(partial.quantityReceived);
+    if (partial.unitCost !== undefined)         model.unitCost().setControlValue(partial.unitCost);
+    if(partial.description !== undefined)      model.description().setControlValue(partial.description);
+    if(partial.colorName !==undefined)       model.colorName().setControlValue(partial.colorName);
+
   }
 
-  private restoreSelectedVariant(): void {
-    const id = this.productVariantIdCtrl.value;
-    if (!id) return;
-    this.selectedVariantId.set(id);
-    const found = this.availableVariants().find(v => v.id === id);
-    if (found) this.variantSearch.set(this.formatDropdownLabel(found));
-  }
+selectVariant(variant: ProductVariantOption): void {
+    this.patchModel({
+      id: variant.id,
+      description: variant.description,
+      size: variant.size ?? '',
+      colorId: variant.colorId,
+      colorCode: variant.sku,
+      colorName: variant.colorName,
+      price: variant.price,
+      mode: 'ex',
+      quantityReceived: null,
+      unitCost: null,
+      sku: variant.sku
+    });
 
-  private syncSubtotalSignals(): void {
-    const { quantityReceived, unitCost } = this.form().controls;
-    this.qtySignal.set(quantityReceived.value ?? 0);
-    this.costSignal.set(unitCost.value ?? 0);
-
-    quantityReceived.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(val => this.qtySignal.set(val ?? 0));
-
-    unitCost.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(val => this.costSignal.set(val ?? 0));
-  }
-
-  // ── Dropdown ──────────────────────────────────────────────────────────
-  openDropdown():  void { this.showDropdown.set(true); }
-  closeDropdown(): void { setTimeout(() => this.showDropdown.set(false), 150); }
-
-  onSearchInput(value: string): void {
-    this.variantSearch.set(value);
-    const selected = this.selectedVariant();
-    if (selected && value !== this.formatDropdownLabel(selected)) {
-      this.productVariantIdCtrl.setValue(null);
-      this.selectedVariantId.set(null);
-    }
-    this.openDropdown();
-  }
-
-  selectVariant(variant: ProductVariantOption): void {
-    this.productVariantIdCtrl.setValue(variant.id);
-    this.selectedVariantId.set(variant.id);
-    this.productVariantIdCtrl.markAsTouched();
-    this.variantSearch.set(this.formatVariantLabel(variant));
+    this.variantSearch.set(variant.sku);
     this.showDropdown.set(false);
   }
 
-  // ── Accessors ─────────────────────────────────────────────────────────
-  get productVariantIdCtrl(): FormControl<GUID | null> {
-    return this.form().controls.productVariantId;
-  }
-
-  // ── Helpers ───────────────────────────────────────────────────────────
-  formatVariantLabel(v: ProductVariantOption):  string { return v.sku+' '+v.description; }
-  formatDropdownLabel(v: ProductVariantOption): string {
-    const parts = [v.sku];
-    if(v.description) parts.push(v.description);
-    if (v.size)  parts.push(`Talle ${v.size}`);
-    if (v.color) parts.push(v.color);
-    return parts.join(' · ');
-  }
-
-  onRemove():      void {
-    const currentId = this.productVariantIdCtrl.value;
-    if (currentId) {
-      this.productVariantIdCtrl.setValue(null);
+  onSearchInput(value: string): void {
+    this.variantSearch.set(value);
+    // Si borran el texto, limpiamos el ID
+    if (!value) {
+      this.patchModel({
+        id: '' as GUID,
+        mode: 'ex',
+        size: '',
+        colorId: '0' as GUID,
+        colorCode: '',
+        colorName: '',
+        quantityReceived: null,
+        unitCost: 0,
+        description: '',
+        price: null,
+        sku: ''
+      });
     }
-    this.createNew.emit(this.variantSearch());
+  }
 
+  onRemove(): void {
     this.remove.emit();
   }
-
-
-  hasError(ctrl: AbstractControl | null, error = 'required'): boolean {
-    if (!ctrl) return false;
-    return ctrl.hasError(error) && ctrl.touched;
-  }
-
-  onCreateNew(): void {
-    // libera la variante que tenía seleccionada antes de destruirse
-    const currentId = this.productVariantIdCtrl.value;
-    if (currentId) {
-      this.productVariantIdCtrl.setValue(null);
-    }
-    this.createNew.emit(this.variantSearch());
-  }
+  // En el componente, temporal para debug
+debugState = computed(() => {
+  const id = this.formModel().id();
+  const qty = this.formModel().quantityReceived();
+  const cost = this.formModel().unitCost();
+  
+  console.log('id state:', {
+    value: id.value(),
+    touched: id.touched(),
+    invalid: id.invalid(),
+    errors: id.errors(),
+  });
+  console.log('qty state:', {
+    value: qty.value(),
+    touched: qty.touched(),
+    invalid: qty.invalid(),
+    errors: qty.errors(),
+  });
+  console.log('cost state:', {
+    value: cost.value(),
+    touched: cost.touched(),
+    invalid: cost.invalid(),
+    errors: cost.errors(),
+  });
+  
+});
 }

@@ -1,9 +1,6 @@
 import { Component, input, output, signal, computed, effect, ElementRef, viewChild } from '@angular/core';
+import { SelectOption } from '@shared/models/select-option.model';
 
-export interface SelectOption {
-  id: GUID;
-  name: string;
-}
 
 /**
  * Searchable select dropdown for entities with { id, name }.
@@ -73,7 +70,7 @@ export interface SelectOption {
                   [class.text-blue-600]="opt.id === selectedId()"
                   [class.font-medium]="opt.id === selectedId()"
                 >
-                  {{ opt.name }}
+                  {{ opt.displayName }}
                   @if (opt.id === selectedId()) {
                     <span class="material-icons text-base text-blue-500">check</span>
                   }
@@ -113,13 +110,13 @@ export class SearchableSelect {
   filtered = computed(() => {
     const q = this.query().toLowerCase().trim();
     if (!q) return this.options();
-    return this.options().filter(o => o.name.toLowerCase().includes(q));
+    return this.options().filter(o => o.displayName.toLowerCase().includes(q));
   });
 
   selectedLabel = computed(() => {
     const id = this.selectedId();
     if (!id) return '';
-    return this.options().find(o => o.id === id)?.name ?? '';
+    return this.options().find(o => o.id === id)?.displayName ?? '';
   });
 
   toggleOpen() {

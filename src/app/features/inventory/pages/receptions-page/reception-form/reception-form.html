@@ -1,12 +1,12 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="mx-auto py-5 px-3 sm:px-6 min-w-225">
+<div class="mx-auto py-5 px-3 sm:px-6 min-w-225">
 
+  <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-
     <div class="flex items-center gap-4">
       <h2 class="font-inter text-base font-bold text-text-main">Nueva recepción</h2>
-
       <input
-        formControlName="notes"
+        [value]="reception().notes"
+        (input)="updateNotes($event)"
         placeholder="Notas (proveedor, temporada...)"
         class="w-72 px-3 py-1.5 border border-border bg-bg-surface rounded-md text-sm text-text-main placeholder-text-soft
                focus:outline-none focus:ring-1 focus:ring-accent-ui focus:border-accent-ui transition-colors duration-150"
@@ -14,28 +14,15 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <span class="text-xs text-text-soft">
-        <kbd class="px-1.5 py-0.5 bg-bg-muted border border-border rounded text-[10px] font-mono">Tab</kbd>
-        para navegar entre celdas
-      </span>
-
-      <button
-        type="button"
-        (click)="onCancel()"
-        class="px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm"
-      >
+      <button type="button" (click)="onCancel()"
+        class="px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm">
         Cancelar
       </button>
-
-      <button
-        type="submit"
-        [disabled]="isSubmitting()"
-        class="px-4 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm"
-      >
+      <button type="button" (click)="onSubmit()" [disabled]="isSubmitting()"
+        class="px-4 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm">
         {{ isSubmitting() ? 'Guardando...' : 'Guardar recepción' }}
       </button>
     </div>
-
   </div>
 
   <div class="space-y-3">
@@ -46,52 +33,34 @@
       </div>
     }
 
-    @if (itemsArray.length === 0) {
+    @if (reception().items.length === 0) {
       <div class="text-center text-sm text-text-soft py-10 border border-dashed border-border bg-bg-surface/50 rounded-lg">
         No hay productos. Hacé clic en "+ Agregar producto" para empezar.
       </div>
     }
 
-    @for (itemForm of itemsArray.controls; track itemForm) {
-      <app-reception-item
-        [categories]="categories()"
-        [brands]="brands()"
-        [colors]="colors()"
-        [form]="itemForm"
-        (remove)="removeItem($index)"
-        (edit)="onEditItem($event, $index)"
-        [index]="$index"
-      />
+    @for (group of reception().items; track group.productId) {
+      <app-reception-item [group]="group" (remove)="removeGroup($event)" />
     }
 
-    <div class="py-3 flex items-center gap-4">
-      <!-- Botón Producto Nuevo -->
-      <button type="button" (click)="editingItem.set(null); activateNewProductModal.set(true)"
-              class="flex items-center gap-2 px-4 py-2 bg-feedback-info text-feedback-info-text border border-border rounded-lg hover:bg-accent-ui hover:text-accent-ui-text transition-all duration-150 shadow-sm group">
-        <span class="text-xl font-bold group-hover:scale-110">+</span>
-        <div class="text-left">
-          <p class="text-sm font-bold leading-none">Crear Producto Nuevo</p>
-          <p class="text-[10px] opacity-80">Para artículos que entran por primera vez</p>
-        </div>
-      </button>
-
-      <!-- Botón Producto Existente -->
-      <button type="button" (click)="editingItem.set(null); activateExistingProductModal.set(true);"
-              class="flex items-center gap-2 px-4 py-2 bg-bg-muted text-text-main border border-border rounded-lg hover:bg-text-main hover:text-inverse transition-all duration-150 shadow-sm group">
+    <!-- Botón agregar -->
+    <div class="py-3">
+      <button type="button" (click)="showCatalogueModal.set(true)"
+        class="flex items-center gap-2 px-4 py-2 bg-bg-muted text-text-main border border-border rounded-lg hover:bg-text-main hover:text-inverse transition-all duration-150 shadow-sm group">
         <span class="text-xl font-bold group-hover:scale-110">🔍</span>
         <div class="text-left">
-          <p class="text-sm font-bold leading-none">Buscar en Catálogo</p>
-          <p class="text-[10px] opacity-80">Añadir stock de algo ya registrado</p>
+          <p class="text-sm font-bold leading-none">Agregar producto</p>
+          <p class="text-[10px] opacity-80">Buscar en catálogo o crear nuevo</p>
         </div>
       </button>
     </div>
 
+    <!-- Footer -->
     <div class="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-border gap-4">
-
       <div class="flex items-center gap-6 text-sm text-text-muted">
         <span>
-          <span class="font-bold text-text-main">{{ itemsArray.length }}</span>
-          {{ itemsArray.length === 1 ? 'producto' : 'productos' }}
+          <span class="font-bold text-text-main">{{ reception().items.length }}</span>
+          {{ reception().items.length === 1 ? 'producto' : 'productos' }}
         </span>
         <span>
           Costo total:
@@ -100,75 +69,33 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button
-          type="button"
-          (click)="onCancel()"
-          class="px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm"
-        >
+        <button type="button" (click)="onCancel()"
+          class="px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm">
           Cancelar
         </button>
-
-        <button
-          type="submit"
-          [disabled]="isSubmitting()"
-          class="px-5 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm"
-        >
+        <button type="button" (click)="onSubmit()" [disabled]="isSubmitting()"
+          class="px-5 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm">
           {{ isSubmitting() ? 'Guardando...' : 'Guardar recepción' }}
         </button>
       </div>
-
     </div>
 
   </div>
 
-</form>
-@if(activateNewProductModal()){
-  <app-new-product-modal
-    [categories]="categories()"
-    [colors]="colors()"
-    [brands]="brands()"
-    [itemForm]="editingItem()"
-    (confirm)="onNewProductConfirmed($event)"
-    (close)="closeNewProductModal()"
-  />
-}
-@if(activateExistingProductModal())
-{
+
+</div>
+
+@if (showCatalogueModal()) {
   <app-existing-product-modal
-  [colors]="colors()"
-  [itemForm]="editingItem()"
-  (close)="activateExistingProductModal.set(false); editingItem.set(null)"
+    (confirm)="addGroup($event)"
+    (close)="showCatalogueModal.set(false)"
+    (notFound)="onNotFound()"
   />
 }
-@if (activeModal()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/20"
-  tabindex="0"
-  (keydown)="handleModalKeyDown($event)">
 
-    @if (activeModal()?.type === 'category') {
-      <app-create-category
-        [initialName]="activeModal()!.query"
-        (created)="onCategoryCreated($event)"
-        (closed)="activeModal.set(null)"
-      />
-    }
-
-    @if (activeModal()?.type === 'brand') {
-      <app-create-brand
-        [initialName]="activeModal()!.query"
-        (created)="onBrandCreated($event)"
-        (closed)="activeModal.set(null)"
-      />
-    }
-    @if(activeModal()?.type ==='color')
-    {
-      <app-create-color
-      [initialName]="activeModal()!.query"
-      (created)="onColorCreated($event)"
-      (closed)="activeModal.set(null)"
-      />
-
-    }
-
-  </div>
+@if (showNewProductModal()) {
+  <app-new-product-modal
+    (confirm)="addGroup($event)"
+    (close)="showNewProductModal.set(false)"
+  />
 }

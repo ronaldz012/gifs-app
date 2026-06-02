@@ -3,6 +3,8 @@ import { FormControl } from '@angular/forms';
 import {Category} from '../../dtos/categories/category-dto';
 import {CreateCategory} from '../create-category/create-category'; // ajusta path
 import SelectCtrl from '@shared/components/selec-from-list-ctrl';
+import { FieldState, FieldTree } from '@angular/forms/signals';
+import { CategoryService } from '@features/inventory/services/category-service';
 
 @Component({
   selector: 'app-category-select-ctrl',
@@ -11,9 +13,10 @@ import SelectCtrl from '@shared/components/selec-from-list-ctrl';
   template: `
     <div class="relative w-full">
       <app-select-ctrl
-        [ctrl]="ctrl()"
+        [fieldState]="fieldId()"
         [options]="categoryOptions()"
         [placeholder]="placeholder()"
+        (selected)="categorySelected($event)"
         (createNew)="openInlineCreate($event)"
       />
       @if (showCreate()) {
@@ -29,20 +32,27 @@ import SelectCtrl from '@shared/components/selec-from-list-ctrl';
   `,
 })
 export class CategorySelectCtrl {
-  private elRef = inject(ElementRef);
 
-  ctrl        = input.required<FormControl>();
-  categories  = input<Category[]>([]);
+  private elRef = inject(ElementRef);
+  categoryService= inject(CategoryService);
+
+
+  fieldId        = input.required<FieldState<GUID>>();
+  fieldName        = input.required<FieldState<string>>();
+  categories  = this.categoryService.categories;
   placeholder = input<string>('Categoría...');
 
-  categoryCreated = output<Category>();
 
   showCreate  = signal(false);
   createQuery = signal('');
 
   categoryOptions = computed(() =>
-    this.categories().map(c => ({ id: c.id, name: c.name }))
+    this.categories().map(c => ({ id: c.id, displayName: c.name }))
   );
+  categorySelected(id: GUID) {
+  const category = this.categories().find(c => c.id === id);
+  this.fieldName().setControlValue(category?.name ?? '');
+  }
 
   openInlineCreate(query: string) {
     this.createQuery.set(query);
@@ -55,9 +65,10 @@ export class CategorySelectCtrl {
   }
 
   onCreated(category: Category) {
-    this.ctrl().setValue(category.id);
-    this.ctrl().markAsTouched();
+    this.categoryService.add(category)
+    this.fieldId().setControlValue(category.id);
+    this.fieldName().setControlValue(category.name);
+    this.fieldId().markAsTouched();
     this.closeInlineCreate();
-    this.categoryCreated.emit(category);
   }
 }

@@ -12,18 +12,23 @@ import {UpdateProductDto} from '../dtos/products/update-product-dto';
 import {UpdateProductVariantDto} from '../dtos/products/update-product-variant-dto';
 import {UpdateProductVariantStockDto} from '../dtos/products/update-product-variant-stock-dto';
 import { environment } from 'environments/environment';
+import { CreateProductVariantDto, ProductVariantCreatedDto } from '../dtos/products/create-product-variant-dto';
+import { CreateProductWithVariantsDto, ProductWithVariantsCreatedDto } from '../dtos/products/create-product-with-variants-dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
+
   private http = inject(HttpClient);
   private product_url = environment.BACKEND_URL + '/api/Product';
   private productVariant_url = environment.BACKEND_URL + '/api/ProductVariant';
 
-  createProduct(dto : CreateProductDto): Observable<boolean> {
-    return  this.http.post<boolean>(this.product_url, dto);
-  }
+
+  createProductWithVariants(dto: CreateProductWithVariantsDto): Observable<ProductWithVariantsCreatedDto> {
+  return this.http.post<ProductWithVariantsCreatedDto>(`${this.product_url}`, dto);
+}
+
   getProducts(query : ProductQueryParams) : Observable<PagedResult<ListProductDto>>{
     let params = new HttpParams();
 
@@ -56,6 +61,11 @@ export class ProductService {
   /////////////VARIANTS/////////////////////////////////////////////////mber) {
   //     return this.http/
 
+  
+
+  createVariants(productId: string, dto: CreateProductVariantDto[]): Observable<ProductVariantCreatedDto[]> {
+  return this.http.post<ProductVariantCreatedDto[]>(`${this.productVariant_url}/${productId}`, dto);
+  }
 
   getVariantBySku(code : string) : Observable<ProductVariantBySkuDto>{
     let params = new HttpParams();

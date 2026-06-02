@@ -1,9 +1,9 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { CategoryService } from '../../../services/category-service';
-import BrandService from '../../../services/brand-service';
 import { FormsModule } from '@angular/forms';
 import { ProductQueryParams } from '../../../dtos/products/product-dto';
 import { Gender } from '../../../interfaces/gender';
+import { BrandService } from '@features/inventory/services/brand-service';
 
 @Component({
   selector: 'app-product-filter-bar',
@@ -31,8 +31,8 @@ export class ProductFilterBar {
     // Sync searchValue cuando params cambia externamente
     effect(() => this.searchValue.set(this.params().filter ?? ''));
 
-    this.categoryService.getAll().subscribe(r => this.categories.set(r));
-    this.brandService.getAll().subscribe(r => this.brands.set(r));
+    // this.categoryService.getAll().subscribe(r => this.categories.set(r));
+    // this.brandService.getAll().subscribe(r => this.brands.set(r));
   }
 
   onSearch(value: string) {

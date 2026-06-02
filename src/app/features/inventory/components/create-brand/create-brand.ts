@@ -1,7 +1,7 @@
 import {Component, ElementRef, inject, input, OnInit, output, ViewChild} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Brand} from '../../dtos/brands/brand-dto';
-import BrandService from '../../services/brand-service';
+import { BrandService } from '@features/inventory/services/brand-service';
 
 @Component({
   selector: 'app-create-brand',

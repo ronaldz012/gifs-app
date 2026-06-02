@@ -38,3 +38,49 @@
 @utility section-title {
   @apply text-[11px] font-semibold text-text-soft uppercase tracking-wide mb-4;
 }
+
+
+@utility badge {
+  @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1;
+}
+@utility badge-warning {
+  @apply badge bg-feedback-warning text-feedback-warning-text ring-feedback-warning-text/30;
+}
+@utility badge-success {
+  @apply badge bg-feedback-success text-feedback-success-text ring-feedback-success-text/30;
+}
+@utility badge-error {
+  @apply badge bg-feedback-error text-feedback-error-text ring-feedback-error-text/30;
+}
+@utility badge-info {
+  @apply badge bg-feedback-info text-feedback-info-text ring-feedback-info-text/30;
+}
+
+/* ─────────────────────────────────────────────
+   PILLS — Chips compactos para tablas y filas
+   Más pequeños que badge, sin rounded-full
+   ───────────────────────────────────────────── */
+
+@utility pill {
+  @apply inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ring-1;
+}
+
+@utility pill-success {
+  @apply pill bg-feedback-success text-feedback-success-text ring-feedback-success-text/20;
+}
+
+@utility pill-warning {
+  @apply pill bg-feedback-warning text-feedback-warning-text ring-feedback-warning-text/20;
+}
+
+@utility pill-error {
+  @apply pill bg-feedback-error text-feedback-error-text ring-feedback-error-text/20;
+}
+
+@utility pill-info {
+  @apply pill bg-feedback-info text-feedback-info-text ring-feedback-info-text/20;
+}
+
+@utility pill-neutral {
+  @apply pill bg-bg-muted text-text-soft ring-border;
+}

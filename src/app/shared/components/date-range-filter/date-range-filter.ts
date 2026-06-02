@@ -14,51 +14,51 @@ type DateShortcut = 'today' | 'week' | 'month' | 'custom';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
 
-      <!-- Shortcuts -->
-      <div class="grid grid-cols-2 sm:flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 w-full sm:w-auto">
-        @for (s of shortcuts; track s.value) {
-          <button
-            class="px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors whitespace-nowrap text-center"
-            [class]="activeShortcut() === s.value
-              ? 'bg-white text-gray-800 font-medium shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'"
-            (click)="applyShortcut(s.value)">
-            {{ s.label }}
-          </button>
-        }
+    <!-- Shortcuts -->
+    <div class="grid grid-cols-2 sm:flex items-center gap-1 bg-bg-muted rounded-lg p-0.5 w-full sm:w-auto">
+      @for (s of shortcuts; track s.value) {
+        <button
+          class="px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors whitespace-nowrap text-center"
+          [class]="activeShortcut() === s.value
+            ? 'bg-bg-surface text-text-main font-medium shadow-sm'
+            : 'text-text-soft hover:text-text-muted'"
+          (click)="applyShortcut(s.value)">
+          {{ s.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Custom date inputs -->
+    @if (activeShortcut() === 'custom') {
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 w-full sm:w-auto">
+        <input
+          type="date"
+          class="px-2 py-1.5 sm:py-1 text-sm border border-border rounded-md bg-bg-surface
+                 text-text-main w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-ring-focus-ring"
+          [max]="fromMax()"
+          [ngModel]="localFrom()"
+          (ngModelChange)="onFromChange($event)" />
+        <span class="hidden sm:inline text-text-soft text-xs">→</span>
+        <input
+          type="date"
+          class="px-2 py-1.5 sm:py-1 text-sm border border-border rounded-md bg-bg-surface
+                 text-text-main w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-ring-focus-ring"
+          [min]="toMin()"
+          [ngModel]="localTo()"
+          (ngModelChange)="onToChange($event)" />
       </div>
 
-      <!-- Custom date inputs — visible solo cuando activeShortcut = 'custom' -->
-      @if (activeShortcut() === 'custom') {
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 w-full sm:w-auto">
-          <input
-            type="date"
-            class="px-2 py-1.5 sm:py-1 text-sm border border-gray-200 rounded-md w-full sm:w-auto"
-            [max]="fromMax()"
-            [ngModel]="localFrom()"
-            (ngModelChange)="onFromChange($event)" />
-          <span class="hidden sm:inline text-gray-400 text-xs">→</span>
-          <input
-            type="date"
-            class="px-2 py-1.5 sm:py-1 text-sm border border-gray-200 rounded-md w-full sm:w-auto"
-            [min]="toMin()"
-            [ngModel]="localTo()"
-            (ngModelChange)="onToChange($event)" />
-        </div>
-      } @else if (activeShortcut() !== 'custom' && (from() || to())) {
-        <!-- Badge mostrando rango activo de shortcut -->
-        <div class="flex justify-center sm:block">
-          <span class="text-xs text-indigo-600 bg-indigo-50 border border-indigo-200
-                       px-2 py-1 rounded-lg font-medium inline-block text-center">
-            {{ formatActiveBadge() }}
-          </span>
-        </div>
-      }
+    } @else if (from() || to()) {
+      <div class="flex justify-center sm:block">
+        <span class="badge-info">{{ formatActiveBadge() }}</span>
+      </div>
+    }
 
-    </div>
-  `,
+  </div>
+`,
+ 
 })
 export class DateRangeFilter {
   /** Valores actuales desde el padre */
