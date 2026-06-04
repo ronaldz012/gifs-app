@@ -46,7 +46,7 @@
 <div class="flex flex-col px-1 py-1.5 min-h-[42px]">
   <input
     type="number"
-    [formField]="$any(formModel().price)"
+    [formField]="formModel().price"
     placeholder="0.00"
     [class.!border-feedback-error-text]="formModel().price().touched() && formModel().price().invalid()"
     class="w-full px-2 py-1 border border-border rounded text-[11px] text-right bg-transparent
@@ -65,7 +65,7 @@
 <div class="flex flex-col px-1 py-1.5 min-h-[42px]">
   <input
     type="number"
-    [formField]="$any(formModel().quantityReceived)"
+    [formField]="formModel().quantityReceived"
     placeholder="0"
     [class.!border-feedback-error-text]="formModel().quantityReceived().touched() && formModel().quantityReceived().invalid()"
     class="w-full px-2 py-1 border border-border rounded text-[11px] text-right font-bold text-text-main bg-transparent
@@ -84,7 +84,7 @@
 <div class="flex flex-col px-1 py-1.5 min-h-[42px]">
   <input
     type="number"
-    [formField]="$any(formModel().unitCost)"
+    [formField]="formModel().unitCost"
     placeholder="0.00"
     [class.!border-feedback-error-text]="formModel().unitCost().touched() && formModel().unitCost().invalid()"
     class="w-full px-2 py-1 border border-border rounded text-[11px] text-right font-mono text-text-main bg-transparent
