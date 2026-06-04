@@ -49,7 +49,7 @@ export class BrandSelectCtrl {
 
   brandSelected($event: GUID) {
     const brand = this.brands().find(b => b.id === $event);
-    this.fieldName().setControlValue(brand?.name ?? '');
+    this.fieldName().value.set(brand?.name ?? '');
     
   }
 
@@ -65,7 +65,7 @@ export class BrandSelectCtrl {
 
   onCreated(brand: Brand) {
     this.service.add(brand);
-    this.fieldId().setControlValue(brand.id);
+    this.fieldId().value.set(brand.id);
     this.fieldId().markAsTouched();
     this.closeInlineCreate();
   }

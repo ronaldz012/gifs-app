@@ -55,7 +55,7 @@
       <label class="text-[10px] font-bold uppercase text-gray-400">Género</label>
       <select
         [value]="form().gender().value()"
-        (change)="form().gender().setControlValue(+$any($event.target).value)"
+        (change)="form().gender().value.set(+$any($event.target).value)"
         (blur)="form().gender().markAsTouched()"
         class="w-full px-2.5 py-1.5 border rounded-md text-[11px] font-bold bg-white
               text-gray-700 outline-none transition-all cursor-pointer

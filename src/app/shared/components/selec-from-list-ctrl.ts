@@ -96,14 +96,14 @@ export default class SelectCtrl {
     this.activeIndex.set(0);
     this.isOpen.set(true);
     if (!value) {
-      this.fieldState().setControlValue(null);
+      this.fieldState().value.set(null);
     }
   }
 
   selectOption(opt: SelectOption, event?: MouseEvent) {
     if (event) event.preventDefault();
     this.query.set(opt.displayName);
-    this.fieldState().setControlValue(opt.id);
+    this.fieldState().value.set(opt.id);
     this.fieldState().markAsTouched();
     this.selected.emit(opt.id);  // ← el wrapper recibe todo y decide qué hacer
     this.isOpen.set(false);

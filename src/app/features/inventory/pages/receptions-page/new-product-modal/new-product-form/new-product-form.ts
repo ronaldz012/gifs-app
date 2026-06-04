@@ -32,13 +32,13 @@ export class NewProductForm {
 
   handleCreatedCategory(category: Category): void {
     this.categoryStore.add(category);
-    this.form().categoryId().setControlValue(category.id);
-    this.form().categoryName().setControlValue(category.name);
+    this.form().categoryId().value.set(category.id);
+    this.form().categoryName().value.set(category.name);
   }
 
   handleCreatedBrand(brand: Brand): void {
     this.brandStore.add(brand);
-    this.form().brandId().setControlValue(brand.id);
-    this.form().brandName().setControlValue(brand.name);
+    this.form().brandId().value.set(brand.id);
+    this.form().brandName().value.set(brand.name);
   }
 }

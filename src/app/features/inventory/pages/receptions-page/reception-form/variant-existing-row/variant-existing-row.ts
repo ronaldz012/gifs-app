@@ -52,16 +52,16 @@ closeDropdown() {
 
     // Usamos el acceso como función model.campo() 
     // para obtener el estado y aplicar el cambio.
-    if (partial.id !== undefined)               model.id().setControlValue(partial.id);
-    if (partial.description !== undefined)      model.description().setControlValue(partial.description);
-    if (partial.size !== undefined)             model.size().setControlValue(partial.size);
-    if (partial.colorId !== undefined)          model.colorId().setControlValue(partial.colorId);
-    if (partial.price !== undefined)            model.price().setControlValue(partial.price);
-    if (partial.mode !== undefined)             model.mode().setControlValue(partial.mode);
-    if (partial.quantityReceived !== undefined) model.quantityReceived().setControlValue(partial.quantityReceived);
-    if (partial.unitCost !== undefined)         model.unitCost().setControlValue(partial.unitCost);
-    if(partial.description !== undefined)      model.description().setControlValue(partial.description);
-    if(partial.colorName !==undefined)       model.colorName().setControlValue(partial.colorName);
+    if (partial.id !== undefined)               model.id().value.set(partial.id);
+    if (partial.description !== undefined)      model.description().value.set(partial.description);
+    if (partial.size !== undefined)             model.size().value.set(partial.size);
+    if (partial.colorId !== undefined)          model.colorId().value.set(partial.colorId);
+    if (partial.price !== undefined)            model.price().value.set(partial.price);
+    if (partial.mode !== undefined)             model.mode().value.set(partial.mode);
+    if (partial.quantityReceived !== undefined) model.quantityReceived().value.set(partial.quantityReceived);
+    if (partial.unitCost !== undefined)         model.unitCost().value.set(partial.unitCost);
+    if(partial.description !== undefined)      model.description().value.set(partial.description);
+    if(partial.colorName !==undefined)       model.colorName().value.set(partial.colorName);
 
   }
 

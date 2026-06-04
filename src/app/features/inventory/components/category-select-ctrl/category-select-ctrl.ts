@@ -51,7 +51,7 @@ export class CategorySelectCtrl {
   );
   categorySelected(id: GUID) {
   const category = this.categories().find(c => c.id === id);
-  this.fieldName().setControlValue(category?.name ?? '');
+  this.fieldName().value.set(category?.name ?? '');
   }
 
   openInlineCreate(query: string) {
@@ -66,8 +66,8 @@ export class CategorySelectCtrl {
 
   onCreated(category: Category) {
     this.categoryService.add(category)
-    this.fieldId().setControlValue(category.id);
-    this.fieldName().setControlValue(category.name);
+    this.fieldId().value.set(category.id);
+    this.fieldName().value.set(category.name);
     this.fieldId().markAsTouched();
     this.closeInlineCreate();
   }

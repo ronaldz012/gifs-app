@@ -1,10 +1,9 @@
 import { Component, input, signal} from '@angular/core';
-import {CameraScannerModalComponent} from './camera-scanner-modal/camera-scanner-modal';
 
 @Component({
   selector: 'app-pos-page',
   imports: [
-    CameraScannerModalComponent
+    
   ],
   templateUrl: './pos-page.html',
   styles: ``,

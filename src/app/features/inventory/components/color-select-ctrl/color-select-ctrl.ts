@@ -58,8 +58,8 @@ export class ColorSelectCtrl {
 
   onCreated(color: Color) {
     this.service.add(color);
-    this.fieldState().setControlValue(color.id);
-    this.colorCode().setControlValue(color.code);
+    this.fieldState().value.set(color.id);
+    this.colorCode().value.set(color.code);
     this.fieldState().markAsTouched();
     this.closeInlineCreate();
     

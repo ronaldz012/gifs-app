@@ -31,9 +31,3 @@
 
 </div>
 
-@if (showCamera()) {
-  <app-camera-scanner-modal
-    (close)="showCamera.set(false)"
-    (codeScanned)="addCode($event)"
-  />
-}
