@@ -59,7 +59,7 @@ import {UpdateProductVariantDto} from '../../../../dtos/products/update-product-
             <label class="field-label block">Color</label>
             <input
               type="text"
-              [(ngModel)]="form.color"
+              [(ngModel)]="form.colorId"
               class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
                      focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
               placeholder="Ej: Negro, Blanco, Azul marino..."

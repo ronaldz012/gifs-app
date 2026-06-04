@@ -6,8 +6,8 @@ import { mapCreatedVariantToReceptionVariant } from '../reception-form/common/ma
 import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
 import { CurrencyPipe } from '@angular/common';
 import { NewProductModelForm } from '@features/inventory/models/new-product.model';
-import { applyEach, form, FormField, required } from '@angular/forms/signals';
-import { buildNewVariant, newVariantSchema } from '@features/inventory/models/variant-form.model';
+import { applyEach, FieldTree, form, FormField, required, validateTree } from '@angular/forms/signals';
+import { buildNewVariant, newVariantSchema, VariantForm } from '@features/inventory/models/variant-form.model';
 import { Category } from '@features/inventory/dtos/categories/category-dto';
 import { Brand } from '@features/inventory/dtos/brands/brand-dto';
 import { Color } from '@features/inventory/dtos/Colors/color';
@@ -48,14 +48,45 @@ export class NewProductModal {
    variants:     []
   });
 
-  newProductForm = form(this.newProduct, (s) => {
-    required(s.newProduct.name,       { message: 'Requerido' });
-    required(s.newProduct.brandId,    { message: 'Requerido' });
-    required(s.newProduct.categoryId, { message: 'Requerido' });
-    required(s.newProduct.gender,     { message: 'Requerido' });
-    applyEach(s.variants,newVariantSchema);
-  });
 
+    newProductForm = form(this.newProduct, (s) => {
+      required(s.newProduct.name,       { message: 'Requerido' });
+      required(s.newProduct.brandId,    { message: 'Requerido' });
+      required(s.newProduct.categoryId, { message: 'Requerido' });
+      required(s.newProduct.gender,     { message: 'Requerido' });
+      applyEach(s.variants, newVariantSchema);
+
+      validateTree(s.variants, ({ value, fieldTree }) => {
+      const variants = value() || [];
+      const seen = new Map<string, number[]>();
+
+      variants.forEach((v, i) => {
+        const key = `${v.colorId ?? ''}__${v.size ?? ''}`;
+        if (!seen.has(key)) seen.set(key, []);
+        seen.get(key)!.push(i);
+      });
+
+      // Agregamos 'kind: string' a la estructura del array de errores
+      const errors: { kind: string; message: string; fieldTree: typeof fieldTree[number] }[] = [];
+
+      for (const [key, indices] of seen.entries()) {
+        if (key === '__' || key === 'null__null') continue;
+
+        if (indices.length > 1) {
+          for (const i of indices) {
+            errors.push({
+              kind: 'duplicateVariant', // <-- REQUERIDO por la interfaz de Angular
+              message: 'La combinación de color y talla ya existe',
+              fieldTree: fieldTree[i]
+            });
+          }
+        }
+      }
+
+      return errors.length > 0 ? errors : null;
+    });
+
+    });
   isConfirming = signal(false);
   error        = signal<string | null>(null);
 
