@@ -86,7 +86,7 @@
       <div class="border border-border rounded-xl  bg-bg-surface shadow-sm">
 
         <!-- Cabecera (solo desktop) -->
-        <div class="hidden md:grid grid-cols-[24px_120px_1fr_70px_75px_60px_75px_36px] bg-bg-muted border-b border-border">
+        <div class="hidden md:grid grid-cols-[24px_140px_1fr_70px_75px_60px_75px_36px] bg-bg-muted border-b border-border">
           <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-center">#</div>
           <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Código</div>
           <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Color</div>
@@ -120,7 +120,7 @@
           } @empty {
             <div class="py-8 text-center text-xs italic"
                  [class.text-text-soft]="selectedProduct()"
-                 [class.text-text-soft/50]="!selectedProduct()">
+                 [class.text-text-soft]="!selectedProduct()">
               @if (selectedProduct()) {
                 Sin variantes. Agrega al menos una para continuar.
               } @else {
