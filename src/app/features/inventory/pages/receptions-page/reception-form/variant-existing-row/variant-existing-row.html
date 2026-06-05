@@ -1,136 +1,210 @@
-<!-- 1. INDEX -->
-<div class="px-2 py-3 flex items-start justify-center border-r border-border bg-bg-muted/30">
-  <span class="pill-success">{{ index() + 1 }}</span>
-</div>
+<div class="flex flex-col md:grid md:grid-cols-[24px_120px_1fr_70px_75px_60px_75px_36px] md:items-start gap-4 md:gap-0 p-4 md:p-0 border-b border-border last:border-b-0 hover:bg-accent-ui/5 transition-colors group">
 
-<!-- SKU / variante search -->
-<div class="px-1 py-0.5 relative">
-  <input
-    type="text"
-    [value]="variantSearch()"
-    (input)="onSearchInput($any($event.target).value)"
-    (focus)="openDropdown()"
-    (blur)="closeDropdown()"
-    placeholder="Buscar SKU o variante..."
-    class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 placeholder-gray-400 font-mono
-           focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-100
-           group-hover:border-gray-200 transition-all"
-    [class.border-red-300]="formModel().id().touched() && formModel().id().invalid()"
-  />
-  @if (formModel().id().touched() && formModel().id().invalid()) {
-    @for (error of formModel().id().errors(); track error.kind) {
-      <p class="text-[9px] text-red-500 mt-0.5 px-1">{{ error.message }}</p>
-    }
-  }
+  <!-- ── FILA SUPERIOR MOBILE: índice + botón eliminar ── -->
+  <div class="flex items-center justify-between w-full md:contents">
 
-  @if (showDropdown()) {
-    <div class="absolute z-50 left-0 right-0 mt-0.5 bg-white border border-gray-200 rounded shadow-xl max-h-48 overflow-y-auto overflow-x-hidden">
-      @for (variant of filteredVariants(); track variant.id) {
-        <button
-          type="button"
-          (mousedown)="$event.preventDefault()"
-          (click)="selectVariant(variant)"
-          class="w-full text-left px-2 py-1.5 text-[11px] hover:bg-blue-600 hover:text-white flex items-center gap-2 border-b border-gray-50 last:border-0">
-          <span class="font-mono font-semibold shrink-0">{{ variant.sku }}</span>
-          <span class="truncate opacity-70 flex-1">{{ variant.description }}</span>
-          <span class="text-[10px] opacity-60 shrink-0">Bs {{ variant.price }}</span>
-        </button>
-      }
-      <button
-        type="button"
-        (mousedown)="$event.preventDefault()"
-        (click)="createNew.emit(variantSearch())"
-        class="w-full text-left px-2 py-2 text-[10px] text-blue-600 font-bold hover:bg-blue-50 border-t border-blue-100 flex items-center gap-1 bg-blue-50/30">
-        <span class="bg-blue-600 text-white rounded-full w-3 h-3 flex items-center justify-center">+</span>
-        <span>CREAR NUEVA TALLA/COLOR</span>
-      </button>
+    <!-- Índice -->
+    <div class="md:px-2 md:py-3 md:flex md:items-center md:justify-center md:border-r md:border-border md:bg-bg-muted/30">
+      <span class="pill-neutral">{{ index() + 1 }}</span>
     </div>
-  }
+
+    <!-- SKU / Búsqueda: ocupa col 2 en desktop, hidden aquí en mobile (se muestra abajo) -->
+    <div class="hidden md:block relative px-1 py-0.5">
+      <input
+        type="text"
+        [value]="variantSearch()"
+        (input)="onSearchInput($any($event.target).value)"
+        (focus)="openDropdown()"
+        (blur)="closeDropdown()"
+        placeholder="Buscar SKU..."
+        class="w-full px-2 py-1 border border-border rounded text-[11px] text-text-main placeholder:text-text-soft font-mono bg-transparent focus:outline-none focus:border-accent-ui focus:bg-bg-surface focus:ring-1 focus:ring-accent-ui/20 group-hover:border-border-strong transition-all"
+        [class.!border-feedback-error-text]="formModel().id().touched() && formModel().id().invalid()"
+      />
+      @if (formModel().id().touched() && formModel().id().invalid()) {
+        @for (error of formModel().id().errors(); track error.kind) {
+          <span class="mt-0.5 px-1 text-[8px] text-feedback-error-text font-medium leading-none">{{ error.message }}</span>
+        }
+      }
+      @if (showDropdown()) {
+        <div class="absolute z-50 left-0 right-0 mt-0.5 bg-bg-surface border border-border rounded-lg shadow-md max-h-48 overflow-y-auto">
+          @for (variant of filteredVariants(); track variant.id) {
+            <button
+              type="button"
+              (mousedown)="$event.preventDefault()"
+              (click)="selectVariant(variant)"
+              class="w-full text-left px-2 py-1.5 text-[11px] text-text-main hover:bg-accent-ui hover:text-white flex items-center gap-2 border-b border-border last:border-0 transition-colors">
+              <span class="font-mono font-semibold shrink-0">{{ variant.sku }}</span>
+              <span class="text-[10px] text-text-soft shrink-0">Bs {{ variant.price }}</span>
+            </button>
+          }
+          <button
+            type="button"
+            (mousedown)="$event.preventDefault()"
+            (click)="createNew.emit(variantSearch())"
+            class="w-full text-left px-2 py-2 text-[10px] text-feedback-info-text font-bold hover:bg-feedback-info border-t border-border flex items-center gap-1.5 transition-colors">
+            <span class="bg-feedback-info-text text-white rounded-full w-3.5 h-3.5 flex items-center justify-center text-[10px] leading-none">+</span>
+            <span>Crear nueva talla/color</span>
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Botón eliminar mobile -->
+    <button type="button" tabindex="-1" (click)="onRemove()"
+      class="md:hidden btn-icon hover:bg-feedback-error hover:text-feedback-error-text">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ── SKU: solo mobile (el desktop ya está arriba en md:contents) ── -->
+  <div class="flex flex-col w-full md:hidden">
+    <label class="field-label mb-1">SKU / Variante</label>
+    <div class="relative">
+      <input
+        type="text"
+        [value]="variantSearch()"
+        (input)="onSearchInput($any($event.target).value)"
+        (focus)="openDropdown()"
+        (blur)="closeDropdown()"
+        placeholder="Buscar SKU o variante..."
+        class="w-full px-2 py-1.5 border border-border rounded text-[11px] text-text-main placeholder:text-text-soft font-mono bg-bg-surface focus:outline-none focus:border-accent-ui focus:ring-1 focus:ring-accent-ui/20 transition-all"
+        [class.!border-feedback-error-text]="formModel().id().touched() && formModel().id().invalid()"
+      />
+      @if (formModel().id().touched() && formModel().id().invalid()) {
+        @for (error of formModel().id().errors(); track error.kind) {
+          <span class="mt-0.5 px-1 text-[8px] text-feedback-error-text font-medium leading-none">{{ error.message }}</span>
+        }
+      }
+      @if (showDropdown()) {
+        <div class="absolute z-50 left-0 right-0 mt-0.5 bg-bg-surface border border-border rounded-lg shadow-md max-h-48 overflow-y-auto">
+          @for (variant of filteredVariants(); track variant.id) {
+            <button
+              type="button"
+              (mousedown)="$event.preventDefault()"
+              (click)="selectVariant(variant)"
+              class="w-full text-left px-2 py-1.5 text-[11px] text-text-main hover:bg-accent-ui hover:text-white flex items-center gap-2 border-b border-border last:border-0 transition-colors">
+              <span class="font-mono font-semibold shrink-0">{{ variant.sku }}</span>
+              <span class="text-[10px] text-text-soft shrink-0">Bs {{ variant.price }}</span>
+            </button>
+          }
+          <button
+            type="button"
+            (mousedown)="$event.preventDefault()"
+            (click)="createNew.emit(variantSearch())"
+            class="w-full text-left px-2 py-2 text-[10px] text-feedback-info-text font-bold hover:bg-feedback-info border-t border-border flex items-center gap-1.5 transition-colors">
+            <span class="bg-feedback-info-text text-white rounded-full w-3.5 h-3.5 flex items-center justify-center text-[10px] leading-none">+</span>
+            <span>Crear nueva talla/color</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ── COLOR (display) ── -->
+  <div class="flex flex-col w-full md:block">
+    <label class="md:hidden field-label mb-1">Color</label>
+    <div class="px-2 py-1 text-[11px] text-text-soft truncate flex items-center min-h-[34px]">
+      {{ formModel().colorName().value() || '—' }}
+    </div>
+  </div>
+
+  <!-- ── TALLA (display) ── -->
+  <div class="flex flex-col w-full md:block">
+    <label class="md:hidden field-label mb-1">Talla</label>
+    <div class="flex flex-col px-2 py-1 min-h-[34px] justify-center">
+      <span class="text-[11px]"
+        [class.text-feedback-error-text]="formModel().size().touched() && formModel().size().invalid()"
+        [class.text-text-soft]="!(formModel().size().touched() && formModel().size().invalid())">
+        {{ formModel().size().value() || '—' }}
+      </span>
+      @if (formModel().size().touched() && formModel().size().invalid()) {
+        @for (error of formModel().size().errors(); track error.kind) {
+          <span class="mt-0.5 px-1 text-[8px] text-feedback-error-text font-medium leading-none">{{ error.message }}</span>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- ── PRECIOS Y CANTIDAD: grid 2 cols en mobile ── -->
+  <div class="grid grid-cols-2 gap-3 w-full md:contents md:gap-0">
+
+    <!-- P. Venta (display) -->
+    <div class="flex flex-col w-full md:block">
+      <label class="md:hidden field-label mb-1">P. Venta</label>
+      <div class="flex flex-col px-2 py-1 min-h-[34px] items-start md:items-end justify-center">
+        <span class="text-[11px] font-bold font-mono"
+          [class.text-feedback-error-text]="formModel().price().touched() && formModel().price().invalid()"
+          [class.text-feedback-success-text]="!(formModel().price().touched() && formModel().price().invalid())">
+          {{ formModel().price().value() != null ? (formModel().price().value() | number:'1.0-0') : '—' }}
+        </span>
+        @if (formModel().price().touched() && formModel().price().invalid()) {
+          @for (error of formModel().price().errors(); track error.kind) {
+            <span class="mt-0.5 px-1 text-[8px] text-feedback-error-text font-medium leading-none">{{ error.message }}</span>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Cantidad (input editable) -->
+    <div class="flex flex-col w-full md:block">
+      <label class="md:hidden field-label mb-1">Cantidad</label>
+      <div class="flex flex-col px-1 py-0.5 min-h-[34px]">
+        <input
+          type="number"
+          [formField]="formModel().quantityReceived"
+          placeholder="0"
+          [class.!border-feedback-error-text]="formModel().quantityReceived().touched() && formModel().quantityReceived().invalid()"
+          class="w-full px-2 py-1 border border-border rounded text-[11px] text-left md:text-right font-bold text-text-main bg-transparent focus:outline-none focus:border-accent-ui focus:bg-bg-surface [appearance:textfield] group-hover:border-border-strong transition-all placeholder:text-text-soft"
+        />
+        @if (formModel().quantityReceived().touched() && formModel().quantityReceived().invalid()) {
+          @for (error of formModel().quantityReceived().errors(); track error.kind) {
+            <span class="mt-0.5 px-1 text-[8px] text-feedback-error-text font-medium leading-none">{{ error.message }}</span>
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ── COSTO UNITARIO (input editable) ── -->
+  <div class="flex flex-col w-full md:block">
+    <label class="md:hidden field-label mb-1">Costo unitario</label>
+    <div class="flex flex-col px-1 py-0.5 min-h-[34px]">
+      <input
+        type="number"
+        [formField]="formModel().unitCost"
+        placeholder="0.00"
+        [class.!border-feedback-error-text]="formModel().unitCost().touched() && formModel().unitCost().invalid()"
+        class="w-full px-2 py-1 border border-border rounded text-[11px] text-left md:text-right font-mono text-text-main bg-transparent focus:outline-none focus:border-accent-ui focus:bg-bg-surface [appearance:textfield] group-hover:border-border-strong transition-all placeholder:text-text-soft"
+      />
+      @if (formModel().unitCost().touched() && formModel().unitCost().invalid()) {
+        @for (error of formModel().unitCost().errors(); track error.kind) {
+          <span class="mt-0.5 px-1 text-[8px] text-feedback-error-text font-medium leading-none">{{ error.message }}</span>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- ── BOTÓN ELIMINAR DESKTOP ── -->
+  <div class="hidden md:flex items-center justify-center px-1 py-2">
+    <button type="button" tabindex="-1" (click)="onRemove()"
+      class="btn-icon hover:bg-feedback-error hover:text-feedback-error-text opacity-0 group-hover:opacity-100 transition-all">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
 </div>
 
-<!-- colorName (display only) -->
-<div class="px-2 py-1 text-[11px] text-gray-500 truncate flex items-center justify-center">
-  {{ formModel().colorName().value() || '—' }}
-</div>
-
-<!-- size -->
-<div class="px-2 py-1 text-[11px] truncate flex flex-col justify-center">
-  <span [class]="formModel().size().touched() && formModel().size().invalid() ? 'text-red-400' : 'text-gray-500'">
-    {{ formModel().size().value() || '—' }}
-  </span>
-  @if (formModel().size().touched() && formModel().size().invalid()) {
-    @for (error of formModel().size().errors(); track error.kind) {
-      <p class="text-[9px] text-red-500 leading-tight">{{ error.message }}</p>
+<!-- ── ERROR DE GRUPO (variante duplicada) ── -->
+@if (formModel()().invalid()) {
+  @for (error of formModel()().errors(); track error.kind) {
+    @if (error.kind === 'duplicateVariant') {
+      <div class="mx-4 mb-3 md:mx-0 md:mb-0 px-3 py-1.5 bg-feedback-error border border-feedback-error-text/20 rounded text-[10px] text-feedback-error-text font-medium">
+        {{ error.message }}
+      </div>
     }
   }
-</div>
-
-<!-- price (solo mode=new tiene validación) -->
-<div class="px-2 py-1 text-[11px] flex flex-col items-end justify-center font-mono">
-  <span [class]="formModel().price().touched() && formModel().price().invalid() ? 'text-red-400' : 'text-gray-400'">
-    {{ formModel().price().value() != null ? (formModel().price().value() | number:'1.0-0') : '—' }}
-  </span>
-  @if (formModel().price().touched() && formModel().price().invalid()) {
-    @for (error of formModel().price().errors(); track error.kind) {
-      <p class="text-[9px] text-red-500 leading-tight text-right">{{ error.message }}</p>
-    }
-  }
-</div>
-
-<!-- quantityReceived -->
-<div class="px-1 py-0.5">
-  <input
-    type="number"
-    [formField]="formModel().quantityReceived"
-    placeholder="0"
-    class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 text-right
-           focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-100
-           group-hover:border-gray-200 [appearance:textfield]"
-    [class.border-red-300]="formModel().quantityReceived().touched() && formModel().quantityReceived().invalid()"
-  />
-  @if (formModel().quantityReceived().touched() && formModel().quantityReceived().invalid()) {
-    @for (error of formModel().quantityReceived().errors(); track error.kind) {
-      <p class="text-[9px] text-red-500 mt-0.5 px-1 text-right">{{ error.message }}</p>
-    }
-  }
-</div>
-
-<!-- unitCost -->
-<div class="px-1 py-0.5">
-  <input
-    type="number"
-    [formField]="formModel().unitCost"
-    placeholder=""
-    class="w-full px-2 py-1 border border-transparent rounded text-[11px] text-gray-900 text-right
-           focus:outline-none focus:border-blue-400 focus:bg-white focus:ring-1 focus:ring-blue-100
-           group-hover:border-gray-200 [appearance:textfield]"
-    [class.border-red-300]="formModel().unitCost().touched() && formModel().unitCost().invalid()"
-  />
-  @if (formModel().unitCost().touched() && formModel().unitCost().invalid()) {
-    @for (error of formModel().unitCost().errors(); track error.kind) {
-      <p class="text-[9px] text-red-500 mt-0.5 px-1 text-right">{{ error.message }}</p>
-    }
-  }
-</div>
-
-<!-- description (display puro, sin validación) -->
-<div class="px-2 py-1 text-[11px] text-gray-400 text-right flex items-center justify-end font-mono">
-  {{ formModel().description().value() != null ? formModel().description().value() : '—' }}
-</div>
-
-<!-- remove -->
-<div class="flex items-center justify-center">
-  <button
-    type="button"
-    tabindex="-1"
-    (click)="onRemove()"
-    class="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full w-6 h-6 flex items-center justify-center transition-all md:opacity-0 group-hover:opacity-100">
-    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
-    </svg>
-  </button>
-</div>
-@if (false) {
- <span>{{debugState()}}</span>
 }
-

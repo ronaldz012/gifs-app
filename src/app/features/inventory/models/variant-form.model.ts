@@ -9,7 +9,6 @@ export interface VariantForm {
   colorName: string;
   quantityReceived: number | null;
   unitCost: number | null;
-  description: string;
   price: number | null;
   sku: string;
 }
@@ -43,7 +42,6 @@ export function buildExistingVariant(): VariantForm {
     price:            null,
     quantityReceived: null,
     unitCost:         null,
-    description:      '',
     sku:'',
   };
 }
@@ -59,7 +57,6 @@ export function buildNewVariant(): VariantForm {
     price:            null,
     quantityReceived: null,
     unitCost:         null,
-    description:      '',
     sku:'',
   };
 }

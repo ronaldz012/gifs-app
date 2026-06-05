@@ -83,14 +83,14 @@
   </div>
 
 
-</div>
-
 @if (showCatalogueModal()) {
   <app-existing-product-modal
     (confirm)="addGroup($event)"
     (close)="showCatalogueModal.set(false)"
     (notFound)="onNotFound()"
   />
+
+
 }
 
 @if (showNewProductModal()) {
@@ -98,4 +98,7 @@
     (confirm)="addGroup($event)"
     (close)="showNewProductModal.set(false)"
   />
+
 }
+
+</div>

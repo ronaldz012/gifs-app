@@ -170,7 +170,6 @@ export class ExistingProductModal implements OnInit {
       ? this.productService.createVariants(
           this.itemModel().product.Id!,
           newVariants.map(v => ({
-            description: v.description,
             size:        v.size,
             colorId:     v.colorId,
             price:       v.price,

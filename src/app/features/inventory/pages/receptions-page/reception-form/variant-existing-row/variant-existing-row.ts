@@ -42,9 +42,7 @@ closeDropdown() {
     const q = this.variantSearch().toLowerCase().trim();
     if (!q) return this.availableVariants();
     return this.availableVariants().filter(v =>
-      v.sku?.toLowerCase().includes(q) ||
-      v.description?.toLowerCase().includes(q)
-    );
+      v.sku?.toLowerCase().includes(q));
   });
 
   private patchModel(partial: VariantForm): void {
@@ -53,14 +51,12 @@ closeDropdown() {
     // Usamos el acceso como función model.campo() 
     // para obtener el estado y aplicar el cambio.
     if (partial.id !== undefined)               model.id().value.set(partial.id);
-    if (partial.description !== undefined)      model.description().value.set(partial.description);
     if (partial.size !== undefined)             model.size().value.set(partial.size);
     if (partial.colorId !== undefined)          model.colorId().value.set(partial.colorId);
     if (partial.price !== undefined)            model.price().value.set(partial.price);
     if (partial.mode !== undefined)             model.mode().value.set(partial.mode);
     if (partial.quantityReceived !== undefined) model.quantityReceived().value.set(partial.quantityReceived);
     if (partial.unitCost !== undefined)         model.unitCost().value.set(partial.unitCost);
-    if(partial.description !== undefined)      model.description().value.set(partial.description);
     if(partial.colorName !==undefined)       model.colorName().value.set(partial.colorName);
 
   }
@@ -68,7 +64,6 @@ closeDropdown() {
 selectVariant(variant: ProductVariantOption): void {
     this.patchModel({
       id: variant.id,
-      description: variant.description,
       size: variant.size ?? '',
       colorId: variant.colorId,
       colorCode: variant.sku,
@@ -97,7 +92,6 @@ selectVariant(variant: ProductVariantOption): void {
         colorName: '',
         quantityReceived: null,
         unitCost: 0,
-        description: '',
         price: null,
         sku: ''
       });

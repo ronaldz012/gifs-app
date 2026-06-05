@@ -56,35 +56,41 @@ export class NewProductModal {
       required(s.newProduct.gender,     { message: 'Requerido' });
       applyEach(s.variants, newVariantSchema);
 
-      validateTree(s.variants, ({ value, fieldTree }) => {
-      const variants = value() || [];
-      const seen = new Map<string, number[]>();
+validateTree(s.variants, ({ value, fieldTree }) => {
+  const variants = value() || [];
+  const seen = new Map<string, number[]>();
 
-      variants.forEach((v, i) => {
-        const key = `${v.colorId ?? ''}__${v.size ?? ''}`;
-        if (!seen.has(key)) seen.set(key, []);
-        seen.get(key)!.push(i);
-      });
+  variants.forEach((v, i) => {
+    // Si no hay talla (es null, undefined o ''), ignoramos esta variante por completo
+    if (v.size === null || v.size === undefined || v.size === '') {
+      return; 
+    }
 
-      // Agregamos 'kind: string' a la estructura del array de errores
-      const errors: { kind: string; message: string; fieldTree: typeof fieldTree[number] }[] = [];
+    // Si también quieres asegurar que tenga color para validar duplicados:
+    // if (!v.colorId || !v.size) return;
 
-      for (const [key, indices] of seen.entries()) {
-        if (key === '__' || key === 'null__null') continue;
+    const key = `${v.colorId ?? ''}__${v.size}`;
+    if (!seen.has(key)) seen.set(key, []);
+    seen.get(key)!.push(i);
+  });
 
-        if (indices.length > 1) {
-          for (const i of indices) {
-            errors.push({
-              kind: 'duplicateVariant', // <-- REQUERIDO por la interfaz de Angular
-              message: 'La combinación de color y talla ya existe',
-              fieldTree: fieldTree[i]
-            });
-          }
-        }
+  const errors: { kind: string; message: string; fieldTree: typeof fieldTree[number] }[] = [];
+
+  for (const [key, indices] of seen.entries()) {
+    // Ya no necesitas la validación compleja de strings aquí porque filtramos arriba
+    if (indices.length > 1) {
+      for (const i of indices) {
+        errors.push({
+          kind: 'duplicateVariant',
+          message: 'La combinación de color y talla ya existe',
+          fieldTree: fieldTree[i]
+        });
       }
+    }
+  }
 
-      return errors.length > 0 ? errors : null;
-    });
+  return errors.length > 0 ? errors : null;
+});
 
     });
   isConfirming = signal(false);
@@ -138,7 +144,6 @@ export class NewProductModal {
       brandId:     val.newProduct.brandId,
       gender:      val.newProduct.gender ?? 0,
       variants:    variants.map(v => ({
-        description: v.description,
         size:        v.size,
         colorId:     v.colorId,
         price:       v.price,

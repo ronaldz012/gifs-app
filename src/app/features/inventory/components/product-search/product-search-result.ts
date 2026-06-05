@@ -14,7 +14,6 @@ export interface ProductSearchResult {
 export interface ProductVariantOption {
   id: GUID;
   sku: string;
-  description: string;
   size: string;
   colorId: GUID;
   colorName: string;
