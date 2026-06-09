@@ -14,6 +14,8 @@ import {UpdateProductVariantStockDto} from '../dtos/products/update-product-vari
 import { environment } from 'environments/environment';
 import { CreateProductVariantDto, ProductVariantCreatedDto } from '../dtos/products/create-product-variant-dto';
 import { CreateProductWithVariantsDto, ProductWithVariantsCreatedDto } from '../dtos/products/create-product-with-variants-dto';
+import { ListStockMovementDto, stockMovementParams } from '../dtos/products/list-product-variant-dto';
+import { ProductVariantDetailsDto } from '../dtos/products/product-variant-details';
 
 @Injectable({
   providedIn: 'root',
@@ -85,5 +87,19 @@ export class ProductService {
   adjustVariantStock(productId: GUID, variantId: GUID, dto: UpdateProductVariantStockDto) {
 
     return this.http.patch<void>(this.productVariant_url + '/' + variantId, dto);
+  }
+
+  getVariantDetails(productVariantId: GUID): Observable<ProductVariantDetailsDto> {
+    return this.http.get<ProductVariantDetailsDto>(this.productVariant_url+'/'+productVariantId+'/details');
+  }
+  getVariantMovementsById(productVariantId: GUID, query: stockMovementParams):Observable<PagedResult<ListStockMovementDto>>{
+    let params = new HttpParams();
+
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        params = params.set(key, value.toString());
+      }
+    });
+    return this.http.get<PagedResult<ListStockMovementDto>>(this.productVariant_url+'/'+productVariantId+'/movements', {params: params})
   }
 }
