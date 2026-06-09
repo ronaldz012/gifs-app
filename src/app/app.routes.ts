@@ -53,7 +53,6 @@ export const routes: Routes = [
         children: [
           {
             path: 'products',
-            loadComponent: () => import('@features/inventory/pages/products-page/products-page'),
             children: [
               {
                 path: '',
@@ -73,7 +72,6 @@ export const routes: Routes = [
           },
           {
             path: 'receptions',
-            loadComponent: () => import('@features/inventory/pages/receptions-page/receptions-page'),
             children: [
               {
                 path: '',
@@ -100,7 +98,6 @@ export const routes: Routes = [
           },
           {
             path: 'transfers',
-            loadComponent: () => import('@features/inventory/pages/transfer-page/transfer-page'),
             children: [
               {
                 path: '',

@@ -21,8 +21,9 @@ import {CurrencyPipe} from '@angular/common';
   </div>
 
   <!-- ── Desktop ─────────────────────────────────────────────────────────── -->
+  <!-- Nota: Cambié el ancho de la última columna de 96px a 128px para que entren cómodamente los 4 botones -->
   <div class="hidden sm:block">
-    <div class="grid grid-cols-[1fr_64px_88px_88px_72px_96px] gap-2
+    <div class="grid grid-cols-[1fr_64px_88px_88px_72px_128px] gap-2
                 text-[10px] text-text-soft tracking-wide
                 px-3 py-2 bg-bg-muted rounded-lg mb-1">
       <span>SKU</span>
@@ -35,7 +36,7 @@ import {CurrencyPipe} from '@angular/common';
 
     <ul class="flex flex-col divide-y divide-border-ui">
       @for (v of product().variants; track v.id) {
-        <li class="grid grid-cols-[1fr_64px_88px_88px_72px_96px] gap-2 items-center
+        <li class="grid grid-cols-[1fr_64px_88px_88px_72px_128px] gap-2 items-center
                    px-3 py-3 hover:bg-bg-muted/60 transition-colors text-sm">
           <span class="font-mono text-xs text-text-muted truncate">{{ v.sku }}</span>
           <span class="field-value">{{ v.size }}</span>
@@ -46,6 +47,11 @@ import {CurrencyPipe} from '@angular/common';
             {{ v.stock }} u
           </span>
           <div class="flex gap-1 justify-end">
+            <!-- NUEVO BOTÓN: Ver movimientos (Escritorio) -->
+            <button (click)="viewHistory.emit(v)" class="btn-icon
+              hover:text-text-main hover:bg-bg-muted" title="Ver movimientos">
+              <span class="material-icons text-base">history</span>
+            </button>
             <button (click)="adjustStock.emit(v)" class="btn-icon
               hover:text-accent-ui hover:bg-feedback-info" title="Ajustar stock">
               <span class="material-icons text-base">inventory</span>
@@ -77,6 +83,11 @@ import {CurrencyPipe} from '@angular/common';
           </p>
         </div>
         <div class="flex gap-1 shrink-0">
+          <!-- NUEVO BOTÓN: Ver movimientos (Móvil) -->
+          <button (click)="viewHistory.emit(v)" class="btn-icon-md
+            hover:text-text-main hover:border-border-strong" title="Ver movimientos">
+            <span class="material-icons text-base">history</span>
+          </button>
           <button (click)="adjustStock.emit(v)" class="btn-icon-md
             hover:text-accent-ui hover:border-feedback-info" title="Ajustar stock">
             <span class="material-icons text-base">inventory</span>
@@ -100,8 +111,11 @@ import {CurrencyPipe} from '@angular/common';
 export class ProductDetailVariant {
   product = input.required<ProductDetailDto>();
 
-  addVariant   = output<void>();
-  editVariant  = output<ProductVariantDto>();
+  addVariant    = output<void>();
+  editVariant   = output<ProductVariantDto>();
   deleteVariant = output<ProductVariantDto>();
-  adjustStock  = output<ProductVariantDto>();
+  adjustStock   = output<ProductVariantDto>();
+  
+  // Nuevo output para comunicarle al padre qué variante quieren inspeccionar
+  viewHistory   = output<ProductVariantDto>();
 }

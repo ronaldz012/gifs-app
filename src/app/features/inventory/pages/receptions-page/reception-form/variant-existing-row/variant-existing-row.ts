@@ -1,4 +1,4 @@
-import { Component, computed, effect, input, output, signal, WritableSignal } from '@angular/core';
+import { Component, computed, effect, input, OnInit, output, signal, WritableSignal } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { DecimalPipe } from '@angular/common';
 import { ProductVariantOption } from '../../../../components/product-search/product-search-result';
@@ -11,7 +11,10 @@ import { VariantForm } from '@features/inventory/models/variant-form.model';
   templateUrl: './variant-existing-row.html',
   host: { class: 'contents' }
 })
-export default class VariantExistingRow {
+export default class VariantExistingRow implements OnInit{
+  ngOnInit(): void {
+    this.variantSearch.set(this.formModel().sku().value());
+  }
 openDropdown() {
   this.showDropdown.set(true)
 }
@@ -58,7 +61,7 @@ closeDropdown() {
     if (partial.quantityReceived !== undefined) model.quantityReceived().value.set(partial.quantityReceived);
     if (partial.unitCost !== undefined)         model.unitCost().value.set(partial.unitCost);
     if(partial.colorName !==undefined)       model.colorName().value.set(partial.colorName);
-
+    if(partial.sku !==undefined)       model.sku().value.set(partial.sku);
   }
 
 selectVariant(variant: ProductVariantOption): void {
@@ -66,13 +69,13 @@ selectVariant(variant: ProductVariantOption): void {
       id: variant.id,
       size: variant.size ?? '',
       colorId: variant.colorId,
-      colorCode: variant.sku,
+      colorCode: '',
       colorName: variant.colorName,
       price: variant.price,
       mode: 'ex',
       quantityReceived: null,
       unitCost: null,
-      sku: variant.sku
+      sku: variant.sku,
     });
 
     this.variantSearch.set(variant.sku);

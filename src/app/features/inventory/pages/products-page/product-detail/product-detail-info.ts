@@ -1,10 +1,11 @@
 import { Component, input, output} from '@angular/core';
 import { ProductDetailDto } from '../../../dtos/products/product-detail-dto';
 import { CurrencyPipe} from '@angular/common';
+import { Gender } from '@features/inventory/interfaces/gender';
 
 @Component({
   selector: 'app-product-detail-info',
-  imports: [CurrencyPipe],
+  imports: [],
   template: `
 <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
   <div class="flex items-start justify-between gap-3 mb-4">
@@ -40,10 +41,6 @@ import { CurrencyPipe} from '@angular/common';
       <p class="field-value">{{ product().gender || '—' }}</p>
     </div>
     <div>
-      <p class="field-label">Precio base</p>
-      <p class="field-value">{{ product().basePrice | currency:'BOB':'symbol':'1.2-2' }}</p>
-    </div>
-    <div>
       <p class="field-label">Stock total</p>
       <p class="field-value">{{ product().totalStock }} unidades</p>
     </div>
@@ -61,6 +58,7 @@ import { CurrencyPipe} from '@angular/common';
   styles: ``,
 })
 export class ProductDetailInfo {
+  gener = Gender
   product = input.required<ProductDetailDto>();
 
   editProduct   = output<GUID>();

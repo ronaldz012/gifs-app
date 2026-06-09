@@ -24,4 +24,8 @@ export default class VariantNewRow {
   });
 
   onRemove(): void { this.remove.emit(); }
+  onFocus(event: FocusEvent) {
+  const el = event.target as HTMLElement;
+  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+}
 }

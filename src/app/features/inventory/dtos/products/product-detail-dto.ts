@@ -21,6 +21,7 @@ export interface ProductVariantDto {
   description: string;
   size: string;
   color: string;
+  colorId: GUID;
   price: number;
   stock: number
 }

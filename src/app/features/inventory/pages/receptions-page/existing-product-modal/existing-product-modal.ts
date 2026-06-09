@@ -1,7 +1,6 @@
 import {
-  Component, inject, output, signal, computed, DestroyRef, OnInit
-} from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+  Component, inject, output, signal, computed, DestroyRef, OnInit,
+  input} from '@angular/core';
 import { debounceTime, distinctUntilChanged, finalize, of, Subject, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { applyEach, applyWhen, form, required } from '@angular/forms/signals';
@@ -12,16 +11,15 @@ import VariantNewRow from '../reception-form/variant-new-row/variant-new-row';
 import VariantExistingRow from '../reception-form/variant-existing-row/variant-existing-row';
 
 import { ProductService } from '@features/inventory/services/product-service';
-import { ReceptionGroup } from '@features/inventory/models/reception-model';
-import { ItemForm } from '@features/inventory/models/item-form.model';
 import { Gender } from '@features/inventory/interfaces/gender';
 import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
-import { mapProductSearchToGroup } from '../reception-form/common/mapper';
 import {
   buildExistingVariant,
   buildNewVariant,
   existingVariantSchema,
+  ItemForm,
   newVariantSchema,
+  VariantForm,
 } from '@features/inventory/models/variant-form.model';
 
 @Component({
@@ -38,30 +36,37 @@ export class ExistingProductModal implements OnInit {
 
   protected readonly Gender = Gender;
 
+  itemToEdit = input<{ index: number; item: ItemForm } | null>(null);
+
   // ── Outputs ───────────────────────────────────────────────────────────
   close    = output<void>();
-  confirm  = output<ReceptionGroup>();
+  confirm  = output<ItemForm>();
+  update   = output<{ index: number; item: ItemForm }>();
   notFound = output<string>();
 
-  // ── Búsqueda ──────────────────────────────────────────────────────────
-  searchResults = signal<ProductSearchResult[]>([]);
+  // ── Estado UI ─────────────────────────────────────────────────────────
+  isConfirming  = signal(false);
+  error         = signal<string | null>(null);
   isSearching   = signal(false);
+  searchResults = signal<ProductSearchResult[]>([]);
+  selectedProduct = signal<ProductSearchResult | null>(null);
 
   // ── Form ──────────────────────────────────────────────────────────────
   itemModel = signal<ItemForm>({
     product: {
-      Id: null,
-      productName: '',
+      id:           null,
+      internalCode: '',
+      productName:  '',
       categoryName: '',
-      brandName: '',
-      genderName: '',
-      description: '',
+      brandName:    '',
+      genderName:   '',
+      description:  '',
     },
     variants: [],
   });
 
   itemForm = form(this.itemModel, s => {
-    required(s.product.Id, { message: 'Requerido' });
+    required(s.product.id, { message: 'Requerido' });
     applyEach(s.variants, item => {
       applyWhen(item, ({ valueOf }) => valueOf(item.mode) === 'ex', existingVariantSchema);
       applyWhen(item, ({ valueOf }) => valueOf(item.mode) === 'new', newVariantSchema);
@@ -74,12 +79,9 @@ export class ExistingProductModal implements OnInit {
       .map(v => v.id as GUID)
   );
 
-  // ── Estado UI ─────────────────────────────────────────────────────────
-  isConfirming = signal(false);
-  error        = signal<string | null>(null);
-
   // ── Init ──────────────────────────────────────────────────────────────
   ngOnInit(): void {
+    this.initFromEdit();
     this.searchInput$.pipe(
       debounceTime(400),
       distinctUntilChanged(),
@@ -98,38 +100,72 @@ export class ExistingProductModal implements OnInit {
     ).subscribe(results => this.searchResults.set(results));
   }
 
+  private initFromEdit(): void {
+    const edit = this.itemToEdit();
+    if (edit === null) return;
+
+    this.itemModel.set(edit.item);
+
+    this.productService.getById(edit.item.product.id!).subscribe(result => {
+      if (!result) return;
+      this.selectedProduct.set({
+        id:           result.id,
+        name:         result.name,
+        internalCode: result.internalCode,
+        description:  result.description,
+        basePrice:    result.basePrice,
+        brandName:    result.brandName,
+        categoryName: result.categoryName,
+        gender:       result.gender,
+        productVariants: result.variants.map(v => ({
+          id:          v.id,
+          sku:         v.sku,
+          size:        v.size,
+          colorId:     v.colorId,
+          colorName:   v.color,
+          price:       v.price,
+        })),
+      });
+    });
+  }
+
   // ── Búsqueda ──────────────────────────────────────────────────────────
   onSearchChanged(query: string): void {
     this.searchInput$.next(query);
   }
 
   // ── Producto ──────────────────────────────────────────────────────────
-  selectedProduct = signal<ProductSearchResult | null>(null);
   onProductSelected(product: ProductSearchResult | null): void {
     if (!product) {
       this.clearProduct();
       return;
     }
+
     this.selectedProduct.set(product);
+
+    const isEditing = this.itemToEdit() !== null;
+
     this.itemModel.set({
       product: {
-        Id:           product.id,
+        id:           product.id,
         productName:  product.name,
+        internalCode: product.internalCode,
         categoryName: product.categoryName,
         brandName:    product.brandName,
         genderName:   Gender[product.gender],
         description:  product.description,
       },
-      variants: [],
+      variants: isEditing ? this.itemModel().variants : [],
     });
   }
-    availableVariantsForRow(index: number) {
+
+  availableVariantsForRow(index: number) {
     const product = this.selectedProduct();
     if (!product) return [];
 
     const usedIds = new Set(
       this.itemModel().variants
-        .filter((v, i) => v.mode === 'ex' && v.id && i !== index) // excluye la fila actual
+        .filter((v, i) => v.mode === 'ex' && v.id && i !== index)
         .map(v => v.id as GUID)
     );
 
@@ -137,8 +173,9 @@ export class ExistingProductModal implements OnInit {
   }
 
   private clearProduct(): void {
+    this.selectedProduct.set(null);
     this.itemModel.set({
-      product: { Id: null, productName: '', categoryName: '', brandName: '', genderName: '', description: '' },
+      product: { id: null, internalCode: '', productName: '', categoryName: '', brandName: '', genderName: '', description: '' },
       variants: [],
     });
   }
@@ -168,7 +205,7 @@ export class ExistingProductModal implements OnInit {
 
     const creates$ = newVariants.length
       ? this.productService.createVariants(
-          this.itemModel().product.Id!,
+          this.itemModel().product.id!,
           newVariants.map(v => ({
             size:        v.size,
             colorId:     v.colorId,
@@ -182,9 +219,28 @@ export class ExistingProductModal implements OnInit {
 
     creates$.subscribe({
       next: createdVariants => {
-        const group = mapProductSearchToGroup(this.itemModel(), exVariants, newVariants, createdVariants);
+        const newAsEx: VariantForm[] = createdVariants.map((cv, i) => ({
+          ...newVariants[i],
+          mode: 'ex' as const,
+          id:   cv.productVariantId,
+          sku:  cv.sku,
+          size: cv.size,
+        }));
+
+        const finalItem: ItemForm = {
+          ...this.itemModel(),
+          variants: [...exVariants, ...newAsEx],
+        };
+
         this.isConfirming.set(false);
-        this.confirm.emit(group);
+
+        if (this.itemToEdit() !== null) {
+          this.update.emit({ index: this.itemToEdit()!.index, item: finalItem });
+        } else {
+          this.confirm.emit(finalItem);
+        }
+
+        this.close.emit();
       },
       error: err => {
         this.isConfirming.set(false);
@@ -195,11 +251,6 @@ export class ExistingProductModal implements OnInit {
   }
 
   // ── Navegación ────────────────────────────────────────────────────────
-  onClose(): void    { this.close.emit(); }
+  onClose(): void               { this.close.emit(); }
   onNotFound(query: string): void { this.notFound.emit(query); }
-
-
-createNewProduct($event: string) {
-throw new Error('Method not implemented.');
-}
 }

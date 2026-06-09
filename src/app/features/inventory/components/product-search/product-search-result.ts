@@ -8,8 +8,9 @@ export interface ProductSearchResult {
   basePrice: number;
   brandName: string;
   categoryName: string;
-  productVariants: ProductVariantOption[];
   gender: Gender;
+  productVariants: ProductVariantOption[];
+
 }
 export interface ProductVariantOption {
   id: GUID;

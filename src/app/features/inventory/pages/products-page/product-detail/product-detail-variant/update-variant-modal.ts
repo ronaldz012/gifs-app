@@ -42,30 +42,6 @@ import {UpdateProductVariantDto} from '../../../../dtos/products/update-product-
 
         <div class="flex flex-col gap-4">
 
-          <!-- Talla -->
-          <div>
-            <label class="field-label block">Talla</label>
-            <input
-              type="text"
-              [(ngModel)]="form.size"
-              class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
-                     focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
-              placeholder="Ej: S, M, L, XL, 42..."
-            />
-          </div>
-
-          <!-- Color -->
-          <div>
-            <label class="field-label block">Color</label>
-            <input
-              type="text"
-              [(ngModel)]="form.colorId"
-              class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
-                     focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
-              placeholder="Ej: Negro, Blanco, Azul marino..."
-            />
-          </div>
-
           <!-- Precio -->
           <div>
             <label class="field-label block">Precio</label>
@@ -138,15 +114,11 @@ export class UpdateVariantModal implements OnInit {
 
   form: UpdateProductVariantDto = {
     description: '',
-    size:        '',
-    colorId:       '',
     price:       undefined,
   };
 
   ngOnInit(): void {
     const v = this.variant();
-    this.form.size        = v.size;
-    this.form.colorId       = v.color;
     this.form.price       = v.price;
     this.form.description = v.description ?? '';
   }
@@ -154,8 +126,6 @@ export class UpdateVariantModal implements OnInit {
   onSave(): void {
     const dto: UpdateProductVariantDto = {};
 
-    if (this.form.size?.trim())        dto.size        = this.form.size.trim();
-    if (this.form.colorId?.trim())       dto.colorId       = this.form.colorId.trim();
     if (this.form.price != null)       dto.price       = this.form.price;
     if (this.form.description?.trim()) dto.description = this.form.description.trim();
 

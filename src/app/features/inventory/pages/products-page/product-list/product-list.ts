@@ -7,6 +7,8 @@ import { Paginator } from '@shared/components/app-paginator/app-paginator';
 import { ProductQueryParams } from '../../../dtos/products/product-dto';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 import { ProductFilterBar } from '../product-filter-bar/product-filter-bar';
+import { BrandService } from '@features/inventory/services/brand-service';
+import { CategoryService } from '@features/inventory/services/category-service';
 
 @Component({
   selector: 'app-product-list',
@@ -98,6 +100,8 @@ import { ProductFilterBar } from '../product-filter-bar/product-filter-bar';
 })
 export default class ProductList implements OnInit {
   private productService = inject(ProductService);
+  brandService = inject(BrandService);
+  categoryService = inject(CategoryService);
   private router = inject(Router);
 
   products = signal<ListProductDto[]>([]);
@@ -134,6 +138,8 @@ export default class ProductList implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+    this.brandService.load();
+    this.categoryService.load();
   }
 
   goToDetail(id: GUID) { this.router.navigate(['inventory', 'products', id, 'detail']); }

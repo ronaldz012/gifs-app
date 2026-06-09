@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, OnInit, output, signal } from '@angular/core';
 import { CategoryService } from '../../../services/category-service';
 import { FormsModule } from '@angular/forms';
 import { ProductQueryParams } from '../../../dtos/products/product-dto';
@@ -13,7 +13,7 @@ import { BrandService } from '@features/inventory/services/brand-service';
   templateUrl: './product-filter-bar.html',
   styles: ``,
 })
-export class ProductFilterBar {
+export class ProductFilterBar implements OnInit {
   params = input.required<ProductQueryParams>();
   change = output<Partial<ProductQueryParams>>();
   Gender = Gender
@@ -21,8 +21,9 @@ export class ProductFilterBar {
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
 
-  categories = signal<{ id: GUID; name: string }[]>([]);
-  brands = signal<{ id: GUID; name: string }[]>([]);
+  protected categories = computed(() => this.categoryService.categories());
+  protected brands = computed(() => this.brandService.brands());
+
   searchValue = signal('');
 
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -33,6 +34,10 @@ export class ProductFilterBar {
 
     // this.categoryService.getAll().subscribe(r => this.categories.set(r));
     // this.brandService.getAll().subscribe(r => this.brands.set(r));
+  }
+  ngOnInit(): void {
+    this.categoryService.load();
+    this.brandService.load();
   }
 
   onSearch(value: string) {

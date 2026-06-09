@@ -1,13 +1,11 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { ReceptionGroup } from '@features/inventory/models/reception-model';
 import { ProductService } from '@features/inventory/services/product-service';
 import VariantNewRow from '../reception-form/variant-new-row/variant-new-row';
-import { mapCreatedVariantToReceptionVariant } from '../reception-form/common/mapper';
 import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
 import { CurrencyPipe } from '@angular/common';
 import { NewProductModelForm } from '@features/inventory/models/new-product.model';
 import { applyEach, FieldTree, form, FormField, required, validateTree } from '@angular/forms/signals';
-import { buildNewVariant, newVariantSchema, VariantForm } from '@features/inventory/models/variant-form.model';
+import { buildNewVariant, ItemForm, newVariantSchema, VariantForm } from '@features/inventory/models/variant-form.model';
 import { Category } from '@features/inventory/dtos/categories/category-dto';
 import { Brand } from '@features/inventory/dtos/brands/brand-dto';
 import { Color } from '@features/inventory/dtos/Colors/color';
@@ -31,7 +29,7 @@ export class NewProductModal {
 
   private productService = inject(ProductService);
   close   = output<void>();
-  confirm = output<ReceptionGroup>();
+  confirm = output<ItemForm>();
 
   // ── Form ──────────────────────────────────────────────────────────────
   newProduct = signal<NewProductModelForm>({
@@ -128,49 +126,65 @@ validateTree(s.variants, ({ value, fieldTree }) => {
 
   // ── Confirm ───────────────────────────────────────────────────────────
   onConfirm(): void {
-    this.newProductForm().markAsTouched();
-    if (this.newProductForm().invalid() || !this.newProduct().variants.length) return;
+  this.newProductForm().markAsTouched();
+  this.newProductForm().markAsDirty();
+  if (this.newProductForm().invalid() || !this.newProduct().variants.length) return;
 
-    const val      = this.newProduct();
-    const variants = val.variants;
+  const val      = this.newProduct();
+  const variants = val.variants;
 
-    this.isConfirming.set(true);
-    this.error.set(null);
+  this.isConfirming.set(true);
+  this.error.set(null);
 
-    this.productService.createProductWithVariants({
-      name:        val.newProduct.name,
-      description: val.newProduct.description,
-      categoryId:  val.newProduct.categoryId,
-      brandId:     val.newProduct.brandId,
-      gender:      val.newProduct.gender ?? 0,
-      variants:    variants.map(v => ({
-        size:        v.size,
-        colorId:     v.colorId,
-        price:       v.price,
-      } as CreateProductVariantDto)),
-    }).subscribe({
-      next: (created) => {
-        const group: ReceptionGroup = {
-          productId:    created.id,
+  this.productService.createProductWithVariants({
+    name:        val.newProduct.name,
+    description: val.newProduct.description,
+    categoryId:  val.newProduct.categoryId,
+    brandId:     val.newProduct.brandId,
+    gender:      val.newProduct.gender ?? 0,
+    variants:    variants.map(v => ({
+      size:        v.size,
+      colorId:     v.colorId,
+      price:       v.price,
+    } as CreateProductVariantDto)),
+  }).subscribe({
+    next: (created) => {
+      const group: ItemForm = {
+        product: {
+          id:           created.id,
           productName:  created.name,
           internalCode: created.internalCode,
           brandName:    created.brandName,
           categoryName: created.categoryName,
-          variants:     created.variants.map((cv, i) =>
-            mapCreatedVariantToReceptionVariant(cv, variants[i])
-          ),
-        };
-        this.isConfirming.set(false);
-        this.confirm.emit(group);
-        this.close.emit();
-      },
-      error: (err) => {
-        this.isConfirming.set(false);
-        this.error.set('Error al crear el producto. Intentá de nuevo.');
-        console.error(err);
-      }
-    });
-  }
+          genderName:   '',
+          description:  '',
+        },
+        variants: created.variants.map((cv, i) => ({
+          mode:             'ex' as const,
+          id:               cv.productVariantId,
+          sku:              cv.sku,
+          size:             cv.size,
+          colorId:          variants[i].colorId,
+          colorCode:        variants[i].colorCode,
+          colorName:        cv.colorName,
+          price:            variants[i].price,
+          quantityReceived: variants[i].quantityReceived,
+          unitCost:         variants[i].unitCost,
+          description:      '',
+        } as VariantForm)),
+      };
+
+      this.isConfirming.set(false);
+      this.confirm.emit(group);
+      this.close.emit();
+    },
+    error: (err) => {
+      this.isConfirming.set(false);
+      this.error.set('Error al crear el producto. Intentá de nuevo.');
+      console.error(err);
+    }
+  });
+}
 
   onClose(): void { this.close.emit(); }
   onGenderChange(event: Event): void {
@@ -179,5 +193,10 @@ validateTree(s.variants, ({ value, fieldTree }) => {
     ...m,
     newProduct: { ...m.newProduct, gender: value }
   }));
+}
+
+onFocus(event: FocusEvent) {
+  const el = event.target as HTMLElement;
+  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
 }
 }

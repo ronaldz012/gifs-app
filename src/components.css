@@ -84,3 +84,26 @@
 @utility pill-neutral {
   @apply pill bg-bg-muted text-text-soft ring-border;
 }
+
+/* ─────────────────────────────────────────────
+   TAGS — Etiquetas rectangulares para cards y listas
+   Más grandes que pill, sin rounded-full como badge
+   ───────────────────────────────────────────── */
+@utility tag {
+  @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border truncate max-w-32;
+}
+@utility tag-neutral {
+  @apply tag bg-bg-muted text-text-main border-border;
+}
+@utility tag-info {
+  @apply tag bg-feedback-info text-feedback-info-text border-feedback-info-text/20;
+}
+@utility tag-success {
+  @apply tag bg-feedback-success text-feedback-success-text border-feedback-success-text/20;
+}
+@utility tag-warning {
+  @apply tag bg-feedback-warning text-feedback-warning-text border-feedback-warning-text/20;
+}
+@utility tag-error {
+  @apply tag bg-feedback-error text-feedback-error-text border-feedback-error-text/20;
+}

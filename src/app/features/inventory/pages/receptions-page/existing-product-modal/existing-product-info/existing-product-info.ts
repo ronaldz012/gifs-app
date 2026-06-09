@@ -5,7 +5,7 @@ import {Gender} from '../../../../interfaces/gender';
 import {ProductSearch} from '../../../../components/product-search/product-search';
 import {DecimalPipe} from '@angular/common';
 import { FieldTree } from '@angular/forms/signals';
-import { ProductInfo } from '@features/inventory/models/item-form.model';
+import { ProductInfo } from '@features/inventory/models/variant-form.model';
 
 @Component({
   selector: 'app-existing-product-info',

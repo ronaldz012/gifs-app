@@ -1,5 +1,23 @@
 import { min, required, schema } from "@angular/forms/signals";
 
+export interface Reception {
+ notes:string;
+ items: ItemForm[]
+}
+export interface ItemForm {
+  product: ProductInfo;
+  variants: VariantForm[];
+}
+
+export interface ProductInfo{
+  id: GUID | null;
+  productName: string;
+  internalCode: string;
+  categoryName: string;
+  brandName: string;
+  genderName: string;
+  description: string;
+}
 export interface VariantForm {
   mode: 'ex' | 'new';
   id: GUID | null;

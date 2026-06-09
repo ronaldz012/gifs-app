@@ -1,4 +1,4 @@
-import { Component, input, output, signal, OnInit, inject } from '@angular/core';
+import { Component, input, output, signal, OnInit, inject, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProductDetailDto } from '../../../dtos/products/product-detail-dto';
 import { CategoryService } from '../../../services/category-service';
@@ -53,6 +53,14 @@ const GENDER_LABELS: Record<number, string> = {
 
     <div class="flex flex-col gap-4">
 
+          <app-searchable-select
+        label="Categoría"
+        placeholder="Seleccionar categoría..."
+        [options]="categoryOptions()"
+        [selectedId]="form.categoryId"
+        (selected)="form.categoryId = $event"
+      />
+
       <!-- Nombre -->
       <div>
         <label class="field-label block">Nombre</label>
@@ -77,32 +85,13 @@ const GENDER_LABELS: Record<number, string> = {
         ></textarea>
       </div>
 
-      <!-- Precio base -->
-      <div>
-        <label class="field-label block">Precio base</label>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-text-soft">BOB</span>
-          <input
-            type="number"
-            [(ngModel)]="form.basePrice"
-            min="0.01"
-            step="0.01"
-            class="w-full pl-10 pr-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
-                   focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
-            placeholder="0.00"
-          />
-        </div>
-      </div>
-
       <!-- Género -->
       <div>
         <label class="field-label block">Género</label>
         <select
           [(ngModel)]="form.gender"
           class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
-                 focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
-        >
-          <option [ngValue]="null">Sin especificar</option>
+                 focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring">
           <option [ngValue]="Gender.Unisex">Unisex</option>
           <option [ngValue]="Gender.Hombre">Hombre</option>
           <option [ngValue]="Gender.Mujer">Mujer</option>
@@ -110,22 +99,7 @@ const GENDER_LABELS: Record<number, string> = {
       </div>
 
       <!-- Categoría -->
-      <app-searchable-select
-        label="Categoría"
-        placeholder="Seleccionar categoría..."
-        [options]="categories()"
-        [selectedId]="form.categoryId"
-        (selected)="form.categoryId = $event"
-      />
 
-      <!-- Marca -->
-      <app-searchable-select
-        label="Marca"
-        placeholder="Seleccionar marca..."
-        [options]="brands()"
-        [selectedId]="form.brandId"
-        (selected)="form.brandId = $event"
-      />
 
     </div>
 
@@ -163,31 +137,31 @@ export class UpdateProductModal implements OnInit {
   protected readonly Gender = Gender;
 
   private categoryService = inject(CategoryService);
-  private brandService    = inject(BrandService);
 
+
+categoryOptions = computed(() => 
+  this.categoryService.categories().map(cat => ({
+    id: cat.id,
+    displayName: cat.name
+  }))
+);
   product    = input.required<ProductDetailDto>();
   submitting = input<boolean>(false);
 
   save  = output<UpdateProductDto>();
   close = output<void>();
 
-  categories = signal<SelectOption[]>([]);
-  brands     = signal<SelectOption[]>([]);
 
   form: {
     name:        string;
     description: string;
-    basePrice:   number | null;
     gender:      Gender | null;
     categoryId:  GUID | null;
-    brandId:     GUID | null;
   } = {
     name:        '',
     description: '',
-    basePrice:   null,
     gender:      null,
     categoryId:  null,
-    brandId:     null,
   };
 
   ngOnInit(): void {
@@ -195,10 +169,8 @@ export class UpdateProductModal implements OnInit {
 
     this.form.name        = p.name;
     this.form.description = p.description ?? '';
-    this.form.basePrice   = p.basePrice;
     this.form.gender      = p.gender ?? null;   // ya viene como número del enum
     this.form.categoryId  = p.categoryId ?? null;
-    this.form.brandId     = p.brandId ?? null;
 
     // this.categoryService.getAll().subscribe(list => this.categories.set(list));
     // this.brandService.getAll().subscribe(list => this.brands.set(list));
@@ -209,10 +181,8 @@ export class UpdateProductModal implements OnInit {
 
     if (this.form.name?.trim())        dto.name        = this.form.name.trim();
     if (this.form.description?.trim()) dto.description = this.form.description.trim();
-    if (this.form.basePrice != null)   dto.basePrice   = this.form.basePrice;
     if (this.form.gender != null)      dto.gender      = this.form.gender;
     if (this.form.categoryId != null)  dto.categoryId  = this.form.categoryId;
-    if (this.form.brandId != null)     dto.brandId     = this.form.brandId;
 
     this.save.emit(dto);
   }

@@ -47,6 +47,7 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
           (deleteVariant)="onDeleteVariant($event)"
           (adjustStock)="onAdjustStock($event)"
           (addVariant)="onAddVariant()"
+          (viewHistory)="onViewHistory($event)"
         />
 
       </div>
@@ -115,6 +116,7 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
   styles: ``,
 })
 export default class ProductDetail implements OnInit {
+
   private route          = inject(ActivatedRoute);
   private productService = inject(ProductService);
 
@@ -235,5 +237,9 @@ export default class ProductDetail implements OnInit {
       },
       error: () => this.submitting.set(false),
     });
+  }
+
+  onViewHistory($event: ProductVariantDto) {
+  throw new Error('Method not implemented.');
   }
 }

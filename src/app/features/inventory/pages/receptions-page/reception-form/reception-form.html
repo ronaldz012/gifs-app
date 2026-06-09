@@ -39,9 +39,9 @@
       </div>
     }
 
-    @for (group of reception().items; track group.productId) {
-      <app-reception-item [group]="group" (remove)="removeGroup($event)" />
-    }
+@for (group of reception().items; track $index) {
+  <app-reception-item class="gap-y-8"[group]="group" (remove)="removeGroup($event)" (edit)="editGroup($index)" />
+}
 
     <!-- Botón agregar -->
     <div class="py-3">
@@ -85,8 +85,10 @@
 
 @if (showCatalogueModal()) {
   <app-existing-product-modal
-    (confirm)="addGroup($event)"
-    (close)="showCatalogueModal.set(false)"
+    [itemToEdit]="itemToEdit()"
+    (confirm)="addGroup($event)"    
+    (update)="updateItem($event)"
+    (close)="showCatalogueModal.set(false); itemToEdit.set(null)"
     (notFound)="onNotFound()"
   />
 

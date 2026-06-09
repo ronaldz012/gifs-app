@@ -2,7 +2,6 @@ export interface CreateProductVariantDto {
 
   size: string;
   price: number;
-  description: string;
   colorId: GUID;
   variants: ProductVariantDto[];
 
