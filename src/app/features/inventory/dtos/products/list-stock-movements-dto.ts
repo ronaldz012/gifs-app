@@ -14,14 +14,14 @@ export interface ListStockMovementDto {
 
   branchName: string;
 
-  transferToBranchName: string | null;
-
   notes: string;
 
-  stockTransferId: string | null;
+  transferToBranchName: string | null;
+
+  referenceId: string | null;
 }
 
-export interface stockMovementParams extends BaseQueryDto
+export interface StockMovementParams extends BaseQueryDto
 {
-
+    
 }

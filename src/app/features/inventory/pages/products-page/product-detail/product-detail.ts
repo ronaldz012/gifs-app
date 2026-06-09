@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../../services/product-service';
 import { ProductDetailDto, ProductVariantDto } from '../../../dtos/products/product-detail-dto';
 
@@ -204,6 +204,7 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
 export default class ProductDetail implements OnInit {
 
   private route          = inject(ActivatedRoute);
+  private router = inject(Router);
   private productService = inject(ProductService);
 
   // ── Data ────────────────────────────────────────────────────────────────
@@ -325,7 +326,7 @@ export default class ProductDetail implements OnInit {
     });
   }
 
-  onViewHistory($event: ProductVariantDto) {
-  throw new Error('Method not implemented.');
+  onViewHistory(pv: ProductVariantDto) {
+    this.router.navigate(['inventory','products', pv.id, 'movements']);
   }
 }

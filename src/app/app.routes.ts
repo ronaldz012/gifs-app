@@ -67,6 +67,13 @@ export const routes: Routes = [
                 canActivate: [featureGuard],
                 data: { module: 'inventory', feature: 'products' },
                 loadComponent: () => import('@features/inventory/pages/products-page/product-detail/product-detail')
+              },
+              {
+                path: ':id/movements',
+                title: 'Movimientos de Stock',
+                canActivate: [featureGuard],
+                data: { module: 'inventory', feature: 'products' }, // O la feature que corresponda a kardex/movimientos
+                loadComponent: () => import('@features/inventory/pages/products-page/stock-movements-list/stock-movements-list')
               }
             ]
           },
