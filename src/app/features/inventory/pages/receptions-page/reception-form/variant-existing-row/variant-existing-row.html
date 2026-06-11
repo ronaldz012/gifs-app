@@ -1,5 +1,4 @@
-<div class="flex flex-col md:grid md:grid-cols-[24px_120px_1fr_70px_75px_60px_75px_36px] md:items-start gap-4 md:gap-0 p-4 md:p-0 border-b border-border last:border-b-0 hover:bg-accent-ui/5 transition-colors group">
-
+<div class="flex flex-col md:grid md:grid-cols-[24px_120px_1fr_70px_75px_60px_75px_36px] md:items-start gap-4 md:gap-0 p-4 md:p-0 border-b border-border last:border-b-0 hover:bg-accent-ui/5 transition-colors group/row">
   <!-- ── FILA SUPERIOR MOBILE: índice + botón eliminar ── -->
   <div class="flex items-center justify-between w-full md:contents">
 
@@ -34,18 +33,26 @@
                 (click)="selectVariant(variant)"
                 class="w-full text-left px-2 py-1.5 flex flex-col gap-0.5
                       border-b border-border last:border-0
-                      hover:bg-accent-ui hover:text-white transition-colors group">
+                      hover:bg-accent-ui transition-colors group">
 
                 <!-- Fila 1: size + color -->
                 <div class="flex items-center gap-1">
-                  <span class="pill-neutral group-hover:bg-white/20 group-hover:text-white group-hover:ring-white/20">{{ variant.size }}</span>
-                  <span class="pill-neutral group-hover:bg-white/20 group-hover:text-white group-hover:ring-white/20 truncate">{{ variant.colorName }}</span>
+                  <span class="pill-neutral group-hover:bg-white/15 group-hover:text-white group-hover:ring-white/20">
+                    {{ variant.size }}
+                  </span>
+                  <span class="pill-neutral group-hover:bg-white/15 group-hover:text-white group-hover:ring-white/20 truncate max-w-[4rem]">
+                    {{ variant.colorName }}
+                  </span>
                 </div>
 
                 <!-- Fila 2: sku + precio -->
-                <div class="flex items-center justify-between gap-1">
-                  <span class="font-mono text-[9px] text-text-soft group-hover:text-white/60 truncate">{{ variant.sku }}</span>
-                  <span class="text-[9px] font-medium shrink-0">Bs {{ variant.price }}</span>
+                <div class="flex items-center justify-between">
+                  <span class="font-mono text-[9px] text-text-soft group-hover:text-white/50 truncate">
+                    {{ variant.sku }}
+                  </span>
+                  <span class="text-[9px] font-semibold text-text-main group-hover:text-white shrink-0">
+                    Bs {{ variant.price }}
+                  </span>
                 </div>
 
               </button>
@@ -200,9 +207,9 @@
   </div>
 
   <!-- ── BOTÓN ELIMINAR DESKTOP ── -->
-  <div class="hidden md:flex items-center justify-center px-1 py-2">
+<div class="hidden md:flex items-center justify-center px-1 py-2">
     <button type="button" tabindex="-1" (click)="onRemove()"
-      class="btn-icon hover:bg-feedback-error hover:text-feedback-error-text opacity-0 group-hover:opacity-100 transition-all">
+      class="btn-icon hover:bg-feedback-error hover:text-feedback-error-text opacity-0 group-hover/row:opacity-100 transition-all">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
       </svg>

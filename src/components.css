@@ -82,7 +82,11 @@
 }
 
 @utility pill-neutral {
-  @apply pill bg-bg-muted text-text-soft ring-border;
+  @apply pill bg-border text-text-muted ring-border-strong;
+}
+
+@utility pill-neutral-dark {
+  @apply pill bg-white/15 text-white ring-white/20;
 }
 
 /* ─────────────────────────────────────────────
