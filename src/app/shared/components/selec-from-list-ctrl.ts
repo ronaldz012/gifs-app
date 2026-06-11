@@ -7,6 +7,7 @@ import { SelectOption } from '@shared/models/select-option.model';
   standalone: true,
   template: `
     <div class="relative w-full" (focusout)="handleFocusOut($event)">
+      <!-- INPUT SEMÁNTICO -->
       <input
         type="text"
         [value]="query()"
@@ -15,25 +16,29 @@ import { SelectOption } from '@shared/models/select-option.model';
         (keydown)="handleKeydown($event)"
         [placeholder]="placeholder()"
         autocomplete="off"
-        class="w-full px-2 py-1 border border-transparent rounded text-[11px]
-               focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400
-               focus:bg-white group-hover:border-gray-200 transition-all bg-transparent font-medium"
+        class="w-full px-2 py-1 border border-border rounded text-[11px] font-medium transition-all bg-transparent text-text-main placeholder:text-text-soft hover:border-border-strong focus:outline-none focus:border-accent-ui focus:ring-1 focus:ring-ring-focus-ring focus:bg-bg-surface"
       />
+
+      <!-- DESPLEGABLE / DROPDOWN -->
       @if (isOpen() && (filteredOptions().length > 0 || showCreateOption())) {
-        <ul class="absolute z-100 w-full mt-1 bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-y-auto">
+        <ul class="absolute z-100 w-full mt-1 bg-bg-elevated border border-border rounded shadow-lg max-h-48 overflow-y-auto">
+          
+          <!-- OPCIONES FILTRADAS -->
           @for (opt of filteredOptions(); track opt.id; let i = $index) {
             <li
               (mousedown)="selectOption(opt, $event)"
-              [class.bg-blue-50]="activeIndex() === i"
-              class="px-3 py-1.5 text-[11px] cursor-pointer hover:bg-blue-50 text-gray-700">
+              [class.!bg-bg-muted]="activeIndex() === i"
+              class="px-3 py-1.5 text-[11px] cursor-pointer text-text-main hover:bg-bg-muted transition-colors">
               {{ opt.displayName }}
             </li>
           }
+
+          <!-- ACCIÓN: CREAR NUEVA OPCIÓN -->
           @if (showCreateOption()) {
             <li
               (mousedown)="emitCreate($event)"
-              [class.bg-green-50]="activeIndex() === filteredOptions().length"
-              class="px-3 py-1.5 text-[11px] font-bold text-green-600 border-t border-gray-100 cursor-pointer hover:bg-green-50">
+              [class.!bg-feedback-success]="activeIndex() === filteredOptions().length"
+              class="px-3 py-1.5 text-[11px] font-bold text-feedback-success-text border-t border-border cursor-pointer hover:bg-feedback-success transition-colors">
               + CREAR "{{ query() }}"
             </li>
           }

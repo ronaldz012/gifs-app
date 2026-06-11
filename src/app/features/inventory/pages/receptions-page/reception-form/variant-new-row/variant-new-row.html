@@ -30,7 +30,8 @@
     <div class="flex flex-col px-1 py-1.5 min-h-[42px]">
       <app-color-select-ctrl
         [fieldState]="formModel().colorId()"
-        [colorCode]="formModel().colorCode()"
+        [colorNameState]="formModel().colorCode()"
+
       />
       @if (formModel().colorId().touched() && formModel().colorId().invalid()) {
         @for (error of formModel().colorId().errors(); track error.kind) {

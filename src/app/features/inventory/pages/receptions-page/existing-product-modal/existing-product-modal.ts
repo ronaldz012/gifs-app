@@ -30,6 +30,8 @@ import {
 })
 export class ExistingProductModal implements OnInit {
 
+
+
   private productService = inject(ProductService);
   private destroyRef     = inject(DestroyRef);
   private searchInput$   = new Subject<string>();
@@ -192,6 +194,10 @@ export class ExistingProductModal implements OnInit {
   removeVariant(index: number): void {
     this.itemModel.update(m => ({ ...m, variants: m.variants.filter((_, i) => i !== index) }));
   }
+  replaceVariantForNew($event: string,index: number) {
+    this.removeVariant(index);
+    this.addNewVariant();
+  }
 
   // ── Submit ────────────────────────────────────────────────────────────
   onConfirm(): void {
@@ -249,6 +255,22 @@ export class ExistingProductModal implements OnInit {
       },
     });
   }
+  applyMassiveCost(value: string): void {
+  const cost = parseFloat(value);
+  
+  // Si borran el input masivo, podrías optar por dejarlo en null o 0
+  const cleanCost = isNaN(cost) ? null : cost;
+
+  // Actualizamos el Signal de forma segura e inmutable
+  this.itemModel.update(current => ({
+    ...current,
+    variants: current.variants.map(variant => ({
+      ...variant,
+      // Actualizamos el costo unitario manteniendo el resto de propiedades de la variante
+      unitCost: cleanCost 
+    }))
+  }));
+}
 
   // ── Navegación ────────────────────────────────────────────────────────
   onClose(): void               { this.close.emit(); }

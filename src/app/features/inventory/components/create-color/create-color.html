@@ -1,43 +1,67 @@
-<div class="bg-white border border-blue-200 rounded-lg shadow-xl p-4 w-72 anim-fade-in">
-  <div class="flex justify-between items-center mb-3">
-    <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Nuevo Color</h3>
-    <button (click)="closed.emit()" class="text-gray-400 hover:text-gray-600">&times;</button>
+<div class="bg-bg-surface border border-border rounded-lg shadow-lg p-4 w-72">
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="section-title mb-0">Nuevo Color</h3>
+    <button (click)="closed.emit()" class="btn-icon hover:text-text-main">
+      <span class="material-icons text-base">close</span>
+    </button>
   </div>
 
-  <div [formGroup]="form" class="space-y-4">
+  <!-- Form -->
+  <div class="space-y-4">
+
+    <!-- Campo Nombre -->
     <div>
-      <label class="block text-[10px] font-semibold text-gray-500 mb-1">NOMBRE</label>
-      <input #nameInput formControlName="name" type="text"
-             placeholder="Ej. Azul Naval"
-             class="w-full px-3 py-2 border rounded text-sm focus:ring-2 focus:ring-blue-400 outline-none transition-all"
-             [class.border-red-400]="nameInvalid" />
-      @if (nameInvalid) {
-        <p class="text-[10px] text-red-500 mt-1 animate-bounce">{{ nameErrorMessage }}</p>
+      <label for="name" class="field-label block">NOMBRE</label>
+      <input
+        #nameInput
+        id="name"
+        type="text"
+        [formField]="colorForm.name"
+        (input)="clearServerError()"
+        placeholder="Ej. Azul Naval"
+        autocomplete="off"
+        class="w-full px-3 py-2 rounded-lg border bg-bg-muted text-text-main text-sm
+               outline-none transition-all
+               focus:ring-2 focus:ring-[--focus-ring] focus:border-accent-ui
+               placeholder:text-text-soft"
+        [class.border-feedback-error-text]="showNameError || !!_serverError()"
+        [class.border-border]="!showNameError && !_serverError()"
+      />
+
+      <!-- Error de validación local -->
+      @if (showNameError) {
+        <p class="text-[10px] text-feedback-error-text mt-1">
+          {{ nameErrorMessage }}
+        </p>
+      }
+
+      <!-- Error del servidor (409) -->
+      @if (_serverError()) {
+        <p class="text-[10px] text-feedback-error-text mt-1">
+          {{ _serverError() }}
+        </p>
       }
     </div>
 
-    <div>
-      <label class="block text-[10px] font-semibold text-gray-500 mb-1">CÓDIGO (3 LETRAS)</label>
-      <div class="relative">
-        <input formControlName="code" type="text"
-               placeholder="AZL" maxlength="3"
-               (input)="onCodeInput($event)"
-               class="w-full px-3 py-2 border rounded text-sm uppercase font-mono tracking-widest focus:ring-2 focus:ring-blue-400 outline-none transition-all"
-               [class.border-red-400]="codeInvalid" />
-        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400">
-          {{ form.controls.code.value?.length || 0 }}/3
-        </span>
-      </div>
-      @if (codeInvalid) {
-        <p class="text-[10px] text-red-500 mt-1">{{ codeErrorMessage }}</p>
-      }
-    </div>
-
-    <div class="flex gap-2 pt-2">
-      <button type="button" (click)="save()" [disabled]="isLoading()"
-              class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-xs font-bold py-2 rounded shadow-sm transition-colors">
-        {{ isLoading() ? 'Guardando...' : 'CREAR COLOR' }}
+    <!-- Acciones -->
+    <div class="flex gap-2 pt-1">
+      <button
+        type="button"
+        (click)="closed.emit()"
+        [disabled]="isLoading()"
+        class="btn btn-secondary btn-sm flex-1">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        (click)="save()"
+        [disabled]="isLoading()"
+        class="btn btn-primary btn-sm flex-1">
+        {{ isLoading() ? 'Guardando...' : 'CREAR' }}
       </button>
     </div>
+
   </div>
 </div>

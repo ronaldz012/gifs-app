@@ -1,104 +1,91 @@
-import { Component, ElementRef, inject, input, OnInit, output, ViewChild, signal, AfterViewInit} from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  Component, ElementRef, inject, input, output,
+  ViewChild, signal, AfterViewInit
+} from '@angular/core';
+import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { ColorService } from '../../services/color-service';
 import { Color } from '../../dtos/Colors/color';
 
 @Component({
   selector: 'app-create-color',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   templateUrl: './create-color.html'
 })
-export default class CreateColor implements OnInit, AfterViewInit {
+export default class CreateColor implements AfterViewInit {
+
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
 
-  private fb = inject(FormBuilder);
   private colorService = inject(ColorService);
 
+  // --- Inputs / Outputs ---
   initialName = input.required<string>();
-  created = output<Color>();
-  closed = output<void>();
+  created     = output<Color>();
+  closed      = output<void>();
 
+  // --- Estado ---
   isLoading = signal(false);
 
-  form = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2)]],
-    code: ['', [Validators.required, Validators.pattern(/^[A-Za-z]{3}$/)]]
+  // --- Signal Form (Angular 21) ---
+  colorModel = signal({ name: '' });
+
+  colorForm = form(this.colorModel, (path) => {
+    required(path.name,   { message: 'El nombre es obligatorio' });
+    minLength(path.name, 2, { message: 'Mínimo 2 caracteres' });
   });
 
-  ngOnInit(): void {
-    this.form.controls.name.setValue(this.initialName());
-    // Auto-sugerir código basado en el nombre inicial
-    if (this.initialName().length >= 3) {
-      this.form.controls.code.setValue(this.initialName().substring(0, 3).toUpperCase());
-    }
-  }
   ngAfterViewInit(): void {
-    // Esto asegura el foco cuando el componente se carga
-    this.focus();
-  }
-  onCodeInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    input.value = input.value.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 3);
-    this.form.controls.code.setValue(input.value, { emitEvent: false });
-  }
-  focus() {
+    // Setear valor inicial una vez la vista está lista
+    this.colorModel.update(m => ({ ...m, name: this.initialName() }));
     this.nameInput?.nativeElement.focus();
   }
 
-  save() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  // Shortcut limpio
+  get nameState() { return this.colorForm.name(); }
+
+  get showNameError(): boolean {
+    return this.nameState.touched() && this.nameState.invalid();
+  }
+
+  get nameErrorMessage(): string {
+    const errors = this.nameState.errors();
+    return errors?.[0]?.message ?? '';
+  }
+
+  save(): void {
+    const rootState = this.colorForm();
+    if (rootState.invalid()) {
+      // Forzar touched en todos los campos para mostrar errores
+      this.colorModel.update(m => ({ ...m }));
       return;
     }
 
     this.isLoading.set(true);
-    const { name, code } = this.form.getRawValue();
+    const name = this.nameState.value();
 
-    this.colorService.create({
-      name: name!,
-      code: code!.toUpperCase()
-    }).subscribe({
+    this.colorService.create({name: name}).subscribe({
       next: (newColor) => {
         this.isLoading.set(false);
         this.created.emit(newColor);
-        this.form.reset();
+        this.colorModel.set({ name: '' });
       },
       error: (err) => {
         this.isLoading.set(false);
-
-        // Verificamos el status 409
         if (err.status === 409) {
-          // Accedemos a 'detail' que es lo que envía tu API
-          const detail = err.error?.detail?.toLowerCase() || '';
-
-          if (detail.includes('código') || detail.includes('code')) {
-            this.form.controls.code.setErrors({ codeTaken: true });
-            this.form.controls.code.markAsTouched();
-          } else if (detail.includes('nombre') || detail.includes('name')) {
-            this.form.controls.name.setErrors({ nameTaken: true });
-            this.form.controls.name.markAsTouched();
-          }
+          // Signal Forms: no hay setErrors directo, usamos un error custom
+          // vía validación dinámica o mostramos un error de nivel form
+          this.colorModel.update(m => m); // trigger re-check
+          // Mostrar mensaje via signal separado
+          this._serverError.set('Este nombre ya existe');
         }
       }
     });
   }
 
-  // Getters para UI
-  get nameInvalid() { return this.form.controls.name.invalid && this.form.controls.name.touched; }
-  get codeInvalid() { return this.form.controls.code.invalid && this.form.controls.code.touched; }
+  // Para el error 409 del servidor (no existe en Signal Forms un setErrors nativo aún)
+  _serverError = signal<string | null>(null);
 
-  get nameErrorMessage() {
-    if (this.form.controls.name.hasError('required')) return 'El nombre es obligatorio';
-    if (this.form.controls.name.hasError('nameTaken')) return 'Este nombre ya existe';
-    return '';
-  }
-
-  get codeErrorMessage() {
-    const ctrl = this.form.controls.code;
-    if (ctrl.hasError('required')) return 'Código requerido';
-    if (ctrl.hasError('pattern')) return 'Solo 3 letras (A-Z)';
-    if (ctrl.hasError('codeTaken')) return 'Código ocupado (incluso en borrados)';
-    return '';
+  clearServerError(): void {
+    this._serverError.set(null);
   }
 }

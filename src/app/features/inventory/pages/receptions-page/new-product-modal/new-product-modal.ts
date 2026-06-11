@@ -6,9 +6,6 @@ import { CurrencyPipe } from '@angular/common';
 import { NewProductModelForm } from '@features/inventory/models/new-product.model';
 import { applyEach, FieldTree, form, FormField, required, validateTree } from '@angular/forms/signals';
 import { buildNewVariant, ItemForm, newVariantSchema, VariantForm } from '@features/inventory/models/variant-form.model';
-import { Category } from '@features/inventory/dtos/categories/category-dto';
-import { Brand } from '@features/inventory/dtos/brands/brand-dto';
-import { Color } from '@features/inventory/dtos/Colors/color';
 import { BrandSelectCtrl } from "@features/inventory/components/brand-select-crtl/brand-select-crtl";
 import { CategorySelectCtrl } from "@features/inventory/components/category-select-ctrl/category-select-ctrl";
 import { Gender } from '@features/inventory/interfaces/gender';
@@ -19,6 +16,8 @@ import { Gender } from '@features/inventory/interfaces/gender';
   templateUrl: './new-product-modal.html',
 })
 export class NewProductModal {
+
+
 
   
     readonly genderOptions = [
@@ -184,6 +183,34 @@ validateTree(s.variants, ({ value, fieldTree }) => {
       console.error(err);
     }
   });
+}
+
+applyMassivePrice(value: string) {
+  const price = parseFloat(value);
+    const cleanPrice = isNaN(price) ? null : price;
+
+    // Actualizamos la señal del modelo de formulario
+    this.newProduct.update(current => ({
+      ...current,
+      variants: current.variants.map(variant => ({
+        ...variant,
+        price: cleanPrice 
+      }))
+    }));
+  }
+applyMassiveCost(value: string): void {
+  const price = parseFloat(value);
+  const cleanPrice = isNaN(price) ? null : price;
+
+  // Actualizamos la señal del modelo de formulario
+  this.newProduct.update(current => ({
+    ...current,
+    variants: current.variants.map(variant => ({
+      ...variant,
+      // Actualizamos el precio de venta (price) manteniendo todo lo demás intacto
+      unitCost: cleanPrice 
+    }))
+  }));
 }
 
   onClose(): void { this.close.emit(); }

@@ -34,7 +34,7 @@ export class ColorSelectCtrl {
 
   service = inject(ColorService);
   fieldState   = input.required<FieldState<GUID>>();
-  colorCode    = input.required<FieldState<string>>();
+  colorNameState   = input.required<FieldState<GUID>>();
   colors       = this.service.colors;
   placeholder  = input<string>('Color...');
   colorCreated = output<Color>();
@@ -59,8 +59,7 @@ export class ColorSelectCtrl {
   onCreated(color: Color) {
     this.service.add(color);
     this.fieldState().value.set(color.id);
-    this.colorCode().value.set(color.code);
-    this.fieldState().markAsTouched();
+    this.colorNameState().markAsTouched();
     this.closeInlineCreate();
     
   }

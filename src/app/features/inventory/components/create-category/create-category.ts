@@ -1,85 +1,87 @@
 import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  HostListener,
-  inject,
-  input,
-  OnInit,
-  output,
-  signal,
-  ViewChild
+  Component, ElementRef, HostListener, inject,
+  input, output, signal, ViewChild, AfterViewInit
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { CategoryService } from '../../services/category-service';
 import { Category } from '../../dtos/categories/category-dto';
 
 @Component({
   selector: 'app-create-category',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   templateUrl: './create-category.html',
 })
-export class CreateCategory implements OnInit, AfterViewInit {
+export class CreateCategory implements AfterViewInit {
+
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
 
-  private fb              = inject(FormBuilder);
-  categoryService         = inject(CategoryService);
+  private categoryService = inject(CategoryService);
+  private elRef           = inject(ElementRef);
 
+  // --- Inputs / Outputs ---
   initialName = input.required<string>();
   created     = output<Category>();
   closed      = output<void>();
 
-  isLoading = signal(false);
-  private elRef = inject(ElementRef);
-  form = this.fb.group({
-    name:        ['', [Validators.required, Validators.minLength(2)]],
-    description: ['']
+  // --- Estado ---
+  isLoading   = signal(false);
+  serverError = signal<string | null>(null);
+
+  // --- Signal Form ---
+  categoryModel = signal({ name: '', description: '' });
+
+  categoryForm = form(this.categoryModel, (path) => {
+    required(path.name,     { message: 'El nombre es obligatorio' });
+    minLength(path.name, 2, { message: 'Mínimo 2 caracteres' });
   });
 
-  ngOnInit(): void {
-    this.form.controls.name.setValue(this.initialName());
-  }
-
   ngAfterViewInit(): void {
-    // Pequeño timeout para que el @if termine de renderizar el DOM
+    this.categoryModel.update(m => ({ ...m, name: this.initialName() }));
     setTimeout(() => this.nameInput?.nativeElement.focus(), 0);
   }
 
   @HostListener('keydown.escape')
-  onEscape() {
-    this.closed.emit();
-  }
+  onEscape(): void { this.closed.emit(); }
+
   @HostListener('focusout', ['$event'])
-  onFocusOut(event: FocusEvent) {
+  onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget as HTMLElement;
-    // Si el foco se va a otro elemento fuera de este componente → cerrar
-    if (!this.elRef.nativeElement.contains(next)) {
-      this.closed.emit();
-    }
+    // Si el foco va a null (ej. click en botón que hace submit)
+    // o fuera del componente pero hay una operación en curso → no cerrar
+    if (this.isLoading()) return;
+    if (!this.elRef.nativeElement.contains(next)) this.closed.emit();
   }
 
-  save() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-    this.isLoading.set(true);
-    const body = this.form.getRawValue();
-    this.categoryService.create({ name: body.name!, description: body.description! }).subscribe({
-      next: (data) => {
-        this.isLoading.set(false);
-        this.created.emit(data);
-        this.form.reset();
-      },
-      error: () => {
-        this.isLoading.set(false);
-      }
-    });
+  // --- Shortcuts ---
+  get nameState() { return this.categoryForm.name(); }
+
+  get nameInvalid(): boolean {
+    return this.nameState.touched() && this.nameState.invalid();
   }
 
-  get nameInvalid() {
-    const ctrl = this.form.get('name')!;
-    return ctrl.invalid && ctrl.touched;
+  get nameError(): string {
+    return this.nameState.errors()?.[0]?.message ?? '';
   }
+
+  clearServerError(): void { this.serverError.set(null); }
+
+save(): void {
+  if (this.categoryForm().invalid()) return;
+
+  this.isLoading.set(true);
+  const { name, description } = this.categoryModel();
+
+  this.categoryService.create({ name, description }).subscribe({
+    next: (data) => {
+      this.isLoading.set(false);
+      this.categoryModel.set({ name: '', description: '' }); // reset ANTES
+      this.created.emit(data);                                // emit AL FINAL
+    },
+    error: (err) => {
+      this.isLoading.set(false);
+      if (err.status === 409) this.serverError.set('Esta categoría ya existe');
+    }
+  });
+}
 }

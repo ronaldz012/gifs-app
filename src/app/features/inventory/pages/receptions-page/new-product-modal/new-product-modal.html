@@ -100,7 +100,33 @@
     <section class="space-y-3">
 
       <h3 class="section-title">Variantes del producto</h3>
+      @if (newProduct().variants.length > 0) {
+        <div class="flex flex-wrap items-center gap-3 bg-bg-muted/60 px-3 py-1.5 rounded-lg border border-border">
+          
+          <!-- Costo Masivo -->
+          <div class="flex items-center gap-1.5">
+            <label class="text-[10px] font-medium text-text-soft uppercase tracking-wider">Costo Masivo:</label>
+            <input 
+              type="number" 
+              placeholder="0.00" 
+              (input)="applyMassiveCost($event.target.value)"
+              class="w-20 px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui"
+            />
+          </div>
 
+          <!-- NUEVO: Precio de Venta Masivo -->
+          <div class="flex items-center gap-1.5 sm:border-l sm:border-border sm:pl-3">
+            <label class="text-[10px] font-medium text-text-soft uppercase tracking-wider">P. Venta Masivo:</label>
+            <input 
+              type="number" 
+              placeholder="0.00" 
+              (input)="applyMassivePrice($event.target.value)"
+              class="w-20 px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui"
+            />
+          </div>
+
+        </div>
+      }
       <div class="border border-border rounded-xl bg-bg-surface shadow-sm">
 
         <!-- Cabecera tabla (solo desktop) -->

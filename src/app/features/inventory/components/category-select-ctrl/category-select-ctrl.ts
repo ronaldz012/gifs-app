@@ -1,10 +1,12 @@
-import { Component, computed, ElementRef, HostListener, inject, input, output, signal } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import {Category} from '../../dtos/categories/category-dto';
-import {CreateCategory} from '../create-category/create-category'; // ajusta path
-import SelectCtrl from '@shared/components/selec-from-list-ctrl';
-import { FieldState, FieldTree } from '@angular/forms/signals';
+import {
+  Component, computed, ElementRef, HostListener,
+  inject, input, output, signal
+} from '@angular/core';
+import { FieldState } from '@angular/forms/signals';
+import { Category } from '../../dtos/categories/category-dto';
 import { CategoryService } from '@features/inventory/services/category-service';
+import { CreateCategory } from '../create-category/create-category';
+import SelectCtrl from '@shared/components/selec-from-list-ctrl';
 
 @Component({
   selector: 'app-category-select-ctrl',
@@ -33,42 +35,57 @@ import { CategoryService } from '@features/inventory/services/category-service';
 })
 export class CategorySelectCtrl {
 
-  private elRef = inject(ElementRef);
-  categoryService= inject(CategoryService);
+  private categoryService = inject(CategoryService);
 
-
-  fieldId        = input.required<FieldState<GUID>>();
-  fieldName        = input.required<FieldState<string>>();
-  categories  = this.categoryService.categories;
+  fieldId   = input.required<FieldState<GUID>>();
+  fieldName = input.required<FieldState<string>>();
   placeholder = input<string>('Categoría...');
 
+  // Notifica al padre que seleccionó o creó una categoría
+  categoryChange = output<Category>();
+
+  categoryOptions = computed(() =>
+    this.categoryService.categories().map(c => ({ id: c.id, displayName: c.name }))
+  );
 
   showCreate  = signal(false);
   createQuery = signal('');
 
-  categoryOptions = computed(() =>
-    this.categories().map(c => ({ id: c.id, displayName: c.name }))
-  );
-  categorySelected(id: GUID) {
-  const category = this.categories().find(c => c.id === id);
-  this.fieldName().value.set(category?.name ?? '');
+  categorySelected(id: GUID): void {
+    const found = this.categoryOptions().find(o => o.id === id);
+    if (!found) return;
+    this.fieldId().value.set(id);
+    this.fieldName().value.set(found.displayName);
   }
 
-  openInlineCreate(query: string) {
+  openInlineCreate(query: string): void {
     this.createQuery.set(query);
     this.showCreate.set(true);
   }
 
-  closeInlineCreate() {
+  closeInlineCreate(): void {
     this.showCreate.set(false);
     this.createQuery.set('');
   }
 
-  onCreated(category: Category) {
-    this.categoryService.add(category)
+  onCreated(category: Category): void {
+    // 1. Primero agregar al store/signal del servicio
+    console.log(category)
+    this.categoryService.add(category);
+
+
+    // 2. Leer las opciones YA actualizadas (computed se recalcula síncronamente)
+    const option = this.categoryOptions().find(o => o.id === category.id);
+
+    // 3. Actualizar los FieldState
     this.fieldId().value.set(category.id);
-    this.fieldName().value.set(category.name);
+    this.fieldName().value.set(option?.displayName ?? category.name);
     this.fieldId().markAsTouched();
+    this.fieldName().markAsTouched();
+
+    // 4. Notificar al padre si lo necesita
+    this.categoryChange.emit(category);
+
     this.closeInlineCreate();
   }
 }
