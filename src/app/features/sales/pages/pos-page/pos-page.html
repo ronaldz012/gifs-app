@@ -1,33 +1,66 @@
-<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-4 p-4 max-w-md mx-auto">
 
+  <!-- ── Cabecera de sección ── -->
   <div class="flex items-center justify-between">
-    <span class="text-sm font-medium text-gray-600">
-      Códigos escaneados
-    </span>
+    <h2 class="section-title mb-0">Códigos escaneados</h2>
 
-    <button
-      type="button"
-      class="px-4 py-2 rounded-lg bg-black text-white"
-      (click)="showCamera.set(true)">
-      Escanear
-    </button>
+    <!-- Botón: solo aparece si la API está disponible -->
+    @if (scannerAvailable()) {
+      <button
+        type="button"
+        class="btn btn-primary btn-sm gap-1.5"
+        (click)="openScanner()"
+      >
+        <span class="material-icons text-[16px]">qr_code_scanner</span>
+        Escanear
+      </button>
+    }
   </div>
 
-  @if (code().length) {
+  <!-- ── Lista de resultados ── -->
+  @if (scannedCodes().length) {
     <div class="flex flex-col gap-2">
-      @for (scanned of code(); track scanned) {
-        <div class="rounded-lg border border-gray-200 p-3">
-          <p class="font-mono text-sm">
-            {{ scanned }}
-          </p>
+      @for (code of scannedCodes(); track code; let i = $index) {
+        <div
+          class="flex items-center justify-between gap-3
+                 rounded-xl border border-border bg-bg-surface
+                 px-3 py-2.5 shadow-xs"
+        >
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="material-icons text-[16px] text-feedback-success-text shrink-0">
+              check_circle
+            </span>
+            <p class="font-mono text-sm text-text-main truncate">{{ code }}</p>
+          </div>
+
+          <button
+            type="button"
+            class="btn-icon hover:bg-bg-muted shrink-0"
+            (click)="removeCode(i)"
+            aria-label="Eliminar código"
+          >
+            <span class="material-icons text-[16px] text-text-soft">close</span>
+          </button>
         </div>
       }
     </div>
   } @else {
-    <p class="text-sm text-gray-400">
-      No hay códigos escaneados
-    </p>
+    <!-- Estado vacío -->
+    <div class="flex flex-col items-center gap-2 py-12 text-text-soft">
+      <span class="material-icons text-[40px] opacity-30">qr_code_2</span>
+      <p class="text-sm">
+        @if (scannerAvailable()) {
+          Presioná "Escanear" para leer una etiqueta
+        } @else {
+          El escáner QR requiere Chrome en Android
+        }
+      </p>
+    </div>
   }
 
 </div>
 
+<!-- ── Modal de escaneo ── -->
+<app-qr-scanner-modal
+  (scanned)="onScanned($event)"
+/>

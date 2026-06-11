@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:lan": "ng serve --host 0.0.0.0 --ssl true --port 4200",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -42,7 +43,9 @@
     "@angular/cli": "^21.2.14",
     "@angular/compiler-cli": "^21.2.16",
     "@tailwindcss/postcss": "^4.1.12",
+    "@types/dom-screen-wake-lock": "^1.0.3",
     "@types/jsbarcode": "^3.11.4",
+    "@types/w3c-image-capture": "^1.0.11",
     "autoprefixer": "^10.5.0",
     "jsdom": "^27.1.0",
     "postcss": "^8.5.15",
