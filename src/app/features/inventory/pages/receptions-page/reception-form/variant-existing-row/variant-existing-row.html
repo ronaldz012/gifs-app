@@ -29,13 +29,26 @@
         <div class="absolute z-50 left-0 right-0 mt-0.5 bg-bg-surface border border-border rounded-lg shadow-md max-h-48 overflow-y-auto">
           @for (variant of filteredVariants(); track variant.id) {
             <button
-              type="button"
-              (mousedown)="$event.preventDefault()"
-              (click)="selectVariant(variant)"
-              class="w-full text-left px-2 py-1.5 text-[11px] text-text-main hover:bg-accent-ui hover:text-white flex items-center gap-2 border-b border-border last:border-0 transition-colors">
-              <span class="font-mono font-semibold shrink-0">{{ variant.sku }}</span>
-              <span class="text-[10px] text-text-soft shrink-0">Bs {{ variant.price }}</span>
-            </button>
+                type="button"
+                (mousedown)="$event.preventDefault()"
+                (click)="selectVariant(variant)"
+                class="w-full text-left px-2 py-1.5 flex flex-col gap-0.5
+                      border-b border-border last:border-0
+                      hover:bg-accent-ui hover:text-white transition-colors group">
+
+                <!-- Fila 1: size + color -->
+                <div class="flex items-center gap-1">
+                  <span class="pill-neutral group-hover:bg-white/20 group-hover:text-white group-hover:ring-white/20">{{ variant.size }}</span>
+                  <span class="pill-neutral group-hover:bg-white/20 group-hover:text-white group-hover:ring-white/20 truncate">{{ variant.colorName }}</span>
+                </div>
+
+                <!-- Fila 2: sku + precio -->
+                <div class="flex items-center justify-between gap-1">
+                  <span class="font-mono text-[9px] text-text-soft group-hover:text-white/60 truncate">{{ variant.sku }}</span>
+                  <span class="text-[9px] font-medium shrink-0">Bs {{ variant.price }}</span>
+                </div>
+
+              </button>
           }
           <button
             type="button"
