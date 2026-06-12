@@ -1,5 +1,5 @@
 import { FormArray, FormGroup } from '@angular/forms';
-import CreateReceptionDto, { CreateReceptionItemDto } from '@features/inventory/dtos/Receptions/create-reception-dto';
+import CreateReceptionDto, { CreateReceptionItemDto } from '@features/inventory/dtos/receptions/create-reception-dto';
 
 export function buildReceptionPayload(
   form: FormGroup,

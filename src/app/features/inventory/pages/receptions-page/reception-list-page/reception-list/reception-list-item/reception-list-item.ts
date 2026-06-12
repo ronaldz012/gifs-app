@@ -1,5 +1,5 @@
 import { Component, inject, input, output} from '@angular/core';
-import {ReceptionStatus, StockReceptionListDto} from '../../../../../dtos/Receptions/stock-reception-list-dto';
+import {ReceptionStatus, StockReceptionListDto} from '../../../../../dtos/receptions/stock-reception-list-dto';
 import {CurrencyPipe, DatePipe} from '@angular/common';
 import {Router} from '@angular/router';
 import ReceptionDetails from '../../../reception-details/reception-details';

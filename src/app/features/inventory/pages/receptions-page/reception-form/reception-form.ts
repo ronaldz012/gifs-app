@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import { ReceptionItem } from "./reception-item/reception-item";
 import { ExistingProductModal } from "../existing-product-modal/existing-product-modal";
 import { NewProductModal } from "../new-product-modal/new-product-modal";
-import CreateReceptionDto from "@features/inventory/dtos/Receptions/create-reception-dto";
+import CreateReceptionDto from "@features/inventory/dtos/receptions/create-reception-dto";
 import { ReceptionService } from "@features/inventory/services/reception-service";
 import { ColorService } from "@features/inventory/services/color-service";
 import { BrandService } from "@features/inventory/services/brand-service";

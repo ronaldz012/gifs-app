@@ -1,12 +1,12 @@
 import {inject, Injectable} from '@angular/core';
-import createReceptionDto from '../dtos/Receptions/create-reception-dto';
+import createReceptionDto from '../dtos/receptions/create-reception-dto';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from 'environments/environment';
-import {ReceptionQueryParams, StockReceptionListDto} from '../dtos/Receptions/stock-reception-list-dto';
+import {ReceptionQueryParams, StockReceptionListDto} from '../dtos/receptions/stock-reception-list-dto';
 import {PagedResult} from '../dtos/paged-result';
-import {StockReceptionDetailDto} from '../dtos/Receptions/stock-reception-details-dto';
-import {ReceptionLabelsDto} from '../interfaces/reception-labels';
+import {StockReceptionDetailDto} from '../dtos/receptions/stock-reception-details-dto';
+import {ReceptionLabelsDto} from '../dtos/receptions/reception-labels-dto';
 
 @Injectable({
   providedIn: 'root',

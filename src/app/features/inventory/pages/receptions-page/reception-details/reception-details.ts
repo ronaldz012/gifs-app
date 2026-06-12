@@ -4,8 +4,8 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ConfirmActionModal } from '../../transfer-page/confirm-action-modal/confirm-action-modal';
 
 import {ReceptionService} from '../../../services/reception-service';
-import {ReceptionStatus} from '../../../dtos/Receptions/stock-reception-list-dto';
-import {StockReceptionDetailDto, StockReceptionItemDetailDto} from '../../../dtos/Receptions/stock-reception-details-dto';
+import {ReceptionStatus} from '../../../dtos/receptions/stock-reception-list-dto';
+import {StockReceptionDetailDto, StockReceptionItemDetailDto} from '../../../dtos/receptions/stock-reception-details-dto';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
 

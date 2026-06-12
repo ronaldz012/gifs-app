@@ -7,5 +7,4 @@ export interface ListProductDto {
   variantsCount: number;
   totalStock:    number;
   displayPrice:  number;
-
 }

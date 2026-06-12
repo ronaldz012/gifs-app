@@ -1,7 +1,7 @@
 // features/receptions/components/reception-filter-bar/reception-filter-bar.ts
 import { Component, input, output, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ReceptionQueryParams, ReceptionStatus } from '../../../dtos/Receptions/stock-reception-list-dto';
+import { ReceptionQueryParams, ReceptionStatus } from '../../../dtos/receptions/stock-reception-list-dto';
 import { DateRangeFilter } from '@shared/components/date-range-filter/date-range-filter';
 import { BrandService } from '@features/inventory/services/brand-service';
 

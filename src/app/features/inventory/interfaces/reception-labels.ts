@@ -6,29 +6,7 @@ export const GenderLabel: Record<Gender, string> = {
   [Gender.Mujer]: 'Fem.',
 };
 
-// ─── DTOs (espejo del backend) ───────────────────────────────────────────────
-
-export interface ReceptionLabelItemDto {
-  variantId: GUID;
-  sku: string;
-  size: string;
-  color: string;
-  gender: Gender;
-  price: number;
-  productName: string;
-  brandName: string;
-  categoryName: string;
-  quantity: number; // cuántas etiquetas imprimir de esta variante
-}
-
-export interface ReceptionLabelsDto {
-  receptionId: GUID;
-  receptionDate: string; // ISO date string
-  items: ReceptionLabelItemDto[];
-}
-
-// ─── Modelo interno (una etiqueta ya expandida) ───────────────────────────────
-
+// Modelo interno (una etiqueta ya expandida)
 export interface LabelData {
   variantId: GUID;
   sku: string;

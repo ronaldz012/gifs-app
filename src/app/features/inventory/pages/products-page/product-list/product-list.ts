@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductService } from '../../../services/product-service';
-import { ListProductDto } from '../../../interfaces/listProductDto';
+import { ListProductDto } from '../../../dtos/products/list-product-dto';
 import ProductItem from './product-item/product-item';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
 import { ProductQueryParams } from '../../../dtos/products/product-dto';

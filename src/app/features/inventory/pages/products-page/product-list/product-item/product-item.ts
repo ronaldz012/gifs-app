@@ -1,5 +1,5 @@
 import {Component, input, output} from '@angular/core';
-import {ListProductDto} from '../../../../interfaces/listProductDto';
+import {ListProductDto} from '../../../../dtos/products/list-product-dto';
 import {CurrencyPipe} from '@angular/common';
 
 @Component({

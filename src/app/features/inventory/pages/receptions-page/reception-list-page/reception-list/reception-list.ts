@@ -1,6 +1,6 @@
 import {Component, inject, input, OnInit, output, signal} from '@angular/core';
 import {CurrencyPipe, DatePipe, KeyValuePipe} from '@angular/common';
-import {StockReceptionListDto} from '../../../../dtos/Receptions/stock-reception-list-dto';
+import {StockReceptionListDto} from '../../../../dtos/receptions/stock-reception-list-dto';
 import {ReceptionListItem} from './reception-list-item/reception-list-item';
 import {ReceptionService} from '../../../../services/reception-service';
 import {Router} from '@angular/router';
