@@ -1,8 +1,8 @@
 import { Component, input, output} from '@angular/core';
-import {ProductSearchResult} from '../../../../components/product-search/product-search-result';
+import {ProductSearchResult} from '../../../../components/product-search/product-search-result.component';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {Gender} from '../../../../interfaces/gender';
-import {ProductSearch} from '../../../../components/product-search/product-search';
+import {ProductSearch} from '../../../../components/product-search/product-search.component';
 import {DecimalPipe} from '@angular/common';
 import { FieldTree } from '@angular/forms/signals';
 import { ProductInfo } from '@features/inventory/models/variant-form.model';

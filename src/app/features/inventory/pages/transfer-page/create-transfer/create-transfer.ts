@@ -1,12 +1,12 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import {ProductVariantSearch} from '../../../components/product-variant-search/product-variant-search';
+import {ProductVariantSearch} from '../../../components/product-variant-search/product-variant-search.component';
 import {CreateTransferItemList} from './create-transfer-item-list/create-transfer-item-list';
 import {TransferService} from '../../../services/transfer-service';
 
 import {TransferItem} from '../../../interfaces/transfer-item';
-import {TransferForm} from '../../../dtos/tranfers/transfer-form';
+import {TransferForm} from '../../../dtos/transfers/transfer-form';
 import {ProductVariantBySkuDto} from '../../../dtos/products/product-variant-by-sku-dto';
 import { BranchContextService } from '@core/services/branch-context-service';
 import { BranchDto } from '@core/interfaces/branch.model';

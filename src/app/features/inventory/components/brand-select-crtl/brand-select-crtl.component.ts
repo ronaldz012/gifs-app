@@ -1,6 +1,6 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { Brand } from '@features/inventory/dtos/brands/brand-dto';
-import CreateBrand from '../create-brand/create-brand';
+import CreateBrand from '../create-brand/create-brand.component';
 import SelectCtrl from '@shared/components/selec-from-list-ctrl';
 import { FieldState } from '@angular/forms/signals';
 import { BrandService } from '@features/inventory/services/brand-service';

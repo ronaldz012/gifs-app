@@ -1,7 +1,7 @@
 // features/transfers/components/transfer-filter-bar/transfer-filter-bar.ts
 import { Component, input, output, computed } from '@angular/core';
-import {TransferDirection, TransferStatus} from '../../../dtos/tranfers/transfer-enums';
-import {TransferQueryParams} from '../../../dtos/tranfers/stock-transfer-list-dto';
+import {TransferDirection, TransferStatus} from '../../../dtos/transfers/transfer-enums';
+import {TransferQueryParams} from '../../../dtos/transfers/stock-transfer-list-dto';
 import { DateRangeFilter } from '@shared/components/date-range-filter/date-range-filter';
 
 

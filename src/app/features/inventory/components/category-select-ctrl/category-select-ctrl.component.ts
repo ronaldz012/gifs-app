@@ -5,7 +5,7 @@ import {
 import { FieldState } from '@angular/forms/signals';
 import { Category } from '../../dtos/categories/category-dto';
 import { CategoryService } from '@features/inventory/services/category-service';
-import { CreateCategory } from '../create-category/create-category';
+import { CreateCategory } from '../create-category/create-category.component';
 import SelectCtrl from '@shared/components/selec-from-list-ctrl';
 
 @Component({
@@ -69,21 +69,16 @@ export class CategorySelectCtrl {
   }
 
   onCreated(category: Category): void {
-    // 1. Primero agregar al store/signal del servicio
     console.log(category)
     this.categoryService.add(category);
 
-
-    // 2. Leer las opciones YA actualizadas (computed se recalcula síncronamente)
     const option = this.categoryOptions().find(o => o.id === category.id);
 
-    // 3. Actualizar los FieldState
     this.fieldId().value.set(category.id);
     this.fieldName().value.set(option?.displayName ?? category.name);
     this.fieldId().markAsTouched();
     this.fieldName().markAsTouched();
 
-    // 4. Notificar al padre si lo necesita
     this.categoryChange.emit(category);
 
     this.closeInlineCreate();

@@ -1,3 +1,3 @@
 export interface CreateColorDto {
-name: string;
+  name: string;
 }

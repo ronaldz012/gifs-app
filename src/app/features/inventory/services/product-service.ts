@@ -5,7 +5,7 @@ import {Observable} from 'rxjs';
 import {ProductQueryParams} from '../dtos/products/product-dto';
 import {PagedResult} from '../dtos/paged-result';
 import {ListProductDto} from '../interfaces/listProductDto';
-import {ProductSearchResult} from '../components/product-search/product-search-result';
+import {ProductSearchResult} from '../components/product-search/product-search-result.component';
 import {ProductDetailDto} from '../dtos/products/product-detail-dto';
 import {ProductVariantBySkuDto} from '../dtos/products/product-variant-by-sku-dto';
 import {UpdateProductDto} from '../dtos/products/update-product-dto';

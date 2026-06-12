@@ -59,7 +59,6 @@ export default class CreateBrand implements AfterViewInit {
   get nameError():   string { return this.nameState.errors()?.[0]?.message   ?? ''; }
   get prefixError(): string { return this.prefixState.errors()?.[0]?.message ?? ''; }
 
-  // --- Prefix: forzar mayúsculas y solo letras ---
   onPrefixInput(event: Event): void {
     const el = event.target as HTMLInputElement;
     const clean = el.value.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 3);

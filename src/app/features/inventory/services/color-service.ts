@@ -2,8 +2,8 @@ import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { map, Observable } from 'rxjs';
-import { Color } from '../dtos/Colors/color';
-import { CreateColorDto } from '../dtos/Colors/create-color-dto';
+import { Color } from '../dtos/colors/color';
+import { CreateColorDto } from '../dtos/colors/create-color-dto';
 import { BrandQuery } from '../dtos/brands/brand-dto'; // Reutilizado según tu código original
 import { PagedResult } from '../dtos/paged-result';
 

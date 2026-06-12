@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { Color } from '../../dtos/Colors/color';
+import { Color } from '../../dtos/colors/color';
 import { FieldState } from '@angular/forms/signals';
-import CreateColor from '../create-color/create-color';
+import CreateColor from '../create-color/create-color.component';
 import SelectCtrl from '@shared/components/selec-from-list-ctrl';
 import { Options } from 'jsbarcode';
 import { SelectOption } from '@shared/models/select-option.model';

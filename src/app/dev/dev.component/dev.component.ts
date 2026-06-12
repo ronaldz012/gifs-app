@@ -1,8 +1,8 @@
 import { Component, signal, OnInit, inject } from '@angular/core';
 import { applyEach, applyWhen, form, FormField } from '@angular/forms/signals';
-import { ProductVariantOption } from '@features/inventory/components/product-search/product-search-result';
+import { ProductVariantOption } from '@features/inventory/components/product-search/product-search-result.component';
 import { VariantForm, newVariantSchema, existingVariantSchema,buildExistingVariant, buildNewVariant } from '@features/inventory/models/variant-form.model';
-import { Color } from '@features/inventory/dtos/Colors/color';
+import { Color } from '@features/inventory/dtos/colors/color';
 import { NewProductModal } from '@features/inventory/pages/receptions-page/new-product-modal/new-product-modal';
 import { BrandService } from '@features/inventory/services/brand-service';
 import { CategoryService } from '@features/inventory/services/category-service';

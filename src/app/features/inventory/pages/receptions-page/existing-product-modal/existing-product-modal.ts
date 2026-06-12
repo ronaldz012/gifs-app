@@ -5,8 +5,8 @@ import { debounceTime, distinctUntilChanged, finalize, of, Subject, switchMap } 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { applyEach, applyWhen, form, required } from '@angular/forms/signals';
 
-import { ProductSearch } from '../../../components/product-search/product-search';
-import { ProductSearchResult } from '../../../components/product-search/product-search-result';
+import { ProductSearch } from '../../../components/product-search/product-search.component';
+import { ProductSearchResult } from '../../../components/product-search/product-search-result.component';
 import VariantNewRow from '../reception-form/variant-new-row/variant-new-row';
 import VariantExistingRow from '../reception-form/variant-existing-row/variant-existing-row';
 

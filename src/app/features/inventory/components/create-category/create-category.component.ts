@@ -47,8 +47,6 @@ export class CreateCategory implements AfterViewInit {
   @HostListener('focusout', ['$event'])
   onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget as HTMLElement;
-    // Si el foco va a null (ej. click en botón que hace submit)
-    // o fuera del componente pero hay una operación en curso → no cerrar
     if (this.isLoading()) return;
     if (!this.elRef.nativeElement.contains(next)) this.closed.emit();
   }
@@ -75,8 +73,8 @@ save(): void {
   this.categoryService.create({ name, description }).subscribe({
     next: (data) => {
       this.isLoading.set(false);
-      this.categoryModel.set({ name: '', description: '' }); // reset ANTES
-      this.created.emit(data);                                // emit AL FINAL
+      this.categoryModel.set({ name: '', description: '' });
+      this.created.emit(data);
     },
     error: (err) => {
       this.isLoading.set(false);

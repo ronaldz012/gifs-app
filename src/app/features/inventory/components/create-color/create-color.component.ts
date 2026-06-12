@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { ColorService } from '../../services/color-service';
-import { Color } from '../../dtos/Colors/color';
+import { Color } from '../../dtos/colors/color';
 
 @Component({
   selector: 'app-create-color',
@@ -72,10 +72,7 @@ export default class CreateColor implements AfterViewInit {
       error: (err) => {
         this.isLoading.set(false);
         if (err.status === 409) {
-          // Signal Forms: no hay setErrors directo, usamos un error custom
-          // vía validación dinámica o mostramos un error de nivel form
           this.colorModel.update(m => m); // trigger re-check
-          // Mostrar mensaje via signal separado
           this._serverError.set('Este nombre ya existe');
         }
       }

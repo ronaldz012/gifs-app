@@ -24,4 +24,3 @@ export interface StockTransferItemDetailDto
   color   :string;
   quantityRequested: number
 }
-

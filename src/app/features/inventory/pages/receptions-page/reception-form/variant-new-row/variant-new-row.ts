@@ -1,8 +1,8 @@
 import { Component, computed, input, output } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { VariantForm } from '@features/inventory/models/variant-form.model';
-import { ColorSelectCtrl } from "@features/inventory/components/color-select-ctrl/color-select-ctrl";
-import { ProductVariantOption } from '@features/inventory/components/product-search/product-search-result';
+import { ColorSelectCtrl } from "@features/inventory/components/color-select-ctrl/color-select-ctrl.component";
+import { ProductVariantOption } from '@features/inventory/components/product-search/product-search-result.component';
 
 @Component({
   selector: 'app-variant-new-row',

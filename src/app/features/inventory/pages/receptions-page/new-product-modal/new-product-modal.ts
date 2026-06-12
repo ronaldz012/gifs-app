@@ -6,8 +6,8 @@ import { CurrencyPipe } from '@angular/common';
 import { NewProductModelForm } from '@features/inventory/models/new-product.model';
 import { applyEach, FieldTree, form, FormField, required, validateTree } from '@angular/forms/signals';
 import { buildNewVariant, ItemForm, newVariantSchema, VariantForm } from '@features/inventory/models/variant-form.model';
-import { BrandSelectCtrl } from "@features/inventory/components/brand-select-crtl/brand-select-crtl";
-import { CategorySelectCtrl } from "@features/inventory/components/category-select-ctrl/category-select-ctrl";
+import { BrandSelectCtrl } from "@features/inventory/components/brand-select-crtl/brand-select-crtl.component";
+import { CategorySelectCtrl } from "@features/inventory/components/category-select-ctrl/category-select-ctrl.component";
 import { Gender } from '@features/inventory/interfaces/gender';
 
 @Component({

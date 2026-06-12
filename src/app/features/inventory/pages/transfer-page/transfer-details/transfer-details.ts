@@ -3,10 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ResolveTransferModal } from '../resolve-transfer-modal/resolve-transfer-modal';
 import { ConfirmActionModal } from '../confirm-action-modal/confirm-action-modal';
-import {TotalQtyPipe} from '../../../dtos/tranfers/total-qty-pipe-pipe';
+import {TotalQtyPipe} from '../../../dtos/transfers/total-qty.pipe';
 import {TransferService} from '../../../services/transfer-service';
-import {TransferDirection, TransferStatus} from '../../../dtos/tranfers/transfer-enums';
-import {StockTransferDetailDto} from '../../../dtos/tranfers/stock-transfer-detail-dto';
+import {TransferDirection, TransferStatus} from '../../../dtos/transfers/transfer-enums';
+import {StockTransferDetailDto} from '../../../dtos/transfers/stock-transfer-detail-dto';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
 @Component({

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { ResolveTransferModal } from '../resolve-transfer-modal/resolve-transfer-modal';
 import { ConfirmActionModal } from '../confirm-action-modal/confirm-action-modal';
 import { TransferList } from './transfer-list/transfer-list';
-import { StockTransferListDto, TransferQueryParams} from '../../../dtos/tranfers/stock-transfer-list-dto';
+import { StockTransferListDto, TransferQueryParams} from '../../../dtos/transfers/stock-transfer-list-dto';
 import { TransferService } from '../../../services/transfer-service';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
 import { TransferFilterBar } from '../transfer-filter-bar/transfer-filter-bar';
