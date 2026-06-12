@@ -1,4 +1,4 @@
-import {TransferDirection, TransferStatus} from './transfer-enums';
+import { TransferDirection, TransferStatus } from "./transfer-enums"
 
 export interface StockTransferDetailDto {
   id:GUID,

@@ -1,5 +1,5 @@
-import {TransferDirection, TransferStatus} from './transfer-enums';
 import {BaseQueryDto} from '../base-query-dto';
+import { TransferDirection, TransferStatus } from './transfer-enums';
 
 export interface StockTransferListDto {
   id: GUID;
