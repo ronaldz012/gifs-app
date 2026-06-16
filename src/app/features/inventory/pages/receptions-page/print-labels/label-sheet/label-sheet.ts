@@ -1,11 +1,15 @@
 import { Component, OnDestroy, OnInit, input, signal, computed } from '@angular/core';
-import { LabelItem } from '../label-item/label-item';
-import { LabelData, LABELS_PER_SHEET } from '../../../../interfaces/reception-labels';
+import { LabelItemQr } from '../label-item/label-item-qr';
+import { LabelData } from '../../../../interfaces/reception-labels';
+import { LabelItemBc } from "../label-item/label-item-bc";
+
+// Nota: Cambiado a 28 de forma interna para coincidir con la distribución óptima de 4x7
+const NEW_LABELS_PER_SHEET = 24;
 
 @Component({
   selector: 'app-label-sheet',
   standalone: true,
-  imports: [LabelItem],
+  imports: [LabelItemBc],
   template: `
     <div class="sheets-wrapper"
          [style.transform]="needsZoom() ? 'scale(' + screenZoom() + ')' : 'none'"
@@ -13,7 +17,7 @@ import { LabelData, LABELS_PER_SHEET } from '../../../../interfaces/reception-la
       @for (page of pages(); track $index) {
         <div class="sheet">
           @for (label of page; track label.variantId + '_' + $index) {
-            <app-label-item [label]="label" />
+            <app-label-item-bc [label]="label" />
           }
         </div>
       }
@@ -27,18 +31,23 @@ import { LabelData, LABELS_PER_SHEET } from '../../../../interfaces/reception-la
       gap: 20px;
     }
 
-    .sheet {
-      width: 210mm;
-      height: 297mm;       /* height fijo — evita páginas en blanco */
-      padding: 10mm;
-      box-sizing: border-box;
-      background: white;
-      display: grid;
-      grid-template-columns: repeat(3, 61mm);
-      grid-template-rows: repeat(9, 25mm);
-      gap: 1.5mm;
-      align-content: start;
-    }
+    /* ═══════════════════════════════════════
+       Configuración de Hoja A4 Calibrada
+       Distribución: 4 Columnas x 7 Filas (28 uds)
+       ═══════════════════════════════════════ */
+.sheet {
+  width: 210mm;
+  height: 297mm;         
+  padding: 6mm 12mm;     /* Reajustado para centrar verticalmente la nueva cuadrícula */
+  box-sizing: border-box;
+  background: white;
+  display: grid;
+  grid-template-columns: repeat(3, 60mm); /* 3 columnas x 60mm = 180mm */
+  grid-template-rows: repeat(8, 35mm);    /* ¡CAMBIADO A 35mm! (Ahora caben 8 filas de alto) */
+  gap: 1mm;
+  align-content: start;
+  justify-content: center;
+}
 
     @media screen {
       .sheet { box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
@@ -53,6 +62,8 @@ import { LabelData, LABELS_PER_SHEET } from '../../../../interfaces/reception-la
       .sheet {
         box-shadow: none;
         page-break-inside: avoid;
+        /* Asegura que el navegador respete los límites físicos del A4 */
+        margin: 0;
       }
       .sheet:not(:last-child) {
         page-break-after: always;
@@ -67,11 +78,12 @@ export class LabelSheet implements OnInit, OnDestroy {
   screenZoom = signal('1');
   needsZoom  = signal(false);
 
+  // Segmentación reactiva basada en la nueva densidad por hoja
   pages = computed(() => {
     const data = this.labels();
     const chunks: LabelData[][] = [];
-    for (let i = 0; i < data.length; i += LABELS_PER_SHEET) {
-      chunks.push(data.slice(i, i + LABELS_PER_SHEET));
+    for (let i = 0; i < data.length; i += NEW_LABELS_PER_SHEET) {
+      chunks.push(data.slice(i, i + NEW_LABELS_PER_SHEET));
     }
     return chunks;
   });

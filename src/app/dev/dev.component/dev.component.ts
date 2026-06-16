@@ -1,9 +1,10 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, OnInit, inject, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { applyEach, applyWhen, form, FormField } from '@angular/forms/signals';
 import { ProductVariantOption } from '@features/inventory/components/product-search/product-search-result.component';
 import { VariantForm, newVariantSchema, existingVariantSchema,buildExistingVariant, buildNewVariant } from '@features/inventory/models/variant-form.model';
 import { Color } from '@features/inventory/dtos/colors/color';
-import { NewProductModal } from '@features/inventory/pages/receptions-page/new-product-modal/new-product-modal';
+import { BarcodeScannerModal } from '../../shared/components/barcode-scanner-modal/barcode-scanner-modal';
 import { BrandService } from '@features/inventory/services/brand-service';
 import { CategoryService } from '@features/inventory/services/category-service';
 import { ColorService } from '@features/inventory/services/color-service';
@@ -17,7 +18,7 @@ interface Test {
 }
 @Component({
   selector: 'app-dev.component',
-  imports: [NewProductModal],
+  imports: [CommonModule, BarcodeScannerModal],
   templateUrl: './dev.component.html',
   styleUrl: './dev.component.css',
 })
@@ -27,6 +28,10 @@ brandService = inject(BrandService);
 categoryService = inject(CategoryService);
 colorService = inject(ColorService);
 productService = inject(ProductService);
+
+  @ViewChild('barcodeScanner') barcodeScanner?: BarcodeScannerModal;
+
+  scannedCodes = signal<string[]>([]);
 
 
 
@@ -65,5 +70,18 @@ onCloseModal() {
 
 onConfirmModal(event: any) {
   console.log('Modal confirmed', event);
+}
+
+openScanner(): void {
+  this.barcodeScanner?.open();
+}
+
+onBarcodeScanned(code: string): void {
+  this.scannedCodes.set([...this.scannedCodes(), code]);
+  console.log('Scanned barcode:', code);
+}
+
+onScannerClosed(): void {
+  console.log('Scanner closed');
 }
 }

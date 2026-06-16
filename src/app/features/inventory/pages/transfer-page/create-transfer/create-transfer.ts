@@ -83,7 +83,7 @@ export default class CreateTransfer implements OnInit {
           variantId:    variant.id,
           sku:          variant.sku,
           productName:  variant.productName,
-          variantLabel: [variant.description, variant.size, variant.color]
+          variantLabel: [variant.description, variant.size, variant.colorId]
             .filter(Boolean)
             .join(' · '),
           quantity:    1,

@@ -54,6 +54,16 @@
         </div>
       </button>
     </div>
+        <div class="py-3">
+      <button type="button" (click)="showNewProductModal.set(true)"
+        class="flex items-center gap-2 px-4 py-2 bg-bg-muted text-text-main border border-border rounded-lg hover:bg-text-main hover:text-inverse transition-all duration-150 shadow-sm group">
+        <span class="text-xl font-bold group-hover:scale-110">🔍</span>
+        <div class="text-left">
+          <p class="text-sm font-bold leading-none">Agregar producto</p>
+          <p class="text-[10px] opacity-80">Buscar en catálogo o crear nuevo</p>
+        </div>
+      </button>
+    </div>
 
     <!-- Footer -->
     <div class="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-border gap-4">

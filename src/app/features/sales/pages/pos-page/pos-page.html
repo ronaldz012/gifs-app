@@ -1,66 +1,72 @@
-<div class="flex flex-col gap-4 p-4 max-w-md mx-auto">
+<div class="w-full max-w-5xl mx-auto p-4 md:py-6 flex flex-col gap-5">
 
-  <!-- ── Cabecera de sección ── -->
-  <div class="flex items-center justify-between">
-    <h2 class="section-title mb-0">Códigos escaneados</h2>
+  <!-- ── CABECERA Y ACCIÓN PRINCIPAL ── -->
+  <div class="flex items-center justify-between bg-bg-surface p-4 rounded-xl border border-border shadow-xs">
+    <div class="flex flex-col">
+      <h2 class="text-lg font-black text-text-main">Carrito de Venta</h2>
+      <p class="text-xs text-text-soft">Escanea las prendas o digita el SKU</p>
+    </div>
 
-    <!-- Botón: solo aparece si la API está disponible -->
+    <!-- Botón de Escáner QR (Solo Mobile/Android habilitados) -->
     @if (scannerAvailable()) {
       <button
         type="button"
-        class="btn btn-primary btn-sm gap-1.5"
+        class="flex items-center gap-2 bg-accent-ui text-white font-bold px-4 py-2.5 rounded-xl shadow-xs hover:bg-accent-ui/90 active:scale-95 transition-all text-sm"
         (click)="openScanner()"
       >
-        <span class="material-icons text-[16px]">qr_code_scanner</span>
-        Escanear
+        <span class="material-icons text-[18px]">qr_code_scanner</span>
+        Escanear Código
       </button>
     }
   </div>
 
-  <!-- ── Lista de resultados ── -->
-  @if (scannedCodes().length) {
-    <div class="flex flex-col gap-2">
-      @for (code of scannedCodes(); track code; let i = $index) {
-        <div
-          class="flex items-center justify-between gap-3
-                 rounded-xl border border-border bg-bg-surface
-                 px-3 py-2.5 shadow-xs"
-        >
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="material-icons text-[16px] text-feedback-success-text shrink-0">
-              check_circle
-            </span>
-            <p class="font-mono text-sm text-text-main truncate">{{ code }}</p>
-          </div>
-
-          <button
-            type="button"
-            class="btn-icon hover:bg-bg-muted shrink-0"
-            (click)="removeCode(i)"
-            aria-label="Eliminar código"
-          >
-            <span class="material-icons text-[16px] text-text-soft">close</span>
-          </button>
-        </div>
+  <!-- ── LISTA DE PRENDAS AGREGADAS ── -->
+  @if (posModel().items.length) {
+    
+    <!-- Contenedor principal responsivo -->
+    <div class="flex flex-col gap-3">
+      
+      <!-- Iteración directa sobre los nodos FieldTree generados por Signal Forms -->
+      @for (cartItem of posForm.items; track cartItem().value().productVariantId; let i = $index) {
+        <app-pos-cart-item-card
+          [item]="cartItem"
+          [index]="i"
+          (removed)="removeItem(i)"
+        />
       }
+      
     </div>
+
+    <!-- ── INDICADOR FLOTANTE O FIJO DEL TOTAL ACTUAL ── -->
+    <div class="mt-2 bg-bg-surface border border-border-strong rounded-xl p-4 flex items-center justify-between shadow-sm">
+      <span class="text-sm font-bold text-text-muted">Total Parcial ({{ posModel().items.length }} art.)</span>
+      <span class="text-2xl font-black text-accent-ui font-mono">Bs {{ totalCart() | number:'1.2-2' }}</span>
+    </div>
+
   } @else {
-    <!-- Estado vacío -->
-    <div class="flex flex-col items-center gap-2 py-12 text-text-soft">
-      <span class="material-icons text-[40px] opacity-30">qr_code_2</span>
-      <p class="text-sm">
-        @if (scannerAvailable()) {
-          Presioná "Escanear" para leer una etiqueta
-        } @else {
-          El escáner QR requiere Chrome en Android
-        }
-      </p>
+    
+    <!-- ESTADO VACÍO (UX Refinada) -->
+    <div class="flex flex-col items-center justify-center gap-3 py-20 bg-bg-surface border border-dashed border-border rounded-2xl text-text-soft">
+      <div class="w-16 h-16 rounded-full bg-bg-muted flex items-center justify-center text-text-soft/40">
+        <span class="material-icons text-[36px]">shopping_bag</span>
+      </div>
+      <div class="text-center px-6">
+        <p class="font-bold text-text-main text-sm">El carrito está vacío</p>
+        <p class="text-xs max-w-xs mt-1">
+          @if (scannerAvailable()) {
+            Usa el botón de arriba para activar la cámara o pasa las etiquetas por el escáner láser de la caseta.
+          } @else {
+            Por favor, conecta un lector de barras o activa la búsqueda manual.
+          }
+        </p>
+      </div>
     </div>
+
   }
 
 </div>
 
-<!-- ── Modal de escaneo ── -->
+<!-- ── MODAL DEL ESCÁNER DE CÁMARA ── -->
 <app-qr-scanner-modal
   (scanned)="onScanned($event)"
 />

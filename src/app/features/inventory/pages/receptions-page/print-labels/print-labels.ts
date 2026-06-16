@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { LabelSheet } from './label-sheet/label-sheet';
@@ -92,7 +92,7 @@ export default class PrintLabelsPage implements OnInit {
   private http  = inject(HttpClient);
   private route = inject(ActivatedRoute);
 
-  receptionId = signal(0);
+  receptionId = signal<GUID>('');
   backUrl     = signal('');
   reception   = signal<ReceptionLabelsDto | null>(null);
   loading     = signal(true);
@@ -123,12 +123,28 @@ export default class PrintLabelsPage implements OnInit {
   });
 
   ngOnInit(): void {
-    const id   = Number(this.route.snapshot.paramMap.get('id'));
+    const id   = this.route.snapshot.paramMap.get('id') ?? '';
     const back = this.route.snapshot.queryParamMap.get('back') ?? '';
     this.receptionId.set(id);
     this.backUrl.set(back);
     this.loadData();
+    // Ensure printing-specific class is toggled when user prints via browser
+    window.addEventListener('beforeprint', this.handleBeforePrint);
+    window.addEventListener('afterprint', this.handleAfterPrint);
   }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('beforeprint', this.handleBeforePrint);
+    window.removeEventListener('afterprint', this.handleAfterPrint);
+  }
+
+  private handleBeforePrint = (): void => {
+    try { document.body.classList.add('printing-labels'); } catch (e) {}
+  };
+
+  private handleAfterPrint = (): void => {
+    try { document.body.classList.remove('printing-labels'); } catch (e) {}
+  };
 
   loadData(): void {
     this.loading.set(true);

@@ -1,9 +1,12 @@
 <div class="items-center m-auto p-8">
-  <h1 class="text-2xl font-bold mb-4">Preview: New Product Modal</h1>
-  <div class="border border-gray-300 rounded p-4 max-w-4xl" >
-    <app-new-product-modal 
-      (close)="onCloseModal()"
-      (confirm)="onConfirmModal($event)" 
-    />
+  <button class="px-4 py-2 bg-blue-600 text-white rounded" (click)="openScanner()">Abrir escáner</button>
+
+  <div class="mt-4">
+    <h2 class="font-semibold">Códigos escaneados</h2>
+    <ul>
+      <li *ngFor="let code of scannedCodes()">{{ code }}</li>
+    </ul>
   </div>
+
+  <app-barcode-scanner-modal #barcodeScanner (scanned)="onBarcodeScanned($event)" (closed)="onScannerClosed()"></app-barcode-scanner-modal>
 </div>

@@ -1,0 +1,114 @@
+@if (isOpen()) {
+  <!-- Overlay -->
+  <div
+    class="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Escáner de código de barras"
+  >
+    <!-- Backdrop -->
+    <div
+      class="absolute inset-0 bg-overlay"
+      (click)="close()"
+    ></div>
+
+    <!-- Panel -->
+    <div
+      class="modal-enter relative z-10 w-full max-w-sm mx-auto
+             bg-bg-surface rounded-t-2xl sm:rounded-2xl
+             shadow-lg overflow-hidden
+             flex flex-col"
+    >
+      <!-- Handle (mobile only) -->
+      <div class="sm:hidden w-10 h-1 rounded-full bg-bg-muted mx-auto mt-3 mb-1"></div>
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-border">
+        <div class="flex items-center gap-2">
+          <!-- Ícono cambiado a barcode -->
+          <span class="material-icons text-accent-ui text-[20px]">barcode_reader</span>
+          <span class="text-sm font-semibold text-text-main font-sora">Escanear código de barras</span>
+        </div>
+        <button
+          type="button"
+          class="btn-icon hover:bg-bg-muted"
+          (click)="close()"
+          aria-label="Cerrar escáner"
+        >
+          <span class="material-icons text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Cuerpo -->
+      <div class="flex flex-col gap-4 p-4">
+
+        <!-- Estado: inicializando -->
+        @if (isInitializing()) {
+          <div class="flex flex-col items-center justify-center gap-3 py-12 text-text-soft">
+            <span class="material-icons animate-spin text-[32px] text-accent-ui">sync</span>
+            <p class="text-sm">Iniciando cámara…</p>
+          </div>
+        }
+
+        <!-- Estado: error -->
+        @if (errorMsg()) {
+          <div class="flex flex-col items-center gap-3 py-10">
+            <span class="material-icons text-feedback-error-text text-[36px]">no_photography</span>
+            <p class="text-sm text-feedback-error-text text-center">{{ errorMsg() }}</p>
+            <button type="button" class="btn-secondary btn-sm" (click)="close()">
+              Cerrar
+            </button>
+          </div>
+        }
+
+        <!-- Viewfinder de video -->
+        @if (!isInitializing() && !errorMsg()) {
+          <div class="relative w-full aspect-square sm:aspect-video rounded-xl overflow-hidden bg-black">
+            <video
+              #videoEl
+              autoplay
+              playsinline
+              muted
+              class="w-full h-full object-cover"
+            ></video>
+
+            <!-- Marco guía optimizado para códigos de barra (Rectangular) -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <!-- MEJORA: aspect-[3/1] para que sea una línea/franja horizontal perfecta para barras -->
+              <div
+                class="relative w-4/5 aspect-[3/1] max-w-[280px] rounded-lg
+                       border border-white/40
+                       shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"
+              >
+                <!-- Esquinas decorativas -->
+                <span class="absolute -top-[1px] -left-[1px]  w-4 h-4 border-t-4 border-l-4 border-[var(--raw-success)] rounded-tl-md"></span>
+                <span class="absolute -top-[1px] -right-[1px] w-4 h-4 border-t-4 border-r-4 border-[var(--raw-success)] rounded-tr-md"></span>
+                <span class="absolute -bottom-[1px] -left-[1px]  w-4 h-4 border-b-4 border-l-4 border-[var(--raw-success)] rounded-bl-md"></span>
+                <span class="absolute -bottom-[1px] -right-[1px] w-4 h-4 border-b-4 border-r-4 border-[var(--raw-success)] rounded-br-md"></span>
+                
+                <!-- Línea roja láser decorativa central opcional -->
+                <div class="absolute top-1/2 left-2 right-2 h-[2px] bg-feedback-error-text/60 shadow-[0_0_4px_rgba(239,68,68,0.8)] -translate-y-1/2"></div>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-xs text-text-soft text-center px-4">
+            Centra las líneas del código de barras dentro del recuadro horizontal
+          </p>
+        }
+
+      </div>
+
+      <!-- Footer -->
+      <div class="px-4 pb-5 pt-1">
+        <button
+          type="button"
+          class="btn btn-secondary w-full"
+          (click)="close()"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+}

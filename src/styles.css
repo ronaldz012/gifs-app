@@ -310,5 +310,21 @@
     display: revert !important;
   }
 
+   /* Ensure label cards and QR elements are not clipped when printing */
+   .printing-labels .sheet .label-card {
+      overflow: visible !important;
+      box-sizing: border-box;
+   }
+
+   .printing-labels .qr-wrapper,
+   .printing-labels .qr-wrapper qrcode,
+   .printing-labels .qr-wrapper svg,
+   .printing-labels .qr-wrapper img,
+   .printing-labels .qr-wrapper canvas {
+      width: 28mm !important;
+      height: 28mm !important;
+      display: block !important;
+   }
+
 }
 
