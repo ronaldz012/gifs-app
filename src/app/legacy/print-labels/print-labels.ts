@@ -2,9 +2,9 @@ import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { LabelSheet } from './label-sheet/label-sheet';
-import {LabelData} from '../../../interfaces/reception-labels';
-import {ReceptionLabelsDto} from '../../../dtos/receptions/reception-labels-dto';
-import { PrintHeader } from '../../../../../shared/components/print/print-header';
+import {LabelData} from '../../features/inventory/interfaces/reception-labels';
+import {ReceptionLabelsDto} from '../../features/inventory/dtos/receptions/reception-labels-dto';
+import { PrintHeader } from '../../shared/components/print/print-header';
 import { environment } from 'environments/environment';
 
 @Component({

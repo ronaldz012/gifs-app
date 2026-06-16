@@ -3,7 +3,7 @@ import {
   computed,
   input,
 } from '@angular/core';
-import { LabelData } from '../../../../interfaces/reception-labels';
+import { LabelData } from '../../../features/inventory/interfaces/reception-labels';
 import { QRCodeComponent } from 'angularx-qrcode';
 
 @Component({

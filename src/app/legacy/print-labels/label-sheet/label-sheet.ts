@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, input, signal, computed } from '@angular/core';
 import { LabelItemQr } from '../label-item/label-item-qr';
-import { LabelData } from '../../../../interfaces/reception-labels';
+import { LabelData } from '../../../features/inventory/interfaces/reception-labels';
 import { LabelItemBc } from "../label-item/label-item-bc";
 
 // Nota: Cambiado a 28 de forma interna para coincidir con la distribución óptima de 4x7

@@ -7,7 +7,7 @@ import {
   AfterViewInit,
   effect
 } from '@angular/core';
-import { LabelData } from '../../../../interfaces/reception-labels';
+import { LabelData } from '../../../features/inventory/interfaces/reception-labels';
 import JsBarcode from 'jsbarcode';
 
 @Component({

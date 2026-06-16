@@ -4,6 +4,9 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ConfirmActionModal } from '../../transfer-page/confirm-action-modal/confirm-action-modal';
 
 import {ReceptionService} from '../../../services/reception-service';
+import {LabelData} from '../../../interfaces/reception-labels';
+import {LabelPrintService} from '../../../services/print-label-service';
+import {ReceptionLabelsDto} from '../../../dtos/receptions/reception-labels-dto';
 import {ReceptionStatus} from '../../../dtos/receptions/stock-reception-list-dto';
 import {StockReceptionDetailDto, StockReceptionItemDetailDto} from '../../../dtos/receptions/stock-reception-details-dto';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
@@ -34,6 +37,7 @@ export default class ReceptionDetails implements OnInit {
 
   rollbackModalId = signal<GUID | null>(null);
   submitting      = signal(false);
+  private printService  = inject(LabelPrintService);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -92,16 +96,44 @@ statusClasses(s: ReceptionStatus): string {
     return this.reception()?.items.reduce((sum, i) => sum + i.quantityReceived, 0) ?? 0;
   }
 
-  openLabels(): void {
-    const id = this.reception()?.id;
-    console.log(id);
-    if (!id) return;
-    this.router.navigate(
-      ['/print/receptions', id],
-      { queryParams: { back: `/inventory/receptions/${id}` } }
-    );
-  }
 
+
+  async generarEtiquetas(): Promise<void> {
+  const id = this.reception()?.id;
+  if (!id) return;
+
+  this.loading.set(true);
+
+  this.receptionService.getReceptionLabels(id).subscribe({
+    next: async (data: ReceptionLabelsDto) => {
+      try {
+        const labels: LabelData[] = data.items.flatMap(item =>
+          Array.from({ length: item.quantity }, (): LabelData => ({
+            variantId: item.variantId,
+            sku: item.sku,
+            productName: item.productName,
+            brandName: item.brandName,
+            size: item.size,
+            color: item.color,
+            gender: item.gender,
+            price: item.price,
+            receptionId: data.receptionId,
+          }))
+        );
+        const doc = await this.printService.generarPdf(labels);
+        doc.save(`etiquetas-recepcion-${data.receptionId}.pdf`);
+      } catch (e) {
+        console.error('Error generando PDF de etiquetas', e);
+      } finally {
+        this.loading.set(false);
+      }
+    },
+    error: () => {
+      this.loading.set(false);
+      console.error('No se pudieron obtener las etiquetas.');
+    },
+  });
+}
 
   protected readonly print = print;
 }

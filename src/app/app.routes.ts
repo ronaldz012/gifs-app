@@ -9,18 +9,6 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('@features/auth/login/login')
   },
-
-  {
-    path: 'print',
-    canActivate: [authGuard],
-    children: [
-      {
-        path: 'receptions/:id',
-        title: 'Imprimir Etiquetas',
-        loadComponent: () => import('@features/inventory/pages/receptions-page/print-labels/print-labels')
-      }
-    ]
-  },
   {
     path: '',
     canActivate: [authGuard],
