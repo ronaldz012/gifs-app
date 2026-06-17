@@ -1,12 +1,60 @@
-<div class="items-center m-auto p-8">
-  <button class="px-4 py-2 bg-blue-600 text-white rounded" (click)="openScanner()">Abrir escáner</button>
+<div class="min-h-screen bg-bg-base p-6 flex flex-col gap-8">
 
-  <div class="mt-4">
-    <h2 class="font-semibold">Códigos escaneados</h2>
-    <ul>
-      <li *ngFor="let code of scannedCodes()">{{ code }}</li>
-    </ul>
+  <h1 class="text-lg font-black text-text-main border-b border-border pb-3">
+    🧪 Dev — Pay Panel Test
+  </h1>
+
+  <!-- Estado en tiempo real -->
+  <div class="bg-bg-muted rounded-xl p-4 font-mono text-xs flex flex-col gap-1">
+    <span class="text-text-soft uppercase tracking-wide font-bold mb-1">Estado del form</span>
+    <span>método: <span class="text-accent-ui font-bold">{{ paymentForm.method().value() }}</span></span>
+    <span>código tx: <span class="text-accent-ui font-bold">{{ paymentForm.transactionCode().value() ?? '(null)' }}</span></span>
+    <span>items: <span class="text-accent-ui font-bold">{{ itemCount() }}</span></span>
+    <span>total: <span class="text-accent-ui font-bold">Bs {{ total() | number:'1.2-2' }}</span></span>
   </div>
 
-  <app-barcode-scanner-modal #barcodeScanner (scanned)="onBarcodeScanned($event)" (closed)="onScannerClosed()"></app-barcode-scanner-modal>
+  <!-- Controles de prueba -->
+  <div class="flex gap-3 flex-wrap">
+    <button
+      type="button"
+      class="btn-primary px-4 py-2 rounded-lg text-sm"
+      (click)="itemCount.set(itemCount() > 0 ? itemCount() - 1 : 0)"
+    >− item</button>
+    <button
+      type="button"
+      class="btn-primary px-4 py-2 rounded-lg text-sm"
+      (click)="itemCount.set(itemCount() + 1)"
+    >+ item</button>
+    <button
+      type="button"
+      class="btn-primary px-4 py-2 rounded-lg text-sm md:hidden"
+      (click)="showMobileModal.set(true)"
+    >Abrir modal mobile</button>
+  </div>
+
+  <!-- Desktop panel -->
+  <div class="max-w-sm hidden md:block">
+    <p class="text-xs text-text-soft uppercase tracking-wide font-bold mb-2">Desktop</p>
+    <app-pos-desktop-pay-panel 
+      [total]="total()"
+      [itemCount]="itemCount()"
+      [currentMethod]="paymentForm.method()"
+      [transactionCode]="paymentForm.transactionCode()"
+      (submitted)="onSubmit()"
+    />
+  </div>
+
+  <!-- Mobile modal -->
+  @if (showMobileModal()) {
+    <app-pos-mobile-pay-modal
+      [total]="total()"
+      [itemCount]="itemCount()"
+      [currentMethod]="paymentForm.method()"
+      [transactionCode]="paymentForm.transactionCode()"
+      [isValid]="itemCount() > 0"
+      (closed)="showMobileModal.set(false)"
+      (submitted)="onSubmit()"
+    />
+  }
+
 </div>

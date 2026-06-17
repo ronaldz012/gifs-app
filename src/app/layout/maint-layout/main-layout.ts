@@ -7,10 +7,11 @@ import Topbar from '../topbar/topbar';
   selector: 'app-main-layout',
   imports: [sidebar, RouterOutlet, Topbar],
   template: `
-<div class="flex h-screen overflow-hidden bg-bg-main">
-  <app-sidebar />
+<div class="flex h-screen overflow-hidden bg-bg-main relative">
+  
+  <app-sidebar class="relative z-50" />
 
-  <div class="flex flex-col flex-1 min-w-0">
+  <div class="flex flex-col flex-1 min-w-0 relative z-10">
     <app-topbar />
 
     <main class="relative flex-1 overflow-y-auto bg-bg-main">

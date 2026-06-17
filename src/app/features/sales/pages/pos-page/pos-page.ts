@@ -2,20 +2,30 @@ import { Component, OnInit, signal, ViewChild, inject, computed } from '@angular
 import { form, applyEach, min, validate } from '@angular/forms/signals';
 import { ProductService } from '@features/inventory/services';
 import { isBarcodeApiAvailable, QrScannerModal } from '@features/sales/components/qr-scanner-modal/qr-scanner-modal';
-import {  PosCartItemCardComponent } from './pos-item/pos-item.component';
+import { PosCartItemCardComponent } from './pos-item/pos-item.component';
 import { PosCartItem, PosSaleState } from '@features/sales/models/pos-sale-state.model';
 import { PaymentMethod } from '@features/sales/models/payment-method';
 import { ProductVariantBySkuDto } from '@features/inventory/dtos/products/product-variant-by-sku-dto';
 import { DecimalPipe } from '@angular/common';
+import { PosMobilePayModal } from './pos-mobile-pay-modal/pos-mobile-pay-modal';
+import { PosDesktopPayPanel } from './pos-desktop-pay-panel/pos-desktop-pay-panel';
+
 
 
 @Component({
   selector: 'app-pos-page',
   standalone: true,
-  imports: [QrScannerModal, PosCartItemCardComponent, DecimalPipe],
+  imports: [
+    QrScannerModal, 
+    PosCartItemCardComponent, 
+    DecimalPipe, 
+    PosMobilePayModal, 
+    PosDesktopPayPanel
+  ],
   templateUrl: './pos-page.html',
 })
 export default class PosPage implements OnInit {
+
   @ViewChild(QrScannerModal) scanner!: QrScannerModal;
   
   private productService = inject(ProductService);
@@ -23,7 +33,10 @@ export default class PosPage implements OnInit {
   /** Muestra el botón solo si la API está disponible en este dispositivo */
   scannerAvailable = signal(false);
 
-  // 1. Estado reactivo principal del POS usando la estructura definida
+  // Control de apertura para el BottomSheet de cobro en móviles
+  isMobilePayOpen = signal(false);
+
+  // 1. Estado reactivo principal del POS
   posModel = signal<PosSaleState>({
     paymentMethod: PaymentMethod.Cash,
     transactionCode: null,
@@ -52,12 +65,44 @@ export default class PosPage implements OnInit {
     return this.posModel().items.reduce((acc, item) => acc + (item.sellingPrice * item.quantity), 0);
   });
 
+  // Validador global para habilitar los flujos de cobros
+  isFormValid = computed(() => {
+    return this.posModel().items.length > 0 && this.posForm().valid();
+  });
+
   async ngOnInit(): Promise<void> {
     this.scannerAvailable.set(await isBarcodeApiAvailable());
   }
 
+  searchBySku(skuValue: string): void {
+    const cleanSku = skuValue?.trim();
+    if (!cleanSku) return;
+
+    // Reutiliza la misma lógica exacta de búsqueda y validación del backend
+    this.onScanned(cleanSku);
+  }
   openScanner(): void {
     this.scanner.open();
+  }
+
+  /**
+   * Ejecución final del guardado de la venta en el sistema
+   */
+  submitSale(): void {
+    if (!this.isFormValid()) return;
+    
+    console.log('Modelo listo para enviar a la API:', this.posModel());
+    alert('Venta procesada con éxito');
+    
+    // Reset del flujo operativo posterior a la transacción
+    this.isMobilePayOpen.set(false);
+    this.posModel.set({
+      paymentMethod: PaymentMethod.Cash,
+      transactionCode: null,
+      publicName: '',
+      cashReceived: 0,
+      items: []
+    });
   }
 
   /**
@@ -66,8 +111,6 @@ export default class PosPage implements OnInit {
   onScanned(skuValue: string): void {
     this.productService.getVariantBySku(skuValue).subscribe({
       next: (variant: ProductVariantBySkuDto) => {
-        
-        // Validación preliminar: ¿Tiene stock en sucursal?
         if (variant.availableStockInBranch <= 0) {
           alert(`La variante SKU ${variant.sku} no cuenta con stock disponible en esta sucursal.`);
           return;
@@ -78,7 +121,6 @@ export default class PosPage implements OnInit {
           const existingItemIndex = updatedItems.findIndex(i => i.productVariantId === variant.id);
 
           if (existingItemIndex > -1) {
-            // Regla Retail: Si el producto ya existe, incrementamos cantidad si el stock lo permite
             const currentItem = updatedItems[existingItemIndex];
             if (currentItem.quantity < variant.availableStockInBranch) {
               currentItem.quantity += 1;
@@ -86,13 +128,12 @@ export default class PosPage implements OnInit {
               alert(`No puedes agregar más unidades. Stock máximo disponible: ${variant.availableStockInBranch} u.`);
             }
           } else {
-            // Si es nuevo, mapeamos el DTO de C# a la interfaz de vista PosCartItem
             const newItem: PosCartItem = {
               productVariantId: variant.id,
               productName: variant.productName,
               quantity: 1,
               categoryName: variant.categoryName,
-              brandName: variant.productName, // El nombre base de la prenda
+              brandName: variant.productName,
               sku: variant.sku,
               size: variant.size,
               colorName: variant.colorName,
@@ -101,7 +142,7 @@ export default class PosPage implements OnInit {
               sellingPrice: variant.price,
               discountAmount: 0
             };
-            updatedItems.unshift(newItem); // Agregamos al inicio de la lista
+            updatedItems.unshift(newItem);
           }
 
           return { ...state, items: updatedItems };

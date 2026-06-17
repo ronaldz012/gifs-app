@@ -17,11 +17,25 @@ import { Module } from '@features/auth/models/LoginResponse';
     }
 
     <aside
-  class="fixed top-0 left-0 z-30 md:sticky md:z-auto md:translate-x-0 flex flex-col w-64 h-screen bg-layout-sidebar text-layout-sidebar-text"      [class.transition-transform]="ready()"
+      class="fixed top-0 left-0 z-30 md:sticky md:z-auto md:translate-x-0 flex flex-col w-64 h-screen bg-layout-sidebar text-layout-sidebar-text"
+      [class.transition-transform]="ready()"
       [class.duration-300]="ready()"
       [class.ease-in-out]="ready()"
       [class.-translate-x-full]="!sidebarSvc.isOpen()"
       [class.translate-x-0]="sidebarSvc.isOpen()">
+
+      <!-- CABECERA DEL SIDEBAR (Solo móvil para el botón de cerrar) -->
+      <div class="flex items-center justify-end p-4 md:hidden">
+        <button 
+          (click)="sidebarSvc.close()" 
+          class="p-2 rounded-md hover:bg-white/10 text-layout-sidebar-text focus:outline-none focus:ring-2 focus:ring-white/20"
+          aria-label="Cerrar menú">
+          <!-- Icono de X (SVG) -->
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
       <div class="flex-1 overflow-y-auto">
         <app-side-menu-option
@@ -39,7 +53,6 @@ export default class Sidebar {
   readonly ready        = signal(false);
 
   constructor() {
-    // Evita el parpadeo del sidebar al calcular el layout inicial en el cliente
     afterNextRender(() => this.ready.set(true));
   }
 
