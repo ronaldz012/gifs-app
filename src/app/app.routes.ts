@@ -79,7 +79,7 @@ export const routes: Routes = [
                 path: 'new',
                 title: 'Nueva Recepción',
                 canActivate: [featureGuard],
-                data: { module: 'inventory', feature: 'receptions', permission: 'canCreate' },
+                data: { module: 'inventory', feature: 'receptions', permission: 'create' },
                 loadComponent: () => import('@features/inventory/pages/receptions-page/reception-form/reception-form')
               },
               {
@@ -105,7 +105,7 @@ export const routes: Routes = [
                 path: 'new',
                 title: 'Nueva Transferencia',
                 canActivate: [featureGuard],
-                data: { module: 'inventory', feature: 'transfers', permission: 'canCreate' },
+                data: { module: 'inventory', feature: 'transfers', permission: 'create' },
                 loadComponent: () => import('@features/inventory/pages/transfer-page/create-transfer/create-transfer')
               },
               {
@@ -129,6 +129,11 @@ export const routes: Routes = [
             canActivate: [featureGuard],
             data: { module: 'sales', feature: 'pos' },
             loadComponent: () => import('@features/sales/pages/pos-page/pos-page')
+          },
+          {
+            path: 'sales',
+            redirectTo: 'pos',
+            pathMatch: 'full'
           }
         ]
       },

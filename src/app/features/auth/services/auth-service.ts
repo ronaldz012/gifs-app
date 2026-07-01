@@ -27,13 +27,7 @@ export class AuthService {
       tap(res => {
         if (res == null) return;
         this.cookieService.set(this.TOKEN_KEY, res.accessToken ?? '', 7, '/');
-        this.currentUserService.set({
-          id: res.user.id,
-          userName: res.user.userName,
-          email: res.user.email,
-          firstName: res.user.firstName,
-          lastName: res.user.lastName
-        });
+        this.currentUserService.set({ ...res.user });
         this.branchContext.initialize(res.branches);
       }),
     );

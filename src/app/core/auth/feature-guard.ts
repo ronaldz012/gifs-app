@@ -3,13 +3,7 @@ import { Router, CanActivateFn } from '@angular/router';
 import { BranchContextService } from '@core/services/branch-context-service';
 import { Feature } from '@features/auth/models/LoginResponse';
 
-/**
- * Datos esperados en route.data:
- *   module:     string  — coincide con Module.route   (ej: 'inventory')
- *   feature:    string  — coincide con Feature.route  (ej: 'products')
- *   permission: FeaturePermission — permiso mínimo requerido (default: 'canRead')
- */
-export type FeaturePermission = 'canRead' | 'canCreate' | 'canUpdate' | 'canDelete';
+export type FeaturePermission = 'read' | 'create' | 'update' | 'delete';
 
 export interface FeatureRouteData {
   module: string;
@@ -21,7 +15,7 @@ export const featureGuard: CanActivateFn = (route) => {
   const router = inject(Router);
   const branchContext = inject(BranchContextService);
 
-  const { module: moduleRoute, feature: featureRoute, permission = 'canRead' } =
+  const { module: moduleRoute, feature: featureRoute, permission = 'read' } =
     route.data as FeatureRouteData;
 
   // Sin datos de ruta configurados → dejar pasar (rutas sin restricción de feature)
@@ -41,7 +35,7 @@ export const featureGuard: CanActivateFn = (route) => {
 
   const feature: Feature | undefined = mod.features.find(f => f.route === featureRoute);
 
-  if (!feature || !feature[permission]) {
+  if (!feature || !(feature.permission.includes('*') || feature.permission.includes(permission))) {
     return router.createUrlTree(['/unauthorized']);
   }
 

@@ -40,6 +40,7 @@ export class BranchContextService {
 
   // restaurar desde localStorage al arrancar la app
   restoreFromStorage(branches: Branch[]): void {
+    branches = this.normalizeRoutes(branches);
     const savedId = localStorage.getItem(this.ACTIVE_BRANCH_ID_KEY);
     const saved = branches.find(b => b.branchId === savedId);
     this.setAvailable(branches);
@@ -47,8 +48,23 @@ export class BranchContextService {
   }
 
 
+  private normalizeRoutes(branches: Branch[]): Branch[] {
+    return branches.map(b => ({
+      ...b,
+      modules: b.modules.map(m => ({
+        ...m,
+        route: m.route.replace(/^\//, ''),
+        features: m.features.map(f => ({
+          ...f,
+          route: f.route.replace(/^\//, ''),
+        })),
+      })),
+    }));
+  }
+
   // Reemplaza setAvailable + setActive + localStorage suelto
   initialize(branches: Branch[]): void {
+    branches = this.normalizeRoutes(branches);
     localStorage.setItem(this.BRANCHES_KEY, JSON.stringify(branches));
     console.log("BRANCH EN LOCAL STORAGE: ",localStorage.getItem(this.BRANCHES_KEY));
     this._available.set(branches);

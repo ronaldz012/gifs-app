@@ -1,37 +1,32 @@
 <ul class="flex flex-col gap-1 px-2 py-2">
-  @for (module of modules(); track module.id) {
-    <li class="flex flex-col gap-1">
-      <span class="px-3 pt-3 pb-1 font-inter text-xs font-bold tracking-wider uppercase text-layout-sidebar-text">
-        {{ module.name }}
-      </span>
-      <ul>
-        @for (menu of module.features; track menu.route) {
-          <li>
-          <a
-            #rla="routerLinkActive"
-             class="flex items-center gap-2 mx-2 px-3 py-2
-          font-inter text-sm font-medium
-          text-layout-sidebar-text
-          rounded-lg
-          transition-colors duration-200
-          hover:bg-accent-ui-hover
-          focus-visible:outline-none
-          focus-visible:ring-2
-          focus-visible:ring-focus-ring
-          focus-visible:ring-offset-2
-          focus-visible:ring-offset-focus-ring-offset"
-          [routerLink]="['/', module.route, menu.route]"
-          routerLinkActive="bg-layout-nav-active text-layout-nav-active-text"
-          (click)="onNavigate.emit()">
+  @for (module of modules(); track module.route) {
+    @for (menu of module.features; track menu.route) {
+      @if (menu.isMenu) {
+        <li>
+        <a
+          #rla="routerLinkActive"
+           class="flex items-center gap-2 mx-2 px-3 py-2
+        font-inter text-sm font-medium
+        text-layout-sidebar-text
+        rounded-lg
+        transition-colors duration-200
+        hover:bg-accent-ui-hover
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-focus-ring
+        focus-visible:ring-offset-2
+        focus-visible:ring-offset-focus-ring-offset"
+        [routerLink]="['/', module.route, menu.route]"
+        routerLinkActive="bg-layout-nav-active text-layout-nav-active-text"
+        (click)="onNavigate.emit()">
 
-            <span class="material-icons text-lg">
-              {{ menu.icon }}
-            </span>
-            {{ menu.name }}
-          </a>
-          </li>
-        }
-      </ul>
-    </li>
+          <span class="material-icons text-lg">
+            {{ menu.icon }}
+          </span>
+          {{ menu.displayName }}
+        </a>
+        </li>
+      }
+    }
   }
 </ul>

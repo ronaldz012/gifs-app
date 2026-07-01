@@ -8,7 +8,7 @@ export class CurrentUserService {
 
   readonly user = this._user.asReadonly();
 
-  get username(): string { return this._user()?.userName ?? ''; }
+  get username(): string { return this._user()?.username ?? ''; }
   get email(): string { return this._user()?.email ?? ''; }
   get id(): GUID { return this._user()?.id ?? ''; }
 

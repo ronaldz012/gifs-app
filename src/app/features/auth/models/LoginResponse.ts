@@ -11,40 +11,32 @@ export default interface LoginResponse {
 }
 
 export interface User {
-  id: GUID;
-  userName: string;
+  id: string;
+  username: string;
   email: string;
   firstName: string;
   lastName: string;
+  deletedAt: string | null;
 }
 
 export interface Branch {
-  branchId: GUID;
+  branchId: string;
   branchName: string;
-  roles: Role[];
+  role: string;
   modules: Module[];
 }
 
-export interface Role {
-  id: GUID;
-  name: string;
-}
-
 export interface Module {
-  id: number;
   name: string;
   route: string;
-  icon : string;
   features: Feature[];
 }
 
 export interface Feature {
-  id: number;
-  name: string;
+  key: string;
+  displayName: string;
   route: string;
   icon: string;
-  canCreate: boolean;
-  canRead: boolean;
-  canUpdate: boolean;
-  canDelete: boolean;
+  isMenu: boolean;
+  permission: string[];
 }

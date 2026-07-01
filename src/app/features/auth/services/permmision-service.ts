@@ -18,12 +18,6 @@ import { BranchContextService } from '@core/services/branch-context-service';
 export class PermissionService {
   private readonly branchContext = inject(BranchContextService);
 
-  /**
-   * Verifica un permiso específico sobre una feature.
-   * @param moduleRoute  Valor de Module.route  (ej: 'inventory')
-   * @param featureRoute Valor de Feature.route (ej: 'products')
-   * @param permission   Permiso a verificar     (ej: 'canCreate')
-   */
   can(moduleRoute: string, featureRoute: string, permission: FeaturePermission): boolean {
     const active = this.branchContext.active();
     if (!active) return false;
@@ -32,35 +26,26 @@ export class PermissionService {
     if (!mod) return false;
 
     const feature = mod.features.find(f => f.route === featureRoute);
-    return feature?.[permission] ?? false;
+    if (!feature) return false;
+    return feature.permission.includes('*') || feature.permission.includes(permission);
   }
 
-  // ── Helpers cortos ──────────────────────────────────────────────────────────
-
   canRead(moduleRoute: string, featureRoute: string): boolean {
-    return this.can(moduleRoute, featureRoute, 'canRead');
+    return this.can(moduleRoute, featureRoute, 'read');
   }
 
   canCreate(moduleRoute: string, featureRoute: string): boolean {
-    return this.can(moduleRoute, featureRoute, 'canCreate');
+    return this.can(moduleRoute, featureRoute, 'create');
   }
 
   canUpdate(moduleRoute: string, featureRoute: string): boolean {
-    return this.can(moduleRoute, featureRoute, 'canUpdate');
+    return this.can(moduleRoute, featureRoute, 'update');
   }
 
   canDelete(moduleRoute: string, featureRoute: string): boolean {
-    return this.can(moduleRoute, featureRoute, 'canDelete');
+    return this.can(moduleRoute, featureRoute, 'delete');
   }
 
-  /**
-   * Devuelve todos los permisos de una feature de una vez.
-   * Útil para pasarlos como input a un componente.
-   *
-   * Ejemplo:
-   *   readonly perms = computed(() => this.perm.permsFor('inventory', 'products'));
-   *   // { canRead: true, canCreate: false, canUpdate: true, canDelete: false }
-   */
   permsFor(moduleRoute: string, featureRoute: string) {
     return {
       canRead: this.canRead(moduleRoute, featureRoute),
