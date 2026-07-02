@@ -33,6 +33,18 @@ export class AuthService {
     );
   }
 
+  verifyToken(token: string): Observable<{ valid: boolean; email: string }> {
+    return this.http.post<{ valid: boolean; email: string }>(
+      `${this.url}/verify-token`,
+      JSON.stringify(token),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  completeSetup(token: string, password: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.url}/complete`, { token, password });
+  }
+
   logout(): void {
     this.cookieService.delete(this.TOKEN_KEY, '/');
     this.currentUserService.clear();

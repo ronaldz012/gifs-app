@@ -7,7 +7,11 @@ export const routes: Routes = [
   // ── Layout principal (con sidebar/topbar) ────────────────────────────────
   {
     path: 'login',
-    loadComponent: () => import('@features/auth/login/login')
+      loadComponent: () => import('@features/auth/login/login')
+  },
+  {
+    path: 'setup-password',
+    loadComponent: () => import('@features/auth/setup-password.component/setup-password.component')
   },
   {
     path: '',
