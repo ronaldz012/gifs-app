@@ -26,12 +26,12 @@
 
   <!-- Estado vacío con filtros activos -->
   @if (!loadingTransfers() && transfers().length === 0 && hasActiveFilters()) {
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10
+    <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-10
                 flex flex-col items-center gap-3">
       <span class="text-3xl opacity-30">🔄</span>
-      <p class="text-sm text-gray-400">No hay transferencias con esos filtros.</p>
+      <p class="text-sm text-text-soft">No hay transferencias con esos filtros.</p>
       <button
-        class="text-sm text-blue-500 hover:underline"
+        class="text-sm text-accent-ui hover:underline"
         (click)="patchQuery({ status: undefined, direction: undefined,
                                dateFrom: undefined, dateTo: undefined, page: 1 })">
         Limpiar filtros

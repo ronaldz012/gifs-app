@@ -14,19 +14,19 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
     @if (loading()) {
       <app-skeleton-list [rows]="4" [columns]="3" />
     } @else if (transfers().length === 0) {
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-12
-              flex flex-col items-center gap-3">
+      <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-12
+               flex flex-col items-center gap-3">
         <span class="text-3xl opacity-30">⇅</span>
-        <p class="text-sm text-gray-400">No hay transferencias registradas.</p>
+        <p class="text-sm text-text-soft">No hay transferencias registradas.</p>
       </div>
     } @else {
       <div class="flex flex-col gap-2.5
-              lg:gap-0 lg:border lg:border-gray-200 lg:rounded-xl lg:overflow-hidden lg:shadow-sm lg:bg-white">
+              lg:gap-0 lg:border lg:border-border lg:rounded-xl lg:overflow-hidden lg:shadow-sm lg:bg-bg-surface">
 
         <!-- Header — solo desktop -->
         <div
-          class="hidden lg:grid px-4 py-2 border-b border-gray-100 bg-gray-50/80
-             text-[10px] font-semibold uppercase tracking-wider text-gray-400"
+          class="hidden lg:grid px-4 py-2 border-b border-border bg-bg-muted
+             text-[11px] font-semibold text-text-soft uppercase tracking-wide"
           style="grid-template-columns: 3.5rem 5rem 6rem 1fr 8rem 4.5rem 5.5rem 5.5rem 9rem;"
         >
           <span>ID</span>
@@ -41,7 +41,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
         </div>
 
         <!-- Items -->
-        <ul class="flex flex-col gap-2.5 lg:gap-0 lg:divide-y lg:divide-gray-100">
+        <ul class="flex flex-col gap-2.5 lg:gap-0 lg:divide-y lg:divide-border">
           @for (t of transfers(); track t.id; let i = $index) {
             <app-transfer-list-item
               [transfer]="t"

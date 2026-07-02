@@ -1,14 +1,13 @@
 <li
-  class="row-enter bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden
+  class="row-enter bg-bg-surface rounded-xl border border-border shadow-sm overflow-hidden
          lg:rounded-none lg:border-0 lg:shadow-none"
   [style.animation-delay]="'175ms'"
 >
   <!-- ====== MOBILE ====== -->
-  <!-- ====== MOBILE ====== -->
   <div class="flex items-center gap-3 px-4 py-3.5 lg:hidden">
     <div class="flex items-start flex-col min-w-0 flex-1">
       <div class="flex items-center gap-2 mb-0.5">
-        <span class="text-[11px] font-mono text-gray-400">#{{ transfer().id }}</span>
+        <span class="text-[11px] font-mono text-text-soft">#{{ transfer().id }}</span>
         <span class="text-base font-semibold leading-none"
               [class]="directionClasses(transfer().direction)">
           {{ directionArrow(transfer().direction) }}
@@ -17,21 +16,20 @@
               [class]="directionClasses(transfer().direction)">
           {{ directionLabel(transfer().direction) }}
         </span>
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none"
-              [class]="statusClasses(transfer().status)">
+        <span class="badge" [class]="statusClasses(transfer().status)">
           {{ statusLabel(transfer().status) }}
         </span>
       </div>
-      <p class="text-sm font-semibold text-gray-800 truncate leading-tight">
+      <p class="text-sm font-semibold text-text-main truncate leading-tight">
         {{ transfer().counterpartBranchName }}
       </p>
-      <p class="text-xs text-gray-400 mt-0.5">
+      <p class="text-xs text-text-soft mt-0.5">
         {{ transfer().totalQuantity }} uds
-        · <span class="text-gray-300">
+        · <span class="text-text-soft">
             Creado: {{ transfer().createdAt | date:'dd/MM/yy' }}
           </span>
         @if (transfer().resolvedAt) {
-          · <span class="text-gray-300">
+          · <span class="text-text-soft">
               Resuelto: {{ transfer().resolvedAt | date:'dd/MM/yy' }}
             </span>
         }
@@ -39,32 +37,25 @@
     </div>
     <div class="flex items-center gap-2 shrink-0">
       <button (click)="viewDetail.emit(transfer().id)" title="Ver detalles"
-              class="w-8 h-8 rounded-lg border border-gray-200 text-gray-400
-               flex items-center justify-center text-sm
-               hover:border-gray-300 hover:text-gray-600 transition-colors">↗</button>
+              class="btn-icon-md hover:border-border-strong hover:text-text-muted">↗</button>
       @if (canResolve()) {
         <button (click)="requestResolve.emit(transfer().id)"
-                class="flex items-center gap-1.5 px-3 h-8 rounded-lg
-                 bg-blue-600 text-white text-xs font-medium
-                 hover:bg-blue-700 transition-colors">Resolver</button>
+                class="btn-primary btn-sm">Resolver</button>
       }
       @if (canCancel()) {
         <button (click)="requestCancel.emit(transfer().id)"
-                class="flex items-center gap-1.5 px-3 h-8 rounded-lg
-                 border border-red-200 text-red-400 text-xs font-medium
-                 hover:bg-red-50 hover:text-red-500 transition-colors">Cancelar</button>
+                class="btn btn-sm border border-feedback-error-text/30 text-feedback-error-text hover:bg-feedback-error">Cancelar</button>
       }
     </div>
   </div>
 
   <!-- ====== DESKTOP ====== -->
-  <!-- ====== DESKTOP ====== -->
   <div
-    class="hidden lg:grid items-center px-4 py-2.5 hover:bg-gray-50/70 transition-colors group"
+    class="hidden lg:grid items-center px-4 py-2.5 hover:bg-bg-muted transition-colors group"
     style="grid-template-columns: 3.5rem 5rem 6rem 1fr 8rem 4.5rem 5.5rem 5.5rem 9rem;"
   >
     <!-- ID -->
-    <span class="text-xs font-mono text-gray-400">#{{ transfer().id }}</span>
+    <span class="text-xs font-mono text-text-soft">#{{ transfer().id }}</span>
 
     <!-- Dirección -->
     <div class="flex items-center gap-1.5">
@@ -79,57 +70,49 @@
     </div>
 
     <!-- Estado -->
-    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none w-fit"
-          [class]="statusClasses(transfer().status)">
+    <span class="badge w-fit" [class]="statusClasses(transfer().status)">
       {{ statusLabel(transfer().status) }}
     </span>
 
     <!-- Sucursal contraparte -->
-    <p class="text-sm font-semibold text-gray-800 truncate pr-3">
+    <p class="text-sm font-semibold text-text-main truncate pr-3">
       {{ transfer().counterpartBranchName }}
     </p>
 
     <!-- Solicitante -->
-    <p class="text-xs text-gray-500 truncate pr-3">
+    <p class="text-xs text-text-muted truncate pr-3">
       {{ transfer().requesterName }}
     </p>
 
     <!-- Unidades -->
-    <span class="text-xs text-gray-500 font-medium text-right pr-4">
+    <span class="text-xs text-text-muted font-medium text-right pr-4">
       {{ transfer().totalQuantity }} uds
     </span>
 
     <!-- Creado -->
-    <span class="text-xs text-gray-400 text-right pr-4">
+    <span class="text-xs text-text-soft text-right pr-4">
       {{ transfer().createdAt | date:'dd/MM/yy' }}
     </span>
 
     <!-- Resuelto -->
     <span class="text-xs text-right pr-4"
-          [class]="transfer().resolvedAt ? 'text-gray-400' : 'text-gray-200'">
+          [class]="transfer().resolvedAt ? 'text-text-soft' : 'text-text-soft/40'">
       {{ transfer().resolvedAt ? (transfer().resolvedAt | date:'dd/MM/yy') : '—' }}
     </span>
 
     <!-- Acciones -->
     <div class="flex items-center justify-end gap-1.5">
       <button (click)="viewDetail.emit(transfer().id)" title="Ver detalles"
-              class="w-7 h-7 rounded-lg border border-transparent text-gray-300
-               flex items-center justify-center text-sm
-               group-hover:border-gray-200 group-hover:text-gray-500
-               hover:!border-gray-300 hover:!text-gray-700 transition-colors">↗</button>
+              class="btn-icon border border-transparent group-hover:border-border group-hover:text-text-muted hover:!text-text-main">↗</button>
       @if (canResolve()) {
         <button (click)="requestResolve.emit(transfer().id)"
-                class="flex items-center px-2.5 h-7 rounded-lg
-                 bg-blue-600 text-white text-xs font-medium
-                 hover:bg-blue-700 transition-colors">
+                class="btn-primary btn-sm">
           Resolver
         </button>
       }
       @if (canCancel()) {
         <button (click)="requestCancel.emit(transfer().id)"
-                class="flex items-center px-2.5 h-7 rounded-lg
-                 border border-red-200 text-red-400 text-xs font-medium
-                 hover:bg-red-50 hover:text-red-500 transition-colors">
+                class="btn btn-sm border border-feedback-error-text/30 text-feedback-error-text hover:bg-feedback-error">
           Cancelar
         </button>
       }

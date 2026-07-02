@@ -25,7 +25,7 @@ interface StatusPill {
             class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-lg border transition-colors whitespace-nowrap text-center"
             [class]="isStatusActive(pill.value)
               ? pill.activeClass
-              : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'"
+              : 'bg-bg-surface border-border text-text-muted hover:bg-bg-muted'"
             [disabled]="pill.disabled"
             [title]="pill.disabled ? 'Sin soporte aún' : ''"
             (click)="toggleStatus(pill.value)">
@@ -37,35 +37,35 @@ interface StatusPill {
       <!-- Fila 2: Resto de filtros -->
       <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-2 w-full">
         <!-- Direction toggle -->
-        <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 w-full sm:w-auto">
+        <div class="flex items-center gap-1 bg-bg-muted rounded-lg p-0.5 w-full sm:w-auto">
           <button
             class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors text-center"
             [class]="params().direction === undefined
-              ? 'bg-white text-gray-800 font-medium shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'"
+              ? 'bg-bg-surface text-text-main font-medium shadow-sm'
+              : 'text-text-muted hover:text-text-main'"
             (click)="emit({ direction: undefined, page: 1 })">
             Todas
           </button>
           <button
             class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors text-center"
             [class]="params().direction === Direction.Salida
-              ? 'bg-white text-gray-800 font-medium shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'"
+              ? 'bg-bg-surface text-text-main font-medium shadow-sm'
+              : 'text-text-muted hover:text-text-main'"
             (click)="emit({ direction: Direction.Salida, page: 1 })">
             ↑ Salientes
           </button>
           <button
             class="flex-1 sm:flex-none px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors text-center"
             [class]="params().direction === Direction.Entrada
-              ? 'bg-white text-gray-800 font-medium shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'"
+              ? 'bg-bg-surface text-text-main font-medium shadow-sm'
+              : 'text-text-muted hover:text-text-main'"
             (click)="emit({ direction: Direction.Entrada, page: 1 })">
             ↓ Entrantes
           </button>
         </div>
 
         <!-- Separador -->
-        <div class="hidden sm:block w-px h-6 bg-gray-200"></div>
+        <div class="hidden sm:block w-px h-6 bg-border"></div>
 
         <!-- Rango de fechas -->
         <div class="w-full sm:w-auto min-w-[200px]">
@@ -78,8 +78,8 @@ interface StatusPill {
         <!-- Clear -->
         @if (hasActiveFilters()) {
           <button
-            class="w-full sm:w-auto px-3 py-1.5 sm:py-1 text-sm sm:text-xs text-gray-400 hover:text-gray-600
-                   hover:bg-gray-100 rounded-xl sm:rounded-lg transition-colors border border-dashed border-gray-300 sm:border-transparent bg-white sm:bg-transparent"
+            class="w-full sm:w-auto px-3 py-1.5 sm:py-1 text-sm sm:text-xs text-text-soft hover:text-text-muted
+                   hover:bg-bg-muted rounded-xl sm:rounded-lg transition-colors border border-dashed border-border sm:border-transparent bg-bg-surface sm:bg-transparent"
             (click)="clearAll()">
             ✕ Limpiar
           </button>
@@ -101,28 +101,28 @@ export class TransferFilterBar {
     {
       value: TransferStatus.Pendiente,
       label: '🕐 Pendiente',
-      activeClass: 'bg-amber-50 border-amber-300 text-amber-700 font-medium',
+      activeClass: 'bg-feedback-warning border-feedback-warning-text/30 text-feedback-warning-text font-medium',
     },
     {
       value: TransferStatus.Transito,
       label: '🚚 En tránsito',
-      activeClass: 'bg-blue-50 border-blue-300 text-blue-700 font-medium',
+      activeClass: 'bg-feedback-info border-feedback-info-text/30 text-feedback-info-text font-medium',
       disabled: true,
     },
     {
       value: TransferStatus.Completada,
       label: '✓ Completada',
-      activeClass: 'bg-green-50 border-green-300 text-green-700 font-medium',
+      activeClass: 'bg-feedback-success border-feedback-success-text/30 text-feedback-success-text font-medium',
     },
     {
       value: TransferStatus.Rechazada,
       label: '✕ Rechazada',
-      activeClass: 'bg-red-50 border-red-300 text-red-700 font-medium',
+      activeClass: 'bg-feedback-error border-feedback-error-text/30 text-feedback-error-text font-medium',
     },
     {
       value: TransferStatus.Cancelada,
       label: '— Cancelada',
-      activeClass: 'bg-gray-100 border-gray-400 text-gray-600 font-medium',
+      activeClass: 'bg-bg-muted border-border-strong text-text-muted font-medium',
     },
   ];
 

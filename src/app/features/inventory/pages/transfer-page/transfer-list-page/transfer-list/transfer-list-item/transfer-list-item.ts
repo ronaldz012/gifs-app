@@ -38,11 +38,11 @@ export class TransferListItem {
 
   statusClasses(s: TransferStatus): string {
     const map: Record<TransferStatus, string> = {
-      [TransferStatus.Pendiente]:  'bg-amber-50  text-amber-600  ring-1 ring-amber-200',
-      [TransferStatus.Transito]:   'bg-blue-50   text-blue-600   ring-1 ring-blue-200',
-      [TransferStatus.Completada]: 'bg-green-50  text-green-600  ring-1 ring-green-200',
-      [TransferStatus.Rechazada]:  'bg-red-50    text-red-500    ring-1 ring-red-200',
-      [TransferStatus.Cancelada]:  'bg-gray-100  text-gray-400   ring-1 ring-gray-200',
+      [TransferStatus.Pendiente]:  'badge-warning',
+      [TransferStatus.Transito]:   'badge-info',
+      [TransferStatus.Completada]: 'badge-success',
+      [TransferStatus.Rechazada]:  'badge-error',
+      [TransferStatus.Cancelada]:  'badge bg-bg-muted text-text-soft ring-border',
     };
     return map[s];
   }
@@ -52,7 +52,7 @@ export class TransferListItem {
   }
 
   directionClasses(d: TransferDirection): string {
-    return d === TransferDirection.Entrada ? 'text-emerald-600' : 'text-orange-500';
+    return d === TransferDirection.Entrada ? 'text-feedback-success-text' : 'text-feedback-warning-text';
   }
 
   directionArrow(d: TransferDirection): string {
