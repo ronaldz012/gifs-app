@@ -1,51 +1,25 @@
-import { Component, input, output, signal, OnInit, inject, computed } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, input, output, OnInit, inject, signal } from '@angular/core';
 import { ProductDetailDto } from '../../../dtos/products/product-detail-dto';
+import { UpdateProductDto } from '../../../dtos/products/update-product-dto';
+import { Gender } from '../../../interfaces/gender';
 import { CategoryService } from '../../../services/category-service';
-import {UpdateProductDto} from '../../../dtos/products/update-product-dto';
-import {Gender} from '../../../interfaces/gender';
-import { SearchableSelect } from '@shared/components/searchable-select';
-import { SelectOption } from '@shared/models/select-option.model';
-import { BrandService } from '@features/inventory/services/brand-service';
+import { CategorySelectCtrl } from "@features/inventory/components/category-select-ctrl/category-select-ctrl.component";
+import { form, FormField } from '@angular/forms/signals';
 
-
-
-const GENDER_LABELS: Record<number, string> = {
-  [Gender.Unisex]: 'Unisex',
-  [Gender.Hombre]: 'Hombre',
-  [Gender.Mujer]:  'Mujer',
-};
-
-/**
- * Modal for updating a product's general info.
- *
- * Usage:
- *   @if (showUpdateModal()) {
- *     <app-update-product-modal
- *       [product]="product()"
- *       [submitting]="submitting()"
- *       (save)="onUpdateProduct($event)"
- *       (close)="showUpdateModal.set(false)"
- *     />
- *   }
- */
 @Component({
   selector: 'app-update-product-modal',
-  imports: [FormsModule, SearchableSelect],
+  imports: [CategorySelectCtrl, FormField],
   template: `
-  <!-- Overlay -->
 <div
   class="fixed inset-0 bg-overlay z-40 flex items-end sm:items-center justify-center backdrop-blur-[2px]"
   (click)="close.emit()"
 >
-  <!-- Sheet / Dialog -->
   <div
     class="modal-enter w-full sm:w-[480px] bg-bg-surface
            rounded-t-2xl sm:rounded-2xl shadow-lg z-50
            px-5 pt-5 pb-7 sm:pb-5 max-h-[90vh] overflow-y-auto"
     (click)="$event.stopPropagation()"
   >
-    <!-- Handle (mobile) -->
     <div class="sm:hidden w-10 h-1 rounded-full bg-bg-muted mx-auto mb-5"></div>
 
     <p class="text-sm font-semibold text-text-main mb-1">Editar producto</p>
@@ -53,31 +27,28 @@ const GENDER_LABELS: Record<number, string> = {
 
     <div class="flex flex-col gap-4">
 
-          <app-searchable-select
-        label="Categoría"
-        placeholder="Seleccionar categoría..."
-        [options]="categoryOptions()"
-        [selectedId]="form.categoryId"
-        (selected)="form.categoryId = $event"
-      />
+      <div class="flex flex-col gap-1">
+        <label class="field-label block">Categoría</label>
+        <app-category-select-ctrl
+          [fieldId]="productForm.categoryId()"
+          [fieldName]="productForm.categoryName()" />
+      </div>
 
-      <!-- Nombre -->
       <div>
         <label class="field-label block">Nombre</label>
         <input
           type="text"
-          [(ngModel)]="form.name"
+          [formField]="productForm.name"
           class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
                  focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
           placeholder="Nombre del producto"
         />
       </div>
 
-      <!-- Descripción -->
       <div>
         <label class="field-label block">Descripción</label>
         <textarea
-          [(ngModel)]="form.description"
+          [formField]="productForm.description"
           rows="3"
           class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg resize-none
                  focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
@@ -85,25 +56,22 @@ const GENDER_LABELS: Record<number, string> = {
         ></textarea>
       </div>
 
-      <!-- Género -->
       <div>
         <label class="field-label block">Género</label>
         <select
-          [(ngModel)]="form.gender"
+          (change)="onGenderChange($event)"
+          [value]="formData().gender ?? ''"
           class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
                  focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring">
-          <option [ngValue]="Gender.Unisex">Unisex</option>
-          <option [ngValue]="Gender.Hombre">Hombre</option>
-          <option [ngValue]="Gender.Mujer">Mujer</option>
+          <option value="" disabled>Seleccione</option>
+          @for (g of genderOptions; track g.value) {
+            <option [value]="g.value">{{ g.label }}</option>
+          }
         </select>
       </div>
 
-      <!-- Categoría -->
-
-
     </div>
 
-    <!-- Actions -->
     <div class="flex flex-col sm:flex-row gap-3 mt-6">
       <button (click)="close.emit()" class="btn-secondary flex-1 py-2.5 rounded-xl">
         Cancelar
@@ -138,51 +106,59 @@ export class UpdateProductModal implements OnInit {
 
   private categoryService = inject(CategoryService);
 
-
-categoryOptions = computed(() => 
-  this.categoryService.categories().map(cat => ({
-    id: cat.id,
-    displayName: cat.name
-  }))
-);
   product    = input.required<ProductDetailDto>();
   submitting = input<boolean>(false);
 
   save  = output<UpdateProductDto>();
   close = output<void>();
 
+  readonly genderOptions = [
+    { label: 'Unisex', value: Gender.Unisex },
+    { label: 'Hombre', value: Gender.Hombre },
+    { label: 'Mujer',  value: Gender.Mujer  },
+  ];
 
-  form: {
+  formData = signal<{
     name:        string;
     description: string;
     gender:      Gender | null;
-    categoryId:  GUID | null;
-  } = {
-    name:        '',
+    categoryId:  GUID;
+    categoryName: string;
+  }>({
+    name:         '',
     description: '',
-    gender:      null,
-    categoryId:  null,
-  };
+    gender:       null,
+    categoryId:   '',
+    categoryName: '',
+  });
+
+  productForm = form(this.formData, () => {});
 
   ngOnInit(): void {
+    this.categoryService.load();
     const p = this.product();
+    this.formData.set({
+      name:         p.name,
+      description:  p.description ?? '',
+      gender:       p.gender ?? null,
+      categoryId:   p.categoryId ?? '',
+      categoryName: p.categoryName ?? '',
+    });
+  }
 
-    this.form.name        = p.name;
-    this.form.description = p.description ?? '';
-    this.form.gender      = p.gender ?? null;   // ya viene como número del enum
-    this.form.categoryId  = p.categoryId ?? null;
-
-    // this.categoryService.getAll().subscribe(list => this.categories.set(list));
-    // this.brandService.getAll().subscribe(list => this.brands.set(list));
+  onGenderChange(event: Event): void {
+    const value = Number((event.target as HTMLSelectElement).value);
+    this.formData.update(m => ({ ...m, gender: isNaN(value) ? null : value }));
   }
 
   onSave(): void {
+    const f = this.formData();
     const dto: UpdateProductDto = {};
 
-    if (this.form.name?.trim())        dto.name        = this.form.name.trim();
-    if (this.form.description?.trim()) dto.description = this.form.description.trim();
-    if (this.form.gender != null)      dto.gender      = this.form.gender;
-    if (this.form.categoryId != null)  dto.categoryId  = this.form.categoryId;
+    if (f.name?.trim())        dto.name        = f.name.trim();
+    if (f.description?.trim()) dto.description = f.description.trim();
+    if (f.gender != null)      dto.gender      = f.gender;
+    if (f.categoryId)          dto.categoryId  = f.categoryId;
 
     this.save.emit(dto);
   }

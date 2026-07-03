@@ -1,0 +1,172 @@
+<div class="fixed inset-0 z-[100]">
+  <div class="absolute inset-0 bg-overlay backdrop-blur-[1px]" (click)="onClose()"></div>
+
+  <div class="absolute inset-y-0 right-0 z-10 flex flex-col bg-bg-surface font-inter animate-fade-in
+              w-full md:w-[600px] md:max-w-[90%] md:border-l md:border-border md:shadow-[-20px_0_40px_-15px_rgba(0,0,0,0.15)]"
+       (click)="$event.stopPropagation()">
+
+    <header class="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-surface">
+      <div class="flex items-center gap-2">
+        <span class="pill-success">Nuevo</span>
+        <span class="text-[13px] font-semibold text-text-main">Crear producto</span>
+      </div>
+      <button type="button" (click)="onClose()" class="btn-icon hover:bg-bg-muted hover:text-text-main" aria-label="Cerrar panel">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 max-w-5xl w-full mx-auto space-y-6">
+
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-bg-muted/30 p-4 rounded-xl border border-border/60">
+
+        <div class="flex flex-col gap-1">
+          <label class="field-label">Categoría</label>
+          <app-category-select-ctrl
+            [fieldId]="newProductForm.newProduct.categoryId()"
+            [fieldName]="newProductForm.newProduct.categoryName()" />
+          @if (newProductForm.newProduct.categoryId().touched() && newProductForm.newProduct.categoryId().invalid()) {
+            @for (error of newProductForm.newProduct.categoryId().errors(); track error.kind) {
+              <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+            }
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="field-label">Marca</label>
+          <app-brand-select-ctrl
+            [fieldId]="newProductForm.newProduct.brandId()"
+            [fieldName]="newProductForm.newProduct.brandName()" />
+          @if (newProductForm.newProduct.brandId().touched() && newProductForm.newProduct.brandId().invalid()) {
+            @for (error of newProductForm.newProduct.brandId().errors(); track error.kind) {
+              <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+            }
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="field-label text-feedback-success-text">Nombre del modelo</label>
+          <input
+            type="text"
+            [formField]="newProductForm.newProduct.name"
+            placeholder="Ej. 505 semiclásico..."
+            autofocus
+            class="w-full px-3 py-1.5 border rounded-md text-[13px] text-text-main placeholder:text-text-soft bg-bg-surface font-medium outline-none transition-all focus:ring-2 focus:ring-feedback-success-text/20 focus:border-feedback-success-text"
+            [class.border-border]="!(newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid())"
+            [class.border-feedback-error-text]="newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid()" />
+          @if (newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid()) {
+            @for (error of newProductForm.newProduct.name().errors(); track error.kind) {
+              <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+            }
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="field-label">Género</label>
+          <select
+            (change)="onGenderChange($event)"
+            [value]="newProduct().newProduct.gender ?? ''"
+            class="w-full px-3 py-1.5 border border-border rounded-md text-[13px] text-text-main bg-bg-surface outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui">
+            <option value="" disabled>Seleccione</option>
+            @for (opt of genderOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="md:col-span-2 flex flex-col gap-1">
+          <label class="field-label">
+            Descripción
+            <span class="normal-case font-normal text-[9px]">(opcional)</span>
+          </label>
+          <input
+            type="text"
+            [formField]="newProductForm.newProduct.description"
+            placeholder="Añadir nota..."
+            class="w-full px-3 py-1.5 border border-border rounded-md text-[13px] text-text-muted italic placeholder:text-text-soft outline-none transition-all bg-bg-surface focus:ring-2 focus:ring-border/40 focus:border-border-strong" />
+        </div>
+
+      </section>
+
+      <section class="space-y-3">
+        <h3 class="section-title">Variantes del producto</h3>
+
+        @if (newProduct().variants.length > 0) {
+          <div class="flex flex-wrap items-center gap-3 bg-bg-muted/60 px-3 py-1.5 rounded-lg border border-border">
+            <div class="flex items-center gap-1.5">
+              <label class="text-[10px] font-medium text-text-soft uppercase tracking-wider">Precio Masivo:</label>
+              <input
+                type="number"
+                placeholder="0.00"
+                #massivePrice
+(input)="applyMassivePrice(massivePrice.value)"
+                class="w-20 px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui"
+              />
+            </div>
+          </div>
+        }
+
+        <div class="border border-border rounded-xl bg-bg-surface shadow-sm">
+
+          <div class="hidden md:grid grid-cols-[24px_120px_1fr_90px_90px_36px] bg-bg-muted border-b border-border">
+            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-center">#</div>
+            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Código</div>
+            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Color</div>
+            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Talla</div>
+            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right">P. Venta</div>
+            <div></div>
+          </div>
+
+          <div class="flex flex-col">
+            @for (variant of newProductForm.variants; track $index; let i = $index) {
+              <app-create-variant-row
+                class="block border-b border-border last:border-b-0 hover:bg-accent-ui/5 transition-colors"
+                [formModel]="newProductForm.variants[$index]"
+                (remove)="removeVariant(i)"
+                [index]="i" />
+            } @empty {
+              <div class="py-8 text-center text-xs text-text-soft italic">Sin variantes activas.</div>
+            }
+          </div>
+
+        </div>
+
+        <button
+          type="button"
+          (click)="addVariant()"
+          class="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-border rounded-xl text-xs font-bold uppercase tracking-wider text-text-soft hover:border-accent-ui hover:text-accent-ui hover:bg-accent-ui/5 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Agregar nueva fila (color + talla)
+        </button>
+
+      </section>
+
+      @if (error()) {
+        <div class="px-4 py-3 bg-feedback-error-bg/10 border border-feedback-error-text/20 rounded-lg text-[12px] text-feedback-error-text font-medium">
+          {{ error() }}
+        </div>
+      }
+
+    </main>
+
+    <footer class="border-t border-border bg-bg-surface p-4">
+      <div class="flex items-center justify-end">
+        <button
+          type="button"
+          (click)="onConfirm()"
+          [disabled]="isConfirming()"
+          class="btn btn-primary btn-sm w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed">
+          @if (isConfirming()) {
+            Creando...
+          } @else {
+            Crear producto y ver detalle
+          }
+        </button>
+      </div>
+    </footer>
+
+  </div>
+</div>

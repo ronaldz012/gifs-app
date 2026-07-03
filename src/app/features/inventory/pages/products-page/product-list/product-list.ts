@@ -9,18 +9,27 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 import { ProductFilterBar } from '../product-filter-bar/product-filter-bar';
 import { BrandService } from '@features/inventory/services/brand-service';
 import { CategoryService } from '@features/inventory/services/category-service';
+import CreateProductModal from '../create-product-modal/create-product-modal';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [ProductItem, SkeletonList, Paginator, ProductFilterBar, Paginator],
+  imports: [ProductItem, SkeletonList, Paginator, ProductFilterBar, Paginator, CreateProductModal],
   template: `
 <div class="flex flex-col gap-3">
 
-  <!-- Filtros -->
-  <app-product-filter-bar
-    [params]="query()"
-    (change)="patchQuery($event)" />
+  <div class="flex items-center justify-between gap-3">
+    <app-product-filter-bar
+      [params]="query()"
+      (change)="patchQuery($event)" />
+
+    <button
+      type="button"
+      (click)="showCreateModal.set(true)"
+      class="btn btn-primary btn-sm shrink-0">
+      + Nuevo producto
+    </button>
+  </div>
 
   <!-- Lista -->
   @if (loading()) {
@@ -89,6 +98,11 @@ import { CategoryService } from '@features/inventory/services/category-service';
   }
 
 </div>
+
+@if (showCreateModal()) {
+  <app-create-product-modal
+    (close)="showCreateModal.set(false)" />
+}
   `,
   styles: [`
     @keyframes slide-up {
@@ -115,6 +129,8 @@ export default class ProductList implements OnInit {
     sortBy: 'Name',
     sortDirection: 'asc',
   });
+
+  showCreateModal = signal(false);
 
   hasActiveFilters = computed(() => {
     const q = this.query();
