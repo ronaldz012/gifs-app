@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@core/auth/auth-guard';
 import { featureGuard } from '@core/auth/feature-guard';
+import { adminGuard } from '@core/auth/admin-guard';
 
 
 export const routes: Routes = [
@@ -138,6 +139,28 @@ export const routes: Routes = [
             path: 'sales',
             redirectTo: 'pos',
             pathMatch: 'full'
+          }
+        ]
+      },
+      // ── Administration ──────────────────────────────────────────────────────
+      {
+        path: 'admin',
+        canActivate: [adminGuard],
+        children: [
+          {
+            path: '',
+            title: 'Administración',
+            loadComponent: () => import('@features/administration/pages/admin-page')
+          },
+          {
+            path: 'users',
+            title: 'Usuarios',
+            loadComponent: () => import('@features/administration/pages/users-page')
+          },
+          {
+            path: 'branches',
+            title: 'Sucursales',
+            loadComponent: () => import('@features/administration/pages/branches-page')
           }
         ]
       },

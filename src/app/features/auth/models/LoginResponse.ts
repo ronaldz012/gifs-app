@@ -14,11 +14,17 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  isAdmin: boolean;
+  userType: UserType;
   firstName: string;
   lastName: string;
   deletedAt: string | null;
 }
-
+export enum UserType {
+  Standard,
+  TenantAdmin,
+  Owner,
+}
 export interface Branch {
   branchId: string;
   branchName: string;

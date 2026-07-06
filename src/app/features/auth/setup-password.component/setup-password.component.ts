@@ -52,6 +52,8 @@ export default class SetupPasswordComponent implements OnInit {
         return;
       }
       this.token.set(code);
+      this.authService.logout();
+      localStorage.removeItem('active_branch_id');
       this.authService.verifyToken(code).subscribe({
         next: (res) => {
           if (res.valid) {
