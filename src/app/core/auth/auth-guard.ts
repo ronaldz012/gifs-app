@@ -2,14 +2,14 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { BranchContextService } from '@core/services/branch-context-service';
 import { CookieService } from 'ngx-cookie-service';
+import { SessionService } from '@features/auth/services/session-service';
+import { map, catchError, of } from 'rxjs';
 
 function isTokenExpired(token: string): boolean {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    // exp está en segundos, Date.now() en ms
     return payload.exp * 1000 < Date.now();
   } catch {
-    // token malformado → tratar como expirado
     return true;
   }
 }
@@ -18,6 +18,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const cookieService = inject(CookieService);
   const branchContext = inject(BranchContextService);
+  const sessionService = inject(SessionService);
 
   const token = cookieService.get('auth_token');
 
@@ -28,12 +29,11 @@ export const authGuard: CanActivateFn = (route, state) => {
     });
   }
 
-  // Restaurar branches si los signals están vacíos (recarga de página)
   if (branchContext.available().length === 0) {
-    const raw = localStorage.getItem('branches');
-    if (raw) {
-      branchContext.restoreFromStorage(JSON.parse(raw));
-    }
+    return sessionService.restore().pipe(
+      map(() => true),
+      catchError(() => of(router.createUrlTree(['/login'])))
+    );
   }
 
   return true;

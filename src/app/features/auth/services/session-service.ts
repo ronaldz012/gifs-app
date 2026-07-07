@@ -1,0 +1,44 @@
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'environments/environment';
+import { Observable, of, map, tap, finalize } from 'rxjs';
+import { SessionState } from '../models/LoginResponse';
+import { CurrentUserService } from './current-user-service';
+import { BranchContextService } from '@core/services/branch-context-service';
+
+interface AuthMeResponse {
+  sessionState: SessionState;
+}
+
+@Injectable({ providedIn: 'root' })
+export class SessionService {
+  private http = inject(HttpClient);
+  private currentUser = inject(CurrentUserService);
+  private branchContext = inject(BranchContextService);
+  private url = environment.BACKEND_URL + '/api/Auth';
+
+  private _restored = false;
+  private inflight$: Observable<void> | null = null;
+
+  restore(): Observable<void> {
+    if (this._restored) return of(void 0);
+    if (this.inflight$) return this.inflight$;
+
+    this.inflight$ = this.http.get<AuthMeResponse>(`${this.url}/Me`).pipe(
+      tap(res => {
+        const session = res.sessionState;
+        this.currentUser.set(session.user);
+        this.branchContext.initialize(session.branches);
+        this._restored = true;
+      }),
+      map(() => void 0),
+      finalize(() => { this.inflight$ = null; })
+    );
+    return this.inflight$;
+  }
+
+  clear(): void {
+    this._restored = false;
+    this.inflight$ = null;
+  }
+}

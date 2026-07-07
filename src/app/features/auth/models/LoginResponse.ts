@@ -2,12 +2,23 @@
 export default interface LoginResponse {
   accessToken: string;
   refreshToken: string;
-  tokenType: string;
   expiresIn: number;
-  status: string;
-  authProvider: string;
+  session: SessionState;
+}
+
+export interface SessionState {
   user: User;
   branches: Branch[];
+  tenantPlan: TenantPlanUsage;
+}
+
+export interface TenantPlanUsage {
+  planName: string;
+  features: string[];
+  maxUsers: number;
+  activeUsers: number;
+  maxBranches: number;
+  activeBranches: number;
 }
 
 export interface User {

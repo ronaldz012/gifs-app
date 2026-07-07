@@ -3,8 +3,7 @@ import { User } from '../models/LoginResponse';
 
 @Injectable({ providedIn: 'root' })
 export class CurrentUserService {
-  private readonly STORAGE_KEY = 'current_user';
-  private readonly _user = signal<User | null>(this.loadFromStorage());
+  private readonly _user = signal<User | null>(null);
 
   readonly user = this._user.asReadonly();
 
@@ -14,20 +13,9 @@ export class CurrentUserService {
 
   set(user: User): void {
     this._user.set(user);
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(user));
   }
 
   clear(): void {
     this._user.set(null);
-    localStorage.removeItem(this.STORAGE_KEY);
-
-  }
-
-  private loadFromStorage(): User | null {
-    const raw = localStorage.getItem(this.STORAGE_KEY);
-    if (!raw) return null;
-    try { return JSON.parse(raw); }
-    catch { return null; }
   }
 }
-
