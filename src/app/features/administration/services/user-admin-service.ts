@@ -9,6 +9,7 @@ import { RoleListItemDto } from '../dtos/roles/role-list-item-dto';
 import { BranchListItemDto } from '../dtos/branches/branch-list-item-dto';
 import { GetUserResponse } from '../dtos/users/get-user-response';
 import { CreateUserResponse } from '../dtos/users/create-user-response';
+import { GetUserDetailsResponse } from '../dtos/users/get-user-details-response';
 
 @Injectable({ providedIn: 'root' })
 export class UserAdminService {
@@ -42,5 +43,9 @@ export class UserAdminService {
 
   getBranches(): Observable<BranchListItemDto[]> {
     return this.http.get<BranchListItemDto[]>(this.branchUrl);
+  }
+
+  getUserDetails(id: GUID): Observable<GetUserDetailsResponse> {
+    return this.http.get<GetUserDetailsResponse>(`${this.userUrl}/${id}/details`);
   }
 }
