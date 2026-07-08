@@ -18,8 +18,8 @@ export class AuthService {
   private readonly url = environment.BACKEND_URL + '/api/Auth';
   private readonly TOKEN_KEY = 'auth_token';
 
-  login(email: string, password: string) {
-    return this.http.post<LoginResponse>(this.url + '/Login', { email, password }, {
+  login(emailOrUsername: string, password: string) {
+    return this.http.post<LoginResponse>(this.url + '/Login', { email: emailOrUsername, password }, {
       headers: { 'X-Forwarded-Host': "livican" }
     }).pipe(
       tap(res => {

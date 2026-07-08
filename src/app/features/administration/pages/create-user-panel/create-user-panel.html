@@ -1,0 +1,221 @@
+<div class="fixed inset-0 z-[100]">
+  <div class="absolute inset-0 bg-overlay backdrop-blur-[1px]" (click)="onClose()"></div>
+
+  <div class="absolute inset-y-0 right-0 z-10 flex flex-col bg-bg-surface font-inter animate-fade-in
+              w-full md:w-[600px] md:max-w-[90%] md:border-l md:border-border md:shadow-[-20px_0_40px_-15px_rgba(0,0,0,0.15)]"
+       (click)="$event.stopPropagation()">
+
+    <header class="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-surface">
+      <div class="flex items-center gap-2">
+        <span class="pill-success">Nuevo</span>
+        <span class="text-[13px] font-semibold text-text-main">Crear usuario</span>
+      </div>
+      @if (!result()) {
+        <button type="button" (click)="onClose()" class="btn-icon hover:bg-bg-muted hover:text-text-main" aria-label="Cerrar panel">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      }
+    </header>
+
+    @if (result()) {
+      <main class="flex-1 overflow-y-auto p-4 max-w-5xl w-full mx-auto">
+        <div class="flex flex-col items-center gap-5 py-10">
+          <div class="w-12 h-12 rounded-full bg-feedback-success/20 flex items-center justify-center">
+            <span class="material-icons text-2xl text-feedback-success-text">check_circle</span>
+          </div>
+
+          <p class="text-sm font-semibold text-text-main">Usuario creado exitosamente</p>
+
+          <div class="w-full max-w-md p-4 bg-bg-muted rounded-xl border border-border space-y-2">
+            <label class="text-[10px] font-semibold uppercase tracking-wider text-text-soft">
+              Link para configurar contraseña
+            </label>
+            <div class="flex gap-2">
+              <input readonly [value]="result()!.setupUrl"
+                     class="flex-1 w-0 px-3 py-2 text-[12px] text-text-main bg-bg-surface border border-border rounded-md font-mono truncate" />
+              <button type="button" (click)="copyUrl()" class="btn-secondary btn-sm shrink-0">
+                <span class="material-icons text-sm">content_copy</span>
+              </button>
+            </div>
+            @if (copied()) {
+              <span class="text-[10px] text-feedback-success-text">¡Copiado!</span>
+            }
+          </div>
+
+          @if (result()!.emailSent) {
+            <p class="text-xs text-text-muted text-center">
+              También se envió un email con las instrucciones.
+            </p>
+          }
+
+          @if (error()) {
+            <div class="w-full px-4 py-3 bg-feedback-error-bg/10 border border-feedback-error-text/20 rounded-lg text-[12px] text-feedback-error-text font-medium">
+              {{ error() }}
+            </div>
+          }
+
+          <button type="button" (click)="onClose()" class="btn btn-primary btn-sm mt-2">Cerrar</button>
+        </div>
+      </main>
+    } @else {
+      <main class="flex-1 overflow-y-auto p-4 max-w-5xl w-full mx-auto space-y-6">
+
+        @if (loading()) {
+          <div class="flex items-center justify-center py-12">
+            <span class="text-sm text-text-muted">Cargando...</span>
+          </div>
+
+        } @else {
+          <section class="bg-bg-muted/30 p-4 rounded-xl border border-border/60 space-y-4">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-text-soft">Datos generales</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1">
+                <label class="field-label">Nombre</label>
+                <input type="text" [formField]="form.firstName" placeholder="Ej. Juan" autofocus
+                       class="w-full px-3 py-1.5 border rounded-md text-[13px] text-text-main placeholder:text-text-soft bg-bg-surface font-medium outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui"
+                       [class.border-border]="!(form.firstName().touched() && form.firstName().invalid())"
+                       [class.border-feedback-error-text]="form.firstName().touched() && form.firstName().invalid()" />
+                @if (form.firstName().touched() && form.firstName().invalid()) {
+                  @for (error of form.firstName().errors(); track error.kind) {
+                    <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+                  }
+                }
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label class="field-label">Apellido</label>
+                <input type="text" [formField]="form.lastName" placeholder="Ej. Pérez"
+                       class="w-full px-3 py-1.5 border rounded-md text-[13px] text-text-main placeholder:text-text-soft bg-bg-surface font-medium outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui"
+                       [class.border-border]="!(form.lastName().touched() && form.lastName().invalid())"
+                       [class.border-feedback-error-text]="form.lastName().touched() && form.lastName().invalid()" />
+                @if (form.lastName().touched() && form.lastName().invalid()) {
+                  @for (error of form.lastName().errors(); track error.kind) {
+                    <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+                  }
+                }
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label class="field-label">Usuario</label>
+                <input type="text" [formField]="form.username" placeholder="Ej. juanperez"
+                       class="w-full px-3 py-1.5 border rounded-md text-[13px] text-text-main placeholder:text-text-soft bg-bg-surface font-medium outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui"
+                       [class.border-border]="!(form.username().touched() && form.username().invalid())"
+                       [class.border-feedback-error-text]="form.username().touched() && form.username().invalid()" />
+                @if (form.username().touched() && form.username().invalid()) {
+                  @for (error of form.username().errors(); track error.kind) {
+                    <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+                  }
+                }
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label class="field-label">
+                  Email
+                  <span class="normal-case font-normal text-[9px]">(opcional)</span>
+                </label>
+                <input type="email" [formField]="form.email" placeholder="Ej. juan@ejemplo.com"
+                       class="w-full px-3 py-1.5 border rounded-md text-[13px] text-text-main placeholder:text-text-soft bg-bg-surface font-medium outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui"
+                       [class.border-border]="!(form.email().touched() && form.email().invalid())"
+                       [class.border-feedback-error-text]="form.email().touched() && form.email().invalid()" />
+                @if (form.email().touched() && form.email().invalid()) {
+                  @for (error of form.email().errors(); track error.kind) {
+                    <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
+                  }
+                }
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label class="field-label">
+                  CI
+                  <span class="normal-case font-normal text-[9px]">(opcional)</span>
+                </label>
+                <input type="text" [formField]="form.ci" placeholder="Ej. 1234567"
+                       class="w-full px-3 py-1.5 border border-border rounded-md text-[13px] text-text-main placeholder:text-text-soft bg-bg-surface font-medium outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui" />
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label class="field-label">
+                  Nacionalidad
+                  <span class="normal-case font-normal text-[9px]">(opcional)</span>
+                </label>
+                <input type="text" [formField]="form.nationality" placeholder="Ej. Boliviano"
+                       class="w-full px-3 py-1.5 border border-border rounded-md text-[13px] text-text-main placeholder:text-text-soft bg-bg-surface font-medium outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui" />
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label class="field-label">
+                  Fecha de nacimiento
+                  <span class="normal-case font-normal text-[9px]">(opcional)</span>
+                </label>
+                <input type="date" [formField]="form.birthDate"
+                       class="w-full px-3 py-1.5 border border-border rounded-md text-[13px] text-text-main bg-bg-surface font-medium outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui" />
+              </div>
+            </div>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-text-soft">Acceso a sucursales</h2>
+
+            <div class="border border-border rounded-xl bg-bg-surface shadow-sm divide-y divide-border">
+              @for (branch of branchRoles(); track branch.branchId) {
+                <div class="flex items-center gap-3 px-4 py-3">
+                  <input type="checkbox"
+                         [checked]="branch.selected"
+                         (change)="onBranchToggle(branch.branchId, $any($event.target).checked)"
+                         class="w-4 h-4 rounded border-border text-accent-ui focus:ring-accent-ui/20" />
+                  <span class="text-sm font-medium text-text-main flex-1">{{ branch.branchName }}</span>
+                  @if (branch.selected) {
+                    <select (change)="onRoleChange(branch.branchId, $any($event.target).value)"
+                            class="w-44 px-2 py-1.5 text-[12px] border border-border rounded-md bg-bg-surface text-text-main outline-none focus:border-accent-ui focus:ring-1 focus:ring-accent-ui/20">
+                      <option value="">Seleccionar rol</option>
+                      @for (role of roles(); track role.id) {
+                        <option [value]="role.id" [selected]="branch.roleId === role.id">{{ role.name }}</option>
+                      }
+                    </select>
+                  }
+                </div>
+              } @empty {
+                <div class="py-8 text-center text-xs text-text-soft italic">
+                  No se pudieron cargar las sucursales.
+                </div>
+              }
+            </div>
+
+            @if (!hasValidBranchAssignment() && form().touched()) {
+              <span class="text-[10px] text-feedback-error-text">
+                Selecciona al menos una sucursal y asígnale un rol.
+              </span>
+            }
+          </section>
+        }
+
+        @if (error()) {
+          <div class="px-4 py-3 bg-feedback-error-bg/10 border border-feedback-error-text/20 rounded-lg text-[12px] text-feedback-error-text font-medium">
+            {{ error() }}
+          </div>
+        }
+
+      </main>
+
+      <footer class="border-t border-border bg-bg-surface p-4">
+        <div class="flex items-center justify-end">
+          <button
+            type="button"
+            (click)="onSubmit()"
+            [disabled]="isSubmitting() || loading()"
+            class="btn btn-primary btn-sm w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed">
+            @if (isSubmitting()) {
+              Creando...
+            } @else {
+              Crear usuario
+            }
+          </button>
+        </div>
+      </footer>
+    }
+
+  </div>
+</div>

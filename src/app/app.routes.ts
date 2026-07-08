@@ -154,8 +154,18 @@ export const routes: Routes = [
           },
           {
             path: 'users',
-            title: 'Usuarios',
-            loadComponent: () => import('@features/administration/pages/users-page')
+            children: [
+              {
+                path: '',
+                title: 'Usuarios',
+                loadComponent: () => import('@features/administration/pages/users-page')
+              },
+              {
+                path: ':id',
+                title: 'Detalle de Usuario',
+                loadComponent: () => import('@features/administration/pages/user-detail-page')
+              }
+            ]
           },
           {
             path: 'branches',

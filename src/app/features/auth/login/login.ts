@@ -11,7 +11,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export default class Login {
   loginForm = new FormGroup({
-    email: new FormControl('', { validators: [Validators.required, Validators.email], nonNullable: true }),
+    emailOrUsername: new FormControl('', { validators: [Validators.required], nonNullable: true }),
     password: new FormControl('', { validators: [Validators.required, Validators.minLength(4)], nonNullable: true }),
   });
 
@@ -26,7 +26,7 @@ export default class Login {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    this.authService.login(this.loginForm.value.email!, this.loginForm.value.password!).subscribe({
+    this.authService.login(this.loginForm.value.emailOrUsername!, this.loginForm.value.password!).subscribe({
       next: () => {
         this.loading.set(false);
         this.router.navigate(['/home']);
