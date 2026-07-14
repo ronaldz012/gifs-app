@@ -1,14 +1,15 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UserAdminService } from '../services/user-admin-service';
 import { GetUserDetailsResponse, UserTypeLabel } from '../dtos/users/get-user-details-response';
 import { UserStatusLabel } from '../dtos/users/get-user-response';
 import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/confirm-action-modal/confirm-action-modal';
+import UpdateUserPanel from './update-user-panel/update-user-panel';
 
 @Component({
   selector: 'app-user-detail-page',
-  imports: [RouterLink, DatePipe, ConfirmActionModal],
+  imports: [RouterLink, DatePipe, ConfirmActionModal, UpdateUserPanel],
   template: `
     @if (loading()) {
       <div class="flex items-center justify-center py-20 text-sm text-text-muted">
@@ -42,8 +43,8 @@ import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/conf
         <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
           <div class="flex items-start justify-between gap-3 mb-4">
             <p class="section-title mb-0">Información general</p>
-            <div class="flex gap-2 shrink-0">
-              <button disabled class="btn-primary opacity-40 cursor-not-allowed" title="Editar">
+            <div class="flex gap-2 shrink-0 flex-wrap">
+              <button (click)="showPanel.set(true)" class="btn-primary" title="Editar">
                 <span class="material-icons text-base leading-none">edit</span>
                 <span class="hidden sm:inline">Editar</span>
               </button>
@@ -54,6 +55,7 @@ import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/conf
                 <span class="material-icons text-base leading-none">power_settings_new</span>
                 <span class="hidden sm:inline">{{ user()!.isActive ? 'Desactivar' : 'Activar' }}</span>
               </button>
+              
             </div>
           </div>
 
@@ -124,6 +126,13 @@ import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/conf
       </div>
     }
 
+    @if (showPanel() && user()) {
+      <app-update-user-panel
+        [userId]="user()!.id"
+        [initialUserType]="user()!.userType"
+        (close)="onUpdatePanelClose()" />
+    }
+
     @if (showToggleConfirm()) {
       <app-confirm-action-modal
         [title]="user()!.isActive ? '¿Desactivar usuario?' : '¿Activar usuario?'"
@@ -136,11 +145,14 @@ import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/conf
         (close)="showToggleConfirm.set(false)"
       />
     }
+
+    
   `,
 })
 export default class UserDetailPage implements OnInit {
   protected readonly UserTypeLabel = UserTypeLabel;
   protected readonly UserStatusLabel = UserStatusLabel;
+  
 
   private route = inject(ActivatedRoute);
   private userAdminService = inject(UserAdminService);
@@ -148,6 +160,7 @@ export default class UserDetailPage implements OnInit {
   user = signal<GetUserDetailsResponse | null>(null);
   loading = signal(true);
   submitting = signal(false);
+  showPanel = signal(false);
   showToggleConfirm = signal(false);
 
   ngOnInit(): void {
@@ -166,6 +179,12 @@ export default class UserDetailPage implements OnInit {
     });
   }
 
+  onUpdatePanelClose(): void {
+    this.showPanel.set(false);
+    const u = this.user();
+    if (u) this.loadUser(u.id);
+  }
+
   onToggleActive(): void {
     const u = this.user();
     if (!u) return;
@@ -180,4 +199,5 @@ export default class UserDetailPage implements OnInit {
       error: () => this.submitting.set(false),
     });
   }
-}
+
+  }

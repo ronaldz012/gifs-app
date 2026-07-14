@@ -1,0 +1,154 @@
+<div class="fixed inset-y-0 right-0 z-[100] flex flex-col bg-bg-surface font-inter animate-fade-in
+            w-full md:w-[600px] md:max-w-[90%] md:border-l md:border-border md:shadow-[-20px_0_40px_-15px_rgba(0,0,0,0.15)]">
+
+  <!-- ── HEADER ── -->
+  <header class="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-surface">
+    <div class="flex items-center gap-2">
+      <span class="pill-info">Catálogo</span>
+      <span class="text-[13px] font-semibold text-text-main">Editar producto</span>
+    </div>
+    <button type="button" (click)="onClose()" class="btn-icon hover:bg-bg-muted hover:text-text-main" aria-label="Cerrar panel">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- ── MAIN ── -->
+  <main class="flex-1 overflow-y-auto p-4 max-w-5xl w-full mx-auto space-y-6">
+
+    <!-- BÚSQUEDA + INFO -->
+    <section class="grid grid-cols-1 gap-4 bg-bg-muted/30 p-4 rounded-xl border border-border/60">
+
+      <div class="flex flex-col gap-1">
+        <label class="field-label text-feedback-info-text">
+          Buscar en catálogo
+          <span class="normal-case font-normal text-feedback-error-text ml-1">* Obligatorio</span>
+        </label>
+        <app-product-search
+          [initialValue]="item().product.productName"
+          (productSelected)="onProductSelected($event)"
+        />
+      </div>
+
+      <!-- Info readonly -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="flex flex-col gap-0.5">
+          <span class="field-label">Categoría</span>
+          <span class="field-value truncate">{{ itemModel().product.categoryName || '—' }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="field-label">Marca</span>
+          <span class="field-value truncate">{{ itemModel().product.brandName || '—' }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="field-label">Género</span>
+          <span class="field-value">{{ itemModel().product.genderName || '—' }}</span>
+        </div>
+        @if (itemModel().product.description) {
+          <div class="col-span-2 md:col-span-4 flex flex-col gap-0.5">
+            <span class="field-label">Descripción</span>
+            <span class="text-[11px] text-text-muted italic truncate">{{ itemModel().product.description }}</span>
+          </div>
+        }
+      </div>
+
+    </section>
+
+    <!-- VARIANTES -->
+    <section class="space-y-3">
+
+      <div class="flex items-center justify-between">
+        <h3 class="section-title">Variantes del pedido</h3>
+        @if (itemModel().variants.length > 0) {
+        <div class="flex items-center gap-1.5 bg-bg-muted/60 px-2 py-1 rounded-lg border border-border">
+          <label class="text-[10px] font-medium text-text-soft uppercase tracking-wider">Costo Masivo:</label>
+          <input
+            type="number"
+            [value]="itemModel().generalCost ?? ''"
+            placeholder="0.00"
+            (input)="applyMassiveCost($event.target.value)"
+            class="w-20 px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui"
+          />
+        </div>
+      }
+      </div>
+
+      <div class="border border-border rounded-xl bg-bg-surface shadow-sm">
+
+        <!-- Cabecera desktop -->
+        <div class="hidden md:grid grid-cols-[24px_120px_1fr_70px_75px_60px_75px_36px] bg-bg-muted border-b border-border">
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-center">#</div>
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Código</div>
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Color</div>
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Talla</div>
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right">P. Venta</div>
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right">Cant.</div>
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right">Costo U.</div>
+          <div></div>
+        </div>
+
+        <!-- Filas -->
+        <div class="flex flex-col">
+          @for (variant of itemModel().variants; track $index; let i = $index) {
+            @if (variant.mode === 'ex') {
+              <app-variant-existing-row
+                class="block border-b border-border last:border-b-0 hover:bg-accent-ui/5 transition-colors"
+                [formModel]="itemForm.variants[i]"
+                [index]="i"
+                [availableVariants]="availableVariantsForRow(i)"
+                (remove)="removeVariant(i)"
+                (createNew)="replaceVariantForNew($event, i)"
+              />
+            } @else {
+              <app-variant-new-row
+                class="block border-b border-border last:border-b-0 hover:bg-accent-ui/5 transition-colors"
+                [formModel]="itemForm.variants[i]"
+                [existingVariants]="selectedProduct()?.productVariants ?? []"
+                [index]="i"
+                (remove)="removeVariant(i)"
+              />
+            }
+          } @empty {
+            <div class="py-8 text-center text-xs italic text-text-soft">
+              @if (selectedProduct()) {
+                Sin variantes. Agrega al menos una para continuar.
+              } @else {
+                Selecciona un producto para agregar variantes.
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+
+    </section>
+      <button
+        type="button"
+        (click)="addExistingVariant()"
+        class="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-border rounded-xl text-xs font-bold uppercase tracking-wider text-text-soft hover:border-accent-ui hover:text-accent-ui hover:bg-accent-ui/5 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+        Agregar nueva fila (color + talla)
+      </button>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="border-t border-border bg-bg-surface p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+    <div class="max-w-5xl w-full mx-auto flex items-center justify-end gap-3">
+      @if (error()) {
+        <span class="text-[11px] text-feedback-error-text mr-auto">{{ error() }}</span>
+      }
+      <button type="button" (click)="onClose()" class="btn btn-secondary btn-sm">
+        Cancelar
+      </button>
+      <button type="button" (click)="onConfirm()"
+        [disabled]="isConfirming() || !selectedProduct()"
+        class="btn btn-primary btn-sm disabled:opacity-40 disabled:cursor-not-allowed">
+        {{ isConfirming() ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+  </footer>
+
+</div>

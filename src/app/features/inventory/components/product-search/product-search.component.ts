@@ -14,7 +14,60 @@ import { ProductSearchResult } from './product-search-result.component';
   imports: [],
   template: `
     <div class="relative w-full" (focusout)="handleFocusOut($event)">
-      ...
+      <div class="relative">
+        <input
+          type="text"
+          [value]="query()"
+          (input)="onInput($event)"
+          (focus)="onFocus()"
+          (keydown)="onKeyDown($event)"
+          placeholder="Buscá por nombre, código o SKU..."
+          class="w-full px-3 py-2 pr-10 text-[13px] text-text-main bg-bg-surface border border-border rounded-lg
+                 placeholder:text-text-soft focus:outline-none focus:ring-1 focus:ring-accent-ui focus:border-accent-ui
+                 transition-colors duration-150"
+        />
+        @if (isSearching()) {
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-soft animate-spin">⟳</span>
+        }
+      </div>
+
+      @if (showDropdown()) {
+        <div class="absolute z-50 mt-1 w-full bg-bg-elevated border border-border rounded-lg shadow-lg max-h-64 overflow-y-auto">
+          @for (product of results(); track product.id; let i = $index) {
+            <button
+              type="button"
+              (click)="select(product)"
+              (mouseenter)="activeIndex.set(i)"
+              class="w-full text-left px-3 py-2 text-[12px] transition-colors flex items-center gap-3
+                     [&.active]:bg-accent-ui/10"
+              [class.active]="i === activeIndex()"
+              [class.bg-accent-ui/10]="i === activeIndex()"
+            >
+              <span class="w-20 shrink-0 font-mono text-[11px] text-text-soft truncate">{{ product.internalCode }}</span>
+              <span class="flex-1 font-medium text-text-main truncate">{{ product.name }}</span>
+              <span class="text-[11px] text-text-muted shrink-0">{{ product.brandName }}</span>
+            </button>
+          }
+          @if (allowCreate()) {
+            <button
+              type="button"
+              (click)="onCreateNew()"
+              class="w-full text-left px-3 py-2 text-[12px] text-accent-ui font-semibold border-t border-border
+                     hover:bg-accent-ui/5 transition-colors flex items-center gap-2"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Crear "{{ query() }}"
+            </button>
+          }
+          @if (showEmpty()) {
+            <div class="px-3 py-4 text-center text-[12px] text-text-soft italic">
+              Sin resultados para "{{ query() }}"
+            </div>
+          }
+        </div>
+      }
     </div>
   `,
 })

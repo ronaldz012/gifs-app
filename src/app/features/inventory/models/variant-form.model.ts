@@ -7,6 +7,7 @@ export interface Reception {
 export interface ItemForm {
   product: ProductInfo;
   variants: VariantForm[];
+  generalCost?: number | null;
 }
 
 export interface ProductInfo{

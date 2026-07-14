@@ -39,23 +39,13 @@
       </div>
     }
 
-@for (group of reception().items; track $index) {
-  <app-reception-item class="gap-y-8"[group]="group" (remove)="removeGroup($event)" (edit)="editGroup($index)" />
-}
+    @for (group of reception().items; track $index) {
+      <app-reception-item class="gap-y-8" [group]="group" (remove)="removeGroup($event)" (edit)="editGroup($index)" />
+    }
 
     <!-- Botón agregar -->
     <div class="py-3">
-      <button type="button" (click)="showCatalogueModal.set(true)"
-        class="flex items-center gap-2 px-4 py-2 bg-bg-muted text-text-main border border-border rounded-lg hover:bg-text-main hover:text-inverse transition-all duration-150 shadow-sm group">
-        <span class="text-xl font-bold group-hover:scale-110">🔍</span>
-        <div class="text-left">
-          <p class="text-sm font-bold leading-none">Agregar producto</p>
-          <p class="text-[10px] opacity-80">Buscar en catálogo o crear nuevo</p>
-        </div>
-      </button>
-    </div>
-        <div class="py-3">
-      <button type="button" (click)="showNewProductModal.set(true)"
+      <button type="button" (click)="showAddCatalogueModal.set(true)"
         class="flex items-center gap-2 px-4 py-2 bg-bg-muted text-text-main border border-border rounded-lg hover:bg-text-main hover:text-inverse transition-all duration-150 shadow-sm group">
         <span class="text-xl font-bold group-hover:scale-110">🔍</span>
         <div class="text-left">
@@ -92,25 +82,28 @@
 
   </div>
 
+  @if (showAddCatalogueModal()) {
+    <app-add-from-catalogue-modal
+      (confirm)="addGroup($event)"
+      (close)="showAddCatalogueModal.set(false)"
+      (notFound)="onNotFound()"
+    />
+  }
 
-@if (showCatalogueModal()) {
-  <app-existing-product-modal
-    [itemToEdit]="itemToEdit()"
-    (confirm)="addGroup($event)"    
-    (update)="updateItem($event)"
-    (close)="showCatalogueModal.set(false); itemToEdit.set(null)"
-    (notFound)="onNotFound()"
-  />
+  @if (showEditModal()) {
+    <app-edit-catalogue-item-modal
+      [item]="editingItem()!.item"
+      [index]="editingItem()!.index"
+      (update)="updateItem($event)"
+      (close)="showEditModal.set(false); editingItem.set(null)"
+    />
+  }
 
-
-}
-
-@if (showNewProductModal()) {
-  <app-new-product-modal
-    (confirm)="addGroup($event)"
-    (close)="showNewProductModal.set(false)"
-  />
-
-}
+  @if (showNewProductModal()) {
+    <app-new-product-modal
+      (confirm)="addGroup($event)"
+      (close)="showNewProductModal.set(false)"
+    />
+  }
 
 </div>

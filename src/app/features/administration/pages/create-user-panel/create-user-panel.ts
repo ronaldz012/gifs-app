@@ -5,6 +5,7 @@ import { CreateUserRequest } from '../../dtos/users/create-user-request';
 import { RoleListItemDto } from '../../dtos/roles/role-list-item-dto';
 import { BranchListItemDto } from '../../dtos/branches/branch-list-item-dto';
 import { CreateUserResponse } from '../../dtos/users/create-user-response';
+import { CreateTenantAdminRequest } from '../../dtos/users/create-tenant-admin-request';
 
 interface BranchRoleEntry {
   branchId: GUID;
@@ -30,6 +31,7 @@ export default class CreateUserPanel implements OnInit {
   error = signal<string | null>(null);
   result = signal<CreateUserResponse | null>(null);
   copied = signal(false);
+  isAdmin = signal(false);
 
   model = signal({
     firstName: '',
@@ -61,7 +63,7 @@ export default class CreateUserPanel implements OnInit {
   });
 
   hasValidBranchAssignment = computed(() =>
-    this.branchRoles().some(b => b.selected && b.roleId)
+    this.isAdmin() || this.branchRoles().some(b => b.selected && b.roleId)
   );
 
   ngOnInit() {
@@ -111,7 +113,7 @@ export default class CreateUserPanel implements OnInit {
     this.error.set(null);
 
     const m = this.model();
-    const payload: CreateUserRequest = {
+    const base = {
       username: m.username,
       firstName: m.firstName,
       lastName: m.lastName,
@@ -120,21 +122,27 @@ export default class CreateUserPanel implements OnInit {
       birthDate: m.birthDate
         ? new Date(m.birthDate).toISOString()
         : new Date(0).toISOString(),
-      branchRoles: this.branchRoles()
-        .filter(b => b.selected && b.roleId)
-        .map(b => ({ branchId: b.branchId, roleId: b.roleId! })),
     };
 
-    if (m.email) payload.email = m.email;
+    if (m.email) (base as any).email = m.email;
 
-    this.userAdminService.createUser(payload).subscribe({
+    const request$ = this.isAdmin()
+      ? this.userAdminService.createTenantAdmin(base as CreateTenantAdminRequest)
+      : this.userAdminService.createUser({
+          ...base,
+          branchRoles: this.branchRoles()
+            .filter(b => b.selected && b.roleId)
+            .map(b => ({ branchId: b.branchId, roleId: b.roleId! })),
+        });
+
+    request$.subscribe({
       next: (res) => {
         this.isSubmitting.set(false);
         this.result.set(res);
       },
       error: () => {
         this.isSubmitting.set(false);
-        this.error.set('Error al crear el usuario. Intentá de nuevo.');
+        this.error.set('Error al crear el usuario.');
       },
     });
   }

@@ -169,8 +169,18 @@ export const routes: Routes = [
           },
           {
             path: 'branches',
-            title: 'Sucursales',
-            loadComponent: () => import('@features/administration/pages/branches-page')
+            children: [
+              {
+                path: '',
+                title: 'Sucursales',
+                loadComponent: () => import('@features/administration/pages/branches-page')
+              },
+              {
+                path: ':id',
+                title: 'Detalle de Sucursal',
+                loadComponent: () => import('@features/administration/pages/branch-detail-page')
+              }
+            ]
           }
         ]
       },

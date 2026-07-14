@@ -1,6 +1,6 @@
 import {
-  Component, inject, output, signal, computed, DestroyRef, OnInit,
-  input} from '@angular/core';
+  Component, inject, output, signal, DestroyRef, OnInit,
+} from '@angular/core';
 import { debounceTime, distinctUntilChanged, finalize, of, Subject, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { applyEach, applyWhen, form, required } from '@angular/forms/signals';
@@ -23,14 +23,12 @@ import {
 } from '@features/inventory/models/variant-form.model';
 
 @Component({
-  selector: 'app-existing-product-modal',
+  selector: 'app-add-from-catalogue-modal',
   standalone: true,
   imports: [ProductSearch, VariantNewRow, VariantExistingRow],
-  templateUrl: './existing-product-modal.html',
+  templateUrl: './add-from-catalogue-modal.html',
 })
-export class ExistingProductModal implements OnInit {
-
-
+export default class AddFromCatalogueModal implements OnInit {
 
   private productService = inject(ProductService);
   private destroyRef     = inject(DestroyRef);
@@ -38,12 +36,9 @@ export class ExistingProductModal implements OnInit {
 
   protected readonly Gender = Gender;
 
-  itemToEdit = input<{ index: number; item: ItemForm } | null>(null);
-
   // ── Outputs ───────────────────────────────────────────────────────────
   close    = output<void>();
   confirm  = output<ItemForm>();
-  update   = output<{ index: number; item: ItemForm }>();
   notFound = output<string>();
 
   // ── Estado UI ─────────────────────────────────────────────────────────
@@ -75,15 +70,8 @@ export class ExistingProductModal implements OnInit {
     });
   });
 
-  usedVariantIds = computed<GUID[]>(() =>
-    this.itemModel().variants
-      .filter(v => v.mode === 'ex' && v.id)
-      .map(v => v.id as GUID)
-  );
-
   // ── Init ──────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    this.initFromEdit();
     this.searchInput$.pipe(
       debounceTime(400),
       distinctUntilChanged(),
@@ -102,35 +90,6 @@ export class ExistingProductModal implements OnInit {
     ).subscribe(results => this.searchResults.set(results));
   }
 
-  private initFromEdit(): void {
-    const edit = this.itemToEdit();
-    if (edit === null) return;
-
-    this.itemModel.set(edit.item);
-
-    this.productService.getById(edit.item.product.id!).subscribe(result => {
-      if (!result) return;
-      this.selectedProduct.set({
-        id:           result.id,
-        name:         result.name,
-        internalCode: result.internalCode,
-        description:  result.description,
-        basePrice:    result.basePrice,
-        brandName:    result.brandName,
-        categoryName: result.categoryName,
-        gender:       result.gender,
-        productVariants: result.variants.map(v => ({
-          id:          v.id,
-          sku:         v.sku,
-          size:        v.size,
-          colorId:     v.colorId,
-          colorName:   v.color,
-          price:       v.price,
-        })),
-      });
-    });
-  }
-
   // ── Búsqueda ──────────────────────────────────────────────────────────
   onSearchChanged(query: string): void {
     this.searchInput$.next(query);
@@ -145,8 +104,6 @@ export class ExistingProductModal implements OnInit {
 
     this.selectedProduct.set(product);
 
-    const isEditing = this.itemToEdit() !== null;
-
     this.itemModel.set({
       product: {
         id:           product.id,
@@ -157,7 +114,8 @@ export class ExistingProductModal implements OnInit {
         genderName:   Gender[product.gender],
         description:  product.description,
       },
-      variants: isEditing ? this.itemModel().variants : [],
+      variants: [],
+      generalCost: null,
     });
   }
 
@@ -179,22 +137,28 @@ export class ExistingProductModal implements OnInit {
     this.itemModel.set({
       product: { id: null, internalCode: '', productName: '', categoryName: '', brandName: '', genderName: '', description: '' },
       variants: [],
+      generalCost: null,
     });
   }
 
   // ── Variantes ─────────────────────────────────────────────────────────
   addExistingVariant(): void {
-    this.itemModel.update(m => ({ ...m, variants: [...m.variants, buildExistingVariant()] }));
+    const generalCost = this.itemModel().generalCost;
+    const variant = { ...buildExistingVariant(), unitCost: generalCost ?? null };
+    this.itemModel.update(m => ({ ...m, variants: [...m.variants, variant] }));
   }
 
   addNewVariant(): void {
-    this.itemModel.update(m => ({ ...m, variants: [...m.variants, buildNewVariant()] }));
+    const generalCost = this.itemModel().generalCost;
+    const variant = { ...buildNewVariant(), unitCost: generalCost ?? null };
+    this.itemModel.update(m => ({ ...m, variants: [...m.variants, variant] }));
   }
 
   removeVariant(index: number): void {
     this.itemModel.update(m => ({ ...m, variants: m.variants.filter((_, i) => i !== index) }));
   }
-  replaceVariantForNew($event: string,index: number) {
+
+  replaceVariantForNew($event: string, index: number) {
     this.removeVariant(index);
     this.addNewVariant();
   }
@@ -239,13 +203,7 @@ export class ExistingProductModal implements OnInit {
         };
 
         this.isConfirming.set(false);
-
-        if (this.itemToEdit() !== null) {
-          this.update.emit({ index: this.itemToEdit()!.index, item: finalItem });
-        } else {
-          this.confirm.emit(finalItem);
-        }
-
+        this.confirm.emit(finalItem);
         this.close.emit();
       },
       error: err => {
@@ -255,24 +213,22 @@ export class ExistingProductModal implements OnInit {
       },
     });
   }
-  applyMassiveCost(value: string): void {
-  const cost = parseFloat(value);
-  
-  // Si borran el input masivo, podrías optar por dejarlo en null o 0
-  const cleanCost = isNaN(cost) ? null : cost;
 
-  // Actualizamos el Signal de forma segura e inmutable
-  this.itemModel.update(current => ({
-    ...current,
-    variants: current.variants.map(variant => ({
-      ...variant,
-      // Actualizamos el costo unitario manteniendo el resto de propiedades de la variante
-      unitCost: cleanCost 
-    }))
-  }));
-}
+  applyMassiveCost(value: string): void {
+    const cost = parseFloat(value);
+    const cleanCost = isNaN(cost) ? null : cost;
+
+    this.itemModel.update(current => ({
+      ...current,
+      generalCost: cleanCost,
+      variants: current.variants.map(variant => ({
+        ...variant,
+        unitCost: cleanCost,
+      })),
+    }));
+  }
 
   // ── Navegación ────────────────────────────────────────────────────────
-  onClose(): void               { this.close.emit(); }
+  onClose(): void                { this.close.emit(); }
   onNotFound(query: string): void { this.notFound.emit(query); }
 }
