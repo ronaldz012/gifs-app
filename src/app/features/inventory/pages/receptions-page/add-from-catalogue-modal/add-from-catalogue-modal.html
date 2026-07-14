@@ -59,7 +59,7 @@
     <section class="space-y-3">
 
       <div class="flex items-center justify-between">
-        <h3 class="section-title">Variantes del pedido</h3>
+        <h3 class="section-title">Variantes disponibles</h3>
         @if (itemModel().variants.length > 0) {
         <div class="flex items-center gap-1.5 bg-bg-muted/60 px-2 py-1 rounded-lg border border-border">
           <label class="text-[10px] font-medium text-text-soft uppercase tracking-wider">Costo Masivo:</label>
@@ -76,45 +76,68 @@
 
       <div class="border border-border rounded-xl bg-bg-surface shadow-sm">
 
-        <!-- Cabecera desktop -->
-        <div class="hidden md:grid grid-cols-[24px_120px_1fr_70px_75px_60px_75px_36px] bg-bg-muted border-b border-border">
-          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-center">#</div>
+        <div class="hidden md:grid grid-cols-[28px_100px_1fr_80px_80px_80px] bg-bg-muted border-b border-border">
+          <div class="px-2 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-center"></div>
           <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Código</div>
-          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Color</div>
-          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Talla</div>
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Color / Talla</div>
           <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right">P. Venta</div>
           <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right">Cant.</div>
           <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right">Costo U.</div>
-          <div></div>
         </div>
 
         <!-- Filas -->
         <div class="flex flex-col">
-          @for (variant of itemModel().variants; track $index; let i = $index) {
-            @if (variant.mode === 'ex') {
-              <app-variant-existing-row
-                class="block border-b border-border last:border-b-0 hover:bg-accent-ui/5 transition-colors"
-                [formModel]="itemForm.variants[i]"
-                [index]="i"
-                [availableVariants]="availableVariantsForRow(i)"
-                (remove)="removeVariant(i)"
-                (createNew)="replaceVariantForNew($event, i)"
-              />
-            } @else {
-              <app-variant-new-row
-                class="block border-b border-border last:border-b-0 hover:bg-accent-ui/5 transition-colors"
-                [formModel]="itemForm.variants[i]"
-                [existingVariants]="selectedProduct()?.productVariants ?? []"
-                [index]="i"
-                (remove)="removeVariant(i)"
-              />
-            }
+          @for (variant of itemModel().variants; track variant.id; let i = $index) {
+            <div
+              class="grid grid-cols-[28px_100px_1fr_80px_80px_80px] md:grid-cols-[28px_100px_1fr_80px_80px_80px] items-center border-b border-border last:border-b-0 transition-colors"
+            >
+              <div class="flex justify-center px-2 py-2">
+                <input
+                  type="checkbox"
+                  [checked]="variant.selected"
+                  (change)="toggleVariant(i)"
+                  class="accent-accent-ui cursor-pointer w-3.5 h-3.5"
+                />
+              </div>
+
+              <div class="px-3 py-2 text-[11px] font-mono text-text-main truncate">{{ variant.sku }}</div>
+
+              <div class="px-3 py-2 text-[11px] text-text-main truncate">
+                {{ variant.colorName }} / {{ variant.size }}
+              </div>
+
+              <div class="px-3 py-2 text-[11px] font-mono text-text-main text-right">
+                {{ variant.price != null ? ('Bs ' + (variant.price | number:'1.0-0')) : '—' }}
+              </div>
+
+              <div class="px-2 py-2">
+                <input
+                  type="number"
+                  [value]="variant.quantityReceived ?? ''"
+                  placeholder="0"
+                  [disabled]="!variant.selected"
+                  (input)="updateVariantField(i, 'quantityReceived', $event)"
+                  class="w-full px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-40 disabled:cursor-not-allowed"
+                />
+              </div>
+
+              <div class="px-2 py-2">
+                <input
+                  type="number"
+                  [value]="variant.unitCost ?? ''"
+                  placeholder="0.00"
+                  [disabled]="!variant.selected"
+                  (input)="updateVariantField(i, 'unitCost', $event)"
+                  class="w-full px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none disabled:opacity-40 disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
           } @empty {
             <div class="py-8 text-center text-xs italic text-text-soft">
               @if (selectedProduct()) {
-                Sin variantes. Agrega al menos una para continuar.
+                Sin variantes disponibles para este producto.
               } @else {
-                Selecciona un producto para agregar variantes.
+                Selecciona un producto para ver sus variantes.
               }
             </div>
           }
@@ -123,15 +146,7 @@
       </div>
 
     </section>
-      <button
-        type="button"
-        (click)="addExistingVariant()"
-        class="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-border rounded-xl text-xs font-bold uppercase tracking-wider text-text-soft hover:border-accent-ui hover:text-accent-ui hover:bg-accent-ui/5 transition-all">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-        </svg>
-        Agregar nueva fila (color + talla)
-      </button>
+
   </main>
 
   <!-- ── FOOTER ── -->

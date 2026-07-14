@@ -170,6 +170,7 @@ validateTree(s.variants, ({ value, fieldTree }) => {
           quantityReceived: variants[i].quantityReceived,
           unitCost:         variants[i].unitCost,
           description:      '',
+          selected:         false,
         } as VariantForm)),
       };
 

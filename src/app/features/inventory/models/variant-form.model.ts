@@ -30,6 +30,7 @@ export interface VariantForm {
   unitCost: number | null;
   price: number | null;
   sku: string;
+  selected: boolean;
 }
 export const existingVariantSchema = schema<VariantForm>((v) => {
   required(v.id,               { message: 'Seleccioná una variante' });
@@ -62,6 +63,7 @@ export function buildExistingVariant(): VariantForm {
     quantityReceived: null,
     unitCost:         null,
     sku:'',
+    selected:         false,
   };
 }
 
@@ -77,5 +79,6 @@ export function buildNewVariant(): VariantForm {
     quantityReceived: null,
     unitCost:         null,
     sku:'',
+    selected:         false,
   };
 }

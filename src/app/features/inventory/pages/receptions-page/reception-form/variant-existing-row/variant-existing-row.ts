@@ -76,6 +76,7 @@ selectVariant(variant: ProductVariantOption): void {
       quantityReceived: null,
       unitCost: null,
       sku: variant.sku,
+      selected: false,
     });
 
     this.variantSearch.set(variant.sku);
@@ -96,7 +97,8 @@ selectVariant(variant: ProductVariantOption): void {
         quantityReceived: null,
         unitCost: 0,
         price: null,
-        sku: ''
+        sku: '',
+        selected: false,
       });
     }
   }

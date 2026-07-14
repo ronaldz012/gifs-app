@@ -1,31 +1,25 @@
 import {
   Component, inject, input, output, signal, DestroyRef, OnInit,
 } from '@angular/core';
-import { debounceTime, distinctUntilChanged, finalize, of, Subject, switchMap } from 'rxjs';
+import { DecimalPipe } from '@angular/common';
+import { debounceTime, distinctUntilChanged, finalize, Subject, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { applyEach, applyWhen, form, required } from '@angular/forms/signals';
 
 import { ProductSearch } from '../../../components/product-search/product-search.component';
 import { ProductSearchResult } from '../../../components/product-search/product-search-result.component';
-import VariantNewRow from '../reception-form/variant-new-row/variant-new-row';
-import VariantExistingRow from '../reception-form/variant-existing-row/variant-existing-row';
 
 import { ProductService } from '@features/inventory/services/product-service';
 import { Gender } from '@features/inventory/interfaces/gender';
-import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
 import {
-  buildExistingVariant,
-  buildNewVariant,
   existingVariantSchema,
   ItemForm,
-  newVariantSchema,
-  VariantForm,
 } from '@features/inventory/models/variant-form.model';
 
 @Component({
   selector: 'app-edit-catalogue-item-modal',
   standalone: true,
-  imports: [ProductSearch, VariantNewRow, VariantExistingRow],
+  imports: [ProductSearch, DecimalPipe],
   templateUrl: './edit-catalogue-item-modal.html',
 })
 export default class EditCatalogueItemModal implements OnInit {
@@ -68,8 +62,7 @@ export default class EditCatalogueItemModal implements OnInit {
   itemForm = form(this.itemModel, s => {
     required(s.product.id, { message: 'Requerido' });
     applyEach(s.variants, item => {
-      applyWhen(item, ({ valueOf }) => valueOf(item.mode) === 'ex', existingVariantSchema);
-      applyWhen(item, ({ valueOf }) => valueOf(item.mode) === 'new', newVariantSchema);
+      applyWhen(item, ({ valueOf }) => valueOf(item.selected) === true, existingVariantSchema);
     });
   });
 
@@ -96,10 +89,14 @@ export default class EditCatalogueItemModal implements OnInit {
 
   private initFromEdit(): void {
     const editItem = this.item();
-    this.itemModel.set(editItem);
 
     this.productService.getById(editItem.product.id!).subscribe(result => {
       if (!result) return;
+
+      const existingMap = new Map(
+        editItem.variants.filter(v => v.id).map(v => [v.id, v])
+      );
+
       this.selectedProduct.set({
         id:           result.id,
         name:         result.name,
@@ -117,6 +114,35 @@ export default class EditCatalogueItemModal implements OnInit {
           colorName:   v.color,
           price:       v.price,
         })),
+      });
+
+      this.itemModel.set({
+        product: {
+          id:           result.id,
+          productName:  result.name,
+          internalCode: result.internalCode,
+          categoryName: result.categoryName,
+          brandName:    result.brandName,
+          genderName:   Gender[result.gender],
+          description:  result.description,
+        },
+        variants: result.variants.map(v => {
+          const existing = existingMap.get(v.id);
+          return {
+            mode:             'ex' as const,
+            id:               v.id,
+            size:             v.size,
+            colorId:          v.colorId,
+            colorCode:        '',
+            colorName:        v.color,
+            price:            v.price,
+            quantityReceived: existing?.quantityReceived ?? null,
+            unitCost:         existing?.unitCost ?? null,
+            sku:              v.sku,
+            selected:         !!existing,
+          };
+        }),
+        generalCost: editItem.generalCost ?? null,
       });
     });
   }
@@ -145,22 +171,21 @@ export default class EditCatalogueItemModal implements OnInit {
         genderName:   Gender[product.gender],
         description:  product.description,
       },
-      variants: this.itemModel().variants,
-      generalCost: this.itemModel().generalCost,
+      variants: product.productVariants.map(v => ({
+        mode:             'ex' as const,
+        id:               v.id,
+        size:             v.size,
+        colorId:          v.colorId,
+        colorCode:        '',
+        colorName:        v.colorName,
+        price:            v.price,
+        quantityReceived: null,
+        unitCost:         null,
+        sku:              v.sku,
+        selected:         false,
+      })),
+      generalCost: null,
     });
-  }
-
-  availableVariantsForRow(index: number) {
-    const product = this.selectedProduct();
-    if (!product) return [];
-
-    const usedIds = new Set(
-      this.itemModel().variants
-        .filter((v, i) => v.mode === 'ex' && v.id && i !== index)
-        .map(v => v.id as GUID)
-    );
-
-    return product.productVariants.filter(v => !usedIds.has(v.id as GUID));
   }
 
   private clearProduct(): void {
@@ -173,76 +198,46 @@ export default class EditCatalogueItemModal implements OnInit {
   }
 
   // ── Variantes ─────────────────────────────────────────────────────────
-  addExistingVariant(): void {
-    const generalCost = this.itemModel().generalCost;
-    const variant = { ...buildExistingVariant(), unitCost: generalCost ?? null };
-    this.itemModel.update(m => ({ ...m, variants: [...m.variants, variant] }));
+  toggleVariant(index: number): void {
+    this.itemModel.update(m => {
+      const variants = m.variants.map((v, i) =>
+        i === index ? { ...v, selected: !v.selected } : v
+      );
+      return { ...m, variants };
+    });
   }
 
-  addNewVariant(): void {
-    const generalCost = this.itemModel().generalCost;
-    const variant = { ...buildNewVariant(), unitCost: generalCost ?? null };
-    this.itemModel.update(m => ({ ...m, variants: [...m.variants, variant] }));
-  }
+  updateVariantField(index: number, field: 'quantityReceived' | 'unitCost', event: Event): void {
+    const value = parseFloat((event.target as HTMLInputElement).value);
+    const cleanValue = isNaN(value) ? null : value;
 
-  removeVariant(index: number): void {
-    this.itemModel.update(m => ({ ...m, variants: m.variants.filter((_, i) => i !== index) }));
-  }
-
-  replaceVariantForNew($event: string, index: number) {
-    this.removeVariant(index);
-    this.addNewVariant();
+    this.itemModel.update(m => {
+      const variants = m.variants.map((v, i) =>
+        i === index ? { ...v, [field]: cleanValue } : v
+      );
+      return { ...m, variants };
+    });
   }
 
   // ── Submit ────────────────────────────────────────────────────────────
   onConfirm(): void {
     this.itemForm().markAsTouched();
 
-    const { variants } = this.itemModel();
-    if (this.itemForm().invalid() || !variants.length) return;
+    const selectedVariants = this.itemModel().variants.filter(v => v.selected);
+    if (!selectedVariants.length) {
+      this.error.set('Seleccioná al menos una variante.');
+      return;
+    }
 
-    const newVariants = variants.filter(v => v.mode === 'new');
-    const exVariants  = variants.filter(v => v.mode === 'ex');
+    if (this.itemForm().invalid()) return;
 
-    const creates$ = newVariants.length
-      ? this.productService.createVariants(
-          this.itemModel().product.id!,
-          newVariants.map(v => ({
-            size:        v.size,
-            colorId:     v.colorId,
-            price:       v.price,
-          } as CreateProductVariantDto))
-        )
-      : of([]);
+    const finalItem: ItemForm = {
+      ...this.itemModel(),
+      variants: selectedVariants,
+    };
 
-    this.isConfirming.set(true);
-    this.error.set(null);
-
-    creates$.subscribe({
-      next: createdVariants => {
-        const newAsEx: VariantForm[] = createdVariants.map((cv, i) => ({
-          ...newVariants[i],
-          mode: 'ex' as const,
-          id:   cv.productVariantId,
-          sku:  cv.sku,
-          size: cv.size,
-        }));
-
-        const finalItem: ItemForm = {
-          ...this.itemModel(),
-          variants: [...exVariants, ...newAsEx],
-        };
-
-        this.isConfirming.set(false);
-        this.update.emit({ index: this.index(), item: finalItem });
-        this.close.emit();
-      },
-      error: err => {
-        this.isConfirming.set(false);
-        this.error.set('Error al crear variantes. Intentá de nuevo.');
-        console.error(err);
-      },
-    });
+    this.update.emit({ index: this.index(), item: finalItem });
+    this.close.emit();
   }
 
   applyMassiveCost(value: string): void {
