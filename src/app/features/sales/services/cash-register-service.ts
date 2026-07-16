@@ -5,11 +5,14 @@ import { environment } from 'environments/environment';
 import { CurrentRegisterDto } from '@features/sales/dtos/current-register-dto';
 import { OpenCashRegisterDto } from '@features/sales/dtos/open-cash-register-dto';
 import { CloseCashRegisterDto } from '@features/sales/dtos/close-cash-register-dto';
+import { MovementListDto } from '@features/sales/dtos/movement-list-dto';
+import { CreateMovementDto } from '@features/sales/dtos/create-movement-dto';
 
 @Injectable({ providedIn: 'root' })
 export class CashRegisterService {
   private http = inject(HttpClient);
   private baseUrl = environment.BACKEND_URL + '/api/CashRegister';
+  private movementUrl = environment.BACKEND_URL + '/api/CashRegisterMovement';
 
   getCurrentRegister(): Observable<CurrentRegisterDto> {
     return this.http.get<CurrentRegisterDto>(`${this.baseUrl}/Current`);
@@ -21,5 +24,13 @@ export class CashRegisterService {
 
   closeRegister(dto: CloseCashRegisterDto): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/Close`, dto);
+  }
+
+  getMovements(): Observable<MovementListDto[]> {
+    return this.http.get<MovementListDto[]>(this.movementUrl);
+  }
+
+  createMovement(dto: CreateMovementDto): Observable<void> {
+    return this.http.post<void>(this.movementUrl, dto);
   }
 }
