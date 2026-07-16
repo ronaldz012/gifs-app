@@ -1,4 +1,5 @@
 import { Component, OnInit, signal, ViewChild, inject, computed } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { form, applyEach, min, validate } from '@angular/forms/signals';
 import { ProductService } from '@features/inventory/services';
 import { isBarcodeApiAvailable, QrScannerModal } from '@features/sales/components/qr-scanner-modal/qr-scanner-modal';
@@ -9,6 +10,8 @@ import { ProductVariantBySkuDto } from '@features/inventory/dtos/products/produc
 import { DecimalPipe } from '@angular/common';
 import { PosMobilePayModal } from './pos-mobile-pay-modal/pos-mobile-pay-modal';
 import { PosDesktopPayPanel } from './pos-desktop-pay-panel/pos-desktop-pay-panel';
+import { CashRegisterService } from '@features/sales/services/cash-register-service';
+import { CurrentRegisterDto } from '@features/sales/dtos/current-register-dto';
 
 
 
@@ -16,15 +19,26 @@ import { PosDesktopPayPanel } from './pos-desktop-pay-panel/pos-desktop-pay-pane
   selector: 'app-pos-page',
   standalone: true,
   imports: [
+    RouterLink,
     QrScannerModal, 
     PosCartItemCardComponent, 
-    DecimalPipe, 
+    DecimalPipe,
     PosMobilePayModal, 
     PosDesktopPayPanel
   ],
   templateUrl: './pos-page.html',
 })
 export default class PosPage implements OnInit {
+
+  // ── Register state ────────────────────────────────────────────────────
+  registerState = signal<'loading' | 'closed' | 'open'>('loading');
+  currentRegister = signal<CurrentRegisterDto | null>(null);
+  showOpenForm = signal(false);
+  openingBalance = signal<number>(0);
+
+  private cashRegisterService = inject(CashRegisterService);
+
+  // ── POS state ──────────────────────────────────────────────────────────
 
   @ViewChild(QrScannerModal) scanner!: QrScannerModal;
   
@@ -72,6 +86,37 @@ export default class PosPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.scannerAvailable.set(await isBarcodeApiAvailable());
+    this.checkRegister();
+  }
+
+  checkRegister(): void {
+    this.cashRegisterService.getCurrentRegister().subscribe({
+      next: (register) => {
+        if (register.isOpen) {
+          this.currentRegister.set(register);
+          this.registerState.set('open');
+        } else {
+          this.registerState.set('closed');
+        }
+      },
+      error: () => this.registerState.set('closed')
+    });
+  }
+
+  toggleOpenForm(): void {
+    this.showOpenForm.update(v => !v);
+    this.openingBalance.set(0);
+  }
+
+  confirmOpenRegister(): void {
+    this.cashRegisterService.openRegister({ openingBalance: this.openingBalance() }).subscribe({
+      next: () => {
+        this.showOpenForm.set(false);
+        this.openingBalance.set(0);
+        this.checkRegister();
+      },
+      error: () => alert('Error al abrir la caja. Intente de nuevo.')
+    });
   }
 
   searchBySku(skuValue: string): void {
