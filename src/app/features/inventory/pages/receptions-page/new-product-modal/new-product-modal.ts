@@ -1,6 +1,5 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { ProductService } from '@features/inventory/services/product-service';
-import VariantNewRow from '../reception-form/variant-new-row/variant-new-row';
 import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
 import { CurrencyPipe } from '@angular/common';
 import { NewProductModelForm } from '@features/inventory/models/new-product.model';
@@ -9,10 +8,11 @@ import { buildNewVariant, ItemForm, newVariantSchema, VariantForm } from '@featu
 import { BrandSelectCtrl } from "@features/inventory/components/brand-select-crtl/brand-select-crtl.component";
 import { CategorySelectCtrl } from "@features/inventory/components/category-select-ctrl/category-select-ctrl.component";
 import { Gender } from '@features/inventory/interfaces/gender';
+import { ColorSelectCtrl } from '@features/inventory/components/color-select-ctrl/color-select-ctrl.component';
 
 @Component({
   selector: 'app-new-product-modal',
-  imports: [VariantNewRow, CurrencyPipe, BrandSelectCtrl, CategorySelectCtrl,FormField],
+  imports: [FormField, CurrencyPipe, BrandSelectCtrl, CategorySelectCtrl, ColorSelectCtrl],
   templateUrl: './new-product-modal.html',
 })
 export class NewProductModal {
