@@ -12,6 +12,8 @@ import { PosMobilePayModal } from './pos-mobile-pay-modal/pos-mobile-pay-modal';
 import { PosDesktopPayPanel } from './pos-desktop-pay-panel/pos-desktop-pay-panel';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { CurrentRegisterDto } from '@features/sales/dtos/current-register-dto';
+import { SaleService } from '@features/sales/services/sale-service';
+import { CreateSaleDto, CreateSaleItemDto } from '@features/sales/dtos/create-sale-dto';
 
 
 
@@ -37,6 +39,7 @@ export default class PosPage implements OnInit {
   openingBalance = signal<number>(0);
 
   private cashRegisterService = inject(CashRegisterService);
+  private saleService = inject(SaleService);
 
   // ── POS state ──────────────────────────────────────────────────────────
 
@@ -82,6 +85,49 @@ export default class PosPage implements OnInit {
   // Validador global para habilitar los flujos de cobros
   isFormValid = computed(() => {
     return this.posModel().items.length > 0 && this.posForm().valid();
+  });
+
+  registerLabel = computed(() => {
+    const reg = this.currentRegister();
+    if (!reg?.openedAt) return '';
+
+    const opened = new Date(reg.openedAt);
+    const now = new Date();
+
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const openedDay = new Date(opened.getFullYear(), opened.getMonth(), opened.getDate());
+
+    const diffDays = Math.round((today.getTime() - openedDay.getTime()) / (1000 * 60 * 60 * 24));
+
+    let dayLabel: string;
+    if (diffDays === 0) {
+      dayLabel = 'hoy';
+    } else if (diffDays === 1) {
+      dayLabel = 'ayer';
+    } else {
+      dayLabel = `${String(opened.getDate()).padStart(2, '0')}/${String(opened.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    const time = `${String(opened.getHours()).padStart(2, '0')}:${String(opened.getMinutes()).padStart(2, '0')}`;
+
+    return `Caja abierta · ${dayLabel} ${time}`;
+  });
+
+  registerDayStatus = computed<'today' | 'yesterday' | 'old'>(() => {
+    const reg = this.currentRegister();
+    if (!reg?.openedAt) return 'today';
+
+    const opened = new Date(reg.openedAt);
+    const now = new Date();
+
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const openedDay = new Date(opened.getFullYear(), opened.getMonth(), opened.getDate());
+
+    const diffDays = Math.round((today.getTime() - openedDay.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'today';
+    if (diffDays === 1) return 'yesterday';
+    return 'old';
   });
 
   async ngOnInit(): Promise<void> {
@@ -135,18 +181,33 @@ export default class PosPage implements OnInit {
    */
   submitSale(): void {
     if (!this.isFormValid()) return;
-    
-    console.log('Modelo listo para enviar a la API:', this.posModel());
-    alert('Venta procesada con éxito');
-    
-    // Reset del flujo operativo posterior a la transacción
-    this.isMobilePayOpen.set(false);
-    this.posModel.set({
-      paymentMethod: PaymentMethod.Cash,
-      transactionCode: null,
-      publicName: '',
-      cashReceived: 0,
-      items: []
+
+    const state = this.posModel();
+    const dto: CreateSaleDto = {
+      paymentMethod: state.paymentMethod,
+      invoiceNumber: null,
+      documentType: 0, // Ticket
+      transactionCode: state.transactionCode,
+      notes: null,
+      items: state.items.map(item => ({
+        productVariantId: item.productVariantId,
+        quantity: item.quantity,
+        discountAmount: item.discountAmount,
+      })),
+    };
+
+    this.saleService.createSale(dto).subscribe({
+      next: () => {
+        this.isMobilePayOpen.set(false);
+        this.posModel.set({
+          paymentMethod: PaymentMethod.Cash,
+          transactionCode: null,
+          publicName: '',
+          cashReceived: 0,
+          items: [],
+        });
+      },
+      error: () => alert('Error al procesar la venta. Intente de nuevo.'),
     });
   }
 

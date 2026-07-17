@@ -79,7 +79,6 @@ import CreateProductModal from '../create-product-modal/create-product-modal';
             [product]="p"
             [index]="i"
             (viewDetail)="goToDetail($event)"
-            (viewStock)="goToStock($event)"
             (viewMovements)="goToMovements($event)" />
         }
       </ul>
@@ -159,6 +158,5 @@ export default class ProductList implements OnInit {
   }
 
   goToDetail(id: GUID) { this.router.navigate(['inventory', 'products', id, 'detail']); }
-  goToStock(id: GUID) { this.router.navigate(['inventory','products', id, 'stock']); }
   goToMovements(id: GUID) { this.router.navigate(['inventory','products', id, 'movements']); }
 }

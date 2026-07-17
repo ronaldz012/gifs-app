@@ -1,14 +1,11 @@
-<li
-  class="row-enter bg-bg-surface relative overflow-hidden border-b border-border transition-all duration-200 hover:shadow-md group"
-  [style.animation-delay.ms]="index() * 30"
->
-  <!-- Indicador lateral izquierdo -->
+<li class="row-enter bg-bg-surface relative overflow-hidden border-b border-border transition-all duration-200 hover:shadow-md">
+
   <div class="absolute bottom-0 left-0 top-0 w-[4px] bg-accent-ui opacity-0 transition-opacity duration-150 group-hover:opacity-100 lg:block hidden"></div>
 
   <!-- ====== MOBILE ====== -->
-  <div class="flex items-center gap-3 px-4 py-3.5 lg:hidden">
+  <div class="flex items-center gap-4 px-4 py-3.5 lg:hidden">
     <div class="flex flex-col min-w-0 flex-1">
-      <div class="flex items-center gap-2 mb-1">
+      <div class="mb-1 flex items-center gap-2">
         <span
           class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none"
           [class]="statusClasses(reception().status)"
@@ -37,33 +34,27 @@
       }
     </div>
     <div class="shrink-0">
-      <button
-        (click)="viewDetails.emit(reception().id)"
-        title="Ver detalle"
-        class="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-btn-secondary-bg text-btn-primary-bg hover:bg-btn-primary-bg hover:text-btn-primary-text transition-all duration-150"
-      >
-        <span class="material-icons text-base">open_in_new</span>
+      <button (click)="viewDetails.emit(reception().id)" class="btn-link">
+        <span class="btn-link-text">Ver más</span>
+        <span class="material-icons text-base">chevron_right</span>
       </button>
     </div>
   </div>
 
   <!-- ====== DESKTOP ====== -->
   <div
-    class="hidden lg:grid items-center px-4 py-2.5 hover:bg-bg-muted transition-colors duration-150"
+    class="group hidden lg:grid items-center px-4 py-3 transition-colors duration-150 hover:bg-bg-muted"
     style="grid-template-columns: 7rem 1fr 9rem 6rem 5rem 7rem 5.5rem 3.5rem;"
   >
-    <!-- Estado -->
     <span
       class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none w-fit"
       [class]="statusClasses(reception().status)"
     >{{ Status[reception().status] }}</span>
 
-    <!-- Marcas -->
     <p class="truncate pr-4 font-inter text-sm font-semibold text-text-main group-hover:text-accent-ui transition-colors duration-150">
       {{ reception().brandNames.join(', ') || '—' }}
     </p>
 
-    <!-- Categorías -->
     <div class="flex items-center gap-1 min-w-0 pr-2">
       @for (cat of reception().categoryNames.slice(0, 2); track cat) {
         <span class="max-w-[4rem] truncate rounded border border-border bg-bg-muted px-1.5 py-0.5 font-inter text-[10px] font-medium text-text-muted"
@@ -74,35 +65,27 @@
       }
     </div>
 
-    <!-- Variantes -->
     <span class="pr-4 text-right font-inter text-xs font-medium text-text-soft">
       {{ reception().productVariantsCount }}
       {{ reception().productVariantsCount === 1 ? 'var.' : 'vars.' }}
     </span>
 
-    <!-- Unidades -->
     <span class="pr-4 text-right font-inter text-xs font-medium text-text-muted">
       {{ reception().totalItems }} uds
     </span>
 
-    <!-- Costo -->
     <span class="pr-4 text-right font-inter text-sm font-extrabold text-accent-ui">
       {{ reception().totalCost | currency:'BOB':'symbol':'1.2-2' }}
     </span>
 
-    <!-- Fecha -->
     <span class="pr-4 text-right font-inter text-xs font-medium text-text-soft">
       {{ reception().receivedAt | date:'dd/MM/yy' }}
     </span>
 
-    <!-- Acción -->
-    <div class="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity duration-150">
-      <button
-        (click)="viewDetails.emit(reception().id)"
-        title="Ver detalle"
-        class="flex h-8 w-8 items-center justify-center rounded border border-border bg-btn-secondary-bg text-text-muted hover:bg-btn-primary-bg hover:text-btn-primary-text hover:border-btn-primary-bg transition-all duration-150"
-      >
-        <span class="material-icons text-base leading-none">open_in_new</span>
+    <div class="flex justify-end">
+      <button (click)="viewDetails.emit(reception().id)" class="btn-link">
+        <span class="btn-link-text">Ver más</span>
+        <span class="material-icons text-base">chevron_right</span>
       </button>
     </div>
   </div>

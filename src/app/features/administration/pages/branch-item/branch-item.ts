@@ -7,11 +7,9 @@ import { BranchListItemDto } from '../../dtos/branches/branch-list-item-dto';
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a
+    <div
       class="row-enter px-4 py-3 flex flex-wrap items-center gap-y-2
-             transition-colors duration-150 hover:bg-bg-muted
-             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-focus-ring focus-visible:ring-inset"
-      [routerLink]="['/admin', 'branches', branch().id]"
+             transition-colors duration-150 hover:bg-bg-muted"
       style="grid-template-columns: 1fr 1fr 7.5rem 5rem"
     >
       <div class="w-full lg:w-auto lg:flex-1 min-w-0">
@@ -24,11 +22,12 @@ import { BranchListItemDto } from '../../dtos/branches/branch-list-item-dto';
         <span class="pill-neutral text-[10px] font-semibold"
               [class.!hidden]="branch().isActive">Inactivo</span>
       </div>
-      <span class="w-full lg:w-[5rem] flex items-center gap-1 text-xs font-medium text-accent-ui">
-        Ver
+      <a class="w-full lg:w-[5rem] btn-link"
+         [routerLink]="['/admin', 'branches', branch().id]">
+        <span class="btn-link-text">Ver más</span>
         <span class="material-icons text-base">chevron_right</span>
-      </span>
-    </a>
+      </a>
+    </div>
   `,
   styles: `
     @keyframes slide-up {

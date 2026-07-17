@@ -15,7 +15,6 @@ export default class ProductItem {
   index         = input<number>(0);
 
   viewDetail    = output<GUID>();
-  viewStock     = output<GUID>();
   viewMovements = output<GUID>();
 
 

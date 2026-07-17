@@ -151,9 +151,18 @@ export const routes: Routes = [
           },
           {
             path: 'sales',
-            redirectTo: 'pos',
-            pathMatch: 'full'
-          }
+            title: 'Ventas',
+            canActivate: [featureGuard],
+            data: { module: 'sales', feature: 'sales' },
+            loadComponent: () => import('@features/sales/pages/sales-list-page/sales-list-page')
+          },
+          {
+            path: 'sale/:id',
+            title: 'Detalle de Venta',
+            canActivate: [featureGuard],
+            data: { module: 'sales', feature: 'sales' },
+            loadComponent: () => import('@features/sales/pages/sale-detail-page/sale-detail-page')
+          },
         ]
       },
       // ── Administration ──────────────────────────────────────────────────────

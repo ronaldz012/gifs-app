@@ -24,15 +24,10 @@
       </p>
     </div>
 
-    <!-- Botones mobile -->
     <div class="flex shrink-0 gap-1.5">
-      <button (click)="viewDetail.emit(product().id)"
-              class="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-btn-secondary-bg text-btn-primary-bg hover:bg-btn-primary-bg hover:text-btn-primary-text transition-all duration-150">
-        <span class="material-icons text-base">open_in_new</span>
-      </button>
-      <button (click)="viewStock.emit(product().id)"
-              class="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-btn-secondary-bg text-btn-primary-bg hover:bg-btn-primary-bg hover:text-btn-primary-text transition-all duration-150">
-        <span class="material-icons text-base">inventory_2</span>
+      <button (click)="viewDetail.emit(product().id)" class="btn-link">
+        <span class="btn-link-text">Ver más</span>
+        <span class="material-icons text-base">chevron_right</span>
       </button>
     </div>
   </div>
@@ -87,15 +82,10 @@
       {{ product().displayPrice | currency:'BOB':'symbol':'1.2-2' }}
     </span>
 
-    <!-- Acciones -->
-    <div class="flex shrink-0 justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity duration-150">
-      <button (click)="viewDetail.emit(product().id)" title="Info y variantes"
-              class="flex h-8 w-8 items-center justify-center rounded border border-border bg-btn-secondary-bg text-text-muted hover:bg-btn-primary-bg hover:text-btn-primary-text hover:border-btn-primary-bg transition-all duration-150">
-        <span class="material-icons text-base leading-none">open_in_new</span>
-      </button>
-      <button (click)="viewStock.emit(product().id)" title="Stock por sucursal"
-              class="flex h-8 w-8 items-center justify-center rounded border border-border bg-btn-secondary-bg text-text-muted hover:bg-btn-primary-bg hover:text-btn-primary-text hover:border-btn-primary-bg transition-all duration-150">
-        <span class="material-icons text-base leading-none">inventory_2</span>
+    <div class="flex shrink-0 justify-end">
+      <button (click)="viewDetail.emit(product().id)" class="btn-link">
+        <span class="btn-link-text">Ver más</span>
+        <span class="material-icons text-base">chevron_right</span>
       </button>
     </div>
   </div>

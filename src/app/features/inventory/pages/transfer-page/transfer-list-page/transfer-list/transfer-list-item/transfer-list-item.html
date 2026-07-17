@@ -36,8 +36,10 @@
       </p>
     </div>
     <div class="flex items-center gap-2 shrink-0">
-      <button (click)="viewDetail.emit(transfer().id)" title="Ver detalles"
-              class="btn-icon-md hover:border-border-strong hover:text-text-muted">↗</button>
+      <button (click)="viewDetail.emit(transfer().id)" class="btn-link">
+        <span class="btn-link-text">Ver más</span>
+        <span class="material-icons text-base">chevron_right</span>
+      </button>
       @if (canResolve()) {
         <button (click)="requestResolve.emit(transfer().id)"
                 class="btn-primary btn-sm">Resolver</button>
@@ -102,8 +104,10 @@
 
     <!-- Acciones -->
     <div class="flex items-center justify-end gap-1.5">
-      <button (click)="viewDetail.emit(transfer().id)" title="Ver detalles"
-              class="btn-icon border border-transparent group-hover:border-border group-hover:text-text-muted hover:!text-text-main">↗</button>
+      <button (click)="viewDetail.emit(transfer().id)" class="btn-link">
+        <span class="btn-link-text">Ver más</span>
+        <span class="material-icons text-base">chevron_right</span>
+      </button>
       @if (canResolve()) {
         <button (click)="requestResolve.emit(transfer().id)"
                 class="btn-primary btn-sm">
