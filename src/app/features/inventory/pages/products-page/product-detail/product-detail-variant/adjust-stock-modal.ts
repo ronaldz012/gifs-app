@@ -82,7 +82,7 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
 
         <!-- Current stock reference -->
         <p class="text-center text-xs text-text-soft mb-5">
-          Stock actual: <span class="font-medium text-text-muted">{{ variant().stock }} u</span>
+          Stock actual: <span class="font-medium text-text-muted">{{ variant().totalAvailable }} u</span>
         </p>
 
         <!-- Notes -->
@@ -147,7 +147,7 @@ export class AdjustStockModal implements OnInit {
   notes   = signal('');
   touched = signal(false);
 
-  delta = computed(() => this.newStock() - this.variant().stock);
+  delta = computed(() => this.newStock() - this.variant().totalAvailable);
 
   deltaClass = computed(() => {
   const d = this.delta();
@@ -160,7 +160,7 @@ export class AdjustStockModal implements OnInit {
   canSave      = computed(() => this.notes().trim().length >= 3);
 
   ngOnInit(): void {
-    this.newStock.set(this.variant().stock);
+    this.newStock.set(this.variant().totalAvailable);
   }
 
   increment(): void {

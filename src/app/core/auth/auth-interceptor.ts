@@ -19,8 +19,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       Authorization: `Bearer ${token}`,
     };
 
-    const branchId = branchContext.getActiveBranchId();
-    if (branchId) headers['X-Branch-Id'] = branchId;
+    const existingBranchId = req.headers.get('X-Branch-Id');
+    if (!existingBranchId) {
+      const branchId = branchContext.getActiveBranchId();
+      if (branchId) headers['X-Branch-Id'] = branchId;
+    }
 
     req = req.clone({ setHeaders: headers });
   }

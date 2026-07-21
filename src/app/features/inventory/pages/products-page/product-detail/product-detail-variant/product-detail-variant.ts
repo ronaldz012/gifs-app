@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { ProductVariantDto } from '../../../../dtos/products/product-detail-dto';
+import { ProductVariantDto, BranchStockDto } from '../../../../dtos/products/product-detail-dto';
 import { CurrencyPipe } from '@angular/common';
 
 @Component({
@@ -7,16 +7,17 @@ import { CurrencyPipe } from '@angular/common';
   imports: [CurrencyPipe],
   template: `
     <!-- ── Desktop Row ──────────────────────────────────────────────────────── -->
-    <li class="hidden sm:grid grid-cols-[1fr_64px_88px_88px_72px_128px] gap-2 items-center
-               px-3 py-3 hover:bg-bg-muted/60 transition-colors text-sm">
+    <li class="hidden sm:grid gap-2 items-center
+               px-3 py-3 hover:bg-bg-muted/60 transition-colors text-sm"
+        [style.grid-template-columns]="gridColumnsStyle()">
       <span class="font-mono text-xs text-text-muted truncate">{{ variant().sku }}</span>
       <span class="field-value">{{ variant().size }}</span>
       <span class="field-value">{{ variant().color }}</span>
       <span class="field-value">{{ variant().price | currency:'BOB':'symbol':'1.2-2' }}</span>
-      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs
-                   bg-feedback-success text-feedback-success-text w-fit tabular-nums">
-        {{ variant().stock }} u
-      </span>
+      @for (branchId of branchKeys(); track branchId) {
+        <span class="tabular-nums text-center">{{ getStock(branchId) }}</span>
+      }
+      <span class="tabular-nums font-semibold text-center">{{ variant().totalAvailable }}</span>
       <div class="flex gap-1 justify-end">
         <button (click)="viewHistory.emit(variant())" class="btn-icon
           hover:text-text-main hover:bg-bg-muted" title="Ver movimientos">
@@ -44,8 +45,13 @@ import { CurrencyPipe } from '@angular/common';
         <p class="text-sm font-medium text-text-main">{{ variant().size }} · {{ variant().color }}</p>
         <p class="text-xs text-text-muted mt-0.5">
           {{ variant().price | currency:'BOB':'symbol':'1.2-2' }}
-          · <span class="font-medium text-feedback-success-text">{{ variant().stock }} u</span>
+          · <span class="font-medium text-feedback-success-text">{{ variant().totalAvailable }} u</span>
         </p>
+        <div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-text-muted mt-1">
+          @for (branchId of branchKeys(); track branchId) {
+            <span>{{ branchMap()[branchId] }}: {{ getStock(branchId) }}u</span>
+          }
+        </div>
       </div>
       <div class="flex gap-1 shrink-0">
         <button (click)="viewHistory.emit(variant())" class="btn-icon-md
@@ -71,9 +77,16 @@ import { CurrencyPipe } from '@angular/common';
 export class ProductDetailVariant {
   variant = input.required<ProductVariantDto>();
   submitting = input.required<boolean>();
+  branchMap = input<Record<string, string>>({});
+  branchKeys = input<string[]>([]);
+  gridColumnsStyle = input<string>('');
 
   editVariant   = output<ProductVariantDto>();
   deleteVariant = output<ProductVariantDto>();
   adjustStock   = output<ProductVariantDto>();
   viewHistory   = output<ProductVariantDto>();
+
+  getStock(branchId: string): number {
+    return this.variant().branchStocks.find(s => s.branchId === branchId)?.stock ?? 0;
+  }
 }

@@ -1,7 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../../services/product-service';
-import { ProductDetailDto, ProductVariantDto } from '../../../dtos/products/product-detail-dto';
+import { BranchStockDto, ProductDetailDto, ProductVariantDto } from '../../../dtos/products/product-detail-dto';
+import { BranchContextService } from '@core/services/branch-context-service';
 
 import { UpdateProductVariantStockDto } from '../../../dtos/products/update-product-variant-stock-dto';
 import {ProductDetailVariant} from './product-detail-variant/product-detail-variant';
@@ -26,7 +27,7 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
     SkeletonList,
   ],
   template: `
-    <div class="max-w-3xl mx-auto fade-up">
+    <div class="max-w-6xl mx-auto fade-up">
 
     @if (loading()) {
       <app-skeleton-list [rows]="3" [columns]="2" />
@@ -77,7 +78,7 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
             </div>
             <div>
               <p class="field-label">Stock total</p>
-              <p class="field-value">{{ p.totalStock }} unidades</p>
+              <p class="field-value">{{ p.totalAvailable }} unidades</p>
             </div>
             @if (p.description) {
               <div class="sm:col-span-2">
@@ -105,14 +106,17 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
 
           <!-- ── Desktop ─────────────────────────────────────────────────────── -->
           <div class="hidden sm:block">
-            <div class="grid grid-cols-[1fr_64px_88px_88px_72px_128px] gap-2
-                        text-[10px] text-text-soft tracking-wide
-                        px-3 py-2 bg-bg-muted rounded-lg mb-1">
+            <div class="grid gap-2 text-[10px] text-text-soft tracking-wide
+                        px-3 py-2 bg-bg-muted rounded-lg mb-1"
+                 [style.grid-template-columns]="gridColumnsStyle">
               <span>SKU</span>
               <span>TALLA</span>
               <span>COLOR</span>
               <span>PRECIO</span>
-              <span>STOCK</span>
+              @for (branchId of branchKeys; track branchId) {
+                <span class="truncate">{{ branchMap[branchId] }}</span>
+              }
+              <span>TOTAL</span>
               <span></span>
             </div>
 
@@ -121,6 +125,9 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
                 <app-product-detail-variant
                   [variant]="v"
                   [submitting]="submitting()"
+                  [branchMap]="branchMap"
+                  [branchKeys]="branchKeys"
+                  [gridColumnsStyle]="gridColumnsStyle"
                   (editVariant)="onEditVariant($event)"
                   (deleteVariant)="onDeleteVariant($event)"
                   (adjustStock)="onAdjustStock($event)"
@@ -136,6 +143,9 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
               <app-product-detail-variant
                 [variant]="v"
                 [submitting]="submitting()"
+                [branchMap]="branchMap"
+                [branchKeys]="branchKeys"
+                [gridColumnsStyle]="gridColumnsStyle"
                 (editVariant)="onEditVariant($event)"
                 (deleteVariant)="onDeleteVariant($event)"
                 (adjustStock)="onAdjustStock($event)"
@@ -223,6 +233,11 @@ export default class ProductDetail implements OnInit {
   private route          = inject(ActivatedRoute);
   private router = inject(Router);
   private productService = inject(ProductService);
+  private branchContext = inject(BranchContextService);
+
+  branchMap: Record<string, string> = {};
+  branchKeys: string[] = [];
+  gridColumnsStyle = '';
 
   // ── Data ────────────────────────────────────────────────────────────────
   product   = signal<ProductDetailDto | null>(null);
@@ -242,6 +257,13 @@ export default class ProductDetail implements OnInit {
 
   // ── Lifecycle ───────────────────────────────────────────────────────────
   ngOnInit(): void {
+    for (const b of this.branchContext.available()) {
+      this.branchMap[b.branchId] = b.branchName;
+    }
+    this.branchKeys = Object.keys(this.branchMap);
+    const branchCols = this.branchKeys.map(() => '80px').join(' ');
+    this.gridColumnsStyle = `1fr 64px 88px 88px ${branchCols} 64px 128px`;
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.loadProduct(idParam);

@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {CreateProductDto} from '../dtos/products/create-product-dto';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ProductQueryParams} from '../dtos/products/product-dto';
 import {PagedResult} from '../dtos/paged-result';
@@ -16,6 +16,7 @@ import { CreateProductVariantDto, ProductVariantCreatedDto } from '../dtos/produ
 import { CreateProductWithVariantsDto, ProductWithVariantsCreatedDto } from '../dtos/products/create-product-with-variants-dto';
 import { ProductVariantDetailsDto } from '../dtos/products/product-variant-details';
 import { ListStockMovementDto, StockMovementParams } from '../dtos/products/list-stock-movements-dto';
+import { BranchContextService } from '@core/services/branch-context-service';
 
 @Injectable({
   providedIn: 'root',
@@ -23,6 +24,7 @@ import { ListStockMovementDto, StockMovementParams } from '../dtos/products/list
 export class ProductService {
 
   private http = inject(HttpClient);
+  private branchContext = inject(BranchContextService);
   private product_url = environment.BACKEND_URL + '/api/Product';
   private productVariant_url = environment.BACKEND_URL + '/api/ProductVariant';
 
@@ -49,7 +51,9 @@ export class ProductService {
   }
 
   getById(number: GUID) {
-    return this.http.get<ProductDetailDto>(this.product_url + '/' + number);
+    const branchIds = this.branchContext.available().map(b => b.branchId).join(',');
+    const headers = new HttpHeaders({ 'X-Branch-Id': branchIds });
+    return this.http.get<ProductDetailDto>(this.product_url + '/' + number, { headers });
   }
   update(productId: GUID, dto: UpdateProductDto) {
     return this.http.put<void>(this.product_url + '/' + productId, dto);
