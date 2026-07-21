@@ -47,16 +47,20 @@ import { Module } from '@features/auth/models/LoginResponse';
           <div class="mt-auto px-2 py-2 border-t border-border">
             <a
               #rla="routerLinkActive"
-              class="flex items-center gap-2 mx-2 px-3 py-2
+              class="relative flex items-center gap-2 mx-2 px-3 py-2
                      font-inter text-sm font-medium
                      text-layout-sidebar-text rounded-lg
                      transition-colors duration-200
-                     hover:bg-accent-ui-hover
+                     hover:bg-white/5
                      focus-visible:outline-none focus-visible:ring-2
                      focus-visible:ring-focus-ring focus-visible:ring-offset-2
-                     focus-visible:ring-offset-focus-ring-offset"
+                     focus-visible:ring-offset-focus-ring-offset
+                     before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2
+                     before:w-[3px] before:h-0 before:rounded-full before:bg-layout-nav-active-border
+                     before:transition-all before:duration-200"
               routerLink="/admin"
-              routerLinkActive="bg-layout-nav-active text-layout-nav-active-text"
+              [routerLinkActiveOptions]="{ exact: false }"
+              routerLinkActive="bg-layout-nav-active text-layout-nav-active-text font-bold before:!h-5"
               (click)="sidebarSvc.close()">
               <span class="material-icons text-lg">admin_panel_settings</span>
               Administración

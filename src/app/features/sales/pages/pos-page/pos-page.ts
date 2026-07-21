@@ -218,7 +218,7 @@ export default class PosPage implements OnInit {
     this.productService.getVariantBySku(skuValue).subscribe({
       next: (variant: ProductVariantBySkuDto) => {
         if (variant.availableStockInBranch <= 0) {
-          alert(`La variante SKU ${variant.sku} no cuenta con stock disponible en esta sucursal.`);
+          alert(`La talla/color SKU ${variant.sku} no cuenta con stock disponible en esta sucursal.`);
           return;
         }
 

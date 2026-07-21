@@ -16,7 +16,7 @@
       </p>
       <p class="mt-1 font-inter text-xs text-text-muted">
         {{ reception().productVariantsCount }}
-        {{ reception().productVariantsCount === 1 ? 'variante' : 'variantes' }}
+        {{ reception().productVariantsCount === 1 ? 'talla/color' : 'tallas/colores' }}
         · {{ reception().totalItems }} uds
         · <span class="font-bold text-accent-ui">
             {{ reception().totalCost | currency:'BOB':'symbol':'1.2-2' }}
@@ -67,7 +67,7 @@
 
     <span class="pr-4 text-right font-inter text-xs font-medium text-text-soft">
       {{ reception().productVariantsCount }}
-      {{ reception().productVariantsCount === 1 ? 'var.' : 'vars.' }}
+      {{ reception().productVariantsCount === 1 ? 'talla/color' : 'tallas/colores' }}
     </span>
 
     <span class="pr-4 text-right font-inter text-xs font-medium text-text-muted">

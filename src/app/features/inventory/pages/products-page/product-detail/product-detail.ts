@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../../services/product-service';
 import { ProductDetailDto, ProductVariantDto } from '../../../dtos/products/product-detail-dto';
 
@@ -9,6 +9,7 @@ import {UpdateVariantModal} from './product-detail-variant/update-variant-modal'
 import {AdjustStockModal} from './product-detail-variant/adjust-stock-modal';
 import {ConfirmActionModal} from '../../transfer-page/confirm-action-modal/confirm-action-modal';
 import {UpdateProductModal} from './update-product-modal';
+import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 import {UpdateProductDto} from '../../../dtos/products/update-product-dto';
 import {UpdateProductVariantDto} from '../../../dtos/products/update-product-variant-dto';
 
@@ -21,16 +22,24 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
     UpdateVariantModal,
     AdjustStockModal,
     ConfirmActionModal,
+    RouterLink,
+    SkeletonList,
   ],
   template: `
-    @if (loading()) {
-      <div class="flex items-center justify-center py-20 text-gray-400 text-sm">
-        Cargando...
-      </div>
-    }
+    <div class="max-w-3xl mx-auto fade-up">
 
-    @if (!loading() && product(); as p) {
+    @if (loading()) {
+      <app-skeleton-list [rows]="3" [columns]="2" />
+
+    } @else if (!loading() && product(); as p) {
       <div class="flex flex-col gap-4">
+
+        <div class="flex items-center gap-3">
+          <a routerLink="/inventory/products" class="btn-icon">
+            <span class="material-icons text-base">arrow_back</span>
+          </a>
+          <h1 class="text-lg font-black text-text-main">Detalle del Producto</h1>
+        </div>
 
         <!-- ── Información del Producto ─────────────────────────────────────── -->
         <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
@@ -85,8 +94,8 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
         <div class="bg-bg-surface rounded-xl border border-border-strong shadow-sm p-5">
           <div class="flex items-center justify-between mb-4">
             <p class="section-title mb-0">
-              Variantes · {{ p.variants.length }}
-              {{ p.variants.length === 1 ? 'variante' : 'variantes' }}
+              Tallas/Colores · {{ p.variants.length }}
+              {{ p.variants.length === 1 ? 'talla/color' : 'tallas/colores' }}
             </p>
             <button (click)="onAddVariant()" class="btn-secondary btn-sm">
               <span class="material-icons text-base leading-none">add</span>
@@ -139,6 +148,8 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
       </div>
     }
 
+    </div>
+
     <!-- ── Modales ─────────────────────────────────────────────────────────── -->
 
     <!-- Editar producto -->
@@ -155,7 +166,7 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
     @if (showDeleteProduct()) {
       <app-confirm-action-modal
         title="¿Eliminar producto?"
-        description="Esta acción eliminará el producto y todas sus variantes. No se puede deshacer."
+        description="Esta acción eliminará el producto y todas sus tallas/colores. No se puede deshacer."
         confirmLabel="Sí, eliminar"
         submittingLabel="Eliminando..."
         confirmButtonClass="bg-red-500 hover:bg-red-600"
@@ -178,8 +189,8 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
     <!-- Eliminar variante -->
     @if (deletingVariant()) {
       <app-confirm-action-modal
-        title="¿Eliminar variante?"
-        [description]="'Se eliminará la variante ' + deletingVariant()!.sku + '. No se puede deshacer.'"
+        title="¿Eliminar talla/color?"
+        [description]="'Se eliminará la talla/color ' + deletingVariant()!.sku + '. No se puede deshacer.'"
         confirmLabel="Sí, eliminar"
         submittingLabel="Eliminando..."
         confirmButtonClass="bg-red-500 hover:bg-red-600"
@@ -199,7 +210,13 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
       />
     }
   `,
-  styles: ``,
+  styles: `
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fade-up 240ms ease both; }
+  `,
 })
 export default class ProductDetail implements OnInit {
 

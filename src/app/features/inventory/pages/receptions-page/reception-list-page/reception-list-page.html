@@ -1,26 +1,15 @@
-<!-- reception-list-page.html -->
+<div class="flex flex-col gap-4 w-full">
 
-<!-- ── Header ────────────────────────────────────────────────────────────── -->
-<div class="border-b border-border bg-bg-surface shadow-sm px-4 sm:px-6 py-4">
-  <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-    <h1 class="font-inter text-base font-bold text-text-main">Recepciones</h1>
+  <div class="flex items-center justify-between gap-3">
+    <app-reception-filter-bar
+      [params]="query()"
+      (change)="patchQuery($event)" />
     <button
       (click)="router.navigate(['inventory','receptions', 'new'])"
-      class="px-4 py-2 rounded-lg bg-btn-primary-bg text-btn-primary-text text-sm font-semibold
-             hover:bg-btn-primary-hover transition-colors duration-150 whitespace-nowrap shadow-sm">
-      <span class="hidden sm:inline">Nueva recepción</span>
-      <span class="sm:hidden">+ Nueva</span>
+      class="btn btn-primary btn-sm shrink-0">
+      + Nueva recepción
     </button>
   </div>
-</div>
-
-<!-- ── Contenido ─────────────────────────────────────────────────────────── -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-4">
-
-  <!-- Filtros -->
-  <app-reception-filter-bar
-    [params]="query()"
-    (change)="patchQuery($event)" />
 
   <!-- Lista -->
   <app-reception-list

@@ -37,7 +37,7 @@ import {UpdateProductVariantDto} from '../../../../dtos/products/update-product-
         <!-- Handle (mobile) -->
         <div class="sm:hidden w-10 h-1 rounded-full bg-bg-muted mx-auto mb-5"></div>
 
-        <p class="text-sm font-semibold text-text-main mb-0.5">Editar variante</p>
+        <p class="text-sm font-semibold text-text-main mb-0.5">Editar talla/color</p>
         <p class="font-mono text-[11px] text-text-soft mb-5">{{ variant().sku }}</p>
 
         <div class="flex flex-col gap-4">
@@ -69,7 +69,7 @@ import {UpdateProductVariantDto} from '../../../../dtos/products/update-product-
               rows="2"
               class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg resize-none
                      focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
-              placeholder="Detalles adicionales de la variante..."
+              placeholder="Detalles adicionales de la talla/color..."
             ></textarea>
           </div>
 

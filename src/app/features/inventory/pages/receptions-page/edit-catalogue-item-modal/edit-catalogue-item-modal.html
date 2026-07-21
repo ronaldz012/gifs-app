@@ -59,7 +59,7 @@
     <section class="space-y-3">
 
       <div class="flex items-center justify-between">
-        <h3 class="section-title">Variantes del pedido</h3>
+        <h3 class="section-title">Tallas/Colores del pedido</h3>
         @if (itemModel().variants.length > 0) {
         <div class="flex items-center gap-1.5 bg-bg-muted/60 px-2 py-1 rounded-lg border border-border">
           <label class="text-[10px] font-medium text-text-soft uppercase tracking-wider">Costo Masivo:</label>
@@ -135,9 +135,9 @@
           } @empty {
             <div class="py-8 text-center text-xs italic text-text-soft">
               @if (selectedProduct()) {
-                Sin variantes disponibles para este producto.
+                Sin tallas/colores disponibles para este producto.
               } @else {
-                Selecciona un producto para ver sus variantes.
+                Selecciona un producto para ver sus tallas/colores.
               }
             </div>
           }

@@ -162,7 +162,7 @@ export default class AddFromCatalogueModal implements OnInit {
 
     const selectedVariants = this.itemModel().variants.filter(v => v.selected);
     if (!selectedVariants.length) {
-      this.error.set('Seleccioná al menos una variante.');
+      this.error.set('Seleccioná al menos una talla/color.');
       return;
     }
 

@@ -8,13 +8,12 @@ import { StockTransferListDto, TransferQueryParams} from '../../../dtos/transfer
 import { TransferService } from '../../../services/transfer-service';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
 import { TransferFilterBar } from '../transfer-filter-bar/transfer-filter-bar';
-import { NavigateButton } from "@shared/components/navigate-button";
 
 
 @Component({
   selector: 'app-transfer-list-page',
   standalone: true,
-  imports: [TransferList, ResolveTransferModal, ConfirmActionModal, TransferFilterBar, Paginator, NavigateButton],
+  imports: [TransferList, ResolveTransferModal, ConfirmActionModal, TransferFilterBar, Paginator],
   templateUrl: './transfer-list-page.html',
 })
 export default class TransferListPage implements OnInit {

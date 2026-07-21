@@ -3,18 +3,24 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SaleService } from '@features/sales/services/sale-service';
 import { SaleDetailDto } from '@features/sales/dtos/sale-detail-dto';
+import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
 @Component({
   selector: 'app-sale-detail-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink],
+  imports: [DatePipe, DecimalPipe, RouterLink, SkeletonList],
+  styles: `
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fade-up 240ms ease both; }
+  `,
   template: `
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+    <div class="max-w-3xl mx-auto fade-up">
 
       @if (loading()) {
-        <div class="flex items-center justify-center py-20 text-sm text-text-muted">
-          Cargando...
-        </div>
+        <app-skeleton-list [rows]="3" [columns]="2" />
 
       } @else if (!sale()) {
         <div class="flex flex-col items-center gap-3 p-12 rounded-xl border border-border bg-bg-surface shadow-xs">
@@ -30,7 +36,7 @@ import { SaleDetailDto } from '@features/sales/dtos/sale-detail-dto';
             <a routerLink="/sales/sales" class="btn-icon">
               <span class="material-icons text-base">arrow_back</span>
             </a>
-            <h1 class="text-xl font-semibold text-text-main">Detalle de Venta</h1>
+            <h1 class="text-lg font-black text-text-main">Detalle de Venta</h1>
           </div>
 
           <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">

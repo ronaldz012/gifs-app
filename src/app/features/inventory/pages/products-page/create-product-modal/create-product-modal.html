@@ -90,7 +90,7 @@
       </section>
 
       <section class="space-y-3">
-        <h3 class="section-title">Variantes del producto</h3>
+        <h3 class="section-title">Tallas/Colores</h3>
 
         @if (newProduct().variants.length > 0) {
           <div class="flex flex-wrap items-center gap-3 bg-bg-muted/60 px-3 py-1.5 rounded-lg border border-border">
@@ -126,7 +126,7 @@
                 (remove)="removeVariant(i)"
                 [index]="i" />
             } @empty {
-              <div class="py-8 text-center text-xs text-text-soft italic">Sin variantes activas.</div>
+              <div class="py-8 text-center text-xs text-text-soft italic">Sin tallas/colores activos.</div>
             }
           </div>
 

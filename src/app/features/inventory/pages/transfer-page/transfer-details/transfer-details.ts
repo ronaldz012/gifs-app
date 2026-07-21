@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ResolveTransferModal } from '../resolve-transfer-modal/resolve-transfer-modal';
 import { ConfirmActionModal } from '../confirm-action-modal/confirm-action-modal';
@@ -11,7 +11,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
 @Component({
   selector: 'app-transfer-details',
-  imports: [DatePipe, TotalQtyPipe, SkeletonList, ResolveTransferModal, ConfirmActionModal],
+  imports: [DatePipe, TotalQtyPipe, SkeletonList, ResolveTransferModal, ConfirmActionModal, RouterLink],
   templateUrl: './transfer-details.html',
   styles: `
     @keyframes fade-up {

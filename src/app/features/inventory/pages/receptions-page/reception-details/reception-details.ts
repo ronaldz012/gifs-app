@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ConfirmActionModal } from '../../transfer-page/confirm-action-modal/confirm-action-modal';
 
@@ -14,7 +14,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
 @Component({
   selector: 'app-reception-details',
-  imports: [DatePipe, CurrencyPipe, SkeletonList, ConfirmActionModal],
+  imports: [DatePipe, CurrencyPipe, SkeletonList, ConfirmActionModal, RouterLink],
   templateUrl: './reception-details.html',
   styles: `
     @keyframes fade-up {

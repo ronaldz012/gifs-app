@@ -27,11 +27,11 @@ import { CurrencyPipe } from '@angular/common';
           <span class="material-icons text-base">inventory</span>
         </button>
         <button (click)="editVariant.emit(variant())" class="btn-icon
-          hover:text-text-main hover:bg-bg-muted" title="Editar variante">
+          hover:text-text-main hover:bg-bg-muted" title="Editar talla/color">
           <span class="material-icons text-base">edit</span>
         </button>
         <button (click)="deleteVariant.emit(variant())" class="btn-icon
-          hover:text-feedback-error-text hover:bg-feedback-error" title="Eliminar variante">
+          hover:text-feedback-error-text hover:bg-feedback-error" title="Eliminar talla/color">
           <span class="material-icons text-base">delete</span>
         </button>
       </div>
@@ -57,11 +57,11 @@ import { CurrencyPipe } from '@angular/common';
           <span class="material-icons text-base">inventory</span>
         </button>
         <button (click)="editVariant.emit(variant())" class="btn-icon-md
-          hover:text-text-main hover:border-border-strong" title="Editar variante">
+          hover:text-text-main hover:border-border-strong" title="Editar talla/color">
           <span class="material-icons text-base">edit</span>
         </button>
         <button (click)="deleteVariant.emit(variant())" class="btn-icon-md
-          hover:text-feedback-error-text hover:border-feedback-error-text" title="Eliminar variante">
+          hover:text-feedback-error-text hover:border-feedback-error-text" title="Eliminar talla/color">
           <span class="material-icons text-base">delete</span>
         </button>
       </div>

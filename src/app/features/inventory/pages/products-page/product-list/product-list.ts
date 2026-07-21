@@ -58,13 +58,11 @@ import CreateProductModal from '../create-product-modal/create-product-modal';
     <div class="flex flex-col overflow-hidden rounded border border-border bg-bg-surface shadow-sm">
 
       <!-- Header columnas — solo desktop -->
-      <div class="hidden px-4 py-3 border-b border-border bg-bg-muted lg:grid
-                  font-inter text-xs font-semibold uppercase tracking-wider text-text-soft"
-           style="grid-template-columns: 9rem 1fr 13rem 8rem 6rem 7rem 7.5rem;">
+      <div class="hidden px-4 py-3 border-b border-border bg-bg-muted lg:grid grid-cols-[9rem_1fr_13rem_8rem_6rem_7rem_7.5rem] text-xs font-semibold uppercase tracking-wider text-text-soft">
         <span>Código</span>
         <span>Nombre</span>
         <span>Marca / Cat.</span>
-        <span class="pr-4 text-right">Variantes</span>
+        <span class="pr-4 text-right">Talla/Color</span>
         <span class="pr-4 text-right">Stock</span>
         <span class="pr-4 text-right">Precio</span>
         <span></span>

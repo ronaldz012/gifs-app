@@ -33,7 +33,7 @@ export interface VariantForm {
   selected: boolean;
 }
 export const existingVariantSchema = schema<VariantForm>((v) => {
-  required(v.id,               { message: 'Seleccioná una variante' });
+  required(v.id,               { message: 'Seleccioná una talla/color' });
   required(v.quantityReceived, { message: 'Requerido' });
   min(v.quantityReceived, 1,   { message: 'Mín 1' });
   required(v.unitCost,         { message: 'Requerido' });

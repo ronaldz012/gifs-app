@@ -1,4 +1,4 @@
-<div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 fade-up">
+<div class="max-w-3xl mx-auto fade-up">
 
   @if (loading()) {
 
@@ -6,11 +6,11 @@
 
   } @else if (error()) {
 
-    <div class="bg-white rounded-xl border border-red-100 shadow-sm p-8 text-center">
-      <p class="text-sm text-red-400">{{ error() }}</p>
+    <div class="bg-bg-surface rounded-xl border border-feedback-error shadow-xs p-8 text-center">
+      <p class="text-sm text-feedback-error-text">{{ error() }}</p>
       <button
         (click)="router.navigate(['transfers'])"
-        class="mt-4 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        class="mt-4 text-xs text-text-muted hover:text-text-main transition-colors"
       >← Volver</button>
     </div>
 
@@ -18,12 +18,17 @@
 
     <div class="flex flex-col gap-4">
 
+      <div class="flex items-center gap-3">
+        <a routerLink="/inventory/transfers" class="btn-icon">
+          <span class="material-icons text-base">arrow_back</span>
+        </a>
+        <h1 class="text-lg font-black text-text-main">Detalle de Transferencia</h1>
+      </div>
+
       <!-- Información general -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="bg-bg-surface rounded-xl border border-border shadow-xs p-5">
         <div class="flex items-center justify-between mb-4">
-          <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-            Información general
-          </p>
+          <p class="section-title">Información general</p>
           <span
             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
             [class]="statusClasses(t.status)"
@@ -32,89 +37,87 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
           <div>
-            <p class="text-[11px] text-gray-400 mb-0.5">Origen</p>
-            <p class="text-sm font-medium text-gray-800">{{ t.fromBranchName }}</p>
+            <p class="field-label">Origen</p>
+            <p class="field-value">{{ t.fromBranchName }}</p>
           </div>
           <div>
-            <p class="text-[11px] text-gray-400 mb-0.5">Destino</p>
-            <p class="text-sm font-medium text-gray-800">{{ t.toBranchName }}</p>
+            <p class="field-label">Destino</p>
+            <p class="field-value">{{ t.toBranchName }}</p>
           </div>
           <div>
-            <p class="text-[11px] text-gray-400 mb-0.5">Solicitado por</p>
-            <p class="text-sm font-medium text-gray-800">{{ t.requesterName }}</p>
+            <p class="field-label">Solicitado por</p>
+            <p class="field-value">{{ t.requesterName }}</p>
           </div>
           @if (t.resolverName) {
             <div>
-              <p class="text-[11px] text-gray-400 mb-0.5">Resuelto por</p>
-              <p class="text-sm font-medium text-gray-800">{{ t.resolverName }}</p>
+              <p class="field-label">Resuelto por</p>
+              <p class="field-value">{{ t.resolverName }}</p>
             </div>
           }
           <div>
-            <p class="text-[11px] text-gray-400 mb-0.5">Creado</p>
-            <p class="text-sm text-gray-700">{{ t.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+            <p class="field-label">Creado</p>
+            <p class="text-sm text-text-main">{{ t.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
           </div>
           @if (t.resolvedAt) {
             <div>
-              <p class="text-[11px] text-gray-400 mb-0.5">Resuelto</p>
-              <p class="text-sm text-gray-700">{{ t.resolvedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+              <p class="field-label">Resuelto</p>
+              <p class="text-sm text-text-main">{{ t.resolvedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
             </div>
           }
           @if (t.notes) {
             <div class="sm:col-span-2">
-              <p class="text-[11px] text-gray-400 mb-0.5">Notas</p>
-              <p class="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">{{ t.notes }}</p>
+              <p class="field-label">Notas</p>
+              <p class="text-sm text-text-muted bg-bg-muted rounded-lg px-3 py-2">{{ t.notes }}</p>
             </div>
           }
         </div>
       </div>
 
       <!-- Productos -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-4">
+      <div class="bg-bg-surface rounded-xl border border-border shadow-xs p-5">
+        <p class="section-title">
           Productos · {{ t.items.length }} {{ t.items.length === 1 ? 'ítem' : 'ítems' }}
         </p>
-        <ul class="flex flex-col divide-y divide-gray-100">
+        <ul class="flex flex-col divide-y divide-border">
           @for (item of t.items; track item.productVariantId) {
             <li class="flex items-center gap-3 py-3">
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-800 truncate">{{ item.productName }}</p>
-                <p class="text-xs text-gray-400">
+                <p class="text-sm font-medium text-text-main truncate">{{ item.productName }}</p>
+                <p class="field-label">
                   {{ variantLabel(item) }}
-                  <span class="text-gray-300 ml-1">{{ item.sku }}</span>
+                  <span class="text-text-soft ml-1">{{ item.sku }}</span>
                 </p>
               </div>
               <div class="shrink-0 text-right">
-                <p class="text-sm font-semibold tabular-nums text-gray-800">
+                <p class="text-sm font-semibold tabular-nums text-text-main">
                   {{ item.quantityRequested }}
                 </p>
-                <p class="text-[11px] text-gray-400">unidades</p>
+                <p class="field-label">unidades</p>
               </div>
             </li>
           }
         </ul>
-        <div class="pt-3 mt-1 border-t border-gray-100 flex justify-between items-center">
-          <span class="text-xs text-gray-400">Total</span>
-          <span class="text-sm font-semibold text-gray-700 tabular-nums">
+        <div class="pt-3 mt-1 border-t border-border flex justify-between items-center">
+          <span class="text-xs text-text-soft">Total</span>
+          <span class="text-sm font-semibold text-text-main tabular-nums">
             {{ t.items | totalQty }} unidades
           </span>
         </div>
       </div>
 
-      <!-- Acciones mobile -->
+      <!-- Acciones -->
       @if (canCancel(t) || canResolve(t)) {
-        <div class="sm:hidden flex flex-col gap-2">
+        <div class="flex flex-col gap-2">
           @if (canCancel(t)) {
             <button
               (click)="openCancelModal(t.id)"
-              class="w-full py-3 rounded-xl border border-red-200 text-red-400 text-sm font-medium
-                     hover:bg-red-50 transition-colors"
+              class="btn-danger btn-sm w-full py-3 rounded-xl"
             >Cancelar transferencia</button>
           }
           @if (canResolve(t)) {
             <button
               (click)="openResolveModal(t.id)"
-              class="w-full py-3 rounded-xl bg-blue-600 text-white text-sm font-medium
-                     hover:bg-blue-700 transition-colors"
+              class="btn-primary btn-sm w-full py-3 rounded-xl"
             >Resolver</button>
           }
         </div>

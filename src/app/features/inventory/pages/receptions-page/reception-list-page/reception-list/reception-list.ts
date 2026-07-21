@@ -31,7 +31,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
           <span>Estado</span>
           <span>Marcas</span>
           <span>Categorías</span>
-          <span class="pr-4 text-right">Variantes</span>
+          <span class="pr-4 text-right">Talla/Color</span>
           <span class="pr-4 text-right">Uds</span>
           <span class="pr-4 text-right">Costo total</span>
           <span class="pr-4 text-right">Fecha</span>
