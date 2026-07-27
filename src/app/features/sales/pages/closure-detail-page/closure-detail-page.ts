@@ -189,6 +189,37 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
             </div>
           }
 
+          @if (c.variantStocks.length) {
+            <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
+              <p class="section-title mb-4">Stock actual para reposición ({{ c.variantStocks.length }})</p>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="text-[10px] font-bold uppercase tracking-wider text-text-soft border-b border-border">
+                      <th class="text-left py-2 pr-4">Producto</th>
+                      <th class="text-left py-2 pr-4">SKU</th>
+                      <th class="text-right py-2 pl-4">Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-border">
+                    @for (v of c.variantStocks; track v.productVariantId) {
+                      <tr>
+                        <td class="py-2.5 pr-4 text-sm text-text-main">{{ v.productDisplayName }}</td>
+                        <td class="py-2.5 pr-4 text-sm font-mono text-text-muted">{{ v.productSku }}</td>
+                        <td class="py-2.5 pl-4 text-right text-sm font-mono font-bold"
+                          [class.text-feedback-error-text]="v.currentStock <= 0"
+                          [class.text-feedback-warning-text]="v.currentStock > 0 && v.currentStock <= 5"
+                          [class.text-text-main]="v.currentStock > 5">
+                          {{ v.currentStock }}
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+
         </div>
       }
     </div>
@@ -208,7 +239,7 @@ export default class ClosureDetailPage implements OnInit {
 
   private loadDetail(id: string): void {
     this.loading.set(true);
-    this.cashRegisterService.getClosureDetail(id).subscribe({
+    this.cashRegisterService.getClosureDetail(id, true).subscribe({
       next: (c) => { this.closure.set(c); this.loading.set(false); },
       error: () => this.loading.set(false),
     });

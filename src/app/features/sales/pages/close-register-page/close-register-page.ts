@@ -97,7 +97,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
               </div>
               <ul class="flex flex-col">
                 @for (sale of c.sales; track sale.id) {
-                  <li class="group bg-bg-surface border-b border-border last:border-b-0 transition-colors hover:bg-bg-muted/30">
+                  <li class="bg-bg-surface border-b border-border last:border-b-0">
                     <div class="flex items-center gap-4 px-6 py-3.5 lg:hidden">
                       <div class="flex flex-col min-w-0 flex-1">
                         <p class="text-sm font-semibold text-text-main">
@@ -128,6 +128,18 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                       </span>
                       <span class="text-right text-[13px] font-mono text-text-soft">{{ sale.itemsCount }}</span>
                     </div>
+                    @if (sale.items.length > 0) {
+                      <div class="px-6 pb-3 lg:pb-2 space-y-1">
+                        @for (item of sale.items; track item.productVariantId) {
+                          <div class="flex items-center justify-between gap-3 text-xs">
+                            <span class="min-w-0 truncate text-text-muted font-medium">{{ item.productDisplayName }}</span>
+                            <span class="shrink-0 text-text-soft font-mono">
+                              x{{ item.quantity }} · Bs {{ item.finalPrice | number:'1.0-0' }}
+                            </span>
+                          </div>
+                        }
+                      </div>
+                    }
                   </li>
                 }
               </ul>
@@ -277,7 +289,7 @@ export default class CloseRegisterPage implements OnInit {
   }
 
   private loadClosureDetail(id: string): void {
-    this.cashRegisterService.getClosureDetail(id).subscribe({
+    this.cashRegisterService.getClosureDetail(id, false).subscribe({
       next: (c) => {
         this.closure.set(c);
         this.state.set('ready');

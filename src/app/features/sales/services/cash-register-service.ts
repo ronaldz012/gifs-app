@@ -45,7 +45,11 @@ export class CashRegisterService {
     return this.http.get<PagedResult<ClosureListDto>>(`${this.baseUrl}`, { params: httpParams });
   }
 
-  getClosureDetail(id: GUID): Observable<ClosureDetailDto> {
-    return this.http.get<ClosureDetailDto>(`${this.baseUrl}/${id}`);
+  getClosureDetail(id: GUID, includeStock = false): Observable<ClosureDetailDto> {
+    let params = new HttpParams();
+    if (includeStock) {
+      params = params.set('includeStock', true);
+    }
+    return this.http.get<ClosureDetailDto>(`${this.baseUrl}/${id}`, { params });
   }
 }

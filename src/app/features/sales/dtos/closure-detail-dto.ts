@@ -1,3 +1,13 @@
+export interface ClosureSaleItemDetailDto {
+  productVariantId: GUID;
+  productSku: string;
+  productDisplayName: string;
+  quantity: number;
+  unitPrice: number;
+  discountAmount: number;
+  finalPrice: number;
+}
+
 export interface ClosureSaleItemDto {
   id: GUID;
   createdAt: string;
@@ -8,6 +18,14 @@ export interface ClosureSaleItemDto {
   invoiceNumber: number | null;
   transactionCode: string | null;
   itemsCount: number;
+  items: ClosureSaleItemDetailDto[];
+}
+
+export interface ClosureVariantStockDto {
+  productVariantId: GUID;
+  productSku: string;
+  productDisplayName: string;
+  currentStock: number;
 }
 
 export interface ClosureMovementDto {
@@ -34,4 +52,5 @@ export interface ClosureDetailDto {
   totalExpenses: number;
   sales: ClosureSaleItemDto[];
   movements: ClosureMovementDto[];
+  variantStocks: ClosureVariantStockDto[];
 }
