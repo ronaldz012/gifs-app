@@ -84,6 +84,114 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
             </div>
           </div>
 
+          @if (c.sales.length > 0) {
+            <div class="bg-bg-surface rounded-xl border border-border-strong overflow-hidden">
+              <div class="px-6 pt-5 pb-3">
+                <p class="section-title mb-0">Ventas del turno ({{ c.sales.length }})</p>
+              </div>
+              <div class="hidden lg:grid lg:grid-cols-4 px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
+                <span>Hora</span>
+                <span class="text-right">Monto</span>
+                <span class="text-center">Pago</span>
+                <span class="text-right">Arts.</span>
+              </div>
+              <ul class="flex flex-col">
+                @for (sale of c.sales; track sale.id) {
+                  <li class="group bg-bg-surface border-b border-border last:border-b-0 transition-colors hover:bg-bg-muted/30">
+                    <div class="flex items-center gap-4 px-6 py-3.5 lg:hidden">
+                      <div class="flex flex-col min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-text-main">
+                          Bs {{ sale.totalAmount | number:'1.2-2' }}
+                        </p>
+                        <p class="mt-0.5 text-xs text-text-muted">
+                          {{ sale.createdAt | date:'HH:mm' }}
+                          <span class="mx-1">·</span>
+                          <span [class.text-feedback-info-text]="sale.paymentMethod !== 'Cash'">
+                            {{ sale.paymentMethod === 'Cash' ? 'Efectivo' : sale.paymentMethod }}
+                          </span>
+                          <span class="mx-1">·</span>
+                          {{ sale.itemsCount }} {{ sale.itemsCount === 1 ? 'art' : 'arts' }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="hidden lg:grid lg:grid-cols-4 items-center px-6 py-3 transition-colors hover:bg-bg-muted/30">
+                      <span class="text-[13px] text-text-main font-mono">{{ sale.createdAt | date:'HH:mm' }}</span>
+                      <span class="text-right text-[13px] font-mono font-bold text-text-main">Bs {{ sale.totalAmount | number:'1.2-2' }}</span>
+                      <span class="text-center">
+                        <span class="text-[11px] font-medium px-2 py-0.5 rounded-md"
+                          [class.bg-bg-muted]="sale.paymentMethod === 'Cash'"
+                          [class.text-text-muted]="sale.paymentMethod === 'Cash'"
+                          [class.bg-feedback-info-bg]="sale.paymentMethod !== 'Cash'"
+                          [class.text-feedback-info-text]="sale.paymentMethod !== 'Cash'">
+                          {{ sale.paymentMethod === 'Cash' ? 'Efectivo' : sale.paymentMethod }}
+                        </span>
+                      </span>
+                      <span class="text-right text-[13px] font-mono text-text-soft">{{ sale.itemsCount }}</span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          @if (c.movements.length > 0) {
+            <div class="bg-bg-surface rounded-xl border border-border-strong overflow-hidden">
+              <div class="px-6 pt-5 pb-3">
+                <p class="section-title mb-0">Gastos del turno ({{ c.movements.length }})</p>
+              </div>
+              <div class="hidden lg:grid lg:grid-cols-4 px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
+                <span>Tipo</span>
+                <span>Descripción</span>
+                <span class="text-right">Monto</span>
+                <span class="text-right">Hora</span>
+              </div>
+              <ul class="flex flex-col">
+                @for (m of c.movements; track m.id) {
+                  <li class="group bg-bg-surface border-b border-border last:border-b-0 transition-colors hover:bg-bg-muted/30">
+                    <div class="flex items-center gap-4 px-6 py-3.5 lg:hidden">
+                      <div class="flex flex-col min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-text-main">{{ m.description }}</p>
+                        <p class="mt-0.5 text-xs text-text-muted">
+                          <span [class.text-feedback-error-text]="m.type === 'Outflow'"
+                                [class.text-feedback-success-text]="m.type !== 'Outflow'">
+                            {{ m.type === 'Outflow' ? 'Salida' : 'Entrada' }}
+                          </span>
+                          <span class="mx-1">·</span>
+                          {{ m.createdAt | date:'HH:mm' }}
+                        </p>
+                      </div>
+                      <div class="shrink-0 text-right">
+                        <span class="text-sm font-mono font-bold"
+                          [class.text-feedback-error-text]="m.type === 'Outflow'"
+                          [class.text-feedback-success-text]="m.type !== 'Outflow'">
+                          {{ m.type === 'Outflow' ? '-' : '+' }}Bs {{ m.amount | number:'1.2-2' }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="hidden lg:grid lg:grid-cols-4 items-center px-6 py-3 transition-colors hover:bg-bg-muted/30">
+                      <span>
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-md"
+                          [class.text-feedback-error-text]="m.type === 'Outflow'"
+                          [class.bg-feedback-error-bg]="m.type === 'Outflow'"
+                          [class.text-feedback-success-text]="m.type !== 'Outflow'"
+                          [class.bg-feedback-success-bg]="m.type !== 'Outflow'">
+                          {{ m.type === 'Outflow' ? 'Salida' : 'Entrada' }}
+                        </span>
+                      </span>
+                      <span class="text-[13px] text-text-main">{{ m.description }}</span>
+                      <span class="text-right text-[13px] font-mono font-bold"
+                        [class.text-feedback-error-text]="m.type === 'Outflow'"
+                        [class.text-feedback-success-text]="m.type !== 'Outflow'">
+                        {{ m.type === 'Outflow' ? '-' : '+' }}Bs {{ m.amount | number:'1.2-2' }}
+                      </span>
+                      <span class="text-right text-[13px] text-text-soft">{{ m.createdAt | date:'HH:mm' }}</span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
           <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
             <p class="section-title mb-4">Cerrar turno</p>
             <div class="flex flex-col gap-4">
