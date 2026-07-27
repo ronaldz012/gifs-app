@@ -12,11 +12,9 @@ export interface StockTransferListDto {
   createdAt: Date;
   resolvedAt: Date | null;
 }
-export interface TransferQueryParams extends BaseQueryDto{
-
+export interface TransferQueryParams extends BaseQueryDto {
   status?: TransferStatus[];
   direction?: TransferDirection;
   dateFrom?: string;
   dateTo?: string;
-
 }

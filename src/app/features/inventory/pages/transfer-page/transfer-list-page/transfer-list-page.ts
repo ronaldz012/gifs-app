@@ -29,11 +29,8 @@ export default class TransferListPage implements OnInit {
   submitting     = signal(false);
 
   query = signal<TransferQueryParams>({
-    isPaged: true,
     page: 1,
     pageSize: 10,
-    sortBy: 'CreatedAt',
-    sortDirection: 'desc',
   });
 
   hasActiveFilters = computed(() => {

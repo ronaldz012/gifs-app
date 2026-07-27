@@ -1,10 +1,9 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { map, Observable } from 'rxjs';
 import { Color } from '../dtos/colors/color';
 import { CreateColorDto } from '../dtos/colors/create-color-dto';
-import { BrandQuery } from '../dtos/brands/brand-dto'; // Reutilizado según tu código original
 import { PagedResult } from '../dtos/paged-result';
 
 // Asegúrate de tener GUID disponible o cámbialo por string/number según corresponda
@@ -55,19 +54,8 @@ export class ColorService {
   }
 
   // ── API ───────────────────────────────────────────────────────────────
-  getColors(query: BrandQuery): Observable<PagedResult<Color>> {
-    let params = new HttpParams();
-
-    Object.entries(query).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) {
-        params = params.set(key, value.toString());
-      }
-    });
-    return this.http.get<PagedResult<Color>>(this.url, { params });
-  }
-
   getAll(): Observable<Color[]> {
-    return this.getColors({ isPaged: false }).pipe(
+    return this.http.get<PagedResult<Color>>(this.url).pipe(
       map(result => result.items)
     );
   }

@@ -115,11 +115,8 @@ export default class UsersPage implements OnInit {
   loading = signal(false);
 
   query = signal<UserQueryParams>({
-    isPaged: true,
     page: 1,
     pageSize: 10,
-    sortBy: 'Username',
-    sortDirection: 'asc',
   });
 
   hasActiveFilters = computed(() => {

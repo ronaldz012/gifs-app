@@ -27,11 +27,8 @@ export default class ReceptionListPage implements OnInit {
   submitting      = signal(false);
 
   query = signal<ReceptionQueryParams>({
-    isPaged: true,
     page: 1,
     pageSize: 10,
-    sortBy: 'ReceivedAt',
-    sortDirection: 'desc',
   });
 
   hasActiveFilters = computed(() => {

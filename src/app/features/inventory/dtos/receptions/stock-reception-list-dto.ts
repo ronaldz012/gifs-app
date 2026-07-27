@@ -17,7 +17,6 @@ export interface ReceptionQueryParams extends BaseQueryDto {
   dateTo?: string;
   status?: ReceptionStatus;
   brandId?: GUID;
-
 }
 // reception-enums.ts
 export enum ReceptionStatus {

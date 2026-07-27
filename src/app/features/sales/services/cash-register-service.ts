@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'environments/environment';
 import { CurrentRegisterDto } from '@features/sales/dtos/current-register-dto';
@@ -7,6 +7,10 @@ import { OpenCashRegisterDto } from '@features/sales/dtos/open-cash-register-dto
 import { CloseCashRegisterDto } from '@features/sales/dtos/close-cash-register-dto';
 import { MovementListDto } from '@features/sales/dtos/movement-list-dto';
 import { CreateMovementDto } from '@features/sales/dtos/create-movement-dto';
+import { ClosureListDto } from '@features/sales/dtos/closure-list-dto';
+import { ClosureDetailDto } from '@features/sales/dtos/closure-detail-dto';
+import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
+import { PagedResult } from '@features/inventory/dtos/paged-result';
 
 @Injectable({ providedIn: 'root' })
 export class CashRegisterService {
@@ -32,5 +36,16 @@ export class CashRegisterService {
 
   createMovement(dto: CreateMovementDto): Observable<void> {
     return this.http.post<void>(this.movementUrl, dto);
+  }
+
+  getClosures(params: BaseQueryDto): Observable<PagedResult<ClosureListDto>> {
+    let httpParams = new HttpParams()
+      .set('page', params.page)
+      .set('pageSize', params.pageSize);
+    return this.http.get<PagedResult<ClosureListDto>>(`${this.baseUrl}`, { params: httpParams });
+  }
+
+  getClosureDetail(id: GUID): Observable<ClosureDetailDto> {
+    return this.http.get<ClosureDetailDto>(`${this.baseUrl}/${id}`);
   }
 }

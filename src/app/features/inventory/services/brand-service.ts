@@ -1,7 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { Brand, BrandQuery } from '../dtos/brands/brand-dto';
+import { Brand } from '../dtos/brands/brand-dto';
 import { PagedResult } from '../dtos/paged-result';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { CreateBrandDto } from '../dtos/brands/create-brand-dto';
 import { map, Observable } from 'rxjs';
@@ -50,17 +50,8 @@ export class BrandService {
   }
 
   // ── API ───────────────────────────────────────────────────────────────
-  getBrands(query: BrandQuery): Observable<PagedResult<Brand>> {
-    let params = new HttpParams();
-    Object.entries(query).forEach(([key, value]) => {
-      if (value !== null && value !== undefined)
-        params = params.set(key, value.toString());
-    });
-    return this.http.get<PagedResult<Brand>>(this.url, { params });
-  }
-
   getAll(): Observable<Brand[]> {
-    return this.getBrands({ isPaged: false }).pipe(
+    return this.http.get<PagedResult<Brand>>(this.url).pipe(
       map(result => result.items)
     );
   }

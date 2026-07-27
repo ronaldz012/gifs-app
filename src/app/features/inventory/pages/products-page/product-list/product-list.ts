@@ -120,11 +120,8 @@ export default class ProductList implements OnInit {
   loading = signal(false);
 
   query = signal<ProductQueryParams>({
-    isPaged: true,
     page: 1,
     pageSize: 20,
-    sortBy: 'Name',
-    sortDirection: 'asc',
   });
 
   showCreateModal = signal(false);

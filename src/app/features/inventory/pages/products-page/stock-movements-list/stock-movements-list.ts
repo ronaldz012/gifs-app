@@ -35,7 +35,6 @@ variantId = signal<string>('');
   query = signal<StockMovementParams>({
     page: 1,
     pageSize: 20,
-    isPaged: true
   });
 
   ngOnInit() {
