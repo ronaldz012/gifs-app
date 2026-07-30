@@ -65,6 +65,7 @@ export class BranchContextService {
   clear(): void {
     this._available.set([]);
     this._active.set(null);
+    localStorage.removeItem(this.ACTIVE_BRANCH_ID_KEY);
   }
 
   getActiveModules(): Module[] {

@@ -1,10 +1,9 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Color } from '../dtos/colors/color';
 import { CreateColorDto } from '../dtos/colors/create-color-dto';
-import { PagedResult } from '../dtos/paged-result';
 
 // Asegúrate de tener GUID disponible o cámbialo por string/number según corresponda
 type GUID = string; 
@@ -27,14 +26,17 @@ export class ColorService {
   // ── Carga lazy ────────────────────────────────────────────────────────
   load(): void {
     if (this._loaded()) return;
+    this._loaded.set(true);
     this._loading.set(true);
     this.getAll().subscribe({
       next: (data) => {
         this._colors.set(data);
-        this._loaded.set(true);
         this._loading.set(false);
       },
-      error: () => this._loading.set(false),
+      error: () => {
+        this._loading.set(false);
+        this._loaded.set(false);
+      },
     });
   }
 
@@ -55,9 +57,7 @@ export class ColorService {
 
   // ── API ───────────────────────────────────────────────────────────────
   getAll(): Observable<Color[]> {
-    return this.http.get<PagedResult<Color>>(this.url).pipe(
-      map(result => result.items)
-    );
+    return this.http.get<Color[]>(this.url);
   }
 
   create(body: CreateColorDto): Observable<Color> {

@@ -1,10 +1,9 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Brand } from '../dtos/brands/brand-dto';
-import { PagedResult } from '../dtos/paged-result';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { CreateBrandDto } from '../dtos/brands/create-brand-dto';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class BrandService {
@@ -23,14 +22,17 @@ export class BrandService {
   // ── Carga lazy ────────────────────────────────────────────────────────
   load(): void {
     if (this._loaded()) return;
+    this._loaded.set(true);
     this._loading.set(true);
     this.getAll().subscribe({
       next: (data) => {
         this._brands.set(data);
-        this._loaded.set(true);
         this._loading.set(false);
       },
-      error: () => this._loading.set(false),
+      error: () => {
+        this._loading.set(false);
+        this._loaded.set(false);
+      },
     });
   }
 
@@ -51,9 +53,7 @@ export class BrandService {
 
   // ── API ───────────────────────────────────────────────────────────────
   getAll(): Observable<Brand[]> {
-    return this.http.get<PagedResult<Brand>>(this.url).pipe(
-      map(result => result.items)
-    );
+    return this.http.get<Brand[]>(this.url);
   }
 
   create(newBrand: CreateBrandDto): Observable<Brand> {

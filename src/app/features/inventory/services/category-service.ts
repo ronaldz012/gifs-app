@@ -2,8 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Category } from '../dtos/categories/category-dto';
-import { map, Observable } from 'rxjs';
-import { PagedResult } from '../dtos/paged-result';
+import { Observable } from 'rxjs';
 import { CreateCategoryDto } from '../dtos/categories/create-category-dto';
 
 @Injectable({ providedIn: 'root' })
@@ -23,14 +22,17 @@ export class CategoryService {
   // ── Carga lazy ────────────────────────────────────────────────────────
   load(): void {
     if (this._loaded()) return;
+    this._loaded.set(true);
     this._loading.set(true);
     this.getAll().subscribe({
       next: (data) => {
         this._categories.set(data);
-        this._loaded.set(true);
         this._loading.set(false);
       },
-      error: () => this._loading.set(false),
+      error: () => {
+        this._loading.set(false);
+        this._loaded.set(false);
+      },
     });
   }
 
@@ -51,9 +53,7 @@ export class CategoryService {
 
   // ── API ───────────────────────────────────────────────────────────────
   getAll(): Observable<Category[]> {
-    return this.http.get<PagedResult<Category>>(this.url).pipe(
-      map(result => result.items)
-    );
+    return this.http.get<Category[]>(this.url);
   }
 
   create(createCategory: CreateCategoryDto): Observable<Category> {
