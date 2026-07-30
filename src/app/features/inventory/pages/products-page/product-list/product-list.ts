@@ -9,6 +9,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 import { ProductFilterBar } from '../product-filter-bar/product-filter-bar';
 import { BrandService } from '@features/inventory/services/brand-service';
 import { CategoryService } from '@features/inventory/services/category-service';
+import { ColorService } from '@features/inventory/services/color-service';
 import CreateProductModal from '../create-product-modal/create-product-modal';
 
 @Component({
@@ -113,6 +114,7 @@ export default class ProductList implements OnInit {
   private productService = inject(ProductService);
   brandService = inject(BrandService);
   categoryService = inject(CategoryService);
+  colorService = inject(ColorService);
   private router = inject(Router);
 
   products = signal<ListProductDto[]>([]);
@@ -150,6 +152,7 @@ export default class ProductList implements OnInit {
     });
     this.brandService.load();
     this.categoryService.load();
+    this.colorService.load();
   }
 
   goToDetail(id: GUID) { this.router.navigate(['inventory', 'products', id, 'detail']); }

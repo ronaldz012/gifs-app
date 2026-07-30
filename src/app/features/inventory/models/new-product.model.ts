@@ -5,6 +5,8 @@ import { VariantForm } from "./variant-form.model";
 export interface NewProductModelForm {
 newProduct: newProductDataModel;
 variants:VariantForm[];
+samePriceForAll: boolean;
+uniquePrice: number | null;
 }
 export interface newProductDataModel{
 name: string;

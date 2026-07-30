@@ -1,4 +1,4 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, computed, inject, output, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductService } from '@features/inventory/services/product-service';
 import CreateVariantRow from './create-variant-row/create-variant-row';
@@ -44,8 +44,12 @@ export default class CreateProductModal {
       brandName:    '',
       gender:       null,
     },
-    variants: [],
+    variants: [buildNewVariant()],
+    samePriceForAll: true,
+    uniquePrice: null,
   });
+
+  priceLocked = computed(() => this.newProduct().samePriceForAll);
 
   newProductForm = form(this.newProduct, (s) => {
     required(s.newProduct.name,       { message: 'Requerido' });
@@ -87,10 +91,16 @@ export default class CreateProductModal {
   error = signal<string | null>(null);
 
   addVariant(): void {
-    this.newProduct.update(current => ({
-      ...current,
-      variants: [...current.variants, buildNewVariant()],
-    }));
+    this.newProduct.update(current => {
+      const newVar = buildNewVariant();
+      if (current.samePriceForAll && current.uniquePrice !== undefined) {
+        newVar.price = current.uniquePrice;
+      }
+      return {
+        ...current,
+        variants: [...current.variants, newVar],
+      };
+    });
   }
 
   removeVariant(index: number): void {
@@ -100,16 +110,32 @@ export default class CreateProductModal {
     }));
   }
 
-  applyMassivePrice(value: string) {
-    const price = parseFloat(value);
-    const cleanPrice = isNaN(price) ? null : price;
+  onToggleSamePrice(enabled: boolean): void {
+    this.newProduct.update(current => {
+      if (enabled) {
+        return {
+          ...current,
+          samePriceForAll: true,
+          variants: current.variants.map(v => ({
+            ...v,
+            price: current.uniquePrice,
+          })),
+        };
+      }
+      return { ...current, samePriceForAll: false };
+    });
+  }
+
+  onUniquePriceChange(value: string): void {
+    const parsed = parseFloat(value);
+    const price = isNaN(parsed) ? null : parsed;
 
     this.newProduct.update(current => ({
       ...current,
-      variants: current.variants.map(variant => ({
-        ...variant,
-        price: cleanPrice,
-      })),
+      uniquePrice: price,
+      variants: current.samePriceForAll
+        ? current.variants.map(v => ({ ...v, price }))
+        : current.variants,
     }));
   }
 

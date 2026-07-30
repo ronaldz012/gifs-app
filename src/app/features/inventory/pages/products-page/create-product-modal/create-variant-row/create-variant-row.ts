@@ -12,6 +12,7 @@ import { ColorSelectCtrl } from "@features/inventory/components/color-select-ctr
 export default class CreateVariantRow {
   formModel = input.required<FieldTree<VariantForm>>();
   index     = input.required<number>();
+  priceLocked = input(false);
   remove    = output<void>();
 
   onRemove(): void { this.remove.emit(); }

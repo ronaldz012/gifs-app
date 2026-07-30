@@ -6,10 +6,7 @@
        (click)="$event.stopPropagation()">
 
     <header class="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-surface">
-      <div class="flex items-center gap-2">
-        <span class="pill-success">Nuevo</span>
-        <span class="text-[13px] font-semibold text-text-main">Crear producto</span>
-      </div>
+      <span class="text-[13px] font-semibold text-text-main">Crear producto</span>
       <button type="button" (click)="onClose()" class="btn-icon hover:bg-bg-muted hover:text-text-main" aria-label="Cerrar panel">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -17,7 +14,7 @@
       </button>
     </header>
 
-    <main class="flex-1 overflow-y-auto p-4 max-w-5xl w-full mx-auto space-y-6">
+    <main class="flex-1 overflow-y-auto p-3 max-w-5xl w-full mx-auto space-y-5">
 
       <section class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-bg-muted/30 p-4 rounded-xl border border-border/60">
 
@@ -90,39 +87,41 @@
       </section>
 
       <section class="space-y-3">
-        <h3 class="section-title">Tallas/Colores</h3>
+        <h3 class="section-title">Talla / Color</h3>
 
         @if (newProduct().variants.length > 0) {
           <div class="flex flex-wrap items-center gap-3 bg-bg-muted/60 px-3 py-1.5 rounded-lg border border-border">
-            <div class="flex items-center gap-1.5">
-              <label class="text-[10px] font-medium text-text-soft uppercase tracking-wider">Precio Masivo:</label>
-              <input
-                type="number"
-                placeholder="0.00"
-                #massivePrice
-(input)="applyMassivePrice(massivePrice.value)"
-                class="w-20 px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui"
-              />
+            <div class="flex items-center gap-2">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="sr-only peer"
+                  [checked]="newProduct().samePriceForAll"
+                  (change)="onToggleSamePrice($event.target.checked)" />
+                <div class="w-9 h-5 bg-bg-muted rounded-full peer peer-checked:bg-accent-ui peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+              </label>
+              <span class="text-[10px] font-medium text-text-soft uppercase tracking-wider">Precio igual</span>
             </div>
+            @if (newProduct().samePriceForAll) {
+              <div class="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  [value]="newProduct().uniquePrice ?? ''"
+                  (input)="onUniquePriceChange($event.target.value)"
+                  class="w-24 px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui"
+                />
+                <span class="text-[10px] text-text-soft">Todas las filas usan este precio</span>
+              </div>
+            }
           </div>
         }
 
         <div class="border border-border rounded-xl bg-bg-surface shadow-sm">
 
-          <div class="hidden md:grid grid-cols-[24px_120px_1fr_90px_90px_36px] bg-bg-muted border-b border-border">
-            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-center">#</div>
-            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Código</div>
-            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Color</div>
-            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">Talla</div>
-            <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right">P. Venta</div>
-            <div></div>
-          </div>
-
           <div class="flex flex-col">
             @for (variant of newProductForm.variants; track $index; let i = $index) {
               <app-create-variant-row
-                class="block border-b border-border last:border-b-0 hover:bg-accent-ui/5 transition-colors"
                 [formModel]="newProductForm.variants[$index]"
+                [priceLocked]="priceLocked()"
                 (remove)="removeVariant(i)"
                 [index]="i" />
             } @empty {
@@ -135,11 +134,8 @@
         <button
           type="button"
           (click)="addVariant()"
-          class="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-border rounded-xl text-xs font-bold uppercase tracking-wider text-text-soft hover:border-accent-ui hover:text-accent-ui hover:bg-accent-ui/5 transition-all">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          Agregar nueva fila (color + talla)
+          class="btn btn-secondary btn-sm w-full">
+          + Agregar talla / color
         </button>
 
       </section>

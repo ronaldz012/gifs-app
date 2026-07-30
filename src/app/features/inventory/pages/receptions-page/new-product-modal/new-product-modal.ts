@@ -42,7 +42,9 @@ export class NewProductModal {
     gender:       null,
    
   },
-   variants:     []
+   variants:     [],
+   samePriceForAll: true,
+   uniquePrice: null,
   });
 
 
