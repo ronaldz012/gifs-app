@@ -8,6 +8,8 @@ export interface ItemForm {
   product: ProductInfo;
   variants: VariantForm[];
   generalCost?: number | null;
+  sameCostForAll?: boolean;
+  uniqueCost?: number | null;
 }
 
 export interface ProductInfo{

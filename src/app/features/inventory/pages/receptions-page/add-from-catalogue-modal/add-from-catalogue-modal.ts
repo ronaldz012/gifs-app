@@ -1,5 +1,5 @@
 import {
-  Component, inject, output, signal, DestroyRef, OnInit,
+  Component, inject, output, signal, DestroyRef, OnInit, computed,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { debounceTime, distinctUntilChanged, finalize, Subject, switchMap } from 'rxjs';
@@ -43,6 +43,8 @@ export default class AddFromCatalogueModal implements OnInit {
   searchResults = signal<ProductSearchResult[]>([]);
   selectedProduct = signal<ProductSearchResult | null>(null);
 
+  costLocked = computed(() => this.itemModel().sameCostForAll ?? true);
+
   // ── Form ──────────────────────────────────────────────────────────────
   itemModel = signal<ItemForm>({
     product: {
@@ -55,6 +57,8 @@ export default class AddFromCatalogueModal implements OnInit {
       description:  '',
     },
     variants: [],
+    sameCostForAll: true,
+    uniqueCost: null,
   });
 
   itemForm = form(this.itemModel, s => {
@@ -122,6 +126,8 @@ export default class AddFromCatalogueModal implements OnInit {
         selected:         false,
       })),
       generalCost: null,
+      sameCostForAll: true,
+      uniqueCost: null,
     });
   }
 
@@ -131,6 +137,8 @@ export default class AddFromCatalogueModal implements OnInit {
       product: { id: null, internalCode: '', productName: '', categoryName: '', brandName: '', genderName: '', description: '' },
       variants: [],
       generalCost: null,
+      sameCostForAll: true,
+      uniqueCost: null,
     });
   }
 
@@ -156,6 +164,35 @@ export default class AddFromCatalogueModal implements OnInit {
     });
   }
 
+  onToggleSameCost(enabled: boolean): void {
+    this.itemModel.update(current => {
+      if (enabled) {
+        return {
+          ...current,
+          sameCostForAll: true,
+          variants: current.variants.map(v => ({
+            ...v,
+            unitCost: current.uniqueCost ?? null,
+          })),
+        };
+      }
+      return { ...current, sameCostForAll: false };
+    });
+  }
+
+  onUniqueCostChange(value: string): void {
+    const parsed = parseFloat(value);
+    const cost = isNaN(parsed) ? null : parsed;
+
+    this.itemModel.update(current => ({
+      ...current,
+      uniqueCost: cost,
+      variants: (current.sameCostForAll ?? true)
+        ? current.variants.map(v => ({ ...v, unitCost: cost }))
+        : current.variants,
+    }));
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────
   onConfirm(): void {
     this.itemForm().markAsTouched();
@@ -175,20 +212,6 @@ export default class AddFromCatalogueModal implements OnInit {
 
     this.confirm.emit(finalItem);
     this.close.emit();
-  }
-
-  applyMassiveCost(value: string): void {
-    const cost = parseFloat(value);
-    const cleanCost = isNaN(cost) ? null : cost;
-
-    this.itemModel.update(current => ({
-      ...current,
-      generalCost: cleanCost,
-      variants: current.variants.map(variant => ({
-        ...variant,
-        unitCost: cleanCost,
-      })),
-    }));
   }
 
   // ── Navegación ────────────────────────────────────────────────────────
