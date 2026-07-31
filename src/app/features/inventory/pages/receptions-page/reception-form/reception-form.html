@@ -1,5 +1,4 @@
 <div class="mx-auto py-5 px-3 sm:px-6 min-w-225">
-
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
     <div class="flex items-center gap-4">
@@ -8,45 +7,63 @@
         [value]="reception().notes"
         (input)="updateNotes($event)"
         placeholder="Notas (proveedor, temporada...)"
-        class="w-72 px-3 py-1.5 border border-border bg-bg-surface rounded-md text-sm text-text-main placeholder-text-soft
-               focus:outline-none focus:ring-1 focus:ring-accent-ui focus:border-accent-ui transition-colors duration-150"
+        class="w-72 px-3 py-1.5 border border-border bg-bg-surface rounded-md text-sm text-text-main placeholder-text-soft focus:outline-none focus:ring-1 focus:ring-accent-ui focus:border-accent-ui transition-colors duration-150"
       />
     </div>
 
     <div class="flex items-center gap-3">
-      <button type="button" (click)="onCancel()"
-        class="px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm">
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm"
+      >
         Cancelar
       </button>
-      <button type="button" (click)="onSubmit()" [disabled]="isSubmitting()"
-        class="px-4 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm">
+      <button
+        type="button"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting()"
+        class="px-4 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm"
+      >
         {{ isSubmitting() ? 'Guardando...' : 'Guardar recepción' }}
       </button>
     </div>
   </div>
 
   <div class="space-y-3">
-
     @if (submitError()) {
-      <div class="px-3 py-2 text-sm text-feedback-error-text bg-feedback-error border border-border rounded-md">
+      <div
+        class="px-3 py-2 text-sm text-feedback-error-text bg-feedback-error border border-border rounded-md"
+      >
         {{ submitError() }}
       </div>
     }
 
     @if (reception().items.length === 0) {
-      <div class="text-center text-sm text-text-soft py-10 border border-dashed border-border bg-bg-surface/50 rounded-lg">
+      <div
+        class="text-center text-sm text-text-soft py-10 border border-dashed border-border bg-bg-surface/50 rounded-lg"
+      >
         No hay productos. Hacé clic en "+ Agregar producto" para empezar.
       </div>
     }
 
     @for (group of reception().items; track $index) {
-      <app-reception-item class="gap-y-8" [group]="group" (remove)="removeGroup($event)" (edit)="editGroup($index)" />
+      <app-reception-item
+        class="gap-y-8"
+        [group]="group"
+        [index]="$index"
+        (remove)="removeGroup($index)"
+        (edit)="editGroup($index)"
+      />
     }
 
     <!-- Botón agregar -->
     <div class="py-3">
-      <button type="button" (click)="showAddCatalogueModal.set(true)"
-        class="flex items-center gap-2 px-4 py-2 bg-bg-muted text-text-main border border-border rounded-lg hover:bg-text-main hover:text-inverse transition-all duration-150 shadow-sm group">
+      <button
+        type="button"
+        (click)="openAddCatalogueModal()"
+        class="flex items-center gap-2 px-4 py-2 bg-bg-muted text-text-main border border-border rounded-lg hover:bg-text-main hover:text-inverse transition-all duration-150 shadow-sm group"
+      >
         <span class="text-xl font-bold group-hover:scale-110">🔍</span>
         <div class="text-left">
           <p class="text-sm font-bold leading-none">Agregar producto</p>
@@ -56,7 +73,9 @@
     </div>
 
     <!-- Footer -->
-    <div class="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-border gap-4">
+    <div
+      class="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-border gap-4"
+    >
       <div class="flex items-center gap-6 text-sm text-text-muted">
         <span>
           <span class="font-bold text-text-main">{{ reception().items.length }}</span>
@@ -64,46 +83,59 @@
         </span>
         <span>
           Costo total:
-          <span class="font-extrabold text-accent-ui">Bs {{ totalCost() | number:'1.0-0' }}</span>
+          <span class="font-extrabold text-accent-ui">Bs {{ totalCost() | number: '1.0-0' }}</span>
         </span>
       </div>
 
       <div class="flex items-center gap-3">
-        <button type="button" (click)="onCancel()"
-          class="px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm"
+        >
           Cancelar
         </button>
-        <button type="button" (click)="onSubmit()" [disabled]="isSubmitting()"
-          class="px-5 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm">
+        <button
+          type="button"
+          (click)="onSubmit()"
+          [disabled]="isSubmitting()"
+          class="px-5 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm"
+        >
           {{ isSubmitting() ? 'Guardando...' : 'Guardar recepción' }}
         </button>
       </div>
     </div>
-
   </div>
 
   @if (showAddCatalogueModal()) {
-    <app-add-from-catalogue-modal
+    <app-catalogue-item-modal
+      mode="add"
+      [initialProduct]="pendingProduct()"
+      [existingProductIds]="existingProductIds()"
       (confirm)="addGroup($event)"
       (close)="showAddCatalogueModal.set(false)"
-      (notFound)="onNotFound()"
+      (notFound)="onNotFound($event)"
     />
   }
 
   @if (showEditModal()) {
-    <app-edit-catalogue-item-modal
+    <app-catalogue-item-modal
+      mode="edit"
       [item]="editingItem()!.item"
       [index]="editingItem()!.index"
-      (update)="updateItem($event)"
+      [initialProduct]="pendingCreated()"
+      (confirm)="updateItem($event)"
       (close)="showEditModal.set(false); editingItem.set(null)"
+      (notFound)="onNotFound($event)"
     />
   }
 
-  @if (showNewProductModal()) {
-    <app-new-product-modal
-      (confirm)="addGroup($event)"
-      (close)="showNewProductModal.set(false)"
+  @if (showCreateProductModal()) {
+    <app-create-product-modal
+      [returnMode]="true"
+      [initialName]="pendingName()"
+      (created)="onProductCreated($event)"
+      (close)="onCreateProductCancelled()"
     />
   }
-
 </div>

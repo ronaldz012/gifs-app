@@ -1,9 +1,9 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, output, signal } from '@angular/core';
 import { ProductService } from '@features/inventory/services/product-service';
 import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
 import { CurrencyPipe } from '@angular/common';
 import { NewProductModelForm } from '@features/inventory/models/new-product.model';
-import { applyEach, FieldTree, form, FormField, required, validateTree } from '@angular/forms/signals';
+import { applyEach, form, FormField, required, validateTree } from '@angular/forms/signals';
 import { buildNewVariant, ItemForm, newVariantSchema, VariantForm } from '@features/inventory/models/variant-form.model';
 import { BrandSelectCtrl } from "@features/inventory/components/brand-select-crtl/brand-select-crtl.component";
 import { CategorySelectCtrl } from "@features/inventory/components/category-select-ctrl/category-select-ctrl.component";

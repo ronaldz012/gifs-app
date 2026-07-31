@@ -1,6 +1,12 @@
 import {
-  Component, computed, DestroyRef, inject,
-  input, OnInit, output, signal,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
 } from '@angular/core';
 import { debounceTime, distinctUntilChanged, finalize, Subject, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -27,13 +33,18 @@ import { ProductSearchResult } from './product-search-result.component';
                  transition-colors duration-150"
         />
         @if (isSearching()) {
-          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-soft animate-spin">⟳</span>
+          <span
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-soft animate-spin"
+            >⟳</span
+          >
         }
       </div>
 
       @if (showDropdown()) {
-        <div class="absolute z-50 mt-1 w-full bg-bg-elevated border border-border rounded-lg shadow-lg max-h-64 overflow-y-auto">
-          @for (product of results(); track product.id; let i = $index) {
+        <div
+          class="absolute z-50 mt-1 w-full bg-bg-elevated border border-border rounded-lg shadow-lg max-h-64 overflow-y-auto"
+        >
+          @for (product of visibleResults(); track product.id; let i = $index) {
             <button
               type="button"
               (click)="select(product)"
@@ -43,7 +54,9 @@ import { ProductSearchResult } from './product-search-result.component';
               [class.active]="i === activeIndex()"
               [class.bg-accent-ui/10]="i === activeIndex()"
             >
-              <span class="w-20 shrink-0 font-mono text-[11px] text-text-soft truncate">{{ product.internalCode }}</span>
+              <span class="w-20 shrink-0 font-mono text-[11px] text-text-soft truncate">{{
+                product.internalCode
+              }}</span>
               <span class="flex-1 font-medium text-text-main truncate">{{ product.name }}</span>
               <span class="text-[11px] text-text-muted shrink-0">{{ product.brandName }}</span>
             </button>
@@ -56,7 +69,12 @@ import { ProductSearchResult } from './product-search-result.component';
                      hover:bg-accent-ui/5 transition-colors flex items-center gap-2"
             >
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               Crear "{{ query() }}"
             </button>
@@ -72,45 +90,49 @@ import { ProductSearchResult } from './product-search-result.component';
   `,
 })
 export class ProductSearch implements OnInit {
-
   private productService = inject(ProductService);
-  private destroyRef     = inject(DestroyRef);
-  private search$        = new Subject<string>();
+  private destroyRef = inject(DestroyRef);
+  private search$ = new Subject<string>();
 
   initialValue = input<string>('');
-  allowCreate  = input<boolean>(true);
+  allowCreate = input<boolean>(true);
+  excludeIds = input<GUID[]>([]);
   productSelected = output<ProductSearchResult | null>();
-  createNew       = output<string>();
+  createNew = output<string>();
 
-  query       = signal('');
-  selected    = signal(false);
+  query = signal('');
+  selected = signal(false);
   isSearching = signal(false);
-  results     = signal<ProductSearchResult[]>([]);
+  results = signal<ProductSearchResult[]>([]);
   activeIndex = signal(0);
-  isOpen      = signal(false);
+  isOpen = signal(false);
+
+  visibleResults = computed(() => this.results().filter((r) => !this.excludeIds().includes(r.id)));
 
   showDropdown = computed(() => this.isOpen() && !this.selected());
-  showEmpty    = computed(() =>
-    !this.isSearching() && this.results().length === 0 && this.query().length >= 2
+  showEmpty = computed(
+    () => !this.isSearching() && this.visibleResults().length === 0 && this.query().length >= 2,
   );
 
   constructor() {
-    this.search$.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      switchMap(q => {
-        if (q.length < 2) {
-          this.results.set([]);
-          this.isSearching.set(false);
-          return [];
-        }
-        this.isSearching.set(true);
-        return this.productService.searchProduct(q).pipe(
-          finalize(() => this.isSearching.set(false))
-        );
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(r => this.results.set(r));
+    this.search$
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged(),
+        switchMap((q) => {
+          if (q.length < 2) {
+            this.results.set([]);
+            this.isSearching.set(false);
+            return [];
+          }
+          this.isSearching.set(true);
+          return this.productService
+            .searchProduct(q)
+            .pipe(finalize(() => this.isSearching.set(false)));
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((r) => this.results.set(r));
   }
 
   ngOnInit(): void {
@@ -120,18 +142,26 @@ export class ProductSearch implements OnInit {
     }
   }
 
-  onFocus(): void { this.isOpen.set(true); }
+  onFocus(): void {
+    this.isOpen.set(true);
+  }
 
   handleFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget as HTMLElement;
     if (next && (event.currentTarget as HTMLElement).contains(next)) return;
     this.isOpen.set(false);
-    if (!this.selected()) { this.query.set(''); this.results.set([]); }
+    if (!this.selected()) {
+      this.query.set('');
+      this.results.set([]);
+    }
   }
 
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    if (this.selected()) { this.selected.set(false); this.productSelected.emit(null); }
+    if (this.selected()) {
+      this.selected.set(false);
+      this.productSelected.emit(null);
+    }
     this.query.set(value);
     this.activeIndex.set(0);
     this.search$.next(value);
@@ -145,16 +175,31 @@ export class ProductSearch implements OnInit {
     this.productSelected.emit(product);
   }
 
-  onCreateNew(): void { this.isOpen.set(false); this.createNew.emit(this.query()); }
+  onCreateNew(): void {
+    this.isOpen.set(false);
+    this.createNew.emit(this.query());
+  }
 
   onKeyDown(event: KeyboardEvent): void {
-    const list = this.results();
+    const list = this.visibleResults();
     switch (event.key) {
-      case 'ArrowDown': event.preventDefault(); this.isOpen.set(true); this.activeIndex.update(i => (i < list.length - 1 ? i + 1 : 0)); break;
-      case 'ArrowUp': event.preventDefault(); this.activeIndex.update(i => (i > 0 ? i - 1 : list.length - 1)); break;
-      case 'Enter': event.preventDefault(); if (list[this.activeIndex()]) this.select(list[this.activeIndex()]); break;
+      case 'ArrowDown':
+        event.preventDefault();
+        this.isOpen.set(true);
+        this.activeIndex.update((i) => (i < list.length - 1 ? i + 1 : 0));
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.activeIndex.update((i) => (i > 0 ? i - 1 : list.length - 1));
+        break;
+      case 'Enter':
+        event.preventDefault();
+        if (list[this.activeIndex()]) this.select(list[this.activeIndex()]);
+        break;
       case 'Escape':
-      case 'Tab': this.isOpen.set(false); break;
+      case 'Tab':
+        this.isOpen.set(false);
+        break;
     }
   }
 }

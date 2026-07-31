@@ -1,24 +1,23 @@
-import { DecimalPipe } from "@angular/common";
-import { Component, computed, inject, OnInit, signal } from "@angular/core";
-import { Router } from "@angular/router";
-import { ReceptionItem } from "./reception-item/reception-item";
-import AddFromCatalogueModal from "../add-from-catalogue-modal/add-from-catalogue-modal";
-import EditCatalogueItemModal from "../edit-catalogue-item-modal/edit-catalogue-item-modal";
-import { NewProductModal } from "../new-product-modal/new-product-modal";
-import CreateReceptionDto from "@features/inventory/dtos/receptions/create-reception-dto";
-import { ReceptionService } from "@features/inventory/services/reception-service";
-import { ColorService } from "@features/inventory/services/color-service";
-import { BrandService } from "@features/inventory/services/brand-service";
-import { CategoryService } from "@features/inventory/services/category-service";
-import { ItemForm, Reception, VariantForm } from "@features/inventory/models/variant-form.model";
+import { DecimalPipe } from '@angular/common';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { ReceptionItem } from './reception-item/reception-item';
+import CatalogueItemModal from '../catalogue-item-modal/catalogue-item-modal';
+import CreateProductModal from '../../products-page/create-product-modal/create-product-modal';
+import CreateReceptionDto from '@features/inventory/dtos/receptions/create-reception-dto';
+import { ReceptionService } from '@features/inventory/services/reception-service';
+import { ColorService } from '@features/inventory/services/color-service';
+import { BrandService } from '@features/inventory/services/brand-service';
+import { CategoryService } from '@features/inventory/services/category-service';
+import { ItemForm, Reception, VariantForm } from '@features/inventory/models/variant-form.model';
+import { ProductSearchResult } from '@features/inventory/components/product-search/product-search-result.component';
 
 @Component({
   selector: 'app-reception-form',
-  imports: [ReceptionItem, DecimalPipe, AddFromCatalogueModal, EditCatalogueItemModal, NewProductModal],
+  imports: [ReceptionItem, DecimalPipe, CatalogueItemModal, CreateProductModal],
   templateUrl: './reception-form.html',
 })
 export default class ReceptionForm implements OnInit {
-
   ngOnInit(): void {
     this.categoryService.load();
     this.colorService.load();
@@ -27,49 +26,69 @@ export default class ReceptionForm implements OnInit {
 
   private receptionService = inject(ReceptionService);
   private categoryService = inject(CategoryService);
-  private colorService = inject(ColorService)
-  private brandService = inject(BrandService)
-  private router      = inject(Router);
+  private colorService = inject(ColorService);
+  private brandService = inject(BrandService);
+  private router = inject(Router);
 
-  isSubmitting          = signal(false);
-  submitError           = signal<string | null>(null);
+  isSubmitting = signal(false);
+  submitError = signal<string | null>(null);
   showAddCatalogueModal = signal(false);
-  showEditModal         = signal(false);
-  editingItem           = signal<{ index: number; item: ItemForm } | null>(null);
+  showEditModal = signal(false);
+  editingItem = signal<{ index: number; item: ItemForm } | null>(null);
+  showCreateProductModal = signal(false);
+  pendingProduct = signal<ProductSearchResult | null>(null);
+  pendingName = signal('');
+  creatingFromEdit = signal(false);
+  pendingCreated = signal<ProductSearchResult | null>(null);
 
   reception = signal<Reception>({ notes: '', items: [] });
 
+  existingProductIds = computed(() =>
+    this.reception()
+      .items.map((i) => i.product.id)
+      .filter((id): id is GUID => id !== null),
+  );
+
   totalCost = computed(() =>
-    this.reception().items
-      .flatMap((g: ItemForm) => g.variants)
-      .reduce((sum: number, v: VariantForm) => sum + (v.quantityReceived ?? 0) * (v.unitCost ?? 0), 0)
+    this.reception()
+      .items.flatMap((g: ItemForm) => g.variants)
+      .reduce(
+        (sum: number, v: VariantForm) => sum + (v.quantityReceived ?? 0) * (v.unitCost ?? 0),
+        0,
+      ),
   );
 
   updateNotes(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.reception.update(r => ({ ...r, notes: target.value }));
+    this.reception.update((r) => ({ ...r, notes: target.value }));
   }
 
-  addGroup(group: ItemForm): void {
-    console.log("VARIANTE RECIBIADA: ", group);
-    this.reception.update(r => ({ ...r, items: [...r.items, group] }));
+  addGroup(group: { index: number | null; item: ItemForm }): void {
+    const alreadyExists = this.reception().items.some(
+      (i) => i.product.id === group.item.product.id,
+    );
+    if (alreadyExists) {
+      this.submitError.set('Este producto ya fue agregado a la recepción.');
+      return;
+    }
+    this.reception.update((r) => ({ ...r, items: [...r.items, group.item] }));
     this.showAddCatalogueModal.set(false);
   }
 
-  updateItem(itemToUpdate: { index: number; item: ItemForm }): void {
-    this.reception.update(r => {
+  updateItem(itemToUpdate: { index: number | null; item: ItemForm }): void {
+    this.reception.update((r) => {
       const items = [...r.items];
-      items[itemToUpdate.index] = itemToUpdate.item;
+      items[itemToUpdate.index!] = itemToUpdate.item;
       return { ...r, items };
     });
     this.showEditModal.set(false);
     this.editingItem.set(null);
   }
 
-  removeGroup(productId: GUID): void {
-    this.reception.update(r => ({
+  removeGroup(index: number): void {
+    this.reception.update((r) => ({
       ...r,
-      items: r.items.filter((g: ItemForm) => g.product.id !== productId)
+      items: r.items.filter((_, i) => i !== index),
     }));
   }
 
@@ -78,12 +97,12 @@ export default class ReceptionForm implements OnInit {
 
     const payload: CreateReceptionDto = {
       notes: this.reception().notes,
-      items: this.reception().items.flatMap(g =>
-        g.variants.map(v => ({
+      items: this.reception().items.flatMap((g) =>
+        g.variants.map((v) => ({
           productVariantId: v.id!,
           quantityReceived: v.quantityReceived!,
-          unitCost:         v.unitCost!,
-        }))
+          unitCost: v.unitCost!,
+        })),
       ),
     };
 
@@ -109,14 +128,43 @@ export default class ReceptionForm implements OnInit {
 
   editGroup(index: number) {
     const edit = this.reception().items[index];
+    this.pendingCreated.set(null);
     this.editingItem.set({ index, item: edit });
     this.showEditModal.set(true);
   }
 
-  showNewProductModal = signal(false);
-
-  onNotFound(): void {
+  onNotFound(query: string): void {
+    this.creatingFromEdit.set(this.showEditModal());
+    this.showEditModal.set(false);
     this.showAddCatalogueModal.set(false);
-    this.showNewProductModal.set(true);
+    this.pendingName.set(query);
+    this.showCreateProductModal.set(true);
+  }
+
+  onProductCreated(product: ProductSearchResult): void {
+    this.showCreateProductModal.set(false);
+    this.pendingProduct.set(product);
+    if (this.creatingFromEdit()) {
+      this.creatingFromEdit.set(false);
+      this.pendingCreated.set(product);
+      this.showEditModal.set(true);
+    } else {
+      this.showAddCatalogueModal.set(true);
+    }
+  }
+
+  onCreateProductCancelled(): void {
+    this.showCreateProductModal.set(false);
+    if (this.creatingFromEdit()) {
+      this.creatingFromEdit.set(false);
+      this.showEditModal.set(true);
+    } else {
+      this.showAddCatalogueModal.set(true);
+    }
+  }
+
+  openAddCatalogueModal(): void {
+    this.pendingProduct.set(null);
+    this.showAddCatalogueModal.set(true);
   }
 }

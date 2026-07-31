@@ -26,6 +26,7 @@
           <span class="normal-case font-normal text-feedback-error-text ml-1">* Obligatorio</span>
         </label>
         <app-product-search
+          [initialValue]="initialProduct()?.name ?? ''"
           (productSelected)="onProductSelected($event)"
           (createNew)="onNotFound($event)"
         />
@@ -187,9 +188,9 @@
         Cancelar
       </button>
       <button type="button" (click)="onConfirm()"
-        [disabled]="isConfirming() || !selectedProduct()"
+        [disabled]="!selectedProduct()"
         class="btn btn-primary btn-sm disabled:opacity-40 disabled:cursor-not-allowed">
-        {{ isConfirming() ? 'Guardando...' : 'Agregar producto' }}
+        Agregar producto
       </button>
     </div>
   </footer>

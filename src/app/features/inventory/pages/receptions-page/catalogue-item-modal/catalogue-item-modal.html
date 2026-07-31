@@ -1,0 +1,340 @@
+<div
+  class="fixed inset-y-0 right-0 z-[100] flex flex-col bg-bg-surface font-inter animate-fade-in w-full md:w-[600px] md:max-w-[90%] md:border-l md:border-border md:shadow-[-20px_0_40px_-15px_rgba(0,0,0,0.15)]"
+>
+  <!-- ── HEADER ── -->
+  <header class="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-surface">
+    <div class="flex items-center gap-2">
+      <span class="pill-info">Catálogo</span>
+      <span class="text-[13px] font-semibold text-text-main">
+        {{ mode() === 'edit' ? 'Editar producto' : 'Agregar desde catálogo' }}
+      </span>
+    </div>
+    <button
+      type="button"
+      (click)="onClose()"
+      class="btn-icon hover:bg-bg-muted hover:text-text-main"
+      aria-label="Cerrar panel"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+  </header>
+
+  <!-- ── MAIN ── -->
+  <main class="flex-1 overflow-y-auto p-4 max-w-5xl w-full mx-auto space-y-6">
+    <!-- BÚSQUEDA + INFO -->
+    <section class="grid grid-cols-1 gap-4 bg-bg-muted/30 p-4 rounded-xl border border-border/60">
+      <div class="flex flex-col gap-1">
+        <label class="field-label text-feedback-info-text">
+          Buscar en catálogo
+          <span class="normal-case font-normal text-feedback-error-text ml-1">* Obligatorio</span>
+        </label>
+        <app-product-search
+          [initialValue]="
+            mode() === 'edit'
+              ? (item()?.product?.productName ?? '')
+              : (initialProduct()?.name ?? '')
+          "
+          (productSelected)="onProductSelected($event)"
+          (createNew)="onNotFound($event)"
+          [excludeIds]="mode() === 'add' ? existingProductIds() : []"
+        />
+      </div>
+
+      <!-- Info readonly -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="flex flex-col gap-0.5">
+          <span class="field-label">Categoría</span>
+          <span class="field-value truncate">{{ itemModel().product.categoryName || '—' }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="field-label">Marca</span>
+          <span class="field-value truncate">{{ itemModel().product.brandName || '—' }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="field-label">Género</span>
+          <span class="field-value">{{ itemModel().product.genderName || '—' }}</span>
+        </div>
+        @if (itemModel().product.description) {
+          <div class="col-span-2 md:col-span-4 flex flex-col gap-0.5">
+            <span class="field-label">Descripción</span>
+            <span class="text-[11px] text-text-muted italic truncate">{{
+              itemModel().product.description
+            }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- VARIANTES -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="section-title">
+          {{ mode() === 'edit' ? 'Tallas/Colores del pedido' : 'Tallas/Colores disponibles' }}
+        </h3>
+        @if (itemModel().variants.length > 0) {
+          <div
+            class="flex items-center gap-3 bg-bg-muted/60 px-3 py-1.5 rounded-lg border border-border"
+          >
+            <div class="flex items-center gap-2">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="sr-only peer"
+                  [checked]="itemModel().sameCostForAll"
+                  (change)="onToggleSameCost($event.target.checked)"
+                />
+                <div
+                  class="w-9 h-5 bg-bg-muted rounded-full peer peer-checked:bg-accent-ui peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"
+                ></div>
+              </label>
+              <span class="text-[10px] font-medium text-text-soft uppercase tracking-wider"
+                >Costo igual</span
+              >
+            </div>
+            @if (itemModel().sameCostForAll) {
+              <div class="flex flex-col gap-0.5">
+                <div class="flex items-center gap-1.5">
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    [value]="itemModel().uniqueCost ?? ''"
+                    (input)="onUniqueCostChange($event.target.value)"
+                    [class.!border-feedback-error-text]="
+                      itemForm.uniqueCost().touched() && itemForm.uniqueCost().invalid()
+                    "
+                    class="w-24 px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui"
+                  />
+                  <span class="text-[10px] text-text-soft">Todas las filas usan este costo</span>
+                </div>
+                @if (itemForm.uniqueCost().touched() && itemForm.uniqueCost().invalid()) {
+                  @for (error of itemForm.uniqueCost().errors(); track error.kind) {
+                    <span class="text-[9px] text-feedback-error-text font-medium leading-none">{{
+                      error.message
+                    }}</span>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="border border-border rounded-xl bg-bg-surface shadow-sm">
+        <div
+          class="hidden md:grid grid-cols-[28px_100px_1fr_80px_80px_80px] bg-bg-muted border-b border-border"
+        >
+          <div
+            class="px-2 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-center"
+          ></div>
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">
+            Código
+          </div>
+          <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft">
+            Color / Talla
+          </div>
+          <div
+            class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right"
+          >
+            P. Venta
+          </div>
+          <div
+            class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right"
+          >
+            Cant.
+          </div>
+          <div
+            class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-text-soft text-right"
+          >
+            Costo U.
+          </div>
+        </div>
+
+        <!-- Filas -->
+        <div class="flex flex-col">
+          @for (variant of itemModel().variants; track variant.id; let i = $index) {
+            <div
+              class="flex flex-col md:grid md:grid-cols-[28px_100px_1fr_80px_80px_80px] md:items-center border-b border-border last:border-b-0 transition-colors"
+            >
+              <!-- Mobile row 1 | Desktop: cols 1-4 via md:contents -->
+              <div class="flex items-center gap-2 px-3 py-1.5 md:p-0 md:contents">
+                <div class="flex justify-center w-7 shrink-0 md:w-auto md:py-2">
+                  <input
+                    type="checkbox"
+                    [checked]="variant.selected"
+                    (change)="toggleVariant(i)"
+                    class="accent-accent-ui cursor-pointer w-3.5 h-3.5"
+                  />
+                </div>
+
+                <div
+                  class="text-[11px] font-mono text-text-main truncate min-w-0 flex-1 md:flex-none md:px-3 md:py-2"
+                >
+                  {{ variant.sku }}
+                </div>
+
+                <div
+                  class="text-[11px] text-text-main truncate min-w-0 flex-[2] md:flex-none md:px-3 md:py-2"
+                >
+                  {{ variant.colorName }} / {{ variant.size }}
+                </div>
+
+                <div
+                  class="text-[11px] font-mono text-text-main text-right shrink-0 md:px-3 md:py-2"
+                >
+                  {{ variant.price != null ? 'Bs ' + (variant.price | number: '1.0-0') : '—' }}
+                </div>
+              </div>
+
+              <!-- Mobile row 2 | Desktop: cols 5-6 via md:contents -->
+              <div
+                class="flex items-center gap-2 px-3 py-1.5 border-t border-border/40 md:border-t-0 md:p-0 md:contents"
+              >
+                <div class="flex flex-wrap items-center gap-1 flex-1 md:block md:px-2 md:py-2">
+                  <span class="text-[9px] font-semibold uppercase text-text-soft md:hidden"
+                    >Cant.</span
+                  >
+                  @if (variant.selected) {
+                    <input
+                      type="number"
+                      [value]="variant.quantityReceived ?? ''"
+                      placeholder="0"
+                      (input)="updateVariantField(i, 'quantityReceived', $event)"
+                      [class.!border-feedback-error-text]="
+                        itemForm.variants[i].quantityReceived().touched() &&
+                        itemForm.variants[i].quantityReceived().invalid()
+                      "
+                      class="flex-1 min-w-0 w-full px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    />
+                    @if (
+                      itemForm.variants[i].quantityReceived().touched() &&
+                      itemForm.variants[i].quantityReceived().invalid()
+                    ) {
+                      @for (
+                        error of itemForm.variants[i].quantityReceived().errors();
+                        track error.kind
+                      ) {
+                        <span
+                          class="w-full text-[9px] text-feedback-error-text font-medium leading-none"
+                          >{{ error.message }}</span
+                        >
+                      }
+                    }
+                  } @else {
+                    <span class="block w-full px-1.5 py-0.5 text-[11px] font-mono text-text-soft"
+                      >—</span
+                    >
+                  }
+                </div>
+
+                <div class="flex flex-wrap items-center gap-1 flex-1 md:block md:px-2 md:py-2">
+                  <span class="text-[9px] font-semibold uppercase text-text-soft md:hidden"
+                    >C.U.</span
+                  >
+                  @if (variant.selected) {
+                    <div class="relative flex-1 min-w-0 w-full">
+                      <input
+                        type="number"
+                        [value]="variant.unitCost ?? ''"
+                        placeholder="0.00"
+                        (input)="updateVariantField(i, 'unitCost', $event)"
+                        [class.!border-feedback-error-text]="
+                          !costLocked() &&
+                          itemForm.variants[i].unitCost().touched() &&
+                          itemForm.variants[i].unitCost().invalid()
+                        "
+                        class="w-full px-1.5 py-0.5 border border-border rounded text-[11px] font-mono text-text-main bg-bg-surface focus:outline-none focus:border-accent-ui [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      />
+                      @if (costLocked()) {
+                        <div class="absolute inset-0 cursor-not-allowed"></div>
+                      }
+                    </div>
+                    @if (
+                      !costLocked() &&
+                      itemForm.variants[i].unitCost().touched() &&
+                      itemForm.variants[i].unitCost().invalid()
+                    ) {
+                      @for (error of itemForm.variants[i].unitCost().errors(); track error.kind) {
+                        <span
+                          class="w-full text-[9px] text-feedback-error-text font-medium leading-none"
+                          >{{ error.message }}</span
+                        >
+                      }
+                    }
+                  } @else {
+                    <span class="block w-full px-1.5 py-0.5 text-[11px] font-mono text-text-soft"
+                      >—</span
+                    >
+                  }
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="py-8 text-center text-xs italic text-text-soft">
+              @if (selectedProduct()) {
+                Sin tallas/colores disponibles para este producto.
+              } @else {
+                Selecciona un producto para ver sus tallas/colores.
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (hasSummary()) {
+        <section
+          class="bg-bg-muted/30 border border-border rounded-xl p-4 flex flex-wrap items-center gap-x-8 gap-y-3"
+        >
+          <div class="flex flex-col gap-0.5">
+            <span class="field-label">Unidades</span>
+            <span class="text-base font-extrabold text-text-main font-mono"
+              >{{ totalUnits() }} u.</span
+            >
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="field-label">Inversión total</span>
+            <span class="text-base font-black text-accent-ui font-mono"
+              >Bs {{ totalInvestment() | number: '1.2-2' }}</span
+            >
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="field-label">Ventas estimadas</span>
+            <span class="text-base font-black text-text-main font-mono"
+              >Bs {{ totalSales() | number: '1.2-2' }}</span
+            >
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="field-label">Ganancia esperada</span>
+            <span class="text-base font-black text-feedback-success-text font-mono"
+              >Bs {{ expectedProfit() | number: '1.2-2' }}</span
+            >
+          </div>
+        </section>
+      }
+    </section>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="border-t border-border bg-bg-surface p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+    <div class="max-w-5xl w-full mx-auto flex items-center justify-end gap-3">
+      @if (error()) {
+        <span class="text-[11px] text-feedback-error-text mr-auto">{{ error() }}</span>
+      }
+      <button type="button" (click)="onClose()" class="btn btn-secondary btn-sm">Cancelar</button>
+      <button
+        type="button"
+        (click)="onConfirm()"
+        [disabled]="!selectedProduct()"
+        class="btn btn-primary btn-sm disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {{ mode() === 'edit' ? 'Guardar cambios' : 'Agregar producto' }}
+      </button>
+    </div>
+  </footer>
+</div>

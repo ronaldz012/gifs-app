@@ -1,29 +1,45 @@
 <div class="fixed inset-0 z-[100]">
   <div class="absolute inset-0 bg-overlay backdrop-blur-[1px]" (click)="onClose()"></div>
 
-  <div class="absolute inset-y-0 right-0 z-10 flex flex-col bg-bg-surface font-inter animate-fade-in
-              w-full md:w-[600px] md:max-w-[90%] md:border-l md:border-border md:shadow-[-20px_0_40px_-15px_rgba(0,0,0,0.15)]"
-       (click)="$event.stopPropagation()">
-
-    <header class="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-surface">
+  <div
+    class="absolute inset-y-0 right-0 z-10 flex flex-col bg-bg-surface font-inter animate-fade-in w-full md:w-[600px] md:max-w-[90%] md:border-l md:border-border md:shadow-[-20px_0_40px_-15px_rgba(0,0,0,0.15)]"
+    (click)="$event.stopPropagation()"
+  >
+    <header
+      class="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-surface"
+    >
       <span class="text-[13px] font-semibold text-text-main">Crear producto</span>
-      <button type="button" (click)="onClose()" class="btn-icon hover:bg-bg-muted hover:text-text-main" aria-label="Cerrar panel">
+      <button
+        type="button"
+        (click)="onClose()"
+        class="btn-icon hover:bg-bg-muted hover:text-text-main"
+        aria-label="Cerrar panel"
+      >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
     </header>
 
     <main class="flex-1 overflow-y-auto p-3 max-w-5xl w-full mx-auto space-y-5">
-
-      <section class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-bg-muted/30 p-4 rounded-xl border border-border/60">
-
+      <section
+        class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-bg-muted/30 p-4 rounded-xl border border-border/60"
+      >
         <div class="flex flex-col gap-1">
           <label class="field-label">Categoría</label>
           <app-category-select-ctrl
             [fieldId]="newProductForm.newProduct.categoryId()"
-            [fieldName]="newProductForm.newProduct.categoryName()" />
-          @if (newProductForm.newProduct.categoryId().touched() && newProductForm.newProduct.categoryId().invalid()) {
+            [fieldName]="newProductForm.newProduct.categoryName()"
+          />
+          @if (
+            newProductForm.newProduct.categoryId().touched() &&
+            newProductForm.newProduct.categoryId().invalid()
+          ) {
             @for (error of newProductForm.newProduct.categoryId().errors(); track error.kind) {
               <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
             }
@@ -34,8 +50,12 @@
           <label class="field-label">Marca</label>
           <app-brand-select-ctrl
             [fieldId]="newProductForm.newProduct.brandId()"
-            [fieldName]="newProductForm.newProduct.brandName()" />
-          @if (newProductForm.newProduct.brandId().touched() && newProductForm.newProduct.brandId().invalid()) {
+            [fieldName]="newProductForm.newProduct.brandName()"
+          />
+          @if (
+            newProductForm.newProduct.brandId().touched() &&
+            newProductForm.newProduct.brandId().invalid()
+          ) {
             @for (error of newProductForm.newProduct.brandId().errors(); track error.kind) {
               <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
             }
@@ -50,9 +70,20 @@
             placeholder="Ej. 505 semiclásico..."
             autofocus
             class="w-full px-3 py-1.5 border rounded-md text-[13px] text-text-main placeholder:text-text-soft bg-bg-surface font-medium outline-none transition-all focus:ring-2 focus:ring-feedback-success-text/20 focus:border-feedback-success-text"
-            [class.border-border]="!(newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid())"
-            [class.border-feedback-error-text]="newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid()" />
-          @if (newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid()) {
+            [class.border-border]="
+              !(
+                newProductForm.newProduct.name().touched() &&
+                newProductForm.newProduct.name().invalid()
+              )
+            "
+            [class.border-feedback-error-text]="
+              newProductForm.newProduct.name().touched() &&
+              newProductForm.newProduct.name().invalid()
+            "
+          />
+          @if (
+            newProductForm.newProduct.name().touched() && newProductForm.newProduct.name().invalid()
+          ) {
             @for (error of newProductForm.newProduct.name().errors(); track error.kind) {
               <span class="text-[10px] text-feedback-error-text">{{ error.message }}</span>
             }
@@ -64,7 +95,8 @@
           <select
             (change)="onGenderChange($event)"
             [value]="newProduct().newProduct.gender ?? ''"
-            class="w-full px-3 py-1.5 border border-border rounded-md text-[13px] text-text-main bg-bg-surface outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui">
+            class="w-full px-3 py-1.5 border border-border rounded-md text-[13px] text-text-main bg-bg-surface outline-none transition-all focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui"
+          >
             <option value="" disabled>Seleccione</option>
             @for (opt of genderOptions; track opt.value) {
               <option [value]="opt.value">{{ opt.label }}</option>
@@ -81,24 +113,33 @@
             type="text"
             [formField]="newProductForm.newProduct.description"
             placeholder="Añadir nota..."
-            class="w-full px-3 py-1.5 border border-border rounded-md text-[13px] text-text-muted italic placeholder:text-text-soft outline-none transition-all bg-bg-surface focus:ring-2 focus:ring-border/40 focus:border-border-strong" />
+            class="w-full px-3 py-1.5 border border-border rounded-md text-[13px] text-text-muted italic placeholder:text-text-soft outline-none transition-all bg-bg-surface focus:ring-2 focus:ring-border/40 focus:border-border-strong"
+          />
         </div>
-
       </section>
 
       <section class="space-y-3">
         <h3 class="section-title">Talla / Color</h3>
 
         @if (newProduct().variants.length > 0) {
-          <div class="flex flex-wrap items-center gap-3 bg-bg-muted/60 px-3 py-1.5 rounded-lg border border-border">
+          <div
+            class="flex flex-wrap items-center gap-3 bg-bg-muted/60 px-3 py-1.5 rounded-lg border border-border"
+          >
             <div class="flex items-center gap-2">
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="sr-only peer"
+                <input
+                  type="checkbox"
+                  class="sr-only peer"
                   [checked]="newProduct().samePriceForAll"
-                  (change)="onToggleSamePrice($event.target.checked)" />
-                <div class="w-9 h-5 bg-bg-muted rounded-full peer peer-checked:bg-accent-ui peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                  (change)="onToggleSamePrice($event.target.checked)"
+                />
+                <div
+                  class="w-9 h-5 bg-bg-muted rounded-full peer peer-checked:bg-accent-ui peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"
+                ></div>
               </label>
-              <span class="text-[10px] font-medium text-text-soft uppercase tracking-wider">Precio igual</span>
+              <span class="text-[10px] font-medium text-text-soft uppercase tracking-wider"
+                >Precio igual</span
+              >
             </div>
             @if (newProduct().samePriceForAll) {
               <div class="flex items-center gap-1.5">
@@ -116,45 +157,45 @@
         }
 
         <div class="border border-border rounded-xl bg-bg-surface shadow-sm">
-
           <div class="flex flex-col">
             @for (variant of newProductForm.variants; track $index; let i = $index) {
               <app-create-variant-row
                 [formModel]="newProductForm.variants[$index]"
                 [priceLocked]="priceLocked()"
                 (remove)="removeVariant(i)"
-                [index]="i" />
+                [index]="i"
+              />
             } @empty {
-              <div class="py-8 text-center text-xs text-text-soft italic">Sin tallas/colores activos.</div>
+              <div class="py-8 text-center text-xs text-text-soft italic">
+                Sin tallas/colores activos.
+              </div>
             }
           </div>
-
         </div>
 
-        <button
-          type="button"
-          (click)="addVariant()"
-          class="btn btn-secondary btn-sm w-full">
+        <button type="button" (click)="addVariant()" class="btn btn-secondary btn-sm w-full">
           + Agregar talla / color
         </button>
-
       </section>
 
       @if (error()) {
-        <div class="px-4 py-3 bg-feedback-error-bg/10 border border-feedback-error-text/20 rounded-lg text-[12px] text-feedback-error-text font-medium">
+        <div
+          class="px-4 py-3 bg-feedback-error-bg/10 border border-feedback-error-text/20 rounded-lg text-[12px] text-feedback-error-text font-medium"
+        >
           {{ error() }}
         </div>
       }
-
     </main>
 
     <footer class="border-t border-border bg-bg-surface p-4">
-      <div class="flex items-center justify-end">
+      <div class="flex items-center justify-end gap-3">
+        <button type="button" (click)="onClose()" class="btn btn-secondary btn-sm">Cancelar</button>
         <button
           type="button"
           (click)="onConfirm()"
           [disabled]="isConfirming()"
-          class="btn btn-primary btn-sm w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed">
+          class="btn btn-primary btn-sm w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed"
+        >
           @if (isConfirming()) {
             Creando...
           } @else {
@@ -163,6 +204,5 @@
         </button>
       </div>
     </footer>
-
   </div>
 </div>

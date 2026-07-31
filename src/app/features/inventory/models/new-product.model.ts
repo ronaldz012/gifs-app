@@ -1,4 +1,3 @@
-import { Brand } from "../dtos/brands/brand-dto";
 import { Gender } from "../interfaces/gender";
 import { VariantForm } from "./variant-form.model";
 

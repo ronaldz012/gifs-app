@@ -159,9 +159,9 @@
         Cancelar
       </button>
       <button type="button" (click)="onConfirm()"
-        [disabled]="isConfirming() || !selectedProduct()"
+        [disabled]="!selectedProduct()"
         class="btn btn-primary btn-sm disabled:opacity-40 disabled:cursor-not-allowed">
-        {{ isConfirming() ? 'Guardando...' : 'Guardar cambios' }}
+        Guardar cambios
       </button>
     </div>
   </footer>

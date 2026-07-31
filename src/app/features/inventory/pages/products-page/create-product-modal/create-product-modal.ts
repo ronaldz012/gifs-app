@@ -1,14 +1,16 @@
-import { Component, computed, inject, output, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductService } from '@features/inventory/services/product-service';
 import CreateVariantRow from './create-variant-row/create-variant-row';
 import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
+import { ProductWithVariantsCreatedDto } from '@features/inventory/dtos/products/create-product-with-variants-dto';
 import { NewProductModelForm } from '@features/inventory/models/new-product.model';
 import { applyEach, form, FormField, min, required, schema, validateTree } from '@angular/forms/signals';
 import { buildNewVariant, VariantForm } from '@features/inventory/models/variant-form.model';
 import { BrandSelectCtrl } from "@features/inventory/components/brand-select-crtl/brand-select-crtl.component";
 import { CategorySelectCtrl } from "@features/inventory/components/category-select-ctrl/category-select-ctrl.component";
 import { Gender } from '@features/inventory/interfaces/gender';
+import { ProductSearchResult } from '@features/inventory/components/product-search/product-search-result.component';
 
 const createVariantSchema = schema<VariantForm>((v) => {
   required(v.size,    { message: 'Requerido' });
@@ -22,7 +24,7 @@ const createVariantSchema = schema<VariantForm>((v) => {
   imports: [CreateVariantRow, BrandSelectCtrl, CategorySelectCtrl, FormField],
   templateUrl: './create-product-modal.html',
 })
-export default class CreateProductModal {
+export default class CreateProductModal implements OnInit {
 
   readonly genderOptions = [
     { label: 'UNISEX', value: Gender.Unisex },
@@ -32,7 +34,11 @@ export default class CreateProductModal {
 
   private productService = inject(ProductService);
   private router = inject(Router);
-  close = output<void>();
+  close   = output<void>();
+  created = output<ProductSearchResult>();
+
+  returnMode  = input(false);
+  initialName = input('');
 
   newProduct = signal<NewProductModelForm>({
     newProduct: {
@@ -89,6 +95,15 @@ export default class CreateProductModal {
 
   isConfirming = signal(false);
   error = signal<string | null>(null);
+
+  ngOnInit(): void {
+    if (this.initialName()) {
+      this.newProduct.update(current => ({
+        ...current,
+        newProduct: { ...current.newProduct, name: this.initialName() },
+      }));
+    }
+  }
 
   addVariant(): void {
     this.newProduct.update(current => {
@@ -164,6 +179,11 @@ export default class CreateProductModal {
     }).subscribe({
       next: (created) => {
         this.isConfirming.set(false);
+        if (this.returnMode()) {
+          this.created.emit(this.buildSearchResult(created, val));
+          this.close.emit();
+          return;
+        }
         this.router.navigate(['inventory', 'products', created.id, 'detail']);
       },
       error: () => {
@@ -175,16 +195,35 @@ export default class CreateProductModal {
 
   onClose(): void { this.close.emit(); }
 
+  private buildSearchResult(
+    created: ProductWithVariantsCreatedDto,
+    val: NewProductModelForm
+  ): ProductSearchResult {
+    return {
+      id:           created.id,
+      name:         created.name,
+      internalCode: created.internalCode,
+      description:  val.newProduct.description,
+      basePrice:    val.variants[0]?.price ?? 0,
+      brandName:    created.brandName,
+      categoryName: created.categoryName,
+      gender:       val.newProduct.gender ?? Gender.Unisex,
+      productVariants: created.variants.map((cv, i) => ({
+        id:        cv.productVariantId,
+        sku:       cv.sku,
+        size:      cv.size,
+        colorId:   val.variants[i]?.colorId ?? ('' as GUID),
+        colorName: cv.colorName,
+        price:     val.variants[i]?.price ?? 0,
+      })),
+    };
+  }
+
   onGenderChange(event: Event): void {
     const value = Number((event.target as HTMLSelectElement).value);
     this.newProduct.update(m => ({
       ...m,
       newProduct: { ...m.newProduct, gender: value },
     }));
-  }
-
-  onFocus(event: FocusEvent) {
-    const el = event.target as HTMLElement;
-    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
   }
 }

@@ -1,7 +1,7 @@
 import { Component, computed, effect, input, OnInit, output, signal, WritableSignal } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { DecimalPipe } from '@angular/common';
-import { ProductVariantOption } from '../../../../components/product-search/product-search-result.component';
+import { ProductVariantOption } from '@features/inventory/components/product-search/product-search-result.component';
 import { VariantForm } from '@features/inventory/models/variant-form.model';
 
 
