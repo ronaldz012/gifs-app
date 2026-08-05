@@ -1,6 +1,7 @@
 export interface ProductVariantBySkuDto {
   id: GUID; // GUID
   sku: string;
+  displayName: string;
   description: string;
   size: string;
   colorId: GUID;

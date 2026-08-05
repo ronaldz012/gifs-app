@@ -1,16 +1,82 @@
 <div class="min-h-screen bg-bg-base p-6 flex flex-col gap-8">
-
   <h1 class="text-lg font-black text-text-main border-b border-border pb-3">
     🧪 Dev — Pay Panel Test
   </h1>
 
+  <!-- Prueba de toasts -->
+  <section class="bg-bg-surface border border-border rounded-xl p-4 flex flex-col gap-4">
+    <h2 class="text-sm font-bold text-text-main">🔔 Toast Test</h2>
+    <div class="flex flex-col sm:flex-row gap-3 flex-wrap items-end">
+      <div class="flex flex-col gap-1 flex-1 min-w-52">
+        <label class="field-label">Mensaje</label>
+        <input
+          type="text"
+          [value]="toastMessage()"
+          (input)="toastMessage.set($event.target.value)"
+          class="w-full px-3 py-2 border border-border rounded-lg text-sm text-text-main bg-bg-surface font-medium outline-none focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui"
+        />
+      </div>
+      <div class="flex flex-col gap-1 w-36">
+        <label class="field-label">Duración (ms)</label>
+        <input
+          type="number"
+          [value]="toastDuration()"
+          (input)="toastDuration.set(+$event.target.value || 3000)"
+          class="w-full px-3 py-2 border border-border rounded-lg text-sm text-text-main bg-bg-surface font-medium outline-none focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui"
+        />
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <button
+          type="button"
+          class="btn-primary px-3 py-2 rounded-lg text-sm"
+          (click)="showToast('success')"
+        >
+          Éxito
+        </button>
+        <button
+          type="button"
+          class="btn-primary px-3 py-2 rounded-lg text-sm"
+          (click)="showToast('error')"
+        >
+          Error
+        </button>
+        <button
+          type="button"
+          class="btn-primary px-3 py-2 rounded-lg text-sm"
+          (click)="showToast('warning')"
+        >
+          Warning
+        </button>
+        <button
+          type="button"
+          class="btn-primary px-3 py-2 rounded-lg text-sm"
+          (click)="showToast('info')"
+        >
+          Info
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- Estado en tiempo real -->
   <div class="bg-bg-muted rounded-xl p-4 font-mono text-xs flex flex-col gap-1">
     <span class="text-text-soft uppercase tracking-wide font-bold mb-1">Estado del form</span>
-    <span>método: <span class="text-accent-ui font-bold">{{ paymentForm.method().value() }}</span></span>
-    <span>código tx: <span class="text-accent-ui font-bold">{{ paymentForm.transactionCode().value() ?? '(null)' }}</span></span>
-    <span>items: <span class="text-accent-ui font-bold">{{ itemCount() }}</span></span>
-    <span>total: <span class="text-accent-ui font-bold">Bs {{ total() | number:'1.2-2' }}</span></span>
+    <span
+      >método:
+      <span class="text-accent-ui font-bold">{{ paymentForm.method().value() }}</span></span
+    >
+    <span
+      >código tx:
+      <span class="text-accent-ui font-bold">{{
+        paymentForm.transactionCode().value() ?? '(null)'
+      }}</span></span
+    >
+    <span
+      >items: <span class="text-accent-ui font-bold">{{ itemCount() }}</span></span
+    >
+    <span
+      >total: <span class="text-accent-ui font-bold">Bs {{ total() | number: '1.2-2' }}</span></span
+    >
   </div>
 
   <!-- Controles de prueba -->
@@ -19,23 +85,29 @@
       type="button"
       class="btn-primary px-4 py-2 rounded-lg text-sm"
       (click)="itemCount.set(itemCount() > 0 ? itemCount() - 1 : 0)"
-    >− item</button>
+    >
+      − item
+    </button>
     <button
       type="button"
       class="btn-primary px-4 py-2 rounded-lg text-sm"
       (click)="itemCount.set(itemCount() + 1)"
-    >+ item</button>
+    >
+      + item
+    </button>
     <button
       type="button"
       class="btn-primary px-4 py-2 rounded-lg text-sm md:hidden"
       (click)="showMobileModal.set(true)"
-    >Abrir modal mobile</button>
+    >
+      Abrir modal mobile
+    </button>
   </div>
 
   <!-- Desktop panel -->
   <div class="max-w-sm hidden md:block">
     <p class="text-xs text-text-soft uppercase tracking-wide font-bold mb-2">Desktop</p>
-    <app-pos-desktop-pay-panel 
+    <app-pos-desktop-pay-panel
       [total]="total()"
       [itemCount]="itemCount()"
       [currentMethod]="paymentForm.method()"
@@ -62,5 +134,4 @@
     <h2 class="text-sm font-bold text-text-main mb-3">📷 BarcodeDetector Demo</h2>
     <app-simple-scanner-demo />
   </div>
-
 </div>

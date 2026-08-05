@@ -1,11 +1,9 @@
 <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6">
   <div class="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-6 items-start">
-
     <!-- Columna izquierda: scanner + lista -->
     <div class="flex flex-col gap-4">
-
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+      <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-4">
+        <p class="text-xs font-medium text-text-soft uppercase tracking-wide mb-3">
           Agregar producto
         </p>
         <app-product-variant-search
@@ -14,27 +12,18 @@
         />
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
-          Items
-        </p>
-        <app-create-transfer-item-list
-          [items]="items()"
-          (itemsChange)="items.set($event)"
-        />
+      <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-4">
+        <p class="text-xs font-medium text-text-soft uppercase tracking-wide mb-3">Items</p>
+        <app-create-transfer-item-list [items]="items()" (itemsChange)="items.set($event)" />
       </div>
-
     </div>
 
     <!-- Columna derecha: configuración -->
     <div class="flex flex-col gap-4">
-
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
-          Destino
-        </p>
+      <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-4">
+        <p class="text-xs font-medium text-text-soft uppercase tracking-wide mb-3">Destino</p>
         @if (loadingBranches()) {
-          <p class="text-sm text-gray-400">Cargando sucursales...</p>
+          <p class="text-sm text-text-muted">Cargando sucursales...</p>
         } @else {
           <app-branch-selector-destination
             [branches]="branches()"
@@ -43,45 +32,36 @@
         }
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
-          Notas
-        </p>
+      <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-4">
+        <p class="text-xs font-medium text-text-soft uppercase tracking-wide mb-3">Notas</p>
         <textarea
           [value]="form().notes"
           (input)="patchNotes($any($event.target).value)"
           rows="3"
           placeholder="Ej: urgente, para reposición..."
-          class="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-300
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                 resize-none placeholder:text-gray-400"
+          class="w-full px-3 py-2.5 text-sm rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-accent-ui/20 focus:border-accent-ui resize-none placeholder:text-text-soft bg-bg-surface text-text-main"
         ></textarea>
       </div>
 
       @if (items().length > 0) {
-        <div class="bg-blue-50 rounded-xl border border-blue-100 p-4 flex justify-between text-sm">
-          <span class="text-blue-600">
-            {{ items().length }} {{ items().length === 1 ? 'producto' : 'productos' }}
-          </span>
-          <span class="font-medium text-blue-700">{{ totalUnits() }} unidades</span>
+        <div
+          class="bg-feedback-info text-feedback-info-text rounded-xl border border-feedback-info-text/20 p-4 flex justify-between text-sm"
+        >
+          <span> {{ items().length }} {{ items().length === 1 ? 'producto' : 'productos' }} </span>
+          <span class="font-medium">{{ totalUnits() }} unidades</span>
         </div>
       }
 
       <div class="flex gap-3">
-        <button
-          (click)="cancel()"
-          class="flex-1 py-3 rounded-xl text-sm font-medium border border-gray-200
-                 text-gray-500 hover:bg-gray-50 transition-colors"
-        >Cancelar</button>
+        <button (click)="cancel()" class="btn btn-secondary flex-1 py-3">Cancelar</button>
         <button
           (click)="submit()"
           [disabled]="!canSubmit()"
-          class="flex-1 py-3 rounded-xl text-sm font-medium transition
-                 bg-blue-600 text-white hover:bg-blue-700
-                 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
-        >Crear transferencia</button>
+          class="btn btn-primary flex-1 py-3 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Crear transferencia
+        </button>
       </div>
-
     </div>
   </div>
 </div>

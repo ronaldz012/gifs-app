@@ -290,6 +290,21 @@
   justify-content: center;
 }
 
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast-in {
+  animation: toast-in 0.2s ease-out;
+}
+
 
 
 /* Print */

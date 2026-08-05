@@ -18,7 +18,7 @@ import { Component, input, output } from '@angular/core';
  **/
 @Component({
   selector: 'app-confirm-action-modal',
-template: `
+  template: `
     <!-- Overlay -->
     <div
       class="fixed inset-0 bg-overlay z-40 flex items-end sm:items-center justify-center backdrop-blur-[2px]"
@@ -65,8 +65,14 @@ template: `
   `,
   styles: `
     @keyframes confirm-in {
-      from { opacity: 0; transform: scaleY(0.9); }
-      to   { opacity: 1; transform: scaleY(1); }
+      from {
+        opacity: 0;
+        transform: scaleY(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scaleY(1);
+      }
     }
     .confirm-enter {
       animation: confirm-in 160ms ease both;
@@ -76,19 +82,19 @@ template: `
 })
 export class ConfirmActionModal {
   // Content
-  title           = input<string>('¿Confirmar acción?');
-  description     = input<string>('Esta acción no se puede deshacer.');
-  confirmLabel    = input<string>('Confirmar');
-  cancelLabel     = input<string>('No, volver');
+  title = input<string>('¿Confirmar acción?');
+  description = input<string>('Esta acción no se puede deshacer.');
+  confirmLabel = input<string>('Confirmar');
+  cancelLabel = input<string>('No, volver');
   submittingLabel = input<string>('Procesando...');
 
   // Style — permite cambiar el color del botón de confirmación según el contexto
-  confirmButtonClass = input<string>('bg-red-500 hover:bg-red-600');
+  confirmButtonClass = input<string>('bg-feedback-error hover:opacity-90');
 
   // State
   submitting = input<boolean>(false);
 
   // Events
   confirm = output<void>();
-  close   = output<void>();
+  close = output<void>();
 }
