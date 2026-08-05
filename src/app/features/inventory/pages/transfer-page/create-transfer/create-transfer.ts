@@ -39,6 +39,8 @@ export default class CreateTransfer implements OnInit {
 
   totalUnits = computed(() => this.items().reduce((sum, i) => sum + i.quantity, 0));
 
+  originName = computed(() => this.branchService.active()?.branchName ?? '');
+
   ngOnInit(): void {
     this.loadBranches();
   }

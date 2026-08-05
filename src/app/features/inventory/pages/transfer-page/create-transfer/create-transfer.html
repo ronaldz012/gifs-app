@@ -22,14 +22,29 @@
     <div class="flex flex-col gap-4">
       <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-4">
         <p class="text-xs font-medium text-text-soft uppercase tracking-wide mb-3">Destino</p>
-        @if (loadingBranches()) {
-          <p class="text-sm text-text-muted">Cargando sucursales...</p>
-        } @else {
-          <app-branch-selector-destination
-            [branches]="branches()"
-            (branchSelected)="onBranchSelected($event)"
-          />
-        }
+
+        <div class="flex items-center gap-3">
+          <div class="flex flex-1 min-w-0 items-center gap-2 px-3 py-2 rounded-lg bg-bg-muted">
+            <span class="material-icons text-base text-text-muted shrink-0">storefront</span>
+            <div class="min-w-0">
+              <p class="text-[10px] uppercase tracking-wide text-text-soft">Origen</p>
+              <p class="text-sm font-medium text-text-main truncate">{{ originName() }}</p>
+            </div>
+          </div>
+
+          <span class="material-icons text-text-soft shrink-0">arrow_forward</span>
+        </div>
+
+        <div class="mt-3">
+          @if (loadingBranches()) {
+            <p class="text-sm text-text-muted">Cargando sucursales...</p>
+          } @else {
+            <app-branch-selector-destination
+              [branches]="branches()"
+              (branchSelected)="onBranchSelected($event)"
+            />
+          }
+        </div>
       </div>
 
       <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-4">

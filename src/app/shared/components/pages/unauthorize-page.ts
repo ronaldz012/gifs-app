@@ -9,7 +9,8 @@ import { Router } from '@angular/router';
       <h1 class="text-xl font-semibold text-gray-700">Sin permiso para acceder a esta página</h1>
       <button
         class="px-4 py-2 bg-blue-800 text-white rounded hover:bg-blue-700 transition-colors"
-        (click)="goHome()">
+        (click)="goHome()"
+      >
         Ir al inicio
       </button>
     </div>
@@ -17,7 +18,9 @@ import { Router } from '@angular/router';
 })
 export default class UnauthorizedPage {
   private router = inject(Router);
-  goHome() { this.router.navigate(['/home']); }
+  goHome() {
+    this.router.navigate(['/dashboard']);
+  }
 }
 
 import { inject } from '@angular/core';
