@@ -1,6 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { form, required } from '@angular/forms/signals';
 import { ReceptionItem } from './reception-item/reception-item';
 import CatalogueItemModal from '../catalogue-item-modal/catalogue-item-modal';
 import CreateProductModal from '../../products-page/create-product-modal/create-product-modal';
@@ -9,12 +10,14 @@ import { ReceptionService } from '@features/inventory/services/reception-service
 import { ColorService } from '@features/inventory/services/color-service';
 import { BrandService } from '@features/inventory/services/brand-service';
 import { CategoryService } from '@features/inventory/services/category-service';
+import { ProviderService } from '@features/inventory/services/provider-service';
 import { ItemForm, Reception, VariantForm } from '@features/inventory/models/variant-form.model';
 import { ProductSearchResult } from '@features/inventory/components/product-search/product-search-result.component';
+import ProviderSelectCtrl from '@features/inventory/components/provider-select-ctrl/provider-select-ctrl';
 
 @Component({
   selector: 'app-reception-form',
-  imports: [ReceptionItem, DecimalPipe, CatalogueItemModal, CreateProductModal],
+  imports: [ReceptionItem, DecimalPipe, CatalogueItemModal, CreateProductModal, ProviderSelectCtrl],
   templateUrl: './reception-form.html',
 })
 export default class ReceptionForm implements OnInit {
@@ -22,13 +25,20 @@ export default class ReceptionForm implements OnInit {
     this.categoryService.load();
     this.colorService.load();
     this.brandService.load();
+    this.providerService.load();
   }
 
   private receptionService = inject(ReceptionService);
   private categoryService = inject(CategoryService);
   private colorService = inject(ColorService);
   private brandService = inject(BrandService);
+  private providerService = inject(ProviderService);
   private router = inject(Router);
+
+  providerModel = signal<{ id: GUID | null; name: string }>({ id: null, name: '' });
+  providerForm = form(this.providerModel, (s) => {
+    required(s.id, { message: 'Seleccioná un proveedor' });
+  });
 
   isSubmitting = signal(false);
   submitError = signal<string | null>(null);
@@ -95,8 +105,15 @@ export default class ReceptionForm implements OnInit {
   onSubmit(): void {
     if (!this.reception().items.length) return;
 
+    this.providerForm().markAsTouched();
+    if (this.providerForm().invalid()) {
+      this.submitError.set('Seleccioná un proveedor antes de guardar.');
+      return;
+    }
+
     const payload: CreateReceptionDto = {
       notes: this.reception().notes,
+      providerId: this.providerModel().id!,
       items: this.reception().items.flatMap((g) =>
         g.variants.map((v) => ({
           productVariantId: v.id!,

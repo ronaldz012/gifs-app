@@ -26,11 +26,11 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
         <div
           class="hidden px-4 py-3 border-b border-border bg-bg-muted lg:grid
                  font-inter text-xs font-semibold uppercase tracking-wider text-text-soft"
-          style="grid-template-columns: 7rem 1fr 9rem 6rem 5rem 7rem 5.5rem 3.5rem;"
+          style="grid-template-columns: 7rem 9rem 1fr 6rem 5rem 7rem 5.5rem 3.5rem;"
         >
           <span>Estado</span>
+          <span>Proveedor</span>
           <span>Marcas</span>
-          <span>Categorías</span>
           <span class="pr-4 text-right">Talla/Color</span>
           <span class="pr-4 text-right">Uds</span>
           <span class="pr-4 text-right">Costo total</span>

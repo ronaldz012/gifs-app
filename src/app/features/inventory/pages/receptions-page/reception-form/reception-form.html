@@ -1,21 +1,32 @@
-<div class="mx-auto py-5 px-3 sm:px-6 min-w-225">
+<div class="mx-auto py-5 px-3 sm:px-6">
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-    <div class="flex items-center gap-4">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
       <h2 class="font-inter text-base font-bold text-text-main">Nueva recepción</h2>
       <input
         [value]="reception().notes"
         (input)="updateNotes($event)"
         placeholder="Notas (proveedor, temporada...)"
-        class="w-72 px-3 py-1.5 border border-border bg-bg-surface rounded-md text-sm text-text-main placeholder-text-soft focus:outline-none focus:ring-1 focus:ring-accent-ui focus:border-accent-ui transition-colors duration-150"
+        class="w-full sm:w-72 px-3 py-1.5 border border-border bg-bg-surface rounded-md text-sm text-text-main placeholder-text-soft focus:outline-none focus:ring-1 focus:ring-accent-ui focus:border-accent-ui transition-colors duration-150"
       />
     </div>
 
-    <div class="flex items-center gap-3">
+    <div class="w-full sm:w-72 flex flex-col gap-1">
+      <app-provider-select-ctrl
+        [fieldId]="providerForm.id()"
+        [fieldName]="providerForm.name()"
+        placeholder="Proveedor *"
+      />
+      @if (providerForm.id().touched() && providerForm.id().invalid()) {
+        <p class="text-[10px] text-feedback-error-text">Seleccioná un proveedor</p>
+      }
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
       <button
         type="button"
         (click)="onCancel()"
-        class="px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm"
+        class="flex-1 sm:flex-none px-3 py-1.5 text-sm font-semibold text-btn-secondary-text border border-border bg-btn-secondary-bg rounded-md hover:bg-btn-secondary-hover transition-colors duration-150 shadow-sm"
       >
         Cancelar
       </button>
@@ -23,7 +34,7 @@
         type="button"
         (click)="onSubmit()"
         [disabled]="isSubmitting()"
-        class="px-4 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm"
+        class="flex-1 sm:flex-none px-4 py-1.5 text-sm font-semibold bg-btn-primary-bg text-btn-primary-text rounded-md hover:bg-btn-primary-hover disabled:opacity-50 transition-colors duration-150 shadow-sm"
       >
         {{ isSubmitting() ? 'Guardando...' : 'Guardar recepción' }}
       </button>
@@ -49,7 +60,6 @@
 
     @for (group of reception().items; track $index) {
       <app-reception-item
-        class="gap-y-8"
         [group]="group"
         [index]="$index"
         (remove)="removeGroup($index)"

@@ -34,6 +34,10 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
           <div>
+            <p class="field-label">Proveedor</p>
+            <p class="field-value">{{ r.providerName }}</p>
+          </div>
+          <div>
             <p class="field-label">Fecha de recepción</p>
             <p class="field-value">{{ r.receivedAt | date:'dd/MM/yyyy HH:mm' }}</p>
           </div>

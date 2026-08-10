@@ -1,0 +1,134 @@
+<div class="bg-bg-surface border border-border rounded-lg shadow-lg p-4 w-80">
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="section-title mb-0">Nuevo Proveedor</h3>
+    <button (click)="closed.emit()" class="btn-icon hover:text-text-main">
+      <span class="material-icons text-base">close</span>
+    </button>
+  </div>
+
+  <!-- Error servidor -->
+  @if (serverError()) {
+    <div class="badge-error w-full text-center mb-3 rounded-lg px-3 py-2 text-xs">
+      {{ serverError() }}
+    </div>
+  }
+
+  <div class="space-y-3">
+
+    <!-- Nombre -->
+    <div>
+      <label for="name" class="field-label block">NOMBRE</label>
+      <input
+        #nameInput
+        id="name"
+        type="text"
+        [formField]="providerForm.name"
+        (input)="clearServerError()"
+        placeholder="Ej. Textiles Bolívar"
+        autocomplete="off"
+        class="w-full px-3 py-2 rounded-lg border bg-bg-muted text-text-main text-sm
+               outline-none transition-all focus:ring-2 focus:ring-[--focus-ring]
+               focus:border-accent-ui placeholder:text-text-soft"
+        [class.border-feedback-error-text]="nameInvalid"
+        [class.border-border]="!nameInvalid"
+      />
+      @if (nameInvalid) {
+        <p class="text-[10px] text-feedback-error-text mt-1">{{ nameError }}</p>
+      }
+    </div>
+
+    <!-- Contacto (opcional) -->
+    <div>
+      <label for="contactName" class="field-label block">
+        CONTACTO <span class="text-text-soft normal-case font-normal">(opcional)</span>
+      </label>
+      <input
+        id="contactName"
+        type="text"
+        [formField]="providerForm.contactName"
+        placeholder="Nombre de la persona de contacto"
+        autocomplete="off"
+        class="w-full px-3 py-2 rounded-lg border border-border bg-bg-muted text-text-main text-sm
+               outline-none transition-all focus:ring-2 focus:ring-[--focus-ring]
+               focus:border-accent-ui placeholder:text-text-soft"
+      />
+    </div>
+
+    <!-- Email (opcional) -->
+    <div>
+      <label for="email" class="field-label block">
+        EMAIL <span class="text-text-soft normal-case font-normal">(opcional)</span>
+      </label>
+      <input
+        id="email"
+        type="text"
+        [formField]="providerForm.email"
+        placeholder="contacto@empresa.com"
+        autocomplete="off"
+        class="w-full px-3 py-2 rounded-lg border bg-bg-muted text-text-main text-sm
+               outline-none transition-all focus:ring-2 focus:ring-[--focus-ring]
+               focus:border-accent-ui placeholder:text-text-soft"
+        [class.border-feedback-error-text]="emailInvalid"
+        [class.border-border]="!emailInvalid"
+      />
+      @if (emailInvalid) {
+        <p class="text-[10px] text-feedback-error-text mt-1">{{ emailError }}</p>
+      }
+    </div>
+
+    <!-- Teléfono (opcional) -->
+    <div>
+      <label for="phoneNumber" class="field-label block">
+        TELÉFONO <span class="text-text-soft normal-case font-normal">(opcional)</span>
+      </label>
+      <input
+        id="phoneNumber"
+        type="text"
+        [formField]="providerForm.phoneNumber"
+        placeholder="+591 70000000"
+        autocomplete="off"
+        class="w-full px-3 py-2 rounded-lg border border-border bg-bg-muted text-text-main text-sm
+               outline-none transition-all focus:ring-2 focus:ring-[--focus-ring]
+               focus:border-accent-ui placeholder:text-text-soft"
+      />
+    </div>
+
+    <!-- Dirección (opcional) -->
+    <div>
+      <label for="address" class="field-label block">
+        DIRECCIÓN <span class="text-text-soft normal-case font-normal">(opcional)</span>
+      </label>
+      <input
+        id="address"
+        type="text"
+        [formField]="providerForm.address"
+        placeholder="Calle, zona, ciudad..."
+        autocomplete="off"
+        class="w-full px-3 py-2 rounded-lg border border-border bg-bg-muted text-text-main text-sm
+               outline-none transition-all focus:ring-2 focus:ring-[--focus-ring]
+               focus:border-accent-ui placeholder:text-text-soft"
+      />
+    </div>
+
+    <!-- Acciones -->
+    <div class="flex gap-2 pt-1">
+      <button
+        type="button"
+        (click)="closed.emit()"
+        [disabled]="isLoading()"
+        class="btn btn-secondary btn-sm flex-1">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        (click)="save()"
+        [disabled]="isLoading() || providerForm().invalid()"
+        class="btn btn-primary btn-sm flex-1">
+        {{ isLoading() ? 'Guardando...' : 'CREAR' }}
+      </button>
+    </div>
+
+  </div>
+</div>

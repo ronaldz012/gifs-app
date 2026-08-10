@@ -7,6 +7,7 @@ export function buildReceptionPayload(
 ): CreateReceptionDto {
   return {
     notes: form.getRawValue().notes,
+    providerId: form.get('providerId')?.value,
     items: itemsArray.controls.map((itemCtrl: any): CreateReceptionItemDto => {
       const item = itemCtrl.getRawValue();
       return {

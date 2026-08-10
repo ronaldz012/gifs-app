@@ -3,6 +3,8 @@ import { BaseQueryDto } from '../base-query-dto';
 export interface StockReceptionListDto {
   id: GUID;
   branchId: number;
+  providerId: GUID;
+  providerName: string;
   receivedAt: Date;
   canRollback: boolean;
   status: ReceptionStatus;

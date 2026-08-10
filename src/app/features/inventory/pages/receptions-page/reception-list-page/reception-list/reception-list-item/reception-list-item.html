@@ -12,6 +12,9 @@
         >{{ Status[reception().status] }}</span>
       </div>
       <p class="truncate font-inter text-sm font-bold leading-tight text-text-main">
+        {{ reception().providerName || '—' }}
+      </p>
+      <p class="truncate font-inter text-xs font-medium text-text-muted">
         {{ reception().brandNames.join(', ') || '—' }}
       </p>
       <p class="mt-1 font-inter text-xs text-text-muted">
@@ -25,13 +28,6 @@
             {{ reception().receivedAt | date:'dd/MM/yy' }}
           </span>
       </p>
-      @if (reception().categoryNames.length) {
-        <div class="flex flex-wrap gap-1 mt-1.5">
-          @for (cat of reception().categoryNames; track cat) {
-            <span class="rounded border border-border bg-bg-muted px-1.5 py-0.5 font-inter text-[10px] font-medium text-text-muted">{{ cat }}</span>
-          }
-        </div>
-      }
     </div>
     <div class="shrink-0">
       <button (click)="viewDetails.emit(reception().id)" class="btn-link">
@@ -44,7 +40,7 @@
   <!-- ====== DESKTOP ====== -->
   <div
     class="group hidden lg:grid items-center px-4 py-3 transition-colors duration-150 hover:bg-bg-muted"
-    style="grid-template-columns: 7rem 1fr 9rem 6rem 5rem 7rem 5.5rem 3.5rem;"
+    style="grid-template-columns: 7rem 9rem 1fr 6rem 5rem 7rem 5.5rem 3.5rem;"
   >
     <span
       class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium leading-none w-fit"
@@ -52,18 +48,12 @@
     >{{ Status[reception().status] }}</span>
 
     <p class="truncate pr-4 font-inter text-sm font-semibold text-text-main group-hover:text-accent-ui transition-colors duration-150">
-      {{ reception().brandNames.join(', ') || '—' }}
+      {{ reception().providerName || '—' }}
     </p>
 
-    <div class="flex items-center gap-1 min-w-0 pr-2">
-      @for (cat of reception().categoryNames.slice(0, 2); track cat) {
-        <span class="max-w-[4rem] truncate rounded border border-border bg-bg-muted px-1.5 py-0.5 font-inter text-[10px] font-medium text-text-muted"
-              [title]="cat">{{ cat }}</span>
-      }
-      @if (reception().categoryNames.length > 2) {
-        <span class="font-inter text-[10px] text-text-soft">+{{ reception().categoryNames.length - 2 }}</span>
-      }
-    </div>
+    <p class="truncate pr-4 font-inter text-sm font-semibold text-text-main group-hover:text-accent-ui transition-colors duration-150">
+      {{ reception().brandNames.join(', ') || '—' }}
+    </p>
 
     <span class="pr-4 text-right font-inter text-xs font-medium text-text-soft">
       {{ reception().productVariantsCount }}

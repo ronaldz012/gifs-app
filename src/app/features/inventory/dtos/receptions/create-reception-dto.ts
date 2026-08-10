@@ -1,5 +1,6 @@
 export default interface CreateReceptionDto {
   notes?: string;
+  providerId: GUID;
   items: CreateReceptionItemDto[];
 }
 

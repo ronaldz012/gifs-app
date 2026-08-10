@@ -1,19 +1,21 @@
 <li
-  class="row-enter bg-bg-surface rounded-xl border border-border shadow-sm overflow-hidden
-         lg:rounded-none lg:border-0 lg:shadow-none"
+  class="row-enter bg-bg-surface rounded-xl border border-border shadow-sm overflow-hidden lg:rounded-none lg:border-0 lg:shadow-none"
   [style.animation-delay]="'175ms'"
 >
   <!-- ====== MOBILE ====== -->
   <div class="flex items-center gap-3 px-4 py-3.5 lg:hidden">
     <div class="flex items-start flex-col min-w-0 flex-1">
       <div class="flex items-center gap-2 mb-0.5">
-        <span class="text-[11px] font-mono text-text-soft">#{{ transfer().id }}</span>
-        <span class="text-base font-semibold leading-none"
-              [class]="directionClasses(transfer().direction)">
+        <span class="text-[11px] font-medium text-text-soft">
+          {{ transfer().createdAt | date: 'dd/MM/yy' }}
+        </span>
+        <span
+          class="text-base font-semibold leading-none"
+          [class]="directionClasses(transfer().direction)"
+        >
           {{ directionArrow(transfer().direction) }}
         </span>
-        <span class="text-xs font-medium"
-              [class]="directionClasses(transfer().direction)">
+        <span class="text-xs font-medium" [class]="directionClasses(transfer().direction)">
           {{ directionLabel(transfer().direction) }}
         </span>
         <span class="badge" [class]="statusClasses(transfer().status)">
@@ -25,13 +27,11 @@
       </p>
       <p class="text-xs text-text-soft mt-0.5">
         {{ transfer().totalQuantity }} uds
-        · <span class="text-text-soft">
-            Creado: {{ transfer().createdAt | date:'dd/MM/yy' }}
-          </span>
         @if (transfer().resolvedAt) {
-          · <span class="text-text-soft">
-              Resuelto: {{ transfer().resolvedAt | date:'dd/MM/yy' }}
-            </span>
+          ·
+          <span class="text-text-soft">
+            Resuelto: {{ transfer().resolvedAt | date: 'dd/MM/yy' }}
+          </span>
         }
       </p>
     </div>
@@ -41,12 +41,17 @@
         <span class="material-icons text-base">chevron_right</span>
       </button>
       @if (canResolve()) {
-        <button (click)="requestResolve.emit(transfer().id)"
-                class="btn-primary btn-sm">Resolver</button>
+        <button (click)="requestResolve.emit(transfer().id)" class="btn-primary btn-sm">
+          Resolver
+        </button>
       }
       @if (canCancel()) {
-        <button (click)="requestCancel.emit(transfer().id)"
-                class="btn btn-sm border border-feedback-error-text/30 text-feedback-error-text hover:bg-feedback-error">Cancelar</button>
+        <button
+          (click)="requestCancel.emit(transfer().id)"
+          class="btn btn-sm border border-feedback-error-text/30 text-feedback-error-text hover:bg-feedback-error"
+        >
+          Cancelar
+        </button>
       }
     </div>
   </div>
@@ -54,19 +59,22 @@
   <!-- ====== DESKTOP ====== -->
   <div
     class="hidden lg:grid items-center px-4 py-2.5 hover:bg-bg-muted transition-colors group"
-    style="grid-template-columns: 3.5rem 5rem 6rem 1fr 8rem 4.5rem 5.5rem 5.5rem 9rem;"
+    style="grid-template-columns: 5.5rem 5rem 6rem 1fr 8rem 4.5rem 5.5rem 9rem"
   >
-    <!-- ID -->
-    <span class="text-xs font-mono text-text-soft">#{{ transfer().id }}</span>
+    <!-- Creado -->
+    <span class="text-xs text-text-soft pr-4">
+      {{ transfer().createdAt | date: 'dd/MM/yy' }}
+    </span>
 
     <!-- Dirección -->
     <div class="flex items-center gap-1.5">
-      <span class="text-base font-semibold leading-none"
-            [class]="directionClasses(transfer().direction)">
+      <span
+        class="text-base font-semibold leading-none"
+        [class]="directionClasses(transfer().direction)"
+      >
         {{ directionArrow(transfer().direction) }}
       </span>
-      <span class="text-xs font-medium"
-            [class]="directionClasses(transfer().direction)">
+      <span class="text-xs font-medium" [class]="directionClasses(transfer().direction)">
         {{ directionLabel(transfer().direction) }}
       </span>
     </div>
@@ -91,15 +99,12 @@
       {{ transfer().totalQuantity }} uds
     </span>
 
-    <!-- Creado -->
-    <span class="text-xs text-text-soft text-right pr-4">
-      {{ transfer().createdAt | date:'dd/MM/yy' }}
-    </span>
-
     <!-- Resuelto -->
-    <span class="text-xs text-right pr-4"
-          [class]="transfer().resolvedAt ? 'text-text-soft' : 'text-text-soft/40'">
-      {{ transfer().resolvedAt ? (transfer().resolvedAt | date:'dd/MM/yy') : '—' }}
+    <span
+      class="text-xs text-right pr-4"
+      [class]="transfer().resolvedAt ? 'text-text-soft' : 'text-text-soft/40'"
+    >
+      {{ transfer().resolvedAt ? (transfer().resolvedAt | date: 'dd/MM/yy') : '—' }}
     </span>
 
     <!-- Acciones -->
@@ -109,14 +114,15 @@
         <span class="material-icons text-base">chevron_right</span>
       </button>
       @if (canResolve()) {
-        <button (click)="requestResolve.emit(transfer().id)"
-                class="btn-primary btn-sm">
+        <button (click)="requestResolve.emit(transfer().id)" class="btn-primary btn-sm">
           Resolver
         </button>
       }
       @if (canCancel()) {
-        <button (click)="requestCancel.emit(transfer().id)"
-                class="btn btn-sm border border-feedback-error-text/30 text-feedback-error-text hover:bg-feedback-error">
+        <button
+          (click)="requestCancel.emit(transfer().id)"
+          class="btn btn-sm border border-feedback-error-text/30 text-feedback-error-text hover:bg-feedback-error"
+        >
           Cancelar
         </button>
       }

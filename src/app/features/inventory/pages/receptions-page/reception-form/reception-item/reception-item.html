@@ -3,20 +3,24 @@
   Desktop-first, responsive mobile
   ===================================================== -->
 
-<div class="bg-bg-surface border border-border rounded-xl shadow-xs hover:shadow-md hover:border-border-strong transition-all duration-200 group overflow-hidden">
-
+<div
+  class="bg-bg-surface border border-border rounded-xl shadow-xs hover:shadow-md hover:border-border-strong transition-all duration-200 group overflow-hidden"
+>
   <!-- ── HEADER DE LA CARD ── -->
-  <div class="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-bg-muted/30">
-
+  <div
+    class="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-bg-muted/30"
+  >
     <!-- Izquierda: info principal -->
     <div class="flex items-center gap-3 min-w-0">
       <div class="flex flex-col min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-1.5">
           <span class="tag-neutral">{{ group().product.internalCode }}</span>
           <span class="tag-info">{{ group().product.brandName }}</span>
           <span class="text-[10px] text-text-soft">{{ group().product.categoryName }}</span>
         </div>
-        <h3 class="text-sm font-bold text-text-main truncate mt-1 group-hover:text-accent-ui transition-colors">
+        <h3
+          class="text-sm font-bold text-text-main truncate mt-1 group-hover:text-accent-ui transition-colors"
+        >
           {{ group().product.productName }}
         </h3>
       </div>
@@ -24,7 +28,6 @@
 
     <!-- Derecha: totales + acciones -->
     <div class="flex items-center gap-4 shrink-0">
-
       <div class="hidden sm:flex items-center gap-4">
         <div class="flex flex-col items-end">
           <span class="field-label">Unidades</span>
@@ -32,45 +35,87 @@
         </div>
         <div class="flex flex-col items-end border-l border-border pl-4">
           <span class="field-label">Inversión total</span>
-          <span class="text-sm font-black text-accent-ui font-mono">Bs {{ totalCost() | number:'1.2-2' }}</span>
+          <span class="text-sm font-black text-accent-ui font-mono"
+            >Bs {{ totalCost() | number: '1.2-2' }}</span
+          >
         </div>
       </div>
 
       <!-- Acciones: visibles en hover desktop, siempre visibles mobile -->
       <div class="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-all">
-        <button type="button" (click)="onEdit()"
+        <button
+          type="button"
+          (click)="onEdit()"
           class="btn-icon hover:bg-feedback-info hover:text-feedback-info-text"
-          title="Editar">
+          title="Editar"
+        >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+            />
           </svg>
         </button>
-        <button type="button" (click)="onRemove()"
+        <button
+          type="button"
+          (click)="onRemove()"
           class="btn-icon hover:bg-feedback-error hover:text-feedback-error-text"
-          title="Eliminar">
+          title="Eliminar"
+        >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
           </svg>
         </button>
       </div>
-
     </div>
   </div>
 
   <!-- ── TOTALES MOBILE ── -->
-  <div class="flex sm:hidden items-center justify-between px-4 py-2 bg-bg-muted/20 border-b border-border text-xs">
+  <div
+    class="flex sm:hidden items-center justify-between px-4 py-2 bg-bg-muted/20 border-b border-border text-xs"
+  >
     <span class="text-text-soft">
       Unidades: <span class="font-bold text-text-main font-mono">{{ totalUnits() }}</span>
     </span>
     <span class="text-text-soft">
-      Total: <span class="font-bold text-accent-ui font-mono">Bs {{ totalCost() | number:'1.2-2' }}</span>
+      Total:
+      <span class="font-bold text-accent-ui font-mono">Bs {{ totalCost() | number: '1.2-2' }}</span>
     </span>
   </div>
 
-  <!-- ── TABLA DE VARIANTES ── -->
-  <div class="overflow-x-auto">
+  <!-- ── VARIANTES MOBILE ── -->
+  <div class="divide-y divide-border sm:hidden">
+    @for (variant of group().variants; track variant.id) {
+      <div class="px-4 py-2.5">
+        <div class="flex items-center justify-between gap-2">
+          <span class="font-mono font-semibold text-text-main text-[11px]">{{ variant.sku }}</span>
+          <span class="tag-neutral">{{ variant.size }}</span>
+        </div>
+        <div class="flex items-center justify-between gap-2 mt-1 text-xs">
+          <span class="text-text-soft">
+            Cant. <span class="font-bold text-text-main">{{ variant.quantityReceived }}</span>
+            · Costo U.
+            <span class="font-mono text-text-muted"
+              >Bs {{ variant.unitCost | number: '1.2-2' }}</span
+            >
+          </span>
+          <span class="font-mono font-bold text-feedback-success-text">
+            Bs {{ variant.quantityReceived! * variant.unitCost! | number: '1.2-2' }}
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ── TABLA DE VARIANTES (desktop) ── -->
+  <div class="hidden sm:block overflow-x-auto">
     <table class="w-full text-[11px]">
       <thead>
         <tr class="border-b border-border bg-bg-muted/20">
@@ -88,15 +133,18 @@
             <td class="px-3 py-2">
               <span class="tag-neutral">{{ variant.size }}</span>
             </td>
-            <td class="px-3 py-2 text-right font-bold text-text-main">{{ variant.quantityReceived }}</td>
-            <td class="px-3 py-2 text-right font-mono text-text-muted">Bs {{ variant.unitCost | number:'1.2-2' }}</td>
+            <td class="px-3 py-2 text-right font-bold text-text-main">
+              {{ variant.quantityReceived }}
+            </td>
+            <td class="px-3 py-2 text-right font-mono text-text-muted">
+              Bs {{ variant.unitCost | number: '1.2-2' }}
+            </td>
             <td class="px-3 py-2 text-right font-mono font-bold text-feedback-success-text">
-              Bs {{ (variant.quantityReceived! * variant.unitCost!) | number:'1.2-2' }}
+              Bs {{ variant.quantityReceived! * variant.unitCost! | number: '1.2-2' }}
             </td>
           </tr>
         }
       </tbody>
     </table>
   </div>
-
 </div>

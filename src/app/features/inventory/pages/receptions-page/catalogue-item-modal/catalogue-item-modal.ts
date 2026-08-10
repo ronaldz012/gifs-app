@@ -149,7 +149,9 @@ export default class CatalogueItemModal implements OnInit {
             colorName: v.color,
             price: v.price,
             quantityReceived: existing?.quantityReceived ?? null,
-            unitCost: existing?.unitCost ?? null,
+            unitCost:
+              existing?.unitCost ??
+              (editItem.sameCostForAll ? (editItem.uniqueCost ?? null) : null),
             sku: v.sku,
             selected: !!existing,
           };
@@ -224,9 +226,13 @@ export default class CatalogueItemModal implements OnInit {
   // ── Variantes ─────────────────────────────────────────────────────────
   toggleVariant(index: number): void {
     this.itemModel.update((m) => {
-      const variants = m.variants.map((v, i) =>
-        i === index ? { ...v, selected: !v.selected } : v,
-      );
+      const variants = m.variants.map((v, i) => {
+        if (i !== index) return v;
+        const selected = !v.selected;
+        return m.sameCostForAll && selected && m.uniqueCost != null
+          ? { ...v, selected, unitCost: m.uniqueCost }
+          : { ...v, selected };
+      });
       return { ...m, variants };
     });
   }
@@ -271,6 +277,14 @@ export default class CatalogueItemModal implements OnInit {
     }));
   }
 
+  private normalizeUniqueCost(model: CatalogueItemModel): CatalogueItemModel {
+    if (!model.sameCostForAll || model.uniqueCost == null) return model;
+    return {
+      ...model,
+      variants: model.variants.map((v) => ({ ...v, unitCost: model.uniqueCost })),
+    };
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────
   onConfirm(): void {
     this.itemForm().markAsTouched();
@@ -291,9 +305,11 @@ export default class CatalogueItemModal implements OnInit {
 
     if (this.itemForm().invalid()) return;
 
+    const normalized = this.normalizeUniqueCost(this.itemModel());
+
     const finalItem: ItemForm = {
-      ...this.itemModel(),
-      variants: selectedVariants,
+      ...normalized,
+      variants: normalized.variants.filter((v) => v.selected),
     };
 
     this.confirm.emit({ index: this.mode() === 'edit' ? this.index() : null, item: finalItem });
