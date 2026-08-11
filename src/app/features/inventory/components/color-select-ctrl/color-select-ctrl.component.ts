@@ -1,23 +1,94 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  untracked,
+} from '@angular/core';
 import { Color } from '../../dtos/colors/color';
 import { FieldState } from '@angular/forms/signals';
 import CreateColor from '../create-color/create-color.component';
-import SelectCtrl from '@shared/components/selec-from-list-ctrl';
-import { Options } from 'jsbarcode';
-import { SelectOption } from '@shared/models/select-option.model';
 import { ColorService } from '@features/inventory/services/color-service';
 
 @Component({
   selector: 'app-color-select-ctrl',
-  imports: [SelectCtrl, CreateColor],
+  standalone: true,
+  imports: [CreateColor],
   template: `
-    <div class="relative w-full">
-      <app-select-ctrl
-        [fieldState]="fieldState()"
-        [options]="colorOptions()"
-        [placeholder]="placeholder()"
-        (createNew)="openInlineCreate($event)"
+    <div class="relative w-full" (focusout)="handleFocusOut($event)">
+      <!-- INPUT + CHEVRON -->
+      <div
+        class="relative flex items-center w-full rounded border border-border bg-bg-surface text-[11px] font-medium transition-all
+               focus-within:ring-2 focus-within:ring-[--focus-ring] focus-within:border-accent-ui"
+      >
+        <input
+          type="text"
+          [value]="query()"
+          (focus)="isOpen.set(true)"
+          (input)="onInput($event)"
+          (keydown)="handleKeydown($event)"
+          [placeholder]="placeholder()"
+          autocomplete="off"
+          class="w-full px-2 py-1 bg-transparent text-text-main placeholder:text-text-soft
+                 focus:outline-none"
         />
+
+        @if (fieldState().value()) {
+          <button
+            type="button"
+            (mousedown)="clearSelection($event)"
+            class="shrink-0 px-0.5 text-text-soft hover:text-feedback-error-text transition-colors"
+            [attr.aria-label]="'Limpiar selección'"
+          >
+            <span class="material-icons text-[10px]">close</span>
+          </button>
+        }
+
+        <button
+          type="button"
+          (mousedown)="toggleList($event)"
+          class="shrink-0 flex items-center justify-center h-full px-1 text-text-soft hover:text-text-main transition-colors"
+          [attr.aria-label]="'Mostrar colores'"
+        >
+          <span
+            class="material-icons text-base transition-transform duration-200"
+            [class.rotate-180]="isOpen()"
+          >arrow_drop_down</span>
+        </button>
+      </div>
+
+      <!-- DROPDOWN -->
+      @if (isOpen() && (filteredOptions().length > 0 || showCreateOption())) {
+        <ul class="absolute z-100 w-full mt-1 bg-bg-elevated border border-border rounded shadow-lg max-h-48 overflow-y-auto">
+          @for (opt of filteredOptions(); track opt.id; let i = $index) {
+            <li
+              (mousedown)="selectOption(opt, $event)"
+              [class.!bg-bg-muted]="activeIndex() === i"
+              class="flex items-center justify-between px-2 py-1.5 text-[11px] cursor-pointer text-text-main hover:bg-bg-muted transition-colors"
+            >
+              <span class="truncate">{{ opt.displayName }}</span>
+              @if (opt.id === fieldState().value()) {
+                <span class="material-icons text-sm text-accent-ui shrink-0 ml-2">check</span>
+              }
+            </li>
+          }
+
+          @if (showCreateOption()) {
+            <li
+              (mousedown)="openInlineCreate($event)"
+              [class.!bg-feedback-success]="activeIndex() === filteredOptions().length"
+              class="px-2 py-1.5 text-[11px] font-bold text-feedback-success-text border-t border-border cursor-pointer hover:bg-feedback-success transition-colors"
+            >
+              + CREAR "{{ query() }}"
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- PANEL CREAR -->
       @if (showCreate()) {
         <div class="absolute z-110 w-full mt-1">
           <app-create-color
@@ -31,36 +102,147 @@ import { ColorService } from '@features/inventory/services/color-service';
   `,
 })
 export class ColorSelectCtrl {
-
   service = inject(ColorService);
-  fieldState   = input.required<FieldState<GUID>>();
-  colorNameState   = input.required<FieldState<GUID>>();
-  colors       = this.service.colors;
-  placeholder  = input<string>('Color...');
+
+  fieldState = input.required<FieldState<GUID>>();
+  colorNameState = input.required<FieldState<GUID>>();
+  colors = this.service.colors;
+  placeholder = input<string>('Color...');
   colorCreated = output<Color>();
 
-  colorOptions = computed(() => this.colors().map(c => ({
-  id: c.id, displayName: c.name})));
+  colorOptions = computed(() =>
+    this.colors().map((c) => ({ id: c.id, displayName: c.name })),
+  );
 
-
-  showCreate  = signal(false);
+  showCreate = signal(false);
   createQuery = signal('');
 
-  openInlineCreate(query: string) {
-    this.createQuery.set(query);
-    this.showCreate.set(true);
+  query = signal('');
+  isOpen = signal(false);
+  activeIndex = signal(0);
+
+  constructor() {
+    effect(() => {
+      const val = this.fieldState().value();
+      const opts = this.colorOptions();
+      untracked(() => {
+        if (!val) {
+          this.query.set('');
+        } else {
+          const match = opts.find((o) => o.id === val);
+          if (match) this.query.set(match.displayName);
+        }
+      });
+    });
   }
 
-  closeInlineCreate() {
+  filteredOptions = computed(() => {
+    const q = this.query().toLowerCase().trim();
+    return this.colorOptions().filter((o) => o.displayName.toLowerCase().includes(q));
+  });
+
+  showCreateOption = computed(() => {
+    const q = this.query().trim();
+    if (!q) return false;
+    return !this.colorOptions().some((o) => o.displayName.toLowerCase() === q.toLowerCase());
+  });
+
+  handleFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget as HTMLElement;
+    if (next && (event.currentTarget as HTMLElement).contains(next)) return;
+    this.isOpen.set(false);
+    this.fieldState().markAsTouched();
+  }
+
+  toggleList(event: MouseEvent): void {
+    event.preventDefault();
+    this.isOpen.update((v) => !v);
+  }
+
+  onInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.query.set(value);
+    this.activeIndex.set(0);
+    this.isOpen.set(true);
+    if (!value) {
+      this.fieldState().value.set('' as GUID);
+    }
+  }
+
+  clearSelection(event: MouseEvent): void {
+    event.preventDefault();
+    this.query.set('');
+    this.fieldState().value.set('' as GUID);
+    this.activeIndex.set(0);
+  }
+
+  selectOption(opt: { id: GUID; displayName: string }, event?: MouseEvent): void {
+    if (event) event.preventDefault();
+    this.fieldState().value.set(opt.id);
+    this.fieldState().markAsTouched();
+    this.query.set(opt.displayName);
+    this.isOpen.set(false);
+  }
+
+  openInlineCreate(event?: MouseEvent): void {
+    if (event) event.preventDefault();
+    if (!this.query().trim()) return;
+    this.createQuery.set(this.query().trim());
+    this.showCreate.set(true);
+    this.isOpen.set(false);
+  }
+
+  closeInlineCreate(): void {
     this.showCreate.set(false);
     this.createQuery.set('');
   }
 
-  onCreated(color: Color) {
+  onCreated(color: Color): void {
     this.service.add(color);
+
     this.fieldState().value.set(color.id);
     this.colorNameState().markAsTouched();
+    this.query.set(color.name);
+    this.isOpen.set(false);
+
+    this.colorCreated.emit(color);
+
     this.closeInlineCreate();
-    
+  }
+
+  handleKeydown(event: KeyboardEvent): void {
+    if (!this.isOpen()) return;
+    const maxIndex = this.showCreateOption()
+      ? this.filteredOptions().length
+      : this.filteredOptions().length - 1;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.activeIndex.update((v) => (v < maxIndex ? v + 1 : 0));
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.activeIndex.update((v) => (v > 0 ? v - 1 : maxIndex));
+        break;
+      case 'Enter':
+        event.preventDefault();
+        this.executeSelection();
+        break;
+      case 'Escape':
+      case 'Tab':
+        this.isOpen.set(false);
+        break;
+    }
+  }
+
+  private executeSelection(): void {
+    const index = this.activeIndex();
+    const filtered = this.filteredOptions();
+    if (index < filtered.length) {
+      this.selectOption(filtered[index]);
+    } else if (this.showCreateOption()) {
+      this.openInlineCreate();
+    }
   }
 }

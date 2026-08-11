@@ -79,7 +79,10 @@ export default class CreateProductModal implements OnInit {
 
       variants.forEach((v, i) => {
         if (v.size === null || v.size === undefined || v.size === '') return;
-        const key = `${v.colorId ?? ''}__${v.size}`;
+        const size = v.size.trim().toLowerCase();
+        const colorId = (v.colorId ?? '').trim().toLowerCase();
+        if (!size) return;
+        const key = `${colorId}__${size}`;
         if (!seen.has(key)) seen.set(key, []);
         seen.get(key)!.push(i);
       });
