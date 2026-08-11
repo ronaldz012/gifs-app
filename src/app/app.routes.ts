@@ -18,8 +18,6 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('@layout/maint-layout/main-layout'),
     children: [
-      //dev
-      { path: 'dev', loadComponent: () => import('./dev/dev.component/dev.component') },
       // Dashboard
       {
         path: 'dashboard',

@@ -6,7 +6,6 @@ import { ToastContainer } from '@shared/components/toast-container';
   selector: 'app-root',
   imports: [RouterOutlet, ToastContainer],
   templateUrl: './app.html',
-  styleUrl: './app.css',
 })
 export class App {
   protected readonly title = signal('gifs-app');

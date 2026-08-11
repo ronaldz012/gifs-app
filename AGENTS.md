@@ -52,6 +52,8 @@ src/app/
 | DTOs / Models / Interfaces | named export | `export interface CreateSaleDto` |
 | Selectors | `app-` prefix + kebab-case | `app-product-list`, `app-searchable-select` |
 
+> **Note**: `app-searchable-select` and `app-navigate-button` were removed during repo cleanup — do not reference them.
+
 ## Routing & Guards
 
 - Root guard: `authGuard` — checks JWT token, restores branch context on reload.
