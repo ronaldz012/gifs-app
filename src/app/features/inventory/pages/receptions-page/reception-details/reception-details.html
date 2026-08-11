@@ -1,4 +1,4 @@
-<div class="max-w-3xl mx-auto fade-up">
+<div class="max-w-5xl mx-auto fade-up">
 
   @if (loading()) {
     <app-skeleton-list [rows]="3" [columns]="2" />
@@ -56,46 +56,84 @@
         </div>
       </div>
 
-      <!-- Productos -->
-      <div class="bg-bg-surface rounded-xl border border-border shadow-xs p-5">
-        <p class="section-title">
-          Productos · {{ r.items.length }} {{ r.items.length === 1 ? 'ítem' : 'ítems' }}
-        </p>
+<!-- Productos -->
+        <div class="bg-bg-surface rounded-xl border border-border shadow-xs p-5">
+          <p class="section-title">
+            Productos · {{ r.items.length }} {{ r.items.length === 1 ? 'ítem' : 'ítems' }}
+          </p>
 
-        <ul class="flex flex-col divide-y divide-border">
-          @for (item of r.items; track item.id) {
-            <li class="flex items-center gap-3 py-3">
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-text-main truncate">{{ item.productName }}</p>
-                <p class="field-label">{{ variantLabel(item) }}</p>
-              </div>
-              <div class="shrink-0 text-right">
-                <p class="text-sm font-semibold tabular-nums text-text-main">
-                  {{ item.quantityReceived }}
-                  <span class="text-xs font-normal text-text-soft">uds</span>
-                </p>
-                <p class="field-label tabular-nums">
-                  {{ item.unitCost | currency:'BOB':'symbol':'1.2-2' }} c/u
-                </p>
-              </div>
-              <div class="shrink-0 text-right w-20 hidden sm:block">
-                <p class="text-sm tabular-nums text-text-muted">
-                  {{ item.subtotal | currency:'BOB':'symbol':'1.2-2' }}
-                </p>
-                <p class="field-label">subtotal</p>
-              </div>
-            </li>
-          }
-        </ul>
+          <!-- MOBILE -->
+          <ul class="flex flex-col divide-y divide-border md:hidden">
+            @for (item of r.items; track item.id) {
+              <li class="flex items-center gap-3 py-3">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-text-main truncate">{{ item.productName }}</p>
+                  <p class="field-label">
+                    <span class="font-mono text-text-muted">{{ item.sku }}</span>
+                  </p>
+                  <p class="field-label">{{ variantLabel(item) }}</p>
+                </div>
+                <div class="shrink-0 text-right">
+                  <p class="text-sm font-semibold tabular-nums text-text-main">
+                    {{ item.quantityReceived }}
+                    <span class="text-xs font-normal text-text-soft">uds</span>
+                  </p>
+                  <p class="field-label tabular-nums">
+                    {{ item.unitCost | currency:'BOB':'symbol':'1.2-2' }} c/u
+                  </p>
+                </div>
+                <div class="shrink-0 text-right w-20 hidden sm:block">
+                  <p class="text-sm tabular-nums text-text-muted">
+                    {{ item.subtotal | currency:'BOB':'symbol':'1.2-2' }}
+                  </p>
+                  <p class="field-label">subtotal</p>
+                </div>
+              </li>
+            }
+          </ul>
 
-        <div class="pt-3 mt-1 border-t border-border flex flex-col sm:flex-row
-                    sm:items-center justify-between gap-1">
-          <span class="text-xs text-text-soft">{{ totalQuantity }} unidades en total</span>
-          <span class="text-sm font-semibold text-text-main tabular-nums">
-            {{ r.totalCost | currency:'BOB':'symbol':'1.2-2' }}
-          </span>
+          <!-- DESKTOP -->
+          <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-[10px] font-bold uppercase tracking-wider text-text-soft border-b border-border">
+                  <th class="text-left py-2 pr-4">SKU</th>
+                  <th class="text-left py-2 pr-4">Producto</th>
+                  <th class="text-left py-2 pr-4">Variante</th>
+                  <th class="text-right py-2 px-4">Cant.</th>
+                  <th class="text-right py-2 px-4">Costo U.</th>
+                  <th class="text-right py-2 pl-4">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border">
+                @for (item of r.items; track item.id) {
+                  <tr>
+                    <td class="py-2.5 pr-4 font-mono text-xs text-text-muted">{{ item.sku }}</td>
+                    <td class="py-2.5 pr-4 text-text-main font-medium">{{ item.productName }}</td>
+                    <td class="py-2.5 pr-4 text-text-muted">{{ variantLabel(item) }}</td>
+                    <td class="py-2.5 px-4 text-right text-text-main font-mono tabular-nums">
+                      {{ item.quantityReceived }} <span class="text-xs text-text-soft">uds</span>
+                    </td>
+                    <td class="py-2.5 px-4 text-right text-text-muted font-mono tabular-nums">
+                      {{ item.unitCost | currency:'BOB':'symbol':'1.2-2' }}
+                    </td>
+                    <td class="py-2.5 pl-4 text-right font-mono font-bold text-text-main tabular-nums">
+                      {{ item.subtotal | currency:'BOB':'symbol':'1.2-2' }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pt-3 mt-1 border-t border-border flex flex-col sm:flex-row
+                      sm:items-center justify-between gap-1">
+            <span class="text-xs text-text-soft">{{ totalQuantity }} unidades en total</span>
+            <span class="text-sm font-semibold text-text-main tabular-nums">
+              {{ r.totalCost | currency:'BOB':'symbol':'1.2-2' }}
+            </span>
+          </div>
         </div>
-      </div>
 
       <!-- Razón por la que no se puede revertir -->
       @switch (r.reasonCannotRollback) {

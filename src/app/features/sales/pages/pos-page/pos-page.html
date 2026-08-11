@@ -120,6 +120,15 @@
                     <span class="material-icons text-[18px]">qr_code_scanner</span>
                   </button>
                 }
+
+                <button
+                  type="button"
+                  (click)="openSearch()"
+                  class="flex items-center justify-center bg-bg-muted text-text-main p-2.5 rounded-xl border border-border shadow-xs hover:bg-accent-ui/10 hover:border-accent-ui active:scale-95 transition-all"
+                  title="Buscar producto"
+                >
+                  <span class="material-icons text-[18px]">manage_search</span>
+                </button>
               </div>
             </div>
 
@@ -226,3 +235,10 @@
 <app-qr-scanner-modal
   (scanned)="onScanned($event)"
 />
+
+@if (isSearchOpen()) {
+  <app-pos-search-modal
+    (variantSelected)="onVariantPicked($event)"
+    (closed)="closeSearch()"
+  />
+}

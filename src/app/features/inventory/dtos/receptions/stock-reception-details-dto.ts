@@ -17,6 +17,7 @@ export interface StockReceptionDetailDto {
 export interface StockReceptionItemDetailDto {
   id: GUID;
   productVariantId: number;
+  sku: string;
   productName: string;
   variantDescription: string;
   size: string;

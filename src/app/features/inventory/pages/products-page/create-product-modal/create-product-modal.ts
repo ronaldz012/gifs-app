@@ -2,7 +2,6 @@ import { Component, computed, inject, input, OnInit, output, signal } from '@ang
 import { Router } from '@angular/router';
 import { ProductService } from '@features/inventory/services/product-service';
 import CreateVariantRow from './create-variant-row/create-variant-row';
-import { CreateProductVariantDto } from '@features/inventory/dtos/products/create-product-variant-dto';
 import { ProductWithVariantsCreatedDto } from '@features/inventory/dtos/products/create-product-with-variants-dto';
 import { NewProductModelForm } from '@features/inventory/models/new-product.model';
 import {
@@ -184,14 +183,11 @@ export default class CreateProductModal implements OnInit {
         categoryId: val.newProduct.categoryId,
         brandId: val.newProduct.brandId,
         gender: val.newProduct.gender ?? 0,
-        variants: variants.map(
-          (v) =>
-            ({
-              size: v.size,
-              colorId: v.colorId,
-              price: v.price,
-            }) as CreateProductVariantDto,
-        ),
+        variants: variants.map((v) => ({
+          size: v.size,
+          colorId: v.colorId,
+          price: v.price ?? 0,
+        })),
       })
       .subscribe({
         next: (created) => {

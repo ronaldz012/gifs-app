@@ -8,11 +8,14 @@ import { UpdateProductVariantStockDto } from '../../../dtos/products/update-prod
 import {ProductDetailVariant} from './product-detail-variant/product-detail-variant';
 import {UpdateVariantModal} from './product-detail-variant/update-variant-modal';
 import {AdjustStockModal} from './product-detail-variant/adjust-stock-modal';
+import AddVariantModal from './product-detail-variant/add-variant-modal';
 import {ConfirmActionModal} from '../../transfer-page/confirm-action-modal/confirm-action-modal';
 import {UpdateProductModal} from './update-product-modal';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 import {UpdateProductDto} from '../../../dtos/products/update-product-dto';
 import {UpdateProductVariantDto} from '../../../dtos/products/update-product-variant-dto';
+import {CreateProductVariantDto} from '../../../dtos/products/create-product-variant-dto';
+import {ToastService} from '@core/services/toast-service';
 
 
 @Component({
@@ -22,6 +25,7 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
     UpdateProductModal,
     UpdateVariantModal,
     AdjustStockModal,
+    AddVariantModal,
     ConfirmActionModal,
     RouterLink,
     SkeletonList,
@@ -219,6 +223,16 @@ import {UpdateProductVariantDto} from '../../../dtos/products/update-product-var
         (close)="adjustingStockVariant.set(null)"
       />
     }
+
+    <!-- Agregar talla/color -->
+    @if (showAddVariant() && product()) {
+      <app-add-variant-modal
+        [existingVariants]="product()!.variants"
+        [submitting]="submitting()"
+        (save)="onAddVariantSave($event)"
+        (close)="showAddVariant.set(false)"
+      />
+    }
   `,
   styles: `
     @keyframes fade-up {
@@ -234,6 +248,7 @@ export default class ProductDetail implements OnInit {
   private router = inject(Router);
   private productService = inject(ProductService);
   private branchContext = inject(BranchContextService);
+  private toastService = inject(ToastService);
 
   branchMap: Record<string, string> = {};
   branchKeys: string[] = [];
@@ -254,6 +269,8 @@ export default class ProductDetail implements OnInit {
   deletingVariant       = signal<ProductVariantDto | null>(null);
   /** Variante cuyo stock se está ajustando — null = modal cerrado */
   adjustingStockVariant = signal<ProductVariantDto | null>(null);
+  /** Modal de agregar talla/color abierto o no */
+  showAddVariant = signal(false);
 
   // ── Lifecycle ───────────────────────────────────────────────────────────
   ngOnInit(): void {
@@ -299,7 +316,23 @@ export default class ProductDetail implements OnInit {
   }
 
   onAddVariant(): void {
-    // TODO: open add-variant modal when implemented
+    this.showAddVariant.set(true);
+  }
+
+  onAddVariantSave(dto: CreateProductVariantDto): void {
+    this.submitting.set(true);
+    this.productService.createVariants(this.productId, { variants: [dto] }).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.showAddVariant.set(false);
+        this.toastService.success('Talla/color agregada');
+        this.loadProduct(this.productId);
+      },
+      error: () => {
+        this.submitting.set(false);
+        this.toastService.error('Error al agregar la talla/color.');
+      },
+    });
   }
 
   // ── API calls ────────────────────────────────────────────────────────────

@@ -10,6 +10,7 @@ import { ProductVariantBySkuDto } from '@features/inventory/dtos/products/produc
 import { CurrencyPipe } from '@angular/common';
 import { PosMobilePayModal } from './pos-mobile-pay-modal/pos-mobile-pay-modal';
 import { PosDesktopPayPanel } from './pos-desktop-pay-panel/pos-desktop-pay-panel';
+import { PosSearchModal } from './pos-search-modal/pos-search-modal';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { CurrentRegisterDto } from '@features/sales/dtos/current-register-dto';
 import { SaleService } from '@features/sales/services/sale-service';
@@ -26,7 +27,8 @@ import { CreateSaleDto, CreateSaleItemDto } from '@features/sales/dtos/create-sa
     PosCartItemCardComponent, 
     CurrencyPipe,
     PosMobilePayModal, 
-    PosDesktopPayPanel
+    PosDesktopPayPanel,
+    PosSearchModal
   ],
   templateUrl: './pos-page.html',
 })
@@ -52,6 +54,9 @@ export default class PosPage implements OnInit {
 
   // Control de apertura para el BottomSheet de cobro en móviles
   isMobilePayOpen = signal(false);
+
+  // Control de apertura del modal de búsqueda de productos
+  isSearchOpen = signal(false);
 
   // 1. Estado reactivo principal del POS
   posModel = signal<PosSaleState>({
@@ -174,6 +179,18 @@ export default class PosPage implements OnInit {
   }
   openScanner(): void {
     this.scanner.open();
+  }
+
+  openSearch(): void {
+    this.isSearchOpen.set(true);
+  }
+  closeSearch(): void {
+    this.isSearchOpen.set(false);
+  }
+
+  /** Agrega al carrito la variante elegida en el modal de búsqueda */
+  onVariantPicked(sku: string): void {
+    this.onScanned(sku);
   }
 
   /**
