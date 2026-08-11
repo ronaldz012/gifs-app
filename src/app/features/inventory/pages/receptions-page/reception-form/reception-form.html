@@ -11,15 +11,12 @@
       />
     </div>
 
-    <div class="w-full sm:w-72 flex flex-col gap-1">
+    <div class="w-full sm:w-80 md:w-96">
       <app-provider-select-ctrl
         [fieldId]="providerForm.id()"
         [fieldName]="providerForm.name()"
         placeholder="Proveedor *"
       />
-      @if (providerForm.id().touched() && providerForm.id().invalid()) {
-        <p class="text-[10px] text-feedback-error-text">Seleccioná un proveedor</p>
-      }
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
