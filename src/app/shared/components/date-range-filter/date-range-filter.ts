@@ -1,5 +1,4 @@
-// core/ui/date-range-filter/date-range-filter.ts
-import { Component, input, output, signal, computed } from '@angular/core';
+import { Component, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface DateRange {
@@ -7,58 +6,56 @@ export interface DateRange {
   to: string | undefined;
 }
 
-type DateShortcut = 'today' | 'week' | 'month' | 'custom';
+type DateSelection = 'today' | 'yesterday' | 'specific' | null;
 
 @Component({
   selector: 'app-date-range-filter',
   standalone: true,
   imports: [FormsModule],
   template: `
-  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+      <!-- Shortcuts -->
+      <div
+        class="grid grid-cols-3 sm:flex items-center gap-1 bg-bg-muted rounded-lg p-0.5 w-full sm:w-auto"
+      >
+        @for (s of shortcuts; track s.value) {
+          <button
+            class="px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors whitespace-nowrap text-center"
+            [class]="
+              selection() === s.value
+                ? 'bg-bg-surface text-text-main font-medium shadow-sm'
+                : 'text-text-soft hover:text-text-muted'
+            "
+            (click)="onSelectionChange(s.value)"
+          >
+            {{ s.label }}
+          </button>
+        }
+      </div>
 
-    <!-- Shortcuts -->
-    <div class="grid grid-cols-2 sm:flex items-center gap-1 bg-bg-muted rounded-lg p-0.5 w-full sm:w-auto">
-      @for (s of shortcuts; track s.value) {
+      <!-- Specific date picker -->
+      @if (selection() === 'specific') {
+        <input
+          type="date"
+          class="px-2.5 py-1.5 sm:py-1 text-sm border border-border rounded-md bg-bg-surface
+                 text-text-main focus:outline-none focus:ring-2 focus:ring-ring-focus-ring"
+          [max]="maxDate"
+          [ngModel]="specificDate()"
+          (ngModelChange)="onSpecificDate($event)"
+        />
+      }
+
+      @if (selection()) {
         <button
-          class="px-2.5 py-1.5 sm:py-1 text-xs rounded-md transition-colors whitespace-nowrap text-center"
-          [class]="activeShortcut() === s.value
-            ? 'bg-bg-surface text-text-main font-medium shadow-sm'
-            : 'text-text-soft hover:text-text-muted'"
-          (click)="applyShortcut(s.value)">
-          {{ s.label }}
+          class="text-xs text-text-soft hover:text-text-muted px-1 transition-colors"
+          title="Limpiar fecha"
+          (click)="clear()"
+        >
+          ✕
         </button>
       }
     </div>
-
-    <!-- Custom date inputs -->
-    @if (activeShortcut() === 'custom') {
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 w-full sm:w-auto">
-        <input
-          type="date"
-          class="px-2 py-1.5 sm:py-1 text-sm border border-border rounded-md bg-bg-surface
-                 text-text-main w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-ring-focus-ring"
-          [max]="fromMax()"
-          [ngModel]="localFrom()"
-          (ngModelChange)="onFromChange($event)" />
-        <span class="hidden sm:inline text-text-soft text-xs">→</span>
-        <input
-          type="date"
-          class="px-2 py-1.5 sm:py-1 text-sm border border-border rounded-md bg-bg-surface
-                 text-text-main w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-ring-focus-ring"
-          [min]="toMin()"
-          [ngModel]="localTo()"
-          (ngModelChange)="onToChange($event)" />
-      </div>
-
-    } @else if (from() || to()) {
-      <div class="flex justify-center sm:block">
-        <span class="badge-info">{{ formatActiveBadge() }}</span>
-      </div>
-    }
-
-  </div>
-`,
- 
+  `,
 })
 export class DateRangeFilter {
   /** Valores actuales desde el padre */
@@ -68,94 +65,80 @@ export class DateRangeFilter {
   /** Emite cuando cambia el rango */
   rangeChange = output<DateRange>();
 
-  activeShortcut = signal<DateShortcut | null>(null);
+  selection = signal<DateSelection>(null);
+  specificDate = signal<string>('');
 
-  readonly shortcuts: { label: string; value: DateShortcut }[] = [
+  readonly shortcuts: { label: string; value: Exclude<DateSelection, null> }[] = [
     { label: 'Hoy', value: 'today' },
-    { label: 'Esta semana', value: 'week' },
-    { label: 'Este mes', value: 'month' },
-    { label: 'Personalizado', value: 'custom' },
+    { label: 'Ayer', value: 'yesterday' },
+    { label: 'Fecha', value: 'specific' },
   ];
 
-  // Constraints para los inputs
-  fromMax = computed(() => this.localTo() || this.toISODate(new Date()));
-  toMin   = computed(() => this.localFrom() || '');
+  readonly maxDate = this.toISODate(new Date());
 
-  applyShortcut(shortcut: DateShortcut) {
-    this.activeShortcut.set(shortcut);
-
-    if (shortcut === 'custom') {
-      // Solo abre los inputs, no emite hasta que el usuario elige fechas
-      return;
-    }
-
-    const { from, to } = this.getRangeForShortcut(shortcut);
-    this.rangeChange.emit({ from, to });
-  }
-
-  localFrom = signal<string>('');
-  localTo   = signal<string>('');
-
-  onFromChange(value: string) {
-    this.localFrom.set(value);
-    this.rangeChange.emit({
-      from: value ? this.toUtcIsoString(value, false) : undefined,
-      to:   this.to(),
+  constructor() {
+    effect(() => {
+      const from = this.from();
+      const to = this.to();
+      if (!from && !to) {
+        this.selection.set(null);
+        this.specificDate.set('');
+        return;
+      }
+      if (from && to && this.toISODate(new Date(from)) === this.toISODate(new Date(to))) {
+        this.selection.set(this.detectSingleDay(from));
+      }
     });
   }
 
-  onToChange(value: string) {
-    this.localTo.set(value);
-    this.rangeChange.emit({
-      from: this.from(),
-      to:   value ? this.toUtcIsoString(value, true) : undefined,
-    });
-  }
+  onSelectionChange(value: Exclude<DateSelection, null>): void {
+    this.selection.set(value);
 
-  formatActiveBadge(): string {
-    const f = this.from();
-    const t = this.to();
-    if (!f && !t) return '';
-
-    const fmt = (isoStr: string) =>
-      new Date(isoStr).toLocaleDateString('es-BO', {
-        day: '2-digit', month: 'short'
-      });
-
-    if (f && t) return `${fmt(f)} – ${fmt(t)}`;
-    if (f) return `Desde ${fmt(f)}`;
-    return `Hasta ${fmt(t!)}`;
-  }
-
-
-  private getRangeForShortcut(shortcut: Exclude<DateShortcut, 'custom'>): DateRange {
-    const today = new Date();
-
-    switch (shortcut) {
+    switch (value) {
       case 'today':
-        return {
-          from: this.toUtcIsoString(this.toISODate(today), false),
-          to: this.toUtcIsoString(this.toISODate(today), true),
-        };
-
-      case 'week': {
-        const monday = new Date(today);
-        const day = today.getDay();
-        monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
-        return {
-          from: this.toUtcIsoString(this.toISODate(monday), false),
-          to: this.toUtcIsoString(this.toISODate(today), true),
-        };
+        this.specificDate.set(this.toISODate(new Date()));
+        this.emitSingleDay(this.specificDate());
+        break;
+      case 'yesterday': {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        this.specificDate.set(this.toISODate(yesterday));
+        this.emitSingleDay(this.specificDate());
+        break;
       }
-
-      case 'month': {
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        return {
-          from: this.toUtcIsoString(this.toISODate(firstDay), false),
-          to: this.toUtcIsoString(this.toISODate(today), true),
-        };
-      }
+      case 'specific':
+        // Espera a que el usuario elija una fecha
+        break;
     }
+  }
+
+  onSpecificDate(value: string): void {
+    this.specificDate.set(value);
+    if (value) {
+      this.emitSingleDay(value);
+    }
+  }
+
+  clear(): void {
+    this.selection.set(null);
+    this.specificDate.set('');
+    this.rangeChange.emit({ from: undefined, to: undefined });
+  }
+
+  private emitSingleDay(dateStr: string): void {
+    this.rangeChange.emit({
+      from: this.toUtcIsoString(dateStr, false),
+      to: this.toUtcIsoString(dateStr, true),
+    });
+  }
+
+  private detectSingleDay(from: string): DateSelection {
+    const date = this.toISODate(new Date(from));
+    if (date === this.toISODate(new Date())) return 'today';
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (date === this.toISODate(yesterday)) return 'yesterday';
+    return 'specific';
   }
 
   private toUtcIsoString(dateStr: string, endOfDay: boolean): string {
@@ -163,10 +146,6 @@ export class DateRangeFilter {
     const local = new Date(year, month - 1, day);
     if (endOfDay) local.setHours(23, 59, 59, 999);
     return local.toISOString();
-  }
-
-  private todayStr(): string {
-    return this.toISODate(new Date());
   }
 
   private toISODate(date: Date): string {

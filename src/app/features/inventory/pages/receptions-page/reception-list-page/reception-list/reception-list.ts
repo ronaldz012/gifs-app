@@ -28,13 +28,13 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                  font-inter text-xs font-semibold uppercase tracking-wider text-text-soft"
           style="grid-template-columns: 7rem 9rem 1fr 6rem 5rem 7rem 5.5rem 3.5rem;"
         >
-          <span>Estado</span>
+          <span>Fecha</span>
           <span>Proveedor</span>
           <span>Marcas</span>
           <span class="pr-4 text-right">Talla/Color</span>
           <span class="pr-4 text-right">Uds</span>
           <span class="pr-4 text-right">Costo total</span>
-          <span class="pr-4 text-right">Fecha</span>
+          <span>Estado</span>
           <span></span>
         </div>
 

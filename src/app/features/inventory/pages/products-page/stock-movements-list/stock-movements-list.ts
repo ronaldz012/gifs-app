@@ -5,11 +5,12 @@ import { MovementType, movementTypeToSpanish } from '@features/inventory/interfa
 import { ProductService } from '@features/inventory/services/product-service';
 import SkeletonList from "../../../../../shared/ui/skeleton-list/skeleton-list";
 import { Paginator } from "@shared/components/app-paginator/app-paginator";
-import { DatePipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
+import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 
 @Component({
   selector: 'app-stock-movements-list',
-  imports: [SkeletonList, Paginator, NgClass,DatePipe],
+  imports: [SkeletonList, Paginator, NgClass, SmartDatePipe],
   templateUrl: './stock-movements-list.html',
   styles: [`
     @keyframes slide-up {

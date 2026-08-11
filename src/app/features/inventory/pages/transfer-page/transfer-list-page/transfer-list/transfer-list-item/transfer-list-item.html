@@ -6,8 +6,8 @@
   <div class="flex items-center gap-3 px-4 py-3.5 lg:hidden">
     <div class="flex items-start flex-col min-w-0 flex-1">
       <div class="flex items-center gap-2 mb-0.5">
-        <span class="text-[11px] font-medium text-text-soft">
-          {{ transfer().createdAt | date: 'dd/MM/yy' }}
+        <span class="text-[11px] font-semibold text-text-main">
+          {{ transfer().createdAt | smartDate }}
         </span>
         <span
           class="text-base font-semibold leading-none"
@@ -29,9 +29,7 @@
         {{ transfer().totalQuantity }} uds
         @if (transfer().resolvedAt) {
           ·
-          <span class="text-text-soft">
-            Resuelto: {{ transfer().resolvedAt | date: 'dd/MM/yy' }}
-          </span>
+          <span class="text-text-soft"> Resuelto: {{ transfer().resolvedAt | smartDate }} </span>
         }
       </p>
     </div>
@@ -62,8 +60,8 @@
     style="grid-template-columns: 5.5rem 5rem 6rem 1fr 8rem 4.5rem 5.5rem 9rem"
   >
     <!-- Creado -->
-    <span class="text-xs text-text-soft pr-4">
-      {{ transfer().createdAt | date: 'dd/MM/yy' }}
+    <span class="text-xs text-text-main pr-4">
+      {{ transfer().createdAt | smartDate }}
     </span>
 
     <!-- Dirección -->
@@ -104,7 +102,7 @@
       class="text-xs text-right pr-4"
       [class]="transfer().resolvedAt ? 'text-text-soft' : 'text-text-soft/40'"
     >
-      {{ transfer().resolvedAt ? (transfer().resolvedAt | date: 'dd/MM/yy') : '—' }}
+      {{ transfer().resolvedAt ? (transfer().resolvedAt | smartDate) : '—' }}
     </span>
 
     <!-- Acciones -->

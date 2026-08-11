@@ -1,12 +1,12 @@
 import { Component, input, output} from '@angular/core';
 import {StockTransferListDto} from '../../../../../dtos/transfers/stock-transfer-list-dto';
 import {TransferDirection, TransferStatus} from '../../../../../dtos/transfers/transfer-enums';
-import {DatePipe} from '@angular/common';
+import {SmartDatePipe} from '@shared/pipes/smart-date.pipe';
 
 @Component({
   selector: 'app-transfer-list-item',
   imports: [
-    DatePipe
+    SmartDatePipe
   ],
   templateUrl: './transfer-list-item.html',
   styles: ``,

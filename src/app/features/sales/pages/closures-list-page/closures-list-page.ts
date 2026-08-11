@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { ClosureListDto } from '@features/sales/dtos/closure-list-dto';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
@@ -10,7 +11,7 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
 @Component({
   selector: 'app-closures-list-page',
   standalone: true,
-  imports: [DatePipe, CurrencyPipe, RouterLink, Paginator, SkeletonList],
+  imports: [DatePipe, CurrencyPipe, RouterLink, Paginator, SkeletonList, SmartDatePipe],
   template: `
     <div class="flex flex-col gap-4 w-full">
 
@@ -49,7 +50,7 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
                 <div class="flex items-center gap-4 px-4 py-3.5 lg:hidden">
                   <div class="flex flex-col min-w-0 flex-1">
                     <p class="truncate font-inter text-sm font-bold leading-tight text-text-main">
-                      {{ c.openedAt | date:'dd/MM/yy HH:mm' }}
+                      {{ c.openedAt | smartDate }}
                     </p>
                     <p class="font-inter text-xs text-text-muted mt-0.5">
                       {{ c.openedByName }}
@@ -76,7 +77,7 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
                 <!-- DESKTOP -->
                 <div class="hidden lg:grid lg:grid-cols-8 items-center px-4 py-3 transition-colors duration-150 hover:bg-bg-muted">
                   <div class="col-span-2">
-                    <p class="text-[13px] font-medium text-text-main">{{ c.openedAt | date:'dd/MM/yy HH:mm' }}</p>
+                    <p class="text-[13px] font-medium text-text-main">{{ c.openedAt | smartDate }}</p>
                     <p class="text-[11px] text-text-soft">{{ c.openedByName }} @if (c.closedByName) { → {{ c.closedByName }} }</p>
                   </div>
                   <span class="text-right text-[13px] font-mono font-bold text-text-main">{{ c.totalSales | currency:'BOB':'symbol':'1.2-2' }}</span>

@@ -1,17 +1,18 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SaleService } from '@features/sales/services/sale-service';
 import { SaleListDto } from '@features/sales/dtos/sale-list-dto';
 import { SalesQueryDto } from '@features/sales/dtos/sales-query-dto';
 import { DateRangeFilter, DateRange } from '@shared/components/date-range-filter/date-range-filter';
+import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
 @Component({
   selector: 'app-sales-list-page',
   standalone: true,
-  imports: [DatePipe, CurrencyPipe, RouterLink, DateRangeFilter, Paginator, SkeletonList],
+  imports: [CurrencyPipe, RouterLink, DateRangeFilter, SmartDatePipe, Paginator, SkeletonList],
   template: `
     <div class="flex flex-col gap-4 w-full">
 
@@ -59,7 +60,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                 <div class="flex items-center gap-4 px-4 py-3.5 lg:hidden">
                   <div class="flex flex-col min-w-0 flex-1">
                     <p class="truncate font-inter text-sm font-bold leading-tight text-text-main">
-                      {{ sale.createdAt | date:'dd/MM/yy HH:mm' }}
+                      {{ sale.createdAt | smartDate }}
                     </p>
                     <p class="mt-1 font-inter text-xs text-text-muted">
                       <span class="font-bold text-accent-ui">{{ sale.totalAmount | currency:'BOB':'symbol':'1.2-2' }}</span>
@@ -91,7 +92,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
                 <!-- DESKTOP -->
                 <div class="group hidden lg:grid lg:grid-cols-7 items-center px-4 py-3 transition-colors duration-150 hover:bg-bg-muted">
-                  <span class="text-[13px] font-medium text-text-main">{{ sale.createdAt | date:'dd/MM/yy HH:mm' }}</span>
+                  <span class="text-[13px] font-medium text-text-main">{{ sale.createdAt | smartDate }}</span>
                   <span class="text-right text-[13px] font-mono font-bold text-text-main">{{ sale.totalAmount | currency:'BOB':'symbol':'1.2-2' }}</span>
                   <span>
                     @if (sale.paymentMethod === 0) {

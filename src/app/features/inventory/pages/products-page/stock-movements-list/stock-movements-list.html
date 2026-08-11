@@ -49,8 +49,8 @@
                         [ngClass]="getMovementColorClass(m.movementType, 'badge')">
                     {{ movementTypeToSpanish(m.movementType) }}
                   </span>
-                  <span class="text-xs text-text-muted font-mono">
-                    {{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                  <span class="text-xs font-semibold text-text-main font-mono">
+                    {{ m.createdAt | smartDate }}
                   </span>
                 </div>
 
@@ -91,8 +91,8 @@
                  style="grid-template-columns: 10rem 11rem 7rem 12rem 1fr 4rem;">
               
               <!-- Fecha -->
-              <span class="text-xs font-mono text-text-muted">
-                {{ m.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}
+              <span class="text-xs font-mono text-text-main">
+                {{ m.createdAt | smartDate }}
               </span>
 
               <!-- Tipo -->

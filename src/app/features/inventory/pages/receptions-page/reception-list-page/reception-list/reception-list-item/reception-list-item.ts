@@ -1,14 +1,15 @@
 import { Component, inject, input, output} from '@angular/core';
 import {ReceptionStatus, StockReceptionListDto} from '../../../../../dtos/receptions/stock-reception-list-dto';
-import {CurrencyPipe, DatePipe} from '@angular/common';
+import {CurrencyPipe} from '@angular/common';
 import {Router} from '@angular/router';
 import ReceptionDetails from '../../../reception-details/reception-details';
+import {SmartDatePipe} from '@shared/pipes/smart-date.pipe';
 
 @Component({
   selector: 'app-reception-list-item',
   imports: [
     CurrencyPipe,
-    DatePipe
+    SmartDatePipe
   ],
   templateUrl: './reception-list-item.html',
   styles: ``,
