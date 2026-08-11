@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, output, signal, OnInit } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { applyEach, applyWhen, form, min, required, schema } from '@angular/forms/signals';
 
 import { ProductSearch } from '../../../components/product-search/product-search.component';
@@ -22,7 +22,7 @@ const uniqueCostSchema = schema<number | null>((c) => {
 @Component({
   selector: 'app-catalogue-item-modal',
   standalone: true,
-  imports: [ProductSearch, DecimalPipe],
+  imports: [ProductSearch, CurrencyPipe],
   templateUrl: './catalogue-item-modal.html',
 })
 export default class CatalogueItemModal implements OnInit {

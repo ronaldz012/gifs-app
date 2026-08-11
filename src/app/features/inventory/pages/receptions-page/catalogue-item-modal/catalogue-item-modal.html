@@ -188,7 +188,7 @@
                 <div
                   class="text-[11px] font-mono text-text-main text-right shrink-0 md:px-3 md:py-2"
                 >
-                  {{ variant.price != null ? 'Bs ' + (variant.price | number: '1.0-0') : '—' }}
+                  {{ variant.price != null ? (variant.price | currency:'BOB':'symbol':'1.2-2') : '—' }}
                 </div>
               </div>
 
@@ -300,19 +300,19 @@
           <div class="flex flex-col gap-0.5">
             <span class="field-label">Inversión total</span>
             <span class="text-base font-black text-accent-ui font-mono"
-              >Bs {{ totalInvestment() | number: '1.2-2' }}</span
+              >{{ totalInvestment() | currency:'BOB':'symbol':'1.2-2' }}</span
             >
           </div>
           <div class="flex flex-col gap-0.5">
             <span class="field-label">Ventas estimadas</span>
             <span class="text-base font-black text-text-main font-mono"
-              >Bs {{ totalSales() | number: '1.2-2' }}</span
+              >{{ totalSales() | currency:'BOB':'symbol':'1.2-2' }}</span
             >
           </div>
           <div class="flex flex-col gap-0.5">
             <span class="field-label">Ganancia esperada</span>
             <span class="text-base font-black text-feedback-success-text font-mono"
-              >Bs {{ expectedProfit() | number: '1.2-2' }}</span
+              >{{ expectedProfit() | currency:'BOB':'symbol':'1.2-2' }}</span
             >
           </div>
         </section>

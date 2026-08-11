@@ -1,12 +1,12 @@
 import { Component, input, output } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { PaymentMethod } from '@features/sales/models/payment-method';
 import { Field, FieldState, FormField } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-pos-mobile-pay-modal',
   standalone: true,
-  imports: [CommonModule, DecimalPipe, FormField],
+  imports: [CommonModule, FormField],
   templateUrl: './pos-mobile-pay-modal.html',
 })
 export class PosMobilePayModal {

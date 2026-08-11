@@ -43,7 +43,7 @@
     <div class="flex flex-col items-center gap-1 shrink-0 min-w-[110px]">
       @if (hasDiscount()) {
         <span class="text-xs line-through text-text-soft font-mono leading-none">
-          Bs {{ item().originalPrice().value() | number:'1.2-2' }}
+          {{ item().originalPrice().value() | currency:'BOB':'symbol':'1.2-2' }}
         </span>
       }
 
@@ -75,7 +75,7 @@
 
       @if (hasDiscount()) {
         <span class="pill-success text-[10px] font-mono tracking-tight px-1.5 py-0.5 rounded-md font-bold">
-          −Bs {{ item().discountAmount().value() | number:'1.0-0' }}
+          −{{ item().discountAmount().value() | currency:'BOB':'symbol':'1.2-2' }}
         </span>
       }
     </div>
@@ -112,7 +112,7 @@
     <div class="text-right min-w-[95px] shrink-0 font-mono">
       <span class="text-[10px] uppercase tracking-wider text-text-soft block font-bold leading-none mb-0.5">Subtotal</span>
       <span class="text-base font-black text-accent-ui">
-        Bs {{ subtotal() | number:'1.2-2' }}
+        {{ subtotal() | currency:'BOB':'symbol':'1.2-2' }}
       </span>
     </div>
 
@@ -248,7 +248,7 @@
       <div>
         @if (hasDiscount()) {
           <span class="pill-success text-[10px] font-mono px-2 py-0.5 rounded-md font-bold">
-            Ahorro: −Bs {{ (item().discountAmount().value() * item().quantity().value()) | number:'1.0-0' }}
+            Ahorro: −{{ (item().discountAmount().value() * item().quantity().value()) | currency:'BOB':'symbol':'1.2-2' }}
           </span>
         }
       </div>
@@ -256,7 +256,7 @@
       <div class="text-right font-mono">
         <span class="text-[10px] text-text-soft mr-1 font-bold">TOTAL ITEM:</span>
         <span class="text-sm font-black text-accent-ui">
-          Bs {{ subtotal() | number:'1.2-2' }}
+          {{ subtotal() | currency:'BOB':'symbol':'1.2-2' }}
         </span>
       </div>
     </div>

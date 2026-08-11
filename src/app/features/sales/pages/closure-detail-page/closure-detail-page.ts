@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { ClosureDetailDto } from '@features/sales/dtos/closure-detail-dto';
@@ -8,7 +8,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 @Component({
   selector: 'app-closure-detail-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink, SkeletonList],
+  imports: [DatePipe, CurrencyPipe, RouterLink, SkeletonList],
   styles: `
     @keyframes fade-up {
       from { opacity: 0; transform: translateY(8px); }
@@ -60,27 +60,27 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
               </div>
               <div>
                 <p class="field-label">Monto apertura</p>
-                <p class="field-value">Bs {{ c.openingBalance | number:'1.2-2' }}</p>
+                <p class="field-value">{{ c.openingBalance | currency:'BOB':'symbol':'1.2-2' }}</p>
               </div>
               <div>
                 <p class="field-label">Total ventas</p>
-                <p class="field-value">Bs {{ c.totalSales | number:'1.2-2' }}</p>
+                <p class="field-value">{{ c.totalSales | currency:'BOB':'symbol':'1.2-2' }}</p>
               </div>
               <div>
                 <p class="field-label">Ventas efectivo</p>
-                <p class="field-value">Bs {{ c.cashSales | number:'1.2-2' }}</p>
+                <p class="field-value">{{ c.cashSales | currency:'BOB':'symbol':'1.2-2' }}</p>
               </div>
               <div>
                 <p class="field-label">Total gastos</p>
-                <p class="field-value text-feedback-error-text">Bs {{ c.totalExpenses | number:'1.2-2' }}</p>
+                <p class="field-value text-feedback-error-text">{{ c.totalExpenses | currency:'BOB':'symbol':'1.2-2' }}</p>
               </div>
               <div>
                 <p class="field-label">Saldo esperado</p>
-                <p class="field-value font-semibold">Bs {{ c.systemSalesAmount | number:'1.2-2' }}</p>
+                <p class="field-value font-semibold">{{ c.systemSalesAmount | currency:'BOB':'symbol':'1.2-2' }}</p>
               </div>
               <div>
                 <p class="field-label">Monto contado</p>
-                <p class="field-value font-semibold">Bs {{ c.realCountedAmount | number:'1.2-2' }}</p>
+                <p class="field-value font-semibold">{{ c.realCountedAmount | currency:'BOB':'symbol':'1.2-2' }}</p>
               </div>
               <div>
                 <p class="field-label">Diferencia</p>
@@ -90,7 +90,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                   @if (c.difference === 0) {
                     Cuadra
                   } @else {
-                    Bs {{ c.difference | number:'1.2-2' }}
+                    {{ c.difference | currency:'BOB':'symbol':'1.2-2' }}
                   }
                 </p>
               </div>
@@ -117,7 +117,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                       <tr>
                         <td class="py-2.5 pr-4 text-sm text-text-main font-mono">{{ sale.createdAt | date:'HH:mm' }}</td>
                         <td class="py-2.5 pr-4 text-sm text-text-muted">{{ sale.soldByName }}</td>
-                        <td class="py-2.5 px-4 text-right text-sm font-mono font-bold text-text-main">Bs {{ sale.totalAmount | number:'1.2-2' }}</td>
+                        <td class="py-2.5 px-4 text-right text-sm font-mono font-bold text-text-main">{{ sale.totalAmount | currency:'BOB':'symbol':'1.2-2' }}</td>
                         <td class="py-2.5 px-4 text-center">
                           <span class="text-[11px] font-medium px-2 py-0.5 rounded-md"
                             [class.bg-bg-muted]="sale.paymentMethod === 'Cash'"
@@ -178,7 +178,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                         <td class="py-2.5 px-4 text-right text-sm font-mono font-bold"
                           [class.text-feedback-error-text]="m.type === 'Outflow'"
                           [class.text-feedback-success-text]="m.type !== 'Outflow'">
-                          {{ m.type === 'Outflow' ? '-' : '+' }}Bs {{ m.amount | number:'1.2-2' }}
+                          {{ (m.type === 'Outflow' ? -m.amount : m.amount) | currency:'BOB':'symbol':'1.2-2' }}
                         </td>
                         <td class="py-2.5 pl-4 text-right text-sm text-text-soft">{{ m.createdAt | date:'HH:mm' }}</td>
                       </tr>

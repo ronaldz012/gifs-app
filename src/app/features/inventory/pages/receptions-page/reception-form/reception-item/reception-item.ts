@@ -1,11 +1,11 @@
-import { DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Component, input, output, computed } from '@angular/core';
 import { ItemForm } from '@features/inventory/models/variant-form.model';
 
 @Component({
   selector: 'app-reception-item',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [CurrencyPipe],
   templateUrl: './reception-item.html',
 })
 export class ReceptionItem {

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SaleService } from '@features/sales/services/sale-service';
 import { SaleListDto } from '@features/sales/dtos/sale-list-dto';
@@ -11,7 +11,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 @Component({
   selector: 'app-sales-list-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink, DateRangeFilter, Paginator, SkeletonList],
+  imports: [DatePipe, CurrencyPipe, RouterLink, DateRangeFilter, Paginator, SkeletonList],
   template: `
     <div class="flex flex-col gap-4 w-full">
 
@@ -62,7 +62,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                       {{ sale.createdAt | date:'dd/MM/yy HH:mm' }}
                     </p>
                     <p class="mt-1 font-inter text-xs text-text-muted">
-                      <span class="font-bold text-accent-ui">Bs {{ sale.totalAmount | number:'1.2-2' }}</span>
+                      <span class="font-bold text-accent-ui">{{ sale.totalAmount | currency:'BOB':'symbol':'1.2-2' }}</span>
                       <span class="font-bold text-accent-ui bg-accent-ui/10 px-1.5 py-0.5 rounded text-[11px]">{{ sale.itemCount }} art.</span>
                       @if (sale.paymentMethod === 0) {
                         · Efectivo
@@ -92,7 +92,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                 <!-- DESKTOP -->
                 <div class="group hidden lg:grid lg:grid-cols-7 items-center px-4 py-3 transition-colors duration-150 hover:bg-bg-muted">
                   <span class="text-[13px] font-medium text-text-main">{{ sale.createdAt | date:'dd/MM/yy HH:mm' }}</span>
-                  <span class="text-right text-[13px] font-mono font-bold text-text-main">Bs {{ sale.totalAmount | number:'1.2-2' }}</span>
+                  <span class="text-right text-[13px] font-mono font-bold text-text-main">{{ sale.totalAmount | currency:'BOB':'symbol':'1.2-2' }}</span>
                   <span>
                     @if (sale.paymentMethod === 0) {
                       <span class="text-[11px] font-medium text-text-muted bg-bg-muted px-2 py-0.5 rounded-md">Efectivo</span>

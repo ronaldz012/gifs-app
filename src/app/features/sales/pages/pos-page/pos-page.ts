@@ -7,7 +7,7 @@ import { PosCartItemCardComponent } from './pos-item/pos-item.component';
 import { PosCartItem, PosSaleState } from '@features/sales/models/pos-sale-state.model';
 import { PaymentMethod } from '@features/sales/models/payment-method';
 import { ProductVariantBySkuDto } from '@features/inventory/dtos/products/product-variant-by-sku-dto';
-import { DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { PosMobilePayModal } from './pos-mobile-pay-modal/pos-mobile-pay-modal';
 import { PosDesktopPayPanel } from './pos-desktop-pay-panel/pos-desktop-pay-panel';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
@@ -24,7 +24,7 @@ import { CreateSaleDto, CreateSaleItemDto } from '@features/sales/dtos/create-sa
     RouterLink,
     QrScannerModal, 
     PosCartItemCardComponent, 
-    DecimalPipe,
+    CurrencyPipe,
     PosMobilePayModal, 
     PosDesktopPayPanel
   ],

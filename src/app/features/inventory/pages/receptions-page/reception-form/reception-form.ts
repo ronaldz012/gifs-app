@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { form, required } from '@angular/forms/signals';
@@ -17,7 +17,7 @@ import ProviderSelectCtrl from '@features/inventory/components/provider-select-c
 
 @Component({
   selector: 'app-reception-form',
-  imports: [ReceptionItem, DecimalPipe, CatalogueItemModal, CreateProductModal, ProviderSelectCtrl],
+  imports: [ReceptionItem, CurrencyPipe, CatalogueItemModal, CreateProductModal, ProviderSelectCtrl],
   templateUrl: './reception-form.html',
 })
 export default class ReceptionForm implements OnInit {

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SaleService } from '@features/sales/services/sale-service';
 import { SaleDetailDto } from '@features/sales/dtos/sale-detail-dto';
@@ -8,7 +8,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 @Component({
   selector: 'app-sale-detail-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink, SkeletonList],
+  imports: [DatePipe, CurrencyPipe, RouterLink, SkeletonList],
   styles: `
     @keyframes fade-up {
       from { opacity: 0; transform: translateY(8px); }
@@ -64,7 +64,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
               </div>
               <div>
                 <p class="field-label">Total</p>
-                <p class="field-value font-bold">Bs {{ sale()!.totalAmount | number:'1.2-2' }}</p>
+                <p class="field-value font-bold">{{ sale()!.totalAmount | currency:'BOB':'symbol':'1.2-2' }}</p>
               </div>
               <div>
                 <p class="field-label">Artículos</p>
@@ -102,8 +102,8 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                     <tr>
                       <td class="py-2.5 pr-4 text-sm text-text-main">{{ item.productDisplayName }}</td>
                       <td class="py-2.5 px-4 text-center text-sm text-text-muted font-mono">{{ item.quantity }}</td>
-                      <td class="py-2.5 px-4 text-right text-sm text-text-muted font-mono">Bs {{ item.unitPrice | number:'1.2-2' }}</td>
-                      <td class="py-2.5 pl-4 text-right text-sm font-mono font-bold text-text-main">Bs {{ item.finalPrice | number:'1.2-2' }}</td>
+                      <td class="py-2.5 px-4 text-right text-sm text-text-muted font-mono">{{ item.unitPrice | currency:'BOB':'symbol':'1.2-2' }}</td>
+                      <td class="py-2.5 pl-4 text-right text-sm font-mono font-bold text-text-main">{{ item.finalPrice | currency:'BOB':'symbol':'1.2-2' }}</td>
                     </tr>
                   }
                 </tbody>

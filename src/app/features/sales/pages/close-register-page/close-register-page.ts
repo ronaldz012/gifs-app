@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { DecimalPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { CurrentRegisterDto } from '@features/sales/dtos/current-register-dto';
@@ -9,7 +9,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 @Component({
   selector: 'app-close-register-page',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, RouterLink, SkeletonList],
+  imports: [CurrencyPipe, DatePipe, RouterLink, SkeletonList],
   styles: `
     @keyframes fade-up {
       from { opacity: 0; transform: translateY(8px); }
@@ -60,7 +60,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
               </div>
               <div>
                 <p class="field-label">Apertura</p>
-                <p class="field-value">Bs {{ c.openingBalance | number:'1.2-2' }}</p>
+                <p class="field-value">{{ c.openingBalance | currency:'BOB':'symbol':'1.2-2' }}</p>
               </div>
             </div>
           </div>
@@ -68,19 +68,19 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div class="bg-bg-surface rounded-xl border border-border-strong px-4 py-4">
               <p class="field-label">Ventas</p>
-              <p class="text-lg font-black text-text-main font-mono">Bs {{ c.totalSales | number:'1.2-2' }}</p>
+              <p class="text-lg font-black text-text-main font-mono">{{ c.totalSales | currency:'BOB':'symbol':'1.2-2' }}</p>
             </div>
             <div class="bg-bg-surface rounded-xl border border-border-strong px-4 py-4">
               <p class="field-label">Efectivo</p>
-              <p class="text-lg font-black text-text-main font-mono">Bs {{ c.cashSales | number:'1.2-2' }}</p>
+              <p class="text-lg font-black text-text-main font-mono">{{ c.cashSales | currency:'BOB':'symbol':'1.2-2' }}</p>
             </div>
             <div class="bg-bg-surface rounded-xl border border-border-strong px-4 py-4">
               <p class="field-label">Gastos</p>
-              <p class="text-lg font-black text-feedback-error-text font-mono">Bs {{ c.totalExpenses | number:'1.2-2' }}</p>
+              <p class="text-lg font-black text-feedback-error-text font-mono">{{ c.totalExpenses | currency:'BOB':'symbol':'1.2-2' }}</p>
             </div>
             <div class="bg-bg-surface rounded-xl border border-accent-ui/30 px-4 py-4">
               <p class="field-label">Esperado</p>
-              <p class="text-lg font-black text-accent-ui font-mono">Bs {{ expectedAmount() | number:'1.2-2' }}</p>
+              <p class="text-lg font-black text-accent-ui font-mono">{{ expectedAmount() | currency:'BOB':'symbol':'1.2-2' }}</p>
             </div>
           </div>
 
@@ -101,7 +101,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                     <div class="flex items-center gap-4 px-6 py-3.5 lg:hidden">
                       <div class="flex flex-col min-w-0 flex-1">
                         <p class="text-sm font-semibold text-text-main">
-                          Bs {{ sale.totalAmount | number:'1.2-2' }}
+                          {{ sale.totalAmount | currency:'BOB':'symbol':'1.2-2' }}
                         </p>
                         <p class="mt-0.5 text-xs text-text-muted">
                           {{ sale.createdAt | date:'HH:mm' }}
@@ -116,7 +116,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                     </div>
                     <div class="hidden lg:grid lg:grid-cols-4 items-center px-6 py-3 transition-colors hover:bg-bg-muted/30">
                       <span class="text-[13px] text-text-main font-mono">{{ sale.createdAt | date:'HH:mm' }}</span>
-                      <span class="text-right text-[13px] font-mono font-bold text-text-main">Bs {{ sale.totalAmount | number:'1.2-2' }}</span>
+                      <span class="text-right text-[13px] font-mono font-bold text-text-main">{{ sale.totalAmount | currency:'BOB':'symbol':'1.2-2' }}</span>
                       <span class="text-center">
                         <span class="text-[11px] font-medium px-2 py-0.5 rounded-md"
                           [class.bg-bg-muted]="sale.paymentMethod === 'Cash'"
@@ -134,7 +134,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                           <div class="flex items-center justify-between gap-3 text-xs">
                             <span class="min-w-0 truncate text-text-muted font-medium">{{ item.productDisplayName }}</span>
                             <span class="shrink-0 text-text-soft font-mono">
-                              x{{ item.quantity }} · Bs {{ item.finalPrice | number:'1.0-0' }}
+                              x{{ item.quantity }} · {{ item.finalPrice | currency:'BOB':'symbol':'1.2-2' }}
                             </span>
                           </div>
                         }
@@ -176,7 +176,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                         <span class="text-sm font-mono font-bold"
                           [class.text-feedback-error-text]="m.type === 'Outflow'"
                           [class.text-feedback-success-text]="m.type !== 'Outflow'">
-                          {{ m.type === 'Outflow' ? '-' : '+' }}Bs {{ m.amount | number:'1.2-2' }}
+                          {{ (m.type === 'Outflow' ? -m.amount : m.amount) | currency:'BOB':'symbol':'1.2-2' }}
                         </span>
                       </div>
                     </div>
@@ -194,7 +194,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                       <span class="text-right text-[13px] font-mono font-bold"
                         [class.text-feedback-error-text]="m.type === 'Outflow'"
                         [class.text-feedback-success-text]="m.type !== 'Outflow'">
-                        {{ m.type === 'Outflow' ? '-' : '+' }}Bs {{ m.amount | number:'1.2-2' }}
+                        {{ (m.type === 'Outflow' ? -m.amount : m.amount) | currency:'BOB':'symbol':'1.2-2' }}
                       </span>
                       <span class="text-right text-[13px] text-text-soft">{{ m.createdAt | date:'HH:mm' }}</span>
                     </div>

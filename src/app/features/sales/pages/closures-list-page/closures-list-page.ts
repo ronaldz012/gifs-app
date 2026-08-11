@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { ClosureListDto } from '@features/sales/dtos/closure-list-dto';
@@ -10,7 +10,7 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
 @Component({
   selector: 'app-closures-list-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink, Paginator, SkeletonList],
+  imports: [DatePipe, CurrencyPipe, RouterLink, Paginator, SkeletonList],
   template: `
     <div class="flex flex-col gap-4 w-full">
 
@@ -56,12 +56,12 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
                       @if (c.closedAt) { · {{ c.closedAt | date:'HH:mm' }} }
                     </p>
                     <p class="text-xs text-text-muted mt-1">
-                      Ventas: <span class="font-medium text-text-main">Bs {{ c.totalSales | number:'1.2-2' }}</span>
-                      · Gastos: Bs {{ c.totalExpenses | number:'1.2-2' }}
+                      Ventas: <span class="font-medium text-text-main">{{ c.totalSales | currency:'BOB':'symbol':'1.2-2' }}</span>
+                      · Gastos: {{ c.totalExpenses | currency:'BOB':'symbol':'1.2-2' }}
                     </p>
                     <p class="text-xs mt-0.5">
                       <span [class.text-feedback-success-text]="c.difference === 0" [class.text-feedback-error-text]="c.difference !== 0" class="font-bold">
-                        @if (c.difference === 0) { Cuadra } @else { Dif: {{ c.difference | number:'1.2-2' }} }
+                        @if (c.difference === 0) { Cuadra } @else { Dif: {{ c.difference | currency:'BOB':'symbol':'1.2-2' }} }
                       </span>
                     </p>
                   </div>
@@ -79,16 +79,16 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
                     <p class="text-[13px] font-medium text-text-main">{{ c.openedAt | date:'dd/MM/yy HH:mm' }}</p>
                     <p class="text-[11px] text-text-soft">{{ c.openedByName }} @if (c.closedByName) { → {{ c.closedByName }} }</p>
                   </div>
-                  <span class="text-right text-[13px] font-mono font-bold text-text-main">Bs {{ c.totalSales | number:'1.2-2' }}</span>
-                  <span class="text-right text-[13px] font-mono text-text-main">Bs {{ c.cashSales | number:'1.2-2' }}</span>
-                  <span class="text-right text-[13px] font-mono text-feedback-error-text">Bs {{ c.totalExpenses | number:'1.2-2' }}</span>
-                  <span class="text-right text-[13px] font-mono text-text-main">Bs {{ c.systemSalesAmount | number:'1.2-2' }}</span>
-                  <span class="text-right text-[13px] font-mono text-text-main">Bs {{ c.realCountedAmount | number:'1.2-2' }}</span>
+                  <span class="text-right text-[13px] font-mono font-bold text-text-main">{{ c.totalSales | currency:'BOB':'symbol':'1.2-2' }}</span>
+                  <span class="text-right text-[13px] font-mono text-text-main">{{ c.cashSales | currency:'BOB':'symbol':'1.2-2' }}</span>
+                  <span class="text-right text-[13px] font-mono text-feedback-error-text">{{ c.totalExpenses | currency:'BOB':'symbol':'1.2-2' }}</span>
+                  <span class="text-right text-[13px] font-mono text-text-main">{{ c.systemSalesAmount | currency:'BOB':'symbol':'1.2-2' }}</span>
+                  <span class="text-right text-[13px] font-mono text-text-main">{{ c.realCountedAmount | currency:'BOB':'symbol':'1.2-2' }}</span>
                   <div class="flex justify-end items-center gap-2">
                     <span class="text-[13px] font-mono font-bold px-2 py-0.5 rounded-md"
                       [class.bg-feedback-success-bg]="c.difference === 0" [class.text-feedback-success-text]="c.difference === 0"
                       [class.bg-feedback-error-bg]="c.difference !== 0" [class.text-feedback-error-text]="c.difference !== 0">
-                      @if (c.difference === 0) { 0 } @else { {{ c.difference | number:'1.2-2' }} }
+                      @if (c.difference === 0) { 0 } @else { {{ c.difference | currency:'BOB':'symbol':'1.2-2' }} }
                     </span>
                     <a [routerLink]="['/sales', 'closures', c.id]" class="btn-link">
                       <span class="btn-link-text">Ver más</span>

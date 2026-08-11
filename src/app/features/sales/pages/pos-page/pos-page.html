@@ -125,13 +125,6 @@
 
             <div class="flex items-center justify-end gap-3 px-4 py-2 border-t border-border">
               <a
-                routerLink="/sales/closures"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-[12px] font-semibold text-text-main hover:bg-bg-muted hover:border-border-strong transition-all"
-              >
-                <span class="material-icons !text-[16px]">history</span>
-                Historial
-              </a>
-              <a
                 routerLink="/sales/pos/expenses"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-[12px] font-semibold text-text-main hover:bg-bg-muted hover:border-border-strong transition-all"
               >
@@ -163,7 +156,7 @@
 
             <div class="lg:hidden mt-2 bg-bg-surface border border-border-strong rounded-xl p-4 flex items-center justify-between shadow-sm">
               <span class="text-sm font-bold text-text-muted">Total Parcial ({{ posModel().items.length }} art.)</span>
-              <span class="text-2xl font-black text-accent-ui font-mono">Bs {{ totalCart() | number:'1.2-2' }}</span>
+              <span class="text-2xl font-black text-accent-ui font-mono">{{ totalCart() | currency:'BOB':'symbol':'1.2-2' }}</span>
             </div>
 
           } @else {
@@ -212,7 +205,7 @@
         <span class="text-sm tracking-tight font-bold">Cobrar Carrito</span>
       </div>
       <span class="font-mono text-base bg-bg-muted/20 px-2.5 py-0.5 rounded-lg">
-        Bs {{ totalCart() | number:'1.2-2' }}
+        {{ totalCart() | currency:'BOB':'symbol':'1.2-2' }}
       </span>
     </button>
   </div>

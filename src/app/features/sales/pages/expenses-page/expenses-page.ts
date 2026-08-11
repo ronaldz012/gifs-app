@@ -2,13 +2,13 @@ import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { MovementListDto } from '@features/sales/dtos/movement-list-dto';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe } from '@angular/common';
 import CreateExpenseModal from './create-expense-modal';
 
 @Component({
   selector: 'app-expenses-page',
   standalone: true,
-  imports: [RouterLink, DatePipe, DecimalPipe, CreateExpenseModal],
+  imports: [RouterLink, DatePipe, CurrencyPipe, CreateExpenseModal],
   template: `
     <div class="w-full max-w-7xl mx-auto p-4 md:py-6 space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -74,7 +74,7 @@ import CreateExpenseModal from './create-expense-modal';
                   <span class="text-[13px] font-medium text-text-main mt-1">{{ movement.description }}</span>
                   <div class="flex items-center justify-between mt-1">
                     <span class="text-[12px] font-mono font-bold" [class.text-feedback-error-text]="movement.type === 'Outflow'" [class.text-feedback-success-text]="movement.type === 'Inflow'">
-                      {{ movement.type === 'Outflow' ? '-' : '+' }}Bs {{ movement.amount | number:'1.2-2' }}
+                      {{ (movement.type === 'Outflow' ? -movement.amount : movement.amount) | currency:'BOB':'symbol':'1.2-2' }}
                     </span>
                     <span class="text-[11px] text-text-soft">{{ movement.createdAt | date:'HH:mm' }}</span>
                   </div>
@@ -83,7 +83,7 @@ import CreateExpenseModal from './create-expense-modal';
                 <div class="hidden md:block text-[13px] font-medium text-text-main truncate">{{ movement.description }}</div>
 
                 <div class="hidden md:block text-right text-[13px] font-mono font-bold" [class.text-feedback-error-text]="movement.type === 'Outflow'" [class.text-feedback-success-text]="movement.type === 'Inflow'">
-                  {{ movement.type === 'Outflow' ? '-' : '+' }}Bs {{ movement.amount | number:'1.2-2' }}
+                  {{ (movement.type === 'Outflow' ? -movement.amount : movement.amount) | currency:'BOB':'symbol':'1.2-2' }}
                 </div>
 
                 <div class="hidden md:block text-right text-[12px] text-text-soft">{{ movement.createdAt | date:'HH:mm' }}</div>
