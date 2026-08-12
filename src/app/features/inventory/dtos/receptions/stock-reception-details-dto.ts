@@ -1,4 +1,4 @@
-import {ReceptionStatus} from './stock-reception-list-dto';
+import { ReceptionStatus } from './stock-reception-list-dto';
 
 export interface StockReceptionDetailDto {
   id: GUID;
@@ -8,8 +8,6 @@ export interface StockReceptionDetailDto {
   receivedAt: string;
   notes?: string;
   status: ReceptionStatus;
-  canRollBack: boolean;
-  reasonCannotRollback:"OUTDATED" | "NOT_ENOUGH_STOCK" ;
   totalCost: number;
   items: StockReceptionItemDetailDto[];
 }

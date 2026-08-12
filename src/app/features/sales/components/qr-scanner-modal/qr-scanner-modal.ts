@@ -55,7 +55,7 @@ export class QrScannerModal implements OnDestroy {
       });
 
       const BarcodeDetectorClass = (window as any).BarcodeDetector;
-      this.detector = new BarcodeDetectorClass({ formats: ['qr_code'] });
+      this.detector = new BarcodeDetectorClass({ formats: ['qr_code', 'code_128'] });
       
       // LA MAGIA ESTÁ AQUÍ:
       // Ya tenemos los permisos y la cámara en memoria.
@@ -145,7 +145,7 @@ export async function isBarcodeApiAvailable(): Promise<boolean> {
   try {
     const BarcodeDetectorClass = (window as any).BarcodeDetector;
     const formats: string[] = await BarcodeDetectorClass.getSupportedFormats();
-    return formats.includes('qr_code');
+    return formats.includes('qr_code') || formats.includes('code_128');
   } catch {
     return false;
   }

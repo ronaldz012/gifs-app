@@ -2,63 +2,84 @@ import { Injectable } from '@angular/core';
 import { LabelData } from '../interfaces';
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
+import JsBarcode from 'jsbarcode';
+
+type CodeType = 'qr' | 'barcode';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LabelPrintService {
   private readonly CONFIG = {
-    margenIzquierdo: 12,
-    margenSuperior: 6,
-    anchoEtiqueta: 60,
-    altoEtiqueta: 32,
+    leftMargin: 12,
+    topMargin: 6,
+    labelWidth: 60,
+    labelHeight: 32,
     gap: 1,
-    columnas: 3,
+    columns: 3,
     labelsPerSheet: 24,
   };
 
-  public async generarPdf(labels: LabelData[]): Promise<jsPDF> {
+  public async generatePdf(labels: LabelData[]): Promise<jsPDF> {
+    return this.generateWithCode(labels, 'qr');
+  }
+
+  public async generatePdfWithBarcode(labels: LabelData[]): Promise<jsPDF> {
+    return this.generateWithCode(labels, 'barcode');
+  }
+
+  private async generateWithCode(labels: LabelData[], codeType: CodeType): Promise<jsPDF> {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
     for (let i = 0; i < labels.length; i++) {
       if (i > 0 && i % this.CONFIG.labelsPerSheet === 0) {
         doc.addPage();
       }
-      await this.dibujarEtiqueta(doc, labels[i], i);
+      await this.drawLabel(doc, labels[i], i, codeType);
     }
 
     return doc;
   }
 
-  private async dibujarEtiqueta(doc: jsPDF, label: LabelData, indiceGlobal: number): Promise<void> {
-    const { x, y } = this.calcularPosicion(indiceGlobal);
+  private async drawLabel(
+    doc: jsPDF,
+    label: LabelData,
+    globalIndex: number,
+    codeType: CodeType,
+  ): Promise<void> {
+    const { x, y } = this.calculatePosition(globalIndex);
 
-    this.dibujarBorde(doc, x, y);
-    await this.dibujarQr(doc, label.sku, x, y);
-    this.dibujarSku(doc, label.sku, x, y);
-    this.dibujarInfoProducto(doc, label, x, y);
-    this.dibujarBadgeTalla(doc, label.size.toString(), x, y);
-    this.dibujarPrecio(doc, label.price, x, y);
+    this.drawBorder(doc, x, y);
+    if (codeType === 'qr') {
+      await this.drawQr(doc, label.sku, x, y);
+      this.drawSku(doc, label.sku, x, y);
+      this.drawProductInfo(doc, label, x, y);
+      this.drawSizeBadge(doc, label.size.toString(), x, y);
+      this.drawPrice(doc, label.price, x, y);
+    } else {
+      await this.drawBarcode(doc, label.sku, x, y);
+      this.drawBarcodeDetails(doc, label, x, y);
+    }
   }
 
-  private calcularPosicion(indiceGlobal: number): { x: number; y: number } {
-    const indiceEnHoja = indiceGlobal % this.CONFIG.labelsPerSheet;
-    const columna = indiceEnHoja % this.CONFIG.columnas;
-    const fila = Math.floor(indiceEnHoja / this.CONFIG.columnas);
+  private calculatePosition(globalIndex: number): { x: number; y: number } {
+    const indexOnSheet = globalIndex % this.CONFIG.labelsPerSheet;
+    const column = indexOnSheet % this.CONFIG.columns;
+    const row = Math.floor(indexOnSheet / this.CONFIG.columns);
 
     return {
-      x: this.CONFIG.margenIzquierdo + columna * (this.CONFIG.anchoEtiqueta + this.CONFIG.gap),
-      y: this.CONFIG.margenSuperior + fila * (this.CONFIG.altoEtiqueta + this.CONFIG.gap),
+      x: this.CONFIG.leftMargin + column * (this.CONFIG.labelWidth + this.CONFIG.gap),
+      y: this.CONFIG.topMargin + row * (this.CONFIG.labelHeight + this.CONFIG.gap),
     };
   }
 
-  private dibujarBorde(doc: jsPDF, x: number, y: number): void {
+  private drawBorder(doc: jsPDF, x: number, y: number): void {
     doc.setDrawColor(153, 153, 153);
     doc.setLineWidth(0.3);
-    doc.rect(x, y, this.CONFIG.anchoEtiqueta, this.CONFIG.altoEtiqueta);
+    doc.rect(x, y, this.CONFIG.labelWidth, this.CONFIG.labelHeight);
   }
 
-  private async dibujarQr(doc: jsPDF, sku: string, x: number, y: number): Promise<void> {
+  private async drawQr(doc: jsPDF, sku: string, x: number, y: number): Promise<void> {
     try {
       const qrBase64 = await QRCode.toDataURL(sku, {
         errorCorrectionLevel: 'M',
@@ -68,60 +89,124 @@ export class LabelPrintService {
       });
       doc.addImage(qrBase64, 'PNG', x + 2, y + 3, 23, 23);
     } catch (err) {
-      console.error('Error generando QR para SKU: ' + sku, err);
+      console.error('Error generating QR for SKU: ' + sku, err);
     }
   }
 
-  private dibujarSku(doc: jsPDF, sku: string, x: number, y: number): void {
+  private createCanvas(width: number, height: number): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.width = width * 10;
+    canvas.height = height * 10;
+    canvas.style.width = `${width}mm`;
+    canvas.style.height = `${height}mm`;
+    return canvas;
+  }
+
+  private async drawBarcode(doc: jsPDF, sku: string, x: number, y: number): Promise<void> {
+    try {
+      const canvas = this.createCanvas(56, 13);
+      JsBarcode(canvas, sku, {
+        format: 'CODE128',
+        height: 105,
+        displayValue: false,
+        margin: 2,
+        background: '#ffffff',
+      });
+      const barcodeBase64 = canvas.toDataURL('image/png');
+      doc.addImage(barcodeBase64, 'PNG', x + 2, y + 2, 56, 13);
+    } catch (err) {
+      console.error('Error generating barcode for SKU: ' + sku, err);
+    }
+  }
+
+  private drawBarcodeDetails(doc: jsPDF, label: LabelData, x: number, y: number): void {
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(0, 0, 0);
+    doc.text(label.sku, x + 30, y + 17, { align: 'center' });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(30, 58, 95);
+    doc.text(label.brandName.toUpperCase(), x + 2, y + 19.5);
+
+    const cleanName = (label.productName || '').replace(/[\/\s]+$/, '').trim();
+    doc.setFontSize(this.getProductFontSize(cleanName.length));
+    doc.setTextColor(17, 17, 17);
+    const lines = doc.splitTextToSize(cleanName, 24);
+    doc.text(lines.slice(0, 2), x + 2, y + 22);
+
+    doc.setFillColor(0, 0, 0);
+    doc.rect(x + 2, y + 26.5, 10, 5, 'F');
+    doc.setFont('helvetica', 'bold');
+    const sizeFontPt = this.getSizeFontSize(label.size.toString().length);
+    doc.setFontSize(sizeFontPt);
+    doc.setTextColor(255, 255, 255);
+    const badgeCenterY = y + 26.5 + 2.5;
+    doc.text(label.size.toString(), x + 7, badgeCenterY + sizeFontPt * 0.3528 * 0.36, {
+      align: 'center',
+    });
+
+    doc.setFontSize(8.5);
+    doc.setTextColor(51, 51, 51);
+    doc.text(label.color, x + 15, y + 29.5);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Bs. ${label.price}`, x + 57, y + 29.5, { align: 'right' });
+  }
+
+  private drawSku(doc: jsPDF, sku: string, x: number, y: number): void {
     doc.setFont('courier', 'bold');
     doc.setFontSize(8);
     doc.setTextColor(0, 0, 0);
     doc.text(sku, x + 13.5, y + 29, { align: 'center' });
   }
 
-  private dibujarInfoProducto(doc: jsPDF, label: LabelData, x: number, y: number): void {
-    const xInfo = x + 28;
+  private drawProductInfo(doc: jsPDF, label: LabelData, x: number, y: number): void {
+    const infoX = x + 28;
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8.5);
     doc.setTextColor(30, 58, 95);
-    doc.text(label.brandName.toUpperCase(), xInfo, y + 6);
+    doc.text(label.brandName.toUpperCase(), infoX, y + 6);
 
-    const nombreLimpio = (label.productName || '').replace(/[\/\s]+$/, '').trim();
-    doc.setFontSize(this.obtenerFontSizeProducto(nombreLimpio.length));
+    const cleanName = (label.productName || '').replace(/[\/\s]+$/, '').trim();
+    doc.setFontSize(this.getProductFontSize(cleanName.length));
     doc.setTextColor(17, 17, 17);
-    const lineas = doc.splitTextToSize(nombreLimpio, 30);
-    doc.text(lineas.slice(0, 2), xInfo, y + 11);
+    const lines = doc.splitTextToSize(cleanName, 30);
+    doc.text(lines.slice(0, 2), infoX, y + 11);
 
     doc.setFontSize(8.5);
     doc.setTextColor(51, 51, 51);
-    doc.text(label.color, xInfo, y + 21);
+    doc.text(label.color, infoX, y + 21);
   }
 
-  private dibujarBadgeTalla(doc: jsPDF, talla: string, x: number, y: number): void {
-    const xInfo = x + 28;
+  private drawSizeBadge(doc: jsPDF, size: string, x: number, y: number): void {
+    const infoX = x + 28;
     doc.setFillColor(0, 0, 0);
-    doc.rect(xInfo, y + 26, 10, 5, 'F');
+    doc.rect(infoX, y + 26, 10, 5, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(this.obtenerFontSizeTalla(talla.length));
+    doc.setFontSize(this.getSizeFontSize(size.length));
     doc.setTextColor(255, 255, 255);
-    doc.text(talla, xInfo + 5, y + 29.5, { align: 'center' });
+    doc.text(size, infoX + 5, y + 29.5, { align: 'center' });
   }
 
-  private dibujarPrecio(doc: jsPDF, price: number | string, x: number, y: number): void {
+  private drawPrice(doc: jsPDF, price: number | string, x: number, y: number): void {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10.5);
     doc.setTextColor(0, 0, 0);
     doc.text(`Bs. ${price}`, x + 57, y + 30, { align: 'right' });
   }
 
-  private obtenerFontSizeProducto(length: number): number {
+  private getProductFontSize(length: number): number {
     if (length <= 16) return 8.5;
     if (length <= 28) return 7.8;
     return 7;
   }
 
-  private obtenerFontSizeTalla(length: number): number {
+  private getSizeFontSize(length: number): number {
     if (length <= 2) return 11;
     if (length <= 4) return 9;
     return 8;
