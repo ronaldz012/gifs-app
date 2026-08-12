@@ -21,7 +21,7 @@ import { ProductSearchResult } from '@features/inventory/components/product-sear
 import { ToastService } from '@core/services/toast-service';
 
 const createVariantSchema = schema<VariantForm>((v) => {
-  required(v.size, { message: 'Requerido' });
+  required(v.sizeId, { message: 'Requerido' });
   required(v.colorId, { message: 'Requerido' });
   required(v.price, { message: 'Requerido' });
   min(v.price, 0.5, { message: 'Mín Bs 0.50' });
@@ -77,11 +77,10 @@ export default class CreateProductModal implements OnInit {
       const seen = new Map<string, number[]>();
 
       variants.forEach((v, i) => {
-        if (v.size === null || v.size === undefined || v.size === '') return;
-        const size = v.size.trim().toLowerCase();
+        if (v.sizeId === null || v.sizeId === undefined || v.sizeId === '') return;
         const colorId = (v.colorId ?? '').trim().toLowerCase();
-        if (!size) return;
-        const key = `${colorId}__${size}`;
+        if (!colorId) return;
+        const key = `${colorId}__${v.sizeId}`;
         if (!seen.has(key)) seen.set(key, []);
         seen.get(key)!.push(i);
       });
@@ -184,7 +183,7 @@ export default class CreateProductModal implements OnInit {
         brandId: val.newProduct.brandId,
         gender: val.newProduct.gender ?? 0,
         variants: variants.map((v) => ({
-          size: v.size,
+          sizeId: v.sizeId,
           colorId: v.colorId,
           price: v.price ?? 0,
         })),
@@ -229,6 +228,7 @@ export default class CreateProductModal implements OnInit {
         id: cv.productVariantId,
         sku: cv.sku,
         size: cv.size,
+        sizeId: val.variants[i]?.sizeId ?? ('' as GUID),
         colorId: val.variants[i]?.colorId ?? ('' as GUID),
         colorName: cv.colorName,
         price: val.variants[i]?.price ?? 0,

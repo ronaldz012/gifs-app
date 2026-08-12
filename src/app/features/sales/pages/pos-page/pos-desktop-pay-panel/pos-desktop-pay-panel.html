@@ -1,6 +1,7 @@
 <div class="w-full bg-bg-surface border border-border p-5 rounded-xl shadow-xs flex flex-col gap-5">
-
-  <h3 class="text-sm font-black text-text-main border-b border-border pb-2.5 uppercase tracking-wider">
+  <h3
+    class="text-sm font-black text-text-main border-b border-border pb-2.5 uppercase tracking-wider"
+  >
     Resumen de Cobro
   </h3>
 
@@ -11,23 +12,43 @@
     </div>
     <div class="flex justify-between items-baseline mt-2 pt-2 border-t border-border/60">
       <span class="text-xs font-bold text-text-main">Total Neto:</span>
-      <span class="text-2xl font-black text-accent-ui">{{ total() | currency:'BOB':'symbol':'1.2-2' }}</span>
+      <span class="text-2xl font-black text-accent-ui">{{
+        total() | currency: 'BOB' : 'symbol' : '1.2-2'
+      }}</span>
     </div>
   </div>
 
-<div class="flex flex-col gap-2">
-  <label class="field-label font-bold uppercase tracking-wide">Método de Liquidación</label>
-  <div>
-    <select
-      class="w-full p-3 rounded-xl border text-sm font-bold bg-bg-surface text-text-main"
-      [value]="currentMethod().value()"
-      (change)="onMethodChange($event)"
-    >
-      <option [value]="PaymentMethodEnum.Cash">Efectivo</option>
-      <option [value]="PaymentMethodEnum.QrCode">Pago QR</option>
-    </select>
+  <div class="flex flex-col gap-2">
+    <label class="field-label font-bold uppercase tracking-wide">Método de Liquidación</label>
+    <div class="grid grid-cols-2 gap-3">
+      <button
+        type="button"
+        (click)="onMethodChange(PaymentMethodEnum.Cash)"
+        class="flex flex-col items-center gap-1 p-3 rounded-xl border text-xs font-bold transition-colors"
+        [class.border-accent-ui]="currentMethod().value() === PaymentMethodEnum.Cash"
+        [class.bg-bg-muted]="currentMethod().value() === PaymentMethodEnum.Cash"
+        [class.text-accent-ui]="currentMethod().value() === PaymentMethodEnum.Cash"
+        [class.border-border]="currentMethod().value() !== PaymentMethodEnum.Cash"
+        [class.text-text-muted]="currentMethod().value() !== PaymentMethodEnum.Cash"
+      >
+        <span class="material-icons text-[24px]">payments</span>
+        Efectivo
+      </button>
+      <button
+        type="button"
+        (click)="onMethodChange(PaymentMethodEnum.QrCode)"
+        class="flex flex-col items-center gap-1 p-3 rounded-xl border text-xs font-bold transition-colors"
+        [class.border-accent-ui]="currentMethod().value() === PaymentMethodEnum.QrCode"
+        [class.bg-bg-muted]="currentMethod().value() === PaymentMethodEnum.QrCode"
+        [class.text-accent-ui]="currentMethod().value() === PaymentMethodEnum.QrCode"
+        [class.border-border]="currentMethod().value() !== PaymentMethodEnum.QrCode"
+        [class.text-text-muted]="currentMethod().value() !== PaymentMethodEnum.QrCode"
+      >
+        <span class="material-icons text-[24px]">qr_code</span>
+        Pago QR
+      </button>
+    </div>
   </div>
-</div>
 
   @if (currentMethod().value() === PaymentMethodEnum.QrCode) {
     <div class="flex flex-col gap-1.5">
@@ -48,11 +69,10 @@
   <button
     type="button"
     (click)="submitted.emit()"
-    [disabled]="itemCount() === 0"
+    [disabled]="itemCount() === 0 || currentMethod().value() === null"
     class="btn-primary w-full py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
   >
     <span class="material-icons text-[18px]">check_circle</span>
     Completar Compra
   </button>
-
 </div>

@@ -122,6 +122,7 @@ export default class CatalogueItemModal implements OnInit {
           id: v.id,
           sku: v.sku,
           size: v.size,
+          sizeId: v.sizeId,
           colorId: v.colorId,
           colorName: v.color,
           price: v.price,
@@ -143,7 +144,8 @@ export default class CatalogueItemModal implements OnInit {
           return {
             mode: 'ex' as const,
             id: v.id,
-            size: v.size,
+            sizeId: v.sizeId,
+            sizeName: v.size,
             colorId: v.colorId,
             colorCode: '',
             colorName: v.color,
@@ -188,7 +190,8 @@ export default class CatalogueItemModal implements OnInit {
       variants: product.productVariants.map((v) => ({
         mode: 'ex' as const,
         id: v.id,
-        size: v.size,
+        sizeId: v.sizeId,
+        sizeName: v.size,
         colorId: v.colorId,
         colorCode: '',
         colorName: v.colorName,

@@ -12,7 +12,7 @@ import { Field, FieldState, FormField } from '@angular/forms/signals';
 export class PosMobilePayModal {
   total = input.required<number>();
   itemCount = input.required<number>();
-  currentMethod = input.required<FieldState<PaymentMethod>>();
+  currentMethod = input.required<FieldState<PaymentMethod | null>>();
   transactionCode = input.required<FieldState<string | null>>();
   isValid = input.required<boolean>();
 

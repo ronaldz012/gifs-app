@@ -35,9 +35,9 @@
         </div>
         <div class="flex flex-col items-end border-l border-border pl-4">
           <span class="field-label">Inversión total</span>
-          <span class="text-sm font-black text-accent-ui font-mono"
-            >{{ totalCost() | currency:'BOB':'symbol':'1.2-2' }}</span
-          >
+          <span class="text-sm font-black text-accent-ui font-mono">{{
+            totalCost() | currency: 'BOB' : 'symbol' : '1.2-2'
+          }}</span>
         </div>
       </div>
 
@@ -86,7 +86,9 @@
     </span>
     <span class="text-text-soft">
       Total:
-      <span class="font-bold text-accent-ui font-mono">{{ totalCost() | currency:'BOB':'symbol':'1.2-2' }}</span>
+      <span class="font-bold text-accent-ui font-mono">{{
+        totalCost() | currency: 'BOB' : 'symbol' : '1.2-2'
+      }}</span>
     </span>
   </div>
 
@@ -96,18 +98,20 @@
       <div class="px-4 py-2.5">
         <div class="flex items-center justify-between gap-2">
           <span class="font-mono font-semibold text-text-main text-[11px]">{{ variant.sku }}</span>
-          <span class="tag-neutral">{{ variant.size }}</span>
+          <span class="tag-neutral">{{ variant.sizeName }}</span>
         </div>
         <div class="flex items-center justify-between gap-2 mt-1 text-xs">
           <span class="text-text-soft">
             Cant. <span class="font-bold text-text-main">{{ variant.quantityReceived }}</span>
             · Costo U.
-            <span class="font-mono text-text-muted"
-              >{{ variant.unitCost | currency:'BOB':'symbol':'1.2-2' }}</span
-            >
+            <span class="font-mono text-text-muted">{{
+              variant.unitCost | currency: 'BOB' : 'symbol' : '1.2-2'
+            }}</span>
           </span>
           <span class="font-mono font-bold text-feedback-success-text">
-            {{ variant.quantityReceived! * variant.unitCost! | currency:'BOB':'symbol':'1.2-2' }}
+            {{
+              variant.quantityReceived! * variant.unitCost! | currency: 'BOB' : 'symbol' : '1.2-2'
+            }}
           </span>
         </div>
       </div>
@@ -131,16 +135,18 @@
           <tr class="border-b border-border last:border-0 hover:bg-accent-ui/5 transition-colors">
             <td class="px-4 py-2 font-mono font-semibold text-text-main">{{ variant.sku }}</td>
             <td class="px-3 py-2">
-              <span class="tag-neutral">{{ variant.size }}</span>
+              <span class="tag-neutral">{{ variant.sizeName }}</span>
             </td>
             <td class="px-3 py-2 text-right font-bold text-text-main">
               {{ variant.quantityReceived }}
             </td>
             <td class="px-3 py-2 text-right font-mono text-text-muted">
-              {{ variant.unitCost | currency:'BOB':'symbol':'1.2-2' }}
+              {{ variant.unitCost | currency: 'BOB' : 'symbol' : '1.2-2' }}
             </td>
             <td class="px-3 py-2 text-right font-mono font-bold text-feedback-success-text">
-              {{ variant.quantityReceived! * variant.unitCost! | currency:'BOB':'symbol':'1.2-2' }}
+              {{
+                variant.quantityReceived! * variant.unitCost! | currency: 'BOB' : 'symbol' : '1.2-2'
+              }}
             </td>
           </tr>
         }

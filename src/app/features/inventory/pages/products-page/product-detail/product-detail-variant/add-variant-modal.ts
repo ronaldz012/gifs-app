@@ -1,12 +1,14 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { form, FormField, min, required, validate } from '@angular/forms/signals';
 import { ColorSelectCtrl } from '@features/inventory/components/color-select-ctrl/color-select-ctrl.component';
+import { SizeSelectCtrl } from '@features/inventory/components/size-select-ctrl/size-select-ctrl.component';
 import { ColorService } from '@features/inventory/services/color-service';
 import { ProductVariantDto } from '../../../../dtos/products/product-detail-dto';
 import { CreateProductVariantDto } from '../../../../dtos/products/create-product-variant-dto';
 
 interface AddVariantModel {
-  size: string;
+  sizeId: GUID;
+  sizeName: string;
   colorId: GUID;
   colorName: string;
   price: number | null;
@@ -27,7 +29,7 @@ interface AddVariantModel {
  */
 @Component({
   selector: 'app-add-variant-modal',
-  imports: [FormField, ColorSelectCtrl],
+  imports: [FormField, ColorSelectCtrl, SizeSelectCtrl],
   template: `
     <!-- Overlay -->
     <div
@@ -66,15 +68,12 @@ interface AddVariantModel {
           <!-- Talla -->
           <div>
             <label class="field-label block">Talla</label>
-            <input
-              type="text"
-              [formField]="addVariantForm.size"
-              placeholder="Ej. S, M, L, 42, 44..."
-              class="w-full px-3 py-2 text-sm text-text-main bg-bg-surface border border-border rounded-lg
-                     focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
+            <app-size-select-ctrl
+              [fieldState]="addVariantForm.sizeId()"
+              [sizeNameState]="addVariantForm.sizeName()"
             />
-            @if (addVariantForm.size().touched() && addVariantForm.size().invalid()) {
-              @for (error of addVariantForm.size().errors(); track error.kind) {
+            @if (addVariantForm.sizeId().touched() && addVariantForm.sizeId().invalid()) {
+              @for (error of addVariantForm.sizeId().errors(); track error.kind) {
                 <span class="text-xs text-feedback-error-text font-medium leading-none mt-1 block">
                   {{ error.message }}
                 </span>
@@ -158,25 +157,26 @@ export default class AddVariantModal {
   }
 
   model = signal<AddVariantModel>({
-    size: '',
+    sizeId: '' as GUID,
+    sizeName: '',
     colorId: '' as GUID,
     colorName: '',
     price: null,
   });
 
   addVariantForm = form(this.model, (s) => {
-    required(s.size, { message: 'Requerido' });
+    required(s.sizeId, { message: 'Requerido' });
     required(s.colorId, { message: 'Requerido' });
     required(s.price, { message: 'Requerido' });
     min(s.price, 0.5, { message: 'Mín Bs 0.50' });
 
     validate(s.colorId, ({ valueOf }) => {
-      const size = (valueOf(s.size) ?? '').trim().toLowerCase();
+      const sizeId = valueOf(s.sizeId);
       const colorId = valueOf(s.colorId);
-      if (!size || !colorId) return null;
+      if (!sizeId || !colorId) return null;
 
       const exists = this.existingVariants().some(
-        (v) => v.colorId === colorId && v.size.trim().toLowerCase() === size,
+        (v) => v.colorId === colorId && v.sizeId === sizeId,
       );
       return exists
         ? { kind: 'duplicateVariant', message: 'La combinación de color y talla ya existe' }
@@ -191,7 +191,7 @@ export default class AddVariantModal {
 
     const m = this.model();
     this.save.emit({
-      size: m.size.trim(),
+      sizeId: m.sizeId,
       colorId: m.colorId,
       price: m.price ?? 0,
     });

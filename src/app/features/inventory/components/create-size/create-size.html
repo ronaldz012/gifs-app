@@ -1,0 +1,63 @@
+<div class="bg-bg-surface border border-border rounded-lg shadow-lg p-4 w-72">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="section-title mb-0">Nueva Talla</h3>
+    <button (click)="closed.emit()" class="btn-icon hover:text-text-main">
+      <span class="material-icons text-base">close</span>
+    </button>
+  </div>
+
+  <!-- Form -->
+  <div class="space-y-4">
+    <!-- Campo Nombre -->
+    <div>
+      <label for="name" class="field-label block">NOMBRE</label>
+      <input
+        #nameInput
+        id="name"
+        type="text"
+        [formField]="sizeForm.name"
+        (input)="clearServerError()"
+        placeholder="Ej. 42, M, XL..."
+        autocomplete="off"
+        class="w-full px-3 py-2 rounded-lg border bg-bg-muted text-text-main text-sm outline-none transition-all focus:ring-2 focus:ring-[--focus-ring] focus:border-accent-ui placeholder:text-text-soft"
+        [class.border-feedback-error-text]="showNameError || !!_serverError()"
+        [class.border-border]="!showNameError && !_serverError()"
+      />
+
+      <!-- Error de validación local -->
+      @if (showNameError) {
+        <p class="text-[10px] text-feedback-error-text mt-1">
+          {{ nameErrorMessage }}
+        </p>
+      }
+
+      <!-- Error del servidor (409) -->
+      @if (_serverError()) {
+        <p class="text-[10px] text-feedback-error-text mt-1">
+          {{ _serverError() }}
+        </p>
+      }
+    </div>
+
+    <!-- Acciones -->
+    <div class="flex gap-2 pt-1">
+      <button
+        type="button"
+        (click)="closed.emit()"
+        [disabled]="isLoading()"
+        class="btn btn-secondary btn-sm flex-1"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        (click)="save()"
+        [disabled]="isLoading()"
+        class="btn btn-primary btn-sm flex-1"
+      >
+        {{ isLoading() ? 'Guardando...' : 'CREAR' }}
+      </button>
+    </div>
+  </div>
+</div>

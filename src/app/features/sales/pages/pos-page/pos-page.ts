@@ -2,10 +2,12 @@ import { Component, OnInit, signal, ViewChild, inject, computed } from '@angular
 import { RouterLink } from '@angular/router';
 import { form, applyEach, min, validate } from '@angular/forms/signals';
 import { ProductService } from '@features/inventory/services';
-import { isBarcodeApiAvailable, QrScannerModal } from '@features/sales/components/qr-scanner-modal/qr-scanner-modal';
+import {
+  isBarcodeApiAvailable,
+  QrScannerModal,
+} from '@features/sales/components/qr-scanner-modal/qr-scanner-modal';
 import { PosCartItemCardComponent } from './pos-item/pos-item.component';
 import { PosCartItem, PosSaleState } from '@features/sales/models/pos-sale-state.model';
-import { PaymentMethod } from '@features/sales/models/payment-method';
 import { ProductVariantBySkuDto } from '@features/inventory/dtos/products/product-variant-by-sku-dto';
 import { CurrencyPipe } from '@angular/common';
 import { PosMobilePayModal } from './pos-mobile-pay-modal/pos-mobile-pay-modal';
@@ -16,24 +18,21 @@ import { CurrentRegisterDto } from '@features/sales/dtos/current-register-dto';
 import { SaleService } from '@features/sales/services/sale-service';
 import { CreateSaleDto, CreateSaleItemDto } from '@features/sales/dtos/create-sale-dto';
 
-
-
 @Component({
   selector: 'app-pos-page',
   standalone: true,
   imports: [
     RouterLink,
-    QrScannerModal, 
-    PosCartItemCardComponent, 
+    QrScannerModal,
+    PosCartItemCardComponent,
     CurrencyPipe,
-    PosMobilePayModal, 
+    PosMobilePayModal,
     PosDesktopPayPanel,
-    PosSearchModal
+    PosSearchModal,
   ],
   templateUrl: './pos-page.html',
 })
 export default class PosPage implements OnInit {
-
   // ── Register state ────────────────────────────────────────────────────
   registerState = signal<'loading' | 'closed' | 'open'>('loading');
   currentRegister = signal<CurrentRegisterDto | null>(null);
@@ -46,7 +45,7 @@ export default class PosPage implements OnInit {
   // ── POS state ──────────────────────────────────────────────────────────
 
   @ViewChild(QrScannerModal) scanner!: QrScannerModal;
-  
+
   private productService = inject(ProductService);
 
   /** Muestra el botón solo si la API está disponible en este dispositivo */
@@ -60,18 +59,18 @@ export default class PosPage implements OnInit {
 
   // 1. Estado reactivo principal del POS
   posModel = signal<PosSaleState>({
-    paymentMethod: PaymentMethod.Cash,
+    paymentMethod: null,
     transactionCode: null,
     publicName: '',
     cashReceived: 0,
-    items: []
+    items: [],
   });
 
   // 2. Definición del Esquema de validación del Formulario
   posForm = form(this.posModel, (schemaPath) => {
     applyEach(schemaPath.items, (item) => {
       min(item.quantity, 1, { message: 'Mínimo 1 unidad.' });
-      
+
       // Control reactivo de stock por prenda en el carrito
       validate(item.quantity, ({ value, valueOf }) => {
         if (value() > valueOf(item.stock)) {
@@ -84,7 +83,7 @@ export default class PosPage implements OnInit {
 
   // Total acumulado derivativo para mostrar en el pie de página
   totalCart = computed(() => {
-    return this.posModel().items.reduce((acc, item) => acc + (item.sellingPrice * item.quantity), 0);
+    return this.posModel().items.reduce((acc, item) => acc + item.sellingPrice * item.quantity, 0);
   });
 
   // Validador global para habilitar los flujos de cobros
@@ -150,12 +149,12 @@ export default class PosPage implements OnInit {
           this.registerState.set('closed');
         }
       },
-      error: () => this.registerState.set('closed')
+      error: () => this.registerState.set('closed'),
     });
   }
 
   toggleOpenForm(): void {
-    this.showOpenForm.update(v => !v);
+    this.showOpenForm.update((v) => !v);
     this.openingBalance.set(0);
   }
 
@@ -166,7 +165,7 @@ export default class PosPage implements OnInit {
         this.openingBalance.set(0);
         this.checkRegister();
       },
-      error: () => alert('Error al abrir la caja. Intente de nuevo.')
+      error: () => alert('Error al abrir la caja. Intente de nuevo.'),
     });
   }
 
@@ -200,13 +199,16 @@ export default class PosPage implements OnInit {
     if (!this.isFormValid()) return;
 
     const state = this.posModel();
+    const paymentMethod = state.paymentMethod;
+    if (paymentMethod === null) return;
+
     const dto: CreateSaleDto = {
-      paymentMethod: state.paymentMethod,
+      paymentMethod,
       invoiceNumber: null,
       documentType: 0, // Ticket
       transactionCode: state.transactionCode,
       notes: null,
-      items: state.items.map(item => ({
+      items: state.items.map((item) => ({
         productVariantId: item.productVariantId,
         quantity: item.quantity,
         discountAmount: item.discountAmount,
@@ -217,7 +219,7 @@ export default class PosPage implements OnInit {
       next: () => {
         this.isMobilePayOpen.set(false);
         this.posModel.set({
-          paymentMethod: PaymentMethod.Cash,
+          paymentMethod: null,
           transactionCode: null,
           publicName: '',
           cashReceived: 0,
@@ -235,20 +237,26 @@ export default class PosPage implements OnInit {
     this.productService.getVariantBySku(skuValue).subscribe({
       next: (variant: ProductVariantBySkuDto) => {
         if (variant.availableStockInBranch <= 0) {
-          alert(`La talla/color SKU ${variant.sku} no cuenta con stock disponible en esta sucursal.`);
+          alert(
+            `La talla/color SKU ${variant.sku} no cuenta con stock disponible en esta sucursal.`,
+          );
           return;
         }
 
         this.posModel.update((state) => {
           const updatedItems = [...state.items];
-          const existingItemIndex = updatedItems.findIndex(i => i.productVariantId === variant.id);
+          const existingItemIndex = updatedItems.findIndex(
+            (i) => i.productVariantId === variant.id,
+          );
 
           if (existingItemIndex > -1) {
             const currentItem = updatedItems[existingItemIndex];
             if (currentItem.quantity < variant.availableStockInBranch) {
               currentItem.quantity += 1;
             } else {
-              alert(`No puedes agregar más unidades. Stock máximo disponible: ${variant.availableStockInBranch} u.`);
+              alert(
+                `No puedes agregar más unidades. Stock máximo disponible: ${variant.availableStockInBranch} u.`,
+              );
             }
           } else {
             const newItem: PosCartItem = {
@@ -263,7 +271,7 @@ export default class PosPage implements OnInit {
               stock: variant.availableStockInBranch,
               originalPrice: variant.price,
               sellingPrice: variant.price,
-              discountAmount: 0
+              discountAmount: 0,
             };
             updatedItems.unshift(newItem);
           }
@@ -273,7 +281,7 @@ export default class PosPage implements OnInit {
       },
       error: () => {
         alert(`No se encontró ningún producto con el código: ${skuValue}`);
-      }
+      },
     });
   }
 
@@ -283,7 +291,7 @@ export default class PosPage implements OnInit {
   removeItem(index: number): void {
     this.posModel.update((state) => ({
       ...state,
-      items: state.items.filter((_, i) => i !== index)
+      items: state.items.filter((_, i) => i !== index),
     }));
   }
 }

@@ -182,13 +182,17 @@
                 <div
                   class="text-[11px] text-text-main truncate min-w-0 flex-[2] md:flex-none md:px-3 md:py-2"
                 >
-                  {{ variant.colorName }} / {{ variant.size }}
+                  {{ variant.colorName }} / {{ variant.sizeName }}
                 </div>
 
                 <div
                   class="text-[11px] font-mono text-text-main text-right shrink-0 md:px-3 md:py-2"
                 >
-                  {{ variant.price != null ? (variant.price | currency:'BOB':'symbol':'1.2-2') : '—' }}
+                  {{
+                    variant.price != null
+                      ? (variant.price | currency: 'BOB' : 'symbol' : '1.2-2')
+                      : '—'
+                  }}
                 </div>
               </div>
 
@@ -299,21 +303,21 @@
           </div>
           <div class="flex flex-col gap-0.5">
             <span class="field-label">Inversión total</span>
-            <span class="text-base font-black text-accent-ui font-mono"
-              >{{ totalInvestment() | currency:'BOB':'symbol':'1.2-2' }}</span
-            >
+            <span class="text-base font-black text-accent-ui font-mono">{{
+              totalInvestment() | currency: 'BOB' : 'symbol' : '1.2-2'
+            }}</span>
           </div>
           <div class="flex flex-col gap-0.5">
             <span class="field-label">Ventas estimadas</span>
-            <span class="text-base font-black text-text-main font-mono"
-              >{{ totalSales() | currency:'BOB':'symbol':'1.2-2' }}</span
-            >
+            <span class="text-base font-black text-text-main font-mono">{{
+              totalSales() | currency: 'BOB' : 'symbol' : '1.2-2'
+            }}</span>
           </div>
           <div class="flex flex-col gap-0.5">
             <span class="field-label">Ganancia esperada</span>
-            <span class="text-base font-black text-feedback-success-text font-mono"
-              >{{ expectedProfit() | currency:'BOB':'symbol':'1.2-2' }}</span
-            >
+            <span class="text-base font-black text-feedback-success-text font-mono">{{
+              expectedProfit() | currency: 'BOB' : 'symbol' : '1.2-2'
+            }}</span>
           </div>
         </section>
       }

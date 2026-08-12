@@ -10,16 +10,14 @@ import { Field, FieldState, FieldTree, FormField } from '@angular/forms/signals'
   templateUrl: './pos-desktop-pay-panel.html',
 })
 export class PosDesktopPayPanel {
-
   total = input.required<number>();
   itemCount = input.required<number>();
-  currentMethod = input.required<FieldState<number>>();
-  transactionCode = input.required<FieldState<string |null >>();
+  currentMethod = input.required<FieldState<PaymentMethod | null>>();
+  transactionCode = input.required<FieldState<string | null>>();
   submitted = output<void>();
   protected readonly PaymentMethodEnum = PaymentMethod;
 
-  onMethodChange(event: Event) {
-  const value = Number((event.target as HTMLSelectElement).value);
-  this.currentMethod().value.set(value as PaymentMethod);
-}
+  onMethodChange(method: PaymentMethod) {
+    this.currentMethod().value.set(method);
+  }
 }

@@ -4,6 +4,7 @@ export interface ProductVariantBySkuDto {
   displayName: string;
   description: string;
   size: string;
+  sizeId: GUID;
   colorId: GUID;
   colorName: string;
   price: number;

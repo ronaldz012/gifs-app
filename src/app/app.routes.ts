@@ -126,6 +126,16 @@ export const routes: Routes = [
               },
             ],
           },
+          {
+            path: 'providers',
+            title: 'Proveedores',
+            loadComponent: () => import('@features/inventory/pages/providers-page/providers-page'),
+          },
+          {
+            path: 'catalogs',
+            title: 'Catálogos',
+            loadComponent: () => import('@features/inventory/pages/catalogs-page/catalogs-page'),
+          },
         ],
       },
       // ── Sales ──────────────────────────────────────────────────────────────

@@ -5,6 +5,10 @@ export * from './paged-result';
 export * from './colors/color';
 export * from './colors/create-color-dto';
 
+// sizes
+export * from './sizes/size';
+export * from './sizes/create-size-dto';
+
 // transfers
 export * from './transfers/transfer-form';
 export * from './transfers/stock-transfer-detail-dto';

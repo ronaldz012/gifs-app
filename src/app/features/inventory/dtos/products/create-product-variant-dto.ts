@@ -1,5 +1,5 @@
 export interface CreateProductVariantDto {
-  size: string;
+  sizeId: GUID;
   price: number;
   colorId: GUID;
 }

@@ -1,4 +1,4 @@
-import {Gender} from '../../interfaces/gender';
+import { Gender } from '../../interfaces/gender';
 
 export interface BranchStockDto {
   branchId: GUID;
@@ -25,6 +25,7 @@ export interface ProductVariantDto {
   sku: string;
   description: string;
   size: string;
+  sizeId: GUID;
   color: string;
   colorId: GUID;
   price: number;
