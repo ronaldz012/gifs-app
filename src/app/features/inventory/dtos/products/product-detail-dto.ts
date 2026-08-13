@@ -17,6 +17,7 @@ export interface ProductDetailDto {
   brandId: GUID;
   brandName: string;
   totalAvailable: number;
+  isActive: boolean;
   variants: ProductVariantDto[];
 }
 

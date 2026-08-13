@@ -1,22 +1,25 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../../services/product-service';
-import { BranchStockDto, ProductDetailDto, ProductVariantDto } from '../../../dtos/products/product-detail-dto';
+import {
+  BranchStockDto,
+  ProductDetailDto,
+  ProductVariantDto,
+} from '../../../dtos/products/product-detail-dto';
 import { BranchContextService } from '@core/services/branch-context-service';
 
 import { UpdateProductVariantStockDto } from '../../../dtos/products/update-product-variant-stock-dto';
-import {ProductDetailVariant} from './product-detail-variant/product-detail-variant';
-import {UpdateVariantModal} from './product-detail-variant/update-variant-modal';
-import {AdjustStockModal} from './product-detail-variant/adjust-stock-modal';
+import { ProductDetailVariant } from './product-detail-variant/product-detail-variant';
+import { UpdateVariantModal } from './product-detail-variant/update-variant-modal';
+import { AdjustStockModal } from './product-detail-variant/adjust-stock-modal';
 import AddVariantModal from './product-detail-variant/add-variant-modal';
-import {ConfirmActionModal} from '../../transfer-page/confirm-action-modal/confirm-action-modal';
-import {UpdateProductModal} from './update-product-modal';
+import { ConfirmActionModal } from '../../transfer-page/confirm-action-modal/confirm-action-modal';
+import { UpdateProductModal } from './update-product-modal';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
-import {UpdateProductDto} from '../../../dtos/products/update-product-dto';
-import {UpdateProductVariantDto} from '../../../dtos/products/update-product-variant-dto';
-import {CreateProductVariantDto} from '../../../dtos/products/create-product-variant-dto';
-import {ToastService} from '@core/services/toast-service';
-
+import { UpdateProductDto } from '../../../dtos/products/update-product-dto';
+import { UpdateProductVariantDto } from '../../../dtos/products/update-product-variant-dto';
+import { CreateProductVariantDto } from '../../../dtos/products/create-product-variant-dto';
+import { ToastService } from '@core/services/toast-service';
 
 @Component({
   selector: 'app-product-detail',
@@ -32,99 +35,138 @@ import {ToastService} from '@core/services/toast-service';
   ],
   template: `
     <div class="max-w-6xl mx-auto fade-up">
-
-    @if (loading()) {
-      <app-skeleton-list [rows]="3" [columns]="2" />
-
-    } @else if (!loading() && product(); as p) {
-      <div class="flex flex-col gap-4">
-
-        <div class="flex items-center gap-3">
-          <a routerLink="/inventory/products" class="btn-icon">
-            <span class="material-icons text-base">arrow_back</span>
-          </a>
-          <h1 class="text-lg font-black text-text-main">Detalle del Producto</h1>
-        </div>
-
-        <!-- ── Información del Producto ─────────────────────────────────────── -->
-        <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
-          <div class="flex items-start justify-between gap-3 mb-4">
-            <div class="min-w-0">
-              <p class="text-sm font-semibold text-text-main truncate">{{ p.name }}</p>
-              <p class="text-xs font-mono text-text-muted mt-0.5">{{ p.internalCode }}</p>
-            </div>
-            <div class="flex gap-2 shrink-0">
-              <button (click)="showUpdateProduct.set(true)" class="btn-primary" title="Editar">
-                <span class="material-icons text-base leading-none">edit</span>
-                <span class="hidden sm:inline">Editar</span>
-              </button>
-              <button (click)="showDeleteProduct.set(true)" class="btn-danger" title="Eliminar">
-                <span class="material-icons text-base leading-none">delete</span>
-                <span class="hidden sm:inline">Eliminar</span>
-              </button>
-            </div>
+      @if (loading()) {
+        <app-skeleton-list [rows]="3" [columns]="2" />
+      } @else if (!loading() && product(); as p) {
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-3">
+            <a routerLink="/inventory/products" class="btn-icon">
+              <span class="material-icons text-base">arrow_back</span>
+            </a>
+            <h1 class="text-lg font-black text-text-main">Detalle del Producto</h1>
           </div>
 
-          <p class="section-title">Información general</p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-            <div>
-              <p class="field-label">Categoría</p>
-              <p class="field-value">{{ p.categoryName || '—' }}</p>
-            </div>
-            <div>
-              <p class="field-label">Marca</p>
-              <p class="field-value">{{ p.brandName || '—' }}</p>
-            </div>
-            <div>
-              <p class="field-label">Género</p>
-              <p class="field-value">{{ p.gender || '—' }}</p>
-            </div>
-            <div>
-              <p class="field-label">Stock total</p>
-              <p class="field-value">{{ p.totalAvailable }} unidades</p>
-            </div>
-            @if (p.description) {
-              <div class="sm:col-span-2">
-                <p class="field-label">Descripción</p>
-                <p class="text-sm text-text-muted bg-bg-muted rounded-lg px-3 py-2 leading-relaxed">
-                  {{ p.description }}
-                </p>
+          <!-- ── Información del Producto ─────────────────────────────────────── -->
+          <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-semibold text-text-main truncate">{{ p.name }}</p>
+                  <span
+                    class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
+                    [class]="
+                      p.isActive
+                        ? 'bg-feedback-success text-feedback-success-text'
+                        : 'bg-feedback-warning text-feedback-warning-text'
+                    "
+                  >
+                    {{ p.isActive ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+                <p class="text-xs font-mono text-text-muted mt-0.5">{{ p.internalCode }}</p>
               </div>
-            }
-          </div>
-        </div>
-
-        <!-- ── Variantes ────────────────────────────────────────────────────── -->
-        <div class="bg-bg-surface rounded-xl border border-border-strong shadow-sm p-5">
-          <div class="flex items-center justify-between mb-4">
-            <p class="section-title mb-0">
-              Tallas/Colores · {{ p.variants.length }}
-              {{ p.variants.length === 1 ? 'talla/color' : 'tallas/colores' }}
-            </p>
-            <button (click)="onAddVariant()" class="btn-secondary btn-sm">
-              <span class="material-icons text-base leading-none">add</span>
-              Agregar
-            </button>
-          </div>
-
-          <!-- ── Desktop ─────────────────────────────────────────────────────── -->
-          <div class="hidden sm:block">
-            <div class="grid gap-2 text-[10px] text-text-soft tracking-wide
-                        px-3 py-2 bg-bg-muted rounded-lg mb-1"
-                 [style.grid-template-columns]="gridColumnsStyle">
-              <span>SKU</span>
-              <span>TALLA</span>
-              <span>COLOR</span>
-              <span>PRECIO</span>
-              @for (branchId of branchKeys; track branchId) {
-                <span class="truncate">{{ branchMap[branchId] }}</span>
-              }
-              <span>TOTAL</span>
-              <span></span>
+              <div class="flex gap-2 shrink-0">
+                <button
+                  (click)="showToggleStatus.set(true)"
+                  class="btn-secondary"
+                  [title]="p.isActive ? 'Desactivar producto' : 'Activar producto'"
+                >
+                  <span class="material-icons text-base leading-none">toggle_on</span>
+                  <span class="hidden sm:inline">{{ p.isActive ? 'Desactivar' : 'Activar' }}</span>
+                </button>
+                <button (click)="showUpdateProduct.set(true)" class="btn-primary" title="Editar">
+                  <span class="material-icons text-base leading-none">edit</span>
+                  <span class="hidden sm:inline">Editar</span>
+                </button>
+                <button (click)="showDeleteProduct.set(true)" class="btn-danger" title="Eliminar">
+                  <span class="material-icons text-base leading-none">delete</span>
+                  <span class="hidden sm:inline">Eliminar</span>
+                </button>
+              </div>
             </div>
 
-            <ul class="flex flex-col divide-y divide-border-ui">
+            <p class="section-title">Información general</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              <div>
+                <p class="field-label">Categoría</p>
+                <p class="field-value">{{ p.categoryName || '—' }}</p>
+              </div>
+              <div>
+                <p class="field-label">Marca</p>
+                <p class="field-value">{{ p.brandName || '—' }}</p>
+              </div>
+              <div>
+                <p class="field-label">Género</p>
+                <p class="field-value">{{ p.gender || '—' }}</p>
+              </div>
+              <div>
+                <p class="field-label">Stock total</p>
+                <p class="field-value">{{ p.totalAvailable }} unidades</p>
+              </div>
+              @if (p.description) {
+                <div class="sm:col-span-2">
+                  <p class="field-label">Descripción</p>
+                  <p
+                    class="text-sm text-text-muted bg-bg-muted rounded-lg px-3 py-2 leading-relaxed"
+                  >
+                    {{ p.description }}
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- ── Variantes ────────────────────────────────────────────────────── -->
+          <div class="bg-bg-surface rounded-xl border border-border-strong shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4">
+              <p class="section-title mb-0">
+                Tallas/Colores · {{ p.variants.length }}
+                {{ p.variants.length === 1 ? 'talla/color' : 'tallas/colores' }}
+              </p>
+              <button (click)="onAddVariant()" class="btn-secondary btn-sm">
+                <span class="material-icons text-base leading-none">add</span>
+                Agregar
+              </button>
+            </div>
+
+            <!-- ── Desktop ─────────────────────────────────────────────────────── -->
+            <div class="hidden sm:block">
+              <div
+                class="grid gap-2 text-[10px] text-text-soft tracking-wide
+                        px-3 py-2 bg-bg-muted rounded-lg mb-1"
+                [style.grid-template-columns]="gridColumnsStyle"
+              >
+                <span>SKU</span>
+                <span>TALLA</span>
+                <span>COLOR</span>
+                <span>PRECIO</span>
+                @for (branchId of branchKeys; track branchId) {
+                  <span class="truncate">{{ branchMap[branchId] }}</span>
+                }
+                <span>TOTAL</span>
+                <span></span>
+              </div>
+
+              <ul class="flex flex-col divide-y divide-border-ui">
+                @for (v of p.variants; track v.id) {
+                  <app-product-detail-variant
+                    [variant]="v"
+                    [submitting]="submitting()"
+                    [branchMap]="branchMap"
+                    [branchKeys]="branchKeys"
+                    [gridColumnsStyle]="gridColumnsStyle"
+                    (editVariant)="onEditVariant($event)"
+                    (deleteVariant)="onDeleteVariant($event)"
+                    (adjustStock)="onAdjustStock($event)"
+                    (viewHistory)="onViewHistory($event)"
+                  />
+                }
+              </ul>
+            </div>
+
+            <!-- ── Mobile ──────────────────────────────────────────────────────── -->
+            <ul class="flex flex-col divide-y divide-border-ui sm:hidden">
               @for (v of p.variants; track v.id) {
                 <app-product-detail-variant
                   [variant]="v"
@@ -140,28 +182,8 @@ import {ToastService} from '@core/services/toast-service';
               }
             </ul>
           </div>
-
-          <!-- ── Mobile ──────────────────────────────────────────────────────── -->
-          <ul class="flex flex-col divide-y divide-border-ui sm:hidden">
-            @for (v of p.variants; track v.id) {
-              <app-product-detail-variant
-                [variant]="v"
-                [submitting]="submitting()"
-                [branchMap]="branchMap"
-                [branchKeys]="branchKeys"
-                [gridColumnsStyle]="gridColumnsStyle"
-                (editVariant)="onEditVariant($event)"
-                (deleteVariant)="onDeleteVariant($event)"
-                (adjustStock)="onAdjustStock($event)"
-                (viewHistory)="onViewHistory($event)"
-              />
-            }
-          </ul>
         </div>
-
-      </div>
-    }
-
+      }
     </div>
 
     <!-- ── Modales ─────────────────────────────────────────────────────────── -->
@@ -190,6 +212,23 @@ import {ToastService} from '@core/services/toast-service';
       />
     }
 
+    <!-- Cambiar estado (activo/inactivo) -->
+    @if (showToggleStatus() && product()) {
+      <app-confirm-action-modal
+        [title]="product()!.isActive ? '¿Desactivar producto?' : '¿Activar producto?'"
+        [description]="
+          product()!.isActive
+            ? 'El producto dejará de aparecer en búsquedas, recepciones, traspasos y ventas.'
+            : 'El producto volverá a estar disponible para búsquedas, recepciones, traspasos y ventas.'
+        "
+        [confirmLabel]="product()!.isActive ? 'Sí, desactivar' : 'Sí, activar'"
+        submittingLabel="Guardando..."
+        [submitting]="submitting()"
+        (confirm)="onToggleStatus()"
+        (close)="showToggleStatus.set(false)"
+      />
+    }
+
     <!-- Editar variante -->
     @if (editingVariant()) {
       <app-update-variant-modal
@@ -204,7 +243,9 @@ import {ToastService} from '@core/services/toast-service';
     @if (deletingVariant()) {
       <app-confirm-action-modal
         title="¿Eliminar talla/color?"
-        [description]="'Se eliminará la talla/color ' + deletingVariant()!.sku + '. No se puede deshacer.'"
+        [description]="
+          'Se eliminará la talla/color ' + deletingVariant()!.sku + '. No se puede deshacer.'
+        "
         confirmLabel="Sí, eliminar"
         submittingLabel="Eliminando..."
         confirmButtonClass="bg-red-500 hover:bg-red-600"
@@ -236,15 +277,22 @@ import {ToastService} from '@core/services/toast-service';
   `,
   styles: `
     @keyframes fade-up {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .fade-up { animation: fade-up 240ms ease both; }
+    .fade-up {
+      animation: fade-up 240ms ease both;
+    }
   `,
 })
 export default class ProductDetail implements OnInit {
-
-  private route          = inject(ActivatedRoute);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
   private productService = inject(ProductService);
   private branchContext = inject(BranchContextService);
@@ -255,18 +303,19 @@ export default class ProductDetail implements OnInit {
   gridColumnsStyle = '';
 
   // ── Data ────────────────────────────────────────────────────────────────
-  product   = signal<ProductDetailDto | null>(null);
-  loading   = signal(true);
+  product = signal<ProductDetailDto | null>(null);
+  loading = signal(true);
   submitting = signal(false);
 
   // ── Modal visibility ────────────────────────────────────────────────────
   showUpdateProduct = signal(false);
   showDeleteProduct = signal(false);
+  showToggleStatus = signal(false);
 
   /** Variante actualmente en edición — null = modal cerrado */
-  editingVariant        = signal<ProductVariantDto | null>(null);
+  editingVariant = signal<ProductVariantDto | null>(null);
   /** Variante pendiente de borrar — null = modal cerrado */
-  deletingVariant       = signal<ProductVariantDto | null>(null);
+  deletingVariant = signal<ProductVariantDto | null>(null);
   /** Variante cuyo stock se está ajustando — null = modal cerrado */
   adjustingStockVariant = signal<ProductVariantDto | null>(null);
   /** Modal de agregar talla/color abierto o no */
@@ -359,6 +408,24 @@ export default class ProductDetail implements OnInit {
     });
   }
 
+  onToggleStatus(): void {
+    const p = this.product();
+    if (!p) return;
+    this.submitting.set(true);
+    this.productService.updateStatus(p.id, !p.isActive).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.showToggleStatus.set(false);
+        this.toastService.success(p.isActive ? 'Producto desactivado' : 'Producto activado');
+        this.loadProduct(p.id);
+      },
+      error: () => {
+        this.submitting.set(false);
+        this.toastService.error('Error al cambiar el estado del producto.');
+      },
+    });
+  }
+
   onUpdateVariant(dto: UpdateProductVariantDto): void {
     const variantId = this.editingVariant()!.id;
     this.submitting.set(true);
@@ -399,6 +466,6 @@ export default class ProductDetail implements OnInit {
   }
 
   onViewHistory(pv: ProductVariantDto) {
-    this.router.navigate(['inventory','products', pv.id, 'movements']);
+    this.router.navigate(['inventory', 'products', pv.id, 'movements']);
   }
 }

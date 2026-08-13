@@ -279,7 +279,11 @@ export default class PosPage implements OnInit {
           return { ...state, items: updatedItems };
         });
       },
-      error: () => {
+      error: (err) => {
+        if (err.status === 409) {
+          alert(`El producto ${skuValue} está inactivo y no puede venderse.`);
+          return;
+        }
         alert(`No se encontró ningún producto con el código: ${skuValue}`);
       },
     });

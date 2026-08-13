@@ -4,158 +4,206 @@
     <p class="text-sm text-text-soft">Resumen del estado de la caja y reposición</p>
   </header>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <!-- Widget: Hoy -->
-    <section
-      class="bg-bg-surface rounded-xl border border-border shadow-sm p-5 flex flex-col gap-4"
-    >
-      <div class="flex items-center gap-2">
-        <span class="material-icons text-lg text-text-muted">today</span>
-        <h2 class="text-sm font-semibold text-text-main">Hoy</h2>
-      </div>
+  @if (!hasWidgets()) {
+    <!-- Welcome: sin widgets disponibles (sin permisos de vista) -->
+    <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-8 md:p-12">
+      <div class="flex flex-col items-center gap-4 text-center">
+        <div
+          class="w-20 h-20 rounded-full bg-bg-muted flex items-center justify-center text-text-soft/50"
+        >
+          <span class="material-icons text-4xl">dashboard</span>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-text-main">
+            {{ username() ? '¡Hola, ' + username()!.username + '!' : '¡Bienvenido!' }}
+          </h2>
+          <p class="text-sm text-text-muted mt-1 max-w-md">
+            Todavía no tenés módulos asignados en esta sucursal. Elegí uno de los accesos
+            disponibles para comenzar.
+          </p>
+        </div>
 
-      @if (loadingToday()) {
-        <p class="text-sm text-text-muted">Cargando...</p>
-      } @else if (today()) {
-        @if (!today()!.isOpen) {
-          <div class="flex flex-col items-center gap-3 py-4 text-center">
-            <span class="material-icons text-3xl text-text-soft">storefront</span>
-            <p class="text-sm text-text-muted">No hay una caja abierta hoy</p>
-            <a routerLink="/sales/pos" class="btn btn-primary btn-sm">Abrir caja</a>
-          </div>
-        } @else {
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs text-text-soft">Abierta por</p>
-              <p class="text-sm font-medium text-text-main">{{ today()!.openedByName }}</p>
-            </div>
-            <span class="material-icons text-lg text-feedback-success">check_circle</span>
-          </div>
-
-          <div>
-            <p class="text-xs text-text-soft uppercase tracking-wide">Total vendido</p>
-            <p class="text-2xl font-bold text-text-main">
-              {{ today()!.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}
-            </p>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3 text-sm">
-            <div class="bg-bg-muted rounded-lg p-3">
-              <p class="text-xs text-text-soft">Ventas</p>
-              <p class="font-semibold text-text-main">{{ today()!.salesCount }}</p>
-            </div>
-            <div class="bg-bg-muted rounded-lg p-3">
-              <p class="text-xs text-text-soft">Unidades</p>
-              <p class="font-semibold text-text-main">{{ today()!.totalItems }}</p>
-            </div>
-            <div class="bg-bg-muted rounded-lg p-3">
-              <p class="text-xs text-text-soft">Ticket promedio</p>
-              <p class="font-semibold text-text-main">
-                {{ today()!.averageTicket | currency: 'BOB' : 'symbol' : '1.2-2' }}
-              </p>
-            </div>
-            <div class="bg-bg-muted rounded-lg p-3">
-              <p class="text-xs text-text-soft">Ticket / Factura</p>
-              <p class="font-semibold text-text-main">
-                {{ today()!.ticketCount }} / {{ today()!.invoiceCount }}
-              </p>
-            </div>
-          </div>
-
-          <div
-            class="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm"
-          >
-            <span class="text-xs text-text-soft">Efectivo / QR</span>
-            <span class="font-medium text-text-main">
-              {{ today()!.cashAmount | currency: 'BOB' : 'symbol' : '1.2-2' }} /
-              {{ today()!.qrCodeAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}
-            </span>
-          </div>
-
-          <a
-            routerLink="/sales/pos/close-register"
-            class="btn btn-secondary w-full mt-1 justify-center"
-          >
-            Cerrar caja
-          </a>
-        }
-      } @else {
-        <p class="text-sm text-feedback-error-text">No se pudo cargar la información del día.</p>
-      }
-    </section>
-
-    <!-- Widget: Último cierre / reposición -->
-    <section
-      class="bg-bg-surface rounded-xl border border-border shadow-sm p-5 flex flex-col gap-4"
-    >
-      <div class="flex items-center gap-2">
-        <span class="material-icons text-lg text-text-muted">inventory_2</span>
-        <h2 class="text-sm font-semibold text-text-main">Último cierre</h2>
-      </div>
-
-      @if (loadingClosure()) {
-        <p class="text-sm text-text-muted">Cargando...</p>
-      } @else if (lastClosure()) {
-        @if (!lastClosure()!.hasData) {
-          <div class="flex flex-col items-center gap-3 py-4 text-center">
-            <span class="material-icons text-3xl text-text-soft">receipt_long</span>
-            <p class="text-sm text-text-muted">Todavía no hay cierres registrados</p>
-            <a routerLink="/sales/closures" class="btn btn-secondary btn-sm"
-              >Historial de cierres</a
-            >
-          </div>
-        } @else {
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs text-text-soft">Cerrado el</p>
-              <p class="text-sm font-medium text-text-main">
-                {{ lastClosure()!.closedAt | date: 'dd MMM yyyy, HH:mm' }}
-              </p>
-            </div>
-            @if (lastClosure()!.restockCount > 0) {
-              <span
-                class="inline-flex items-center gap-1 rounded-full bg-feedback-warning text-feedback-warning-text px-3 py-1 text-xs font-medium"
+        @if (menuFeatures().length > 0) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full max-w-2xl mt-4">
+            @for (entry of menuFeatures(); track entry.feature.key) {
+              <a
+                [routerLink]="['/', entry.moduleRoute, entry.feature.route]"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-bg-muted/40 hover:bg-bg-muted hover:border-border-strong transition-colors"
               >
-                <span class="material-icons text-sm">restart_alt</span>
-                {{ lastClosure()!.restockCount }} por reponer
-              </span>
-            } @else {
-              <span
-                class="inline-flex items-center rounded-full bg-feedback-success text-feedback-success-text px-3 py-1 text-xs font-medium"
-              >
-                Sin faltantes
-              </span>
+                <span class="material-icons text-xl text-text-muted">{{ entry.feature.icon }}</span>
+                <div class="text-left min-w-0">
+                  <p class="text-sm font-semibold text-text-main truncate">
+                    {{ entry.feature.displayName }}
+                  </p>
+                  <p class="text-xs text-text-soft capitalize">{{ entry.moduleRoute }}</p>
+                </div>
+                <span class="material-icons text-lg text-text-soft ml-auto">chevron_right</span>
+              </a>
             }
           </div>
-
-          <div>
-            <p class="text-xs text-text-soft uppercase tracking-wide">Total del cierre</p>
-            <p class="text-2xl font-bold text-text-main">
-              {{ lastClosure()!.totalSales | currency: 'BOB' : 'symbol' : '1.2-2' }}
-            </p>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3 text-sm">
-            <div class="bg-bg-muted rounded-lg p-3">
-              <p class="text-xs text-text-soft">Ventas</p>
-              <p class="font-semibold text-text-main">{{ lastClosure()!.salesCount }}</p>
-            </div>
-            <div class="bg-bg-muted rounded-lg p-3">
-              <p class="text-xs text-text-soft">Unidades vendidas</p>
-              <p class="font-semibold text-text-main">{{ lastClosure()!.itemsSold }}</p>
-            </div>
-          </div>
-
-          <a
-            [routerLink]="['/sales', 'closures', lastClosure()!.closureId]"
-            class="btn btn-primary btn-sm w-full justify-center"
-          >
-            Ver detalle del cierre
-          </a>
         }
-      } @else {
-        <p class="text-sm text-text-feedback-error-text">No se pudo cargar el último cierre.</p>
+      </div>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      @if (canSeeToday()) {
+        <!-- Widget: Hoy -->
+        <section
+          class="bg-bg-surface rounded-xl border border-border shadow-sm p-5 flex flex-col gap-4"
+        >
+          <div class="flex items-center gap-2">
+            <span class="material-icons text-lg text-text-muted">today</span>
+            <h2 class="text-sm font-semibold text-text-main">Hoy</h2>
+          </div>
+
+          @if (loadingToday()) {
+            <p class="text-sm text-text-muted">Cargando...</p>
+          } @else if (today()) {
+            @if (!today()!.isOpen) {
+              <div class="flex flex-col items-center gap-3 py-4 text-center">
+                <span class="material-icons text-3xl text-text-soft">storefront</span>
+                <p class="text-sm text-text-muted">No hay una caja abierta hoy</p>
+                <a routerLink="/sales/pos" class="btn btn-primary btn-sm">Abrir caja</a>
+              </div>
+            } @else {
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs text-text-soft">Abierta por</p>
+                  <p class="text-sm font-medium text-text-main">{{ today()!.openedByName }}</p>
+                </div>
+                <span class="material-icons text-lg text-feedback-success">check_circle</span>
+              </div>
+
+              <div>
+                <p class="text-xs text-text-soft uppercase tracking-wide">Total vendido</p>
+                <p class="text-2xl font-bold text-text-main">
+                  {{ today()!.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                </p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="bg-bg-muted rounded-lg p-3">
+                  <p class="text-xs text-text-soft">Ventas</p>
+                  <p class="font-semibold text-text-main">{{ today()!.salesCount }}</p>
+                </div>
+                <div class="bg-bg-muted rounded-lg p-3">
+                  <p class="text-xs text-text-soft">Unidades</p>
+                  <p class="font-semibold text-text-main">{{ today()!.totalItems }}</p>
+                </div>
+                <div class="bg-bg-muted rounded-lg p-3">
+                  <p class="text-xs text-text-soft">Ticket promedio</p>
+                  <p class="font-semibold text-text-main">
+                    {{ today()!.averageTicket | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                  </p>
+                </div>
+                <div class="bg-bg-muted rounded-lg p-3">
+                  <p class="text-xs text-text-soft">Ticket / Factura</p>
+                  <p class="font-semibold text-text-main">
+                    {{ today()!.ticketCount }} / {{ today()!.invoiceCount }}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                class="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm"
+              >
+                <span class="text-xs text-text-soft">Efectivo / QR</span>
+                <span class="font-medium text-text-main">
+                  {{ today()!.cashAmount | currency: 'BOB' : 'symbol' : '1.2-2' }} /
+                  {{ today()!.qrCodeAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                </span>
+              </div>
+
+              <a
+                routerLink="/sales/pos/close-register"
+                class="btn btn-secondary w-full mt-1 justify-center"
+              >
+                Cerrar caja
+              </a>
+            }
+          } @else {
+            <p class="text-sm text-feedback-error-text">
+              No se pudo cargar la información del día.
+            </p>
+          }
+        </section>
       }
-    </section>
-  </div>
+
+      @if (canSeeClosure()) {
+        <!-- Widget: Último cierre / reposición -->
+        <section
+          class="bg-bg-surface rounded-xl border border-border shadow-sm p-5 flex flex-col gap-4"
+        >
+          <div class="flex items-center gap-2">
+            <span class="material-icons text-lg text-text-muted">inventory_2</span>
+            <h2 class="text-sm font-semibold text-text-main">Último cierre</h2>
+          </div>
+
+          @if (loadingClosure()) {
+            <p class="text-sm text-text-muted">Cargando...</p>
+          } @else if (lastClosure()) {
+            @if (!lastClosure()!.hasData) {
+              <div class="flex flex-col items-center gap-3 py-4 text-center">
+                <span class="material-icons text-3xl text-text-soft">receipt_long</span>
+                <p class="text-sm text-text-muted">Todavía no hay cierres registrados</p>
+                <a routerLink="/sales/closures" class="btn btn-secondary btn-sm"
+                  >Historial de cierres</a
+                >
+              </div>
+            } @else {
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs text-text-soft">Cerrado el</p>
+                  <p class="text-sm font-medium text-text-main">
+                    {{ lastClosure()!.closedAt | date: 'dd MMM yyyy, HH:mm' }}
+                  </p>
+                </div>
+                @if (lastClosure()!.restockCount > 0) {
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full bg-feedback-warning text-feedback-warning-text px-3 py-1 text-xs font-medium"
+                  >
+                    <span class="material-icons text-sm">restart_alt</span>
+                    {{ lastClosure()!.restockCount }} por reponer
+                  </span>
+                } @else {
+                  <span
+                    class="inline-flex items-center rounded-full bg-feedback-success text-feedback-success-text px-3 py-1 text-xs font-medium"
+                  >
+                    Sin faltantes
+                  </span>
+                }
+              </div>
+
+              <div>
+                <p class="text-xs text-text-soft uppercase tracking-wide">Total del cierre</p>
+                <p class="text-2xl font-bold text-text-main">
+                  {{ lastClosure()!.totalSales | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                </p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="bg-bg-muted rounded-lg p-3">
+                  <p class="text-xs text-text-soft">Ventas</p>
+                  <p class="font-semibold text-text-main">{{ lastClosure()!.salesCount }}</p>
+                </div>
+                <div class="bg-bg-muted rounded-lg p-3">
+                  <p class="text-xs text-text-soft">Unidades vendidas</p>
+                  <p class="font-semibold text-text-main">{{ lastClosure()!.itemsSold }}</p>
+                </div>
+              </div>
+
+              <a
+                [routerLink]="['/sales', 'closures', lastClosure()!.closureId]"
+                class="btn btn-primary btn-sm w-full justify-center"
+              >
+                Ver detalle del cierre
+              </a>
+            }
+          } @else {
+            <p class="text-sm text-text-feedback-error-text">No se pudo cargar el último cierre.</p>
+          }
+        </section>
+      }
+    </div>
+  }
 </div>

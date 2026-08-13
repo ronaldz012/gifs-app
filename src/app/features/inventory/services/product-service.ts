@@ -52,10 +52,19 @@ export class ProductService {
     });
     return this.http.get<PagedResult<ListProductDto>>(this.product_url, { params });
   }
-  searchProduct(query: string) {
+  searchProduct(query: string, includeInactive?: boolean) {
     let params = new HttpParams();
     params = params.set('request', query);
+    if (includeInactive) {
+      params = params.set('includeInactive', 'true');
+    }
     return this.http.get<ProductSearchResult[]>(this.product_url + '/Search', { params });
+  }
+
+  updateStatus(productId: GUID, isActive: boolean): Observable<{ isActive: boolean }> {
+    return this.http.patch<{ isActive: boolean }>(`${this.product_url}/${productId}/status`, {
+      isActive,
+    });
   }
 
   getById(number: GUID) {

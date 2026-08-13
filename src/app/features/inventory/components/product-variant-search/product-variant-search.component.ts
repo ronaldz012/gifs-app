@@ -7,9 +7,7 @@ import { ProductVariantBySkuDto } from '@features/inventory/dtos/products/produc
 
 @Component({
   selector: 'app-product-variant-search',
-  imports: [
-    FormsModule
-  ],
+  imports: [FormsModule],
   templateUrl: './product-variant-search.html',
   styles: ``,
 })
@@ -33,21 +31,24 @@ export class ProductVariantSearch {
           this.loading.set(true);
           this.errorMsg.set('');
         }),
-        switchMap(code =>
+        switchMap((code) =>
           this.productService.getVariantBySku(code).pipe(
-            catchError(err => {
-              const msg = err.status === 404
-                ? `No se encontró "${code}"`
-                : 'Error al buscar el producto';
+            catchError((err) => {
+              const msg =
+                err.status === 404
+                  ? `No se encontró "${code}"`
+                  : err.status === 409
+                    ? `El producto "${code}" está inactivo`
+                    : 'Error al buscar el producto';
               this.errorMsg.set(msg);
               this.loading.set(false);
               return EMPTY;
-            })
-          )
+            }),
+          ),
         ),
-        takeUntilDestroyed()
+        takeUntilDestroyed(),
       )
-      .subscribe(variant => {
+      .subscribe((variant) => {
         this.loading.set(false);
         this.productFound.emit(variant);
         this.inputRef().nativeElement.focus();

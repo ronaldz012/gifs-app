@@ -1,16 +1,30 @@
-<li class="group row-enter bg-bg-surface relative overflow-hidden border-b border-border transition-all duration-200 hover:shadow-sm">
-
+<li
+  class="group row-enter bg-bg-surface relative overflow-hidden border-b border-border transition-all duration-200 hover:shadow-sm"
+>
   <!-- Indicador lateral izquierdo -->
-  <div class="absolute bottom-0 left-0 top-0 w-[4px] bg-accent-ui opacity-0 transition-opacity duration-150 group-hover:opacity-100 hidden lg:block"></div>
+  <div
+    class="absolute bottom-0 left-0 top-0 w-[4px] bg-accent-ui opacity-0 transition-opacity duration-150 group-hover:opacity-100 hidden lg:block"
+  ></div>
 
   <!-- ====== MOBILE: Layout Card ====== -->
   <div class="flex items-center gap-4 px-4 py-3.5 lg:hidden">
     <div class="flex min-w-0 flex-1 flex-col">
-
       <!-- Código -->
       <div class="mb-1 flex items-center gap-2">
-        <span class="inline-flex items-center rounded border border-border bg-bg-muted px-2 py-0.5 font-mono text-xs font-bold text-text-muted">
+        <span
+          class="inline-flex items-center rounded border border-border bg-bg-muted px-2 py-0.5 font-mono text-xs font-bold text-text-muted"
+        >
           {{ product().internalCode || '—' }}
+        </span>
+        <span
+          class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold"
+          [class]="
+            product().isActive
+              ? 'bg-feedback-success text-feedback-success-text'
+              : 'bg-feedback-warning text-feedback-warning-text'
+          "
+        >
+          {{ product().isActive ? 'Activo' : 'Inactivo' }}
         </span>
       </div>
 
@@ -18,9 +32,9 @@
         {{ product().name }}
       </p>
       <p class="mt-1 text-xs text-text-muted">
-        {{ product().variantsCount }} {{ product().variantsCount === 1 ? 'talla/color' : 'tallas/colores' }}
-        · {{ product().totalStock }} uds
-        · <span class="font-bold text-accent-ui">{{ product().displayPrice | currency:'BOB':'symbol':'1.2-2' }}</span>
+        {{ product().variantsCount }}
+        {{ product().variantsCount === 1 ? 'talla/color' : 'tallas/colores' }} ·
+        {{ product().totalStock }} uds
       </p>
     </div>
 
@@ -33,29 +47,38 @@
   </div>
 
   <!-- ====== DESKTOP: Fila Densa Tipo Tabla ====== -->
-  <div class="group hidden items-center lg:grid px-4 py-3 transition-colors duration-150 hover:bg-bg-muted grid-cols-[9rem_1fr_13rem_8rem_6rem_7rem_7.5rem]">
-
+  <div
+    class="group hidden items-center lg:grid px-4 py-3 transition-colors duration-150 hover:bg-bg-muted grid-cols-[9rem_1fr_12rem_8rem_6rem_7rem_6.5rem]"
+  >
     <!-- Código: Token mono -->
-    <span class="inline-flex w-fit truncate items-center rounded border border-border bg-bg-muted px-2 py-0.5 font-mono text-xs font-bold text-text-muted">
+    <span
+      class="inline-flex w-fit truncate items-center rounded border border-border bg-bg-muted px-2 py-0.5 font-mono text-xs font-bold text-text-muted"
+    >
       {{ product().internalCode || '—' }}
     </span>
 
     <!-- Nombre -->
-    <p class="truncate pr-4 text-sm font-semibold text-text-main group-hover:text-accent-ui transition-colors duration-150">
+    <p
+      class="truncate pr-4 text-sm font-semibold text-text-main group-hover:text-accent-ui transition-colors duration-150"
+    >
       {{ product().name }}
     </p>
 
     <!-- Marca + Categoría -->
     <div class="flex min-w-0 items-center gap-1.5">
       @if (product().brandName) {
-        <span class="max-w-24 truncate rounded border border-border bg-bg-muted px-2 py-0.5 text-xs font-medium text-text-main"
-              [title]="product().brandName">
+        <span
+          class="max-w-24 truncate rounded border border-border bg-bg-muted px-2 py-0.5 text-xs font-medium text-text-main"
+          [title]="product().brandName"
+        >
           {{ product().brandName }}
         </span>
       }
       @if (product().categoryName) {
-        <span class="max-w-24 truncate rounded border border-border bg-feedback-info px-2 py-0.5 text-xs font-medium text-feedback-info-text"
-              [title]="product().categoryName">
+        <span
+          class="max-w-24 truncate rounded border border-border bg-feedback-info px-2 py-0.5 text-xs font-medium text-feedback-info-text"
+          [title]="product().categoryName"
+        >
           {{ product().categoryName }}
         </span>
       }
@@ -63,22 +86,34 @@
 
     <!-- Tallas/Colores -->
     <span class="pr-4 text-right text-xs font-medium text-text-soft">
-      {{ product().variantsCount }} {{ product().variantsCount === 1 ? 'talla/color' : 'tallas/colores' }}
+      {{ product().variantsCount }}
+      {{ product().variantsCount === 1 ? 'talla/color' : 'tallas/colores' }}
     </span>
 
     <!-- Stock: semántica de colores por cantidad -->
-    <span class="pr-4 text-right text-sm font-bold"
-          [class]="product().totalStock === 0
-            ? 'text-feedback-error-text'
-            : product().totalStock < 5
-              ? 'text-feedback-warning-text'
-              : 'text-feedback-success-text'">
+    <span
+      class="pr-4 text-right text-sm font-bold"
+      [class]="
+        product().totalStock === 0
+          ? 'text-feedback-error-text'
+          : product().totalStock < 5
+            ? 'text-feedback-warning-text'
+            : 'text-feedback-success-text'
+      "
+    >
       {{ product().totalStock }} uds
     </span>
 
-    <!-- Precio -->
-    <span class="pr-4 text-right text-sm font-extrabold text-accent-ui">
-      {{ product().displayPrice | currency:'BOB':'symbol':'1.2-2' }}
+    <!-- Estado -->
+    <span
+      class="inline-flex w-fit items-center rounded px-2 py-0.5 text-[10px] font-bold"
+      [class]="
+        product().isActive
+          ? 'bg-feedback-success text-feedback-success-text'
+          : 'bg-feedback-warning text-feedback-warning-text'
+      "
+    >
+      {{ product().isActive ? 'Activo' : 'Inactivo' }}
     </span>
 
     <div class="flex shrink-0 justify-end">

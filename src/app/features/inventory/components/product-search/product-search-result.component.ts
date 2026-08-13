@@ -9,6 +9,7 @@ export interface ProductSearchResult {
   brandName: string;
   categoryName: string;
   gender: Gender;
+  isActive?: boolean;
   productVariants: ProductVariantOption[];
 }
 export interface ProductVariantOption {

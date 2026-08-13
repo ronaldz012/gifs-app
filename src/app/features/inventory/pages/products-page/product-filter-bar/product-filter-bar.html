@@ -1,5 +1,4 @@
 <div class="flex flex-wrap items-center gap-2">
-
   <!-- Search -->
   <div class="relative flex-1 min-w-[200px]">
     <span class="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-text-soft">🔍</span>
@@ -12,11 +11,31 @@
     />
   </div>
 
+  <!-- Incluir inactivos -->
+  <label
+    class="flex items-center gap-2 cursor-pointer select-none"
+    title="Mostrar también productos inactivos"
+  >
+    <span class="relative inline-flex items-center">
+      <input
+        type="checkbox"
+        class="sr-only peer"
+        [checked]="!!params().includeInactive"
+        (change)="onToggleInactive($event)"
+      />
+      <div
+        class="w-9 h-5 bg-bg-muted rounded-full peer peer-checked:bg-accent-ui peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"
+      ></div>
+    </span>
+    <span class="text-sm text-text-muted">Incluir inactivos</span>
+  </label>
+
   <!-- Categoría -->
   <select
     class="py-2 px-3 text-sm bg-bg-muted border border-border rounded-xl text-text-muted focus:outline-none focus:ring-2 focus:ring-ring-focus-ring transition-colors"
     [ngModel]="params().categoryId ?? ''"
-    (ngModelChange)="emit({ categoryId: $event || undefined, page: 1 })">
+    (ngModelChange)="emit({ categoryId: $event || undefined, page: 1 })"
+  >
     <option value="">Todas las categorías</option>
     @for (c of categories(); track c.id) {
       <option [value]="c.id">{{ c.name }}</option>
@@ -27,7 +46,8 @@
   <select
     class="py-2 px-3 text-sm bg-bg-muted border border-border rounded-xl text-text-muted focus:outline-none focus:ring-2 focus:ring-ring-focus-ring transition-colors"
     [ngModel]="params().brandId ?? ''"
-    (ngModelChange)="emit({ brandId: $event || undefined, page: 1 })">
+    (ngModelChange)="emit({ brandId: $event || undefined, page: 1 })"
+  >
     <option value="">Todas las marcas</option>
     @for (b of brands(); track b.id) {
       <option [value]="b.id">{{ b.name }}</option>
@@ -38,31 +58,32 @@
   <select
     class="py-2 px-3 text-sm bg-bg-muted border border-border rounded-xl text-text-muted focus:outline-none focus:ring-2 focus:ring-ring-focus-ring transition-colors"
     [ngModel]="params().gender ?? ''"
-    (ngModelChange)="emit({ gender: $event || undefined, page: 1 })">
+    (ngModelChange)="emit({ gender: $event || undefined, page: 1 })"
+  >
     <option value="">Todos los géneros</option>
     <option [value]="Gender.Hombre">Masculino</option>
     <option [value]="Gender.Mujer">Femenino</option>
     <option [value]="Gender.Unisex">Unisex</option>
   </select>
 
-  <!-- Low stock toggle -->
-  <button
-    class="flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl border transition-colors"
-    [class]="params().lowStock
-      ? 'bg-feedback-warning border-feedback-warning-text text-feedback-warning-text font-medium'
-      : 'bg-bg-muted border-border text-text-soft hover:bg-bg-surface hover:text-text-muted'"
-    (click)="emit({ lowStock: !params().lowStock || undefined, page: 1 })"
-    title="Mostrar solo productos con stock bajo o agotado">
-    ⚠️ Stock bajo
-  </button>
+  <!-- Ordenar por -->
+  <select
+    class="py-2 px-3 text-sm bg-bg-muted border border-border rounded-xl text-text-muted focus:outline-none focus:ring-2 focus:ring-ring-focus-ring transition-colors"
+    [ngModel]="currentSort()"
+    (ngModelChange)="onSortChange($event)"
+  >
+    <option value="created_desc">Más recientes</option>
+    <option value="stock_asc">Menor stock</option>
+    <option value="stock_desc">Mayor stock</option>
+  </select>
 
   <!-- Clear filters -->
   @if (hasActiveFilters()) {
     <button
       class="px-3 py-2 text-sm bg-btn-secondary-bg border border-border rounded-xl text-text-soft hover:bg-btn-secondary-hover hover:text-text-muted transition-colors"
-      (click)="clearAll()">
+      (click)="clearAll()"
+    >
       ✕ Limpiar
     </button>
   }
-
 </div>

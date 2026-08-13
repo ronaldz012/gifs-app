@@ -1,32 +1,52 @@
 <div class="flex flex-col gap-4 w-full">
-
   <div class="flex items-center justify-between gap-3">
-    <app-reception-filter-bar
-      [params]="query()"
-      (change)="patchQuery($event)" />
-    <button
-      (click)="router.navigate(['inventory','receptions', 'new'])"
-      class="btn btn-primary btn-sm shrink-0">
-      + Nueva recepción
-    </button>
+    <app-reception-filter-bar [params]="query()" (change)="patchQuery($event)" />
+    <div class="flex items-center gap-2 shrink-0">
+      <button
+        type="button"
+        (click)="router.navigate(['inventory', 'providers'])"
+        class="btn btn-secondary btn-sm flex items-center gap-1"
+      >
+        <span class="material-icons text-base">local_shipping</span>
+        Proveedores
+      </button>
+      <button
+        (click)="router.navigate(['inventory', 'receptions', 'new'])"
+        class="btn btn-primary btn-sm"
+      >
+        + Nueva recepción
+      </button>
+    </div>
   </div>
 
   <!-- Lista -->
   <app-reception-list
     [receptions]="receptions()"
     [loading]="loadingReceptions()"
-    (goToDetails)="router.navigate(['inventory','receptions', $event])"
-    />
+    (goToDetails)="router.navigate(['inventory', 'receptions', $event])"
+  />
 
   <!-- Estado vacío con filtros activos -->
   @if (!loadingReceptions() && receptions().length === 0 && hasActiveFilters()) {
-    <div class="flex flex-col items-center gap-3 p-12 rounded border border-border bg-bg-surface shadow-sm">
+    <div
+      class="flex flex-col items-center gap-3 p-12 rounded border border-border bg-bg-surface shadow-sm"
+    >
       <span class="text-3xl opacity-60">📦</span>
-      <p class="font-inter text-sm font-medium text-text-muted">No hay recepciones con esos filtros.</p>
+      <p class="font-inter text-sm font-medium text-text-muted">
+        No hay recepciones con esos filtros.
+      </p>
       <button
         class="font-inter text-xs font-bold text-accent-ui transition-colors duration-150 hover:underline"
-        (click)="patchQuery({ dateFrom: undefined, dateTo: undefined,
-                               status: undefined, brandId: undefined, page: 1 })">
+        (click)="
+          patchQuery({
+            dateFrom: undefined,
+            dateTo: undefined,
+            status: undefined,
+            brandId: undefined,
+            page: 1,
+          })
+        "
+      >
         Limpiar filtros
       </button>
     </div>
@@ -39,9 +59,9 @@
       [pageSize]="query().pageSize!"
       [totalItems]="totalItems()"
       (pageChange)="patchQuery({ page: $event })"
-      (pageSizeChange)="patchQuery({ pageSize: $event, page: 1 })" />
+      (pageSizeChange)="patchQuery({ pageSize: $event, page: 1 })"
+    />
   }
-
 </div>
 
 <!-- ── Modal: Rollback ────────────────────────────────────────────────────── -->
@@ -52,5 +72,6 @@
     confirmLabel="Sí, revertir"
     [submitting]="submitting()"
     (confirm)="onRollbackConfirm()"
-    (close)="closeRollbackModal()" />
+    (close)="closeRollbackModal()"
+  />
 }

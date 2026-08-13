@@ -16,5 +16,6 @@ export interface ProductWithVariantsCreatedDto {
   internalCode: string;
   brandName: string;
   categoryName: string;
+  isActive?: boolean;
   variants: ProductVariantCreatedDto[];
 }
