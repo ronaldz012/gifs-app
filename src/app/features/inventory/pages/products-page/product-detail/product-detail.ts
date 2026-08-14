@@ -144,7 +144,7 @@ import { ToastService } from '@core/services/toast-service';
                 @for (branchId of branchKeys; track branchId) {
                   <span class="truncate">{{ branchMap[branchId] }}</span>
                 }
-                <span>TOTAL</span>
+                <span>TOTAL VISIBLE</span>
                 <span></span>
               </div>
 
@@ -327,8 +327,8 @@ export default class ProductDetail implements OnInit {
       this.branchMap[b.branchId] = b.branchName;
     }
     this.branchKeys = Object.keys(this.branchMap);
-    const branchCols = this.branchKeys.map(() => '80px').join(' ');
-    this.gridColumnsStyle = `1fr 64px 88px 88px ${branchCols} 64px 128px`;
+    const branchCols = this.branchKeys.map(() => '96px').join(' ');
+    this.gridColumnsStyle = `7.5rem 64px 88px 88px ${branchCols} 80px 128px`;
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
@@ -357,7 +357,27 @@ export default class ProductDetail implements OnInit {
   }
 
   onDeleteVariant(v: ProductVariantDto): void {
-    this.deletingVariant.set(v);
+    this.submitting.set(true);
+    this.productService.canDeleteVariant(v.id).subscribe({
+      next: (check) => {
+        this.submitting.set(false);
+        if (!check.canDelete) {
+          this.toastService.error(
+            check.reason === 'HAS_MOVEMENTS'
+              ? 'Esta variante tiene movimientos de stock asociados y no se puede eliminar.'
+              : check.reason === 'HAS_TRANSFER'
+                ? 'Esta variante está referenciada en una transferencia y no se puede eliminar.'
+                : 'No se puede eliminar esta variante.',
+          );
+          return;
+        }
+        this.deletingVariant.set(v);
+      },
+      error: () => {
+        this.submitting.set(false);
+        this.toastService.error('No se pudo verificar la variante. Intente de nuevo.');
+      },
+    });
   }
 
   onAdjustStock(v: ProductVariantDto): void {
@@ -446,9 +466,20 @@ export default class ProductDetail implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.deletingVariant.set(null);
+        this.toastService.success('Talla/color eliminada');
         this.loadProduct(this.productId);
       },
-      error: () => this.submitting.set(false),
+      error: (err) => {
+        this.submitting.set(false);
+        if (err.status === 409) {
+          this.toastService.error(
+            'Esta variante está asociada a movimientos o transferencias y no se puede eliminar.',
+          );
+          this.deletingVariant.set(null);
+          return;
+        }
+        this.toastService.error('Error al eliminar la talla/color.');
+      },
     });
   }
 

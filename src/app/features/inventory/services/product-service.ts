@@ -21,6 +21,7 @@ import {
   ProductWithVariantsCreatedDto,
 } from '../dtos/products/create-product-with-variants-dto';
 import { ProductVariantDetailsDto } from '../dtos/products/product-variant-details';
+import { CanDeleteVariantResponse } from '../dtos/products/can-delete-variant-dto';
 import {
   ListStockMovementDto,
   StockMovementParams,
@@ -104,6 +105,12 @@ export class ProductService {
 
   deleteVariant(productId: GUID, variantId: GUID) {
     return this.http.delete<void>(this.productVariant_url + '/' + variantId);
+  }
+
+  canDeleteVariant(variantId: GUID): Observable<CanDeleteVariantResponse> {
+    return this.http.get<CanDeleteVariantResponse>(
+      this.productVariant_url + '/' + variantId + '/can-delete',
+    );
   }
 
   updateVariant(productId: GUID, variantId: GUID, dto: UpdateProductVariantDto) {

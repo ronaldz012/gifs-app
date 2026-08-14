@@ -34,6 +34,7 @@ export * from './transfers/transfer-enums';
 export * from './transfers/total-qty.pipe';
 // products
 export * from './products/list-product-dto';
+export * from './products/can-delete-variant-dto';
 
 // receptions
 export * from './receptions/create-reception-dto';
