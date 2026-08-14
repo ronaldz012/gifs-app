@@ -66,6 +66,18 @@ export const routes: Routes = [
                 loadComponent: () =>
                   import('@features/inventory/pages/products-page/stock-movements-list/stock-movements-list'),
               },
+              {
+                path: 'catalog',
+                title: 'Catálogos',
+                loadComponent: () =>
+                  import('@features/inventory/pages/catalogs-page/catalogs-page'),
+              },
+              {
+                path: 'providers',
+                title: 'Proveedores',
+                loadComponent: () =>
+                  import('@features/inventory/pages/providers-page/providers-page'),
+              },
             ],
           },
           {
@@ -125,16 +137,6 @@ export const routes: Routes = [
                   import('@features/inventory/pages/transfer-page/transfer-details/transfer-details'),
               },
             ],
-          },
-          {
-            path: 'providers',
-            title: 'Proveedores',
-            loadComponent: () => import('@features/inventory/pages/providers-page/providers-page'),
-          },
-          {
-            path: 'catalogs',
-            title: 'Catálogos',
-            loadComponent: () => import('@features/inventory/pages/catalogs-page/catalogs-page'),
           },
         ],
       },

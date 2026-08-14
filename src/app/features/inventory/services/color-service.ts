@@ -1,12 +1,13 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
 import { Color } from '../dtos/colors/color';
 import { CreateColorDto } from '../dtos/colors/create-color-dto';
+import { UpdateColorDto } from '../dtos/colors/update-color-dto';
 
 // Asegúrate de tener GUID disponible o cámbialo por string/number según corresponda
-type GUID = string; 
+type GUID = string;
 
 @Injectable({
   providedIn: 'root',
@@ -42,25 +43,35 @@ export class ColorService {
 
   // ── Mutaciones locales ────────────────────────────────────────────────
   add(color: Color): void {
-    this._colors.update(list => [...list, color]);
+    this._colors.update((list) => [...list, color]);
   }
 
   remove(id: GUID): void {
-    this._colors.update(list => list.filter(c => c.id !== id));
+    this._colors.update((list) => list.filter((c) => c.id !== id));
   }
 
   update(color: Color): void {
-    this._colors.update(list =>
-      list.map(c => c.id === color.id ? color : c)
-    );
+    this._colors.update((list) => list.map((c) => (c.id === color.id ? color : c)));
   }
 
   // ── API ───────────────────────────────────────────────────────────────
-  getAll(): Observable<Color[]> {
-    return this.http.get<Color[]>(this.url);
+  getAll(includeInactive?: boolean): Observable<Color[]> {
+    let params = new HttpParams();
+    if (includeInactive) {
+      params = params.set('includeInactive', 'true');
+    }
+    return this.http.get<Color[]>(this.url, { params });
   }
 
   create(body: CreateColorDto): Observable<Color> {
     return this.http.post<Color>(this.url, body);
+  }
+
+  updateItem(id: GUID, dto: UpdateColorDto): Observable<boolean> {
+    return this.http.put<boolean>(`${this.url}/${id}`, dto);
+  }
+
+  updateStatus(id: GUID): Observable<boolean> {
+    return this.http.patch<boolean>(`${this.url}/${id}/status`, undefined);
   }
 }

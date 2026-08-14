@@ -1,10 +1,11 @@
 <div class="flex flex-col gap-4 w-full">
+  <!-- Header: título + acciones -->
   <div class="flex items-center justify-between gap-3">
-    <app-reception-filter-bar [params]="query()" (change)="patchQuery($event)" />
+    <h1 class="text-lg font-black text-text-main">Recepciones</h1>
     <div class="flex items-center gap-2 shrink-0">
       <button
         type="button"
-        (click)="router.navigate(['inventory', 'providers'])"
+        (click)="router.navigate(['inventory', 'products', 'providers'])"
         class="btn btn-secondary btn-sm flex items-center gap-1"
       >
         <span class="material-icons text-base">local_shipping</span>
@@ -18,6 +19,9 @@
       </button>
     </div>
   </div>
+
+  <!-- Filtros -->
+  <app-reception-filter-bar [params]="query()" (change)="patchQuery($event)" />
 
   <!-- Lista -->
   <app-reception-list

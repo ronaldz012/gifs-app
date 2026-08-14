@@ -1,9 +1,10 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
 import { Provider } from '../dtos/providers/provider';
 import { CreateProviderDto } from '../dtos/providers/create-provider-dto';
+import { UpdateProviderDto } from '../dtos/providers/update-provider-dto';
 
 @Injectable({ providedIn: 'root' })
 export class ProviderService {
@@ -41,11 +42,23 @@ export class ProviderService {
   }
 
   // ── API ───────────────────────────────────────────────────────────────
-  getAll(): Observable<Provider[]> {
-    return this.http.get<Provider[]>(this.url);
+  getAll(includeInactive?: boolean): Observable<Provider[]> {
+    let params = new HttpParams();
+    if (includeInactive) {
+      params = params.set('includeInactive', 'true');
+    }
+    return this.http.get<Provider[]>(this.url, { params });
   }
 
   create(body: CreateProviderDto): Observable<Provider> {
     return this.http.post<Provider>(this.url, body);
+  }
+
+  updateItem(id: GUID, dto: UpdateProviderDto): Observable<boolean> {
+    return this.http.put<boolean>(`${this.url}/${id}`, dto);
+  }
+
+  updateStatus(id: GUID): Observable<boolean> {
+    return this.http.patch<boolean>(`${this.url}/${id}/status`, undefined);
   }
 }

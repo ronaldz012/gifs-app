@@ -4,10 +4,27 @@ export * from './paged-result';
 // colors
 export * from './colors/color';
 export * from './colors/create-color-dto';
+export * from './colors/update-color-dto';
 
 // sizes
 export * from './sizes/size';
 export * from './sizes/create-size-dto';
+export * from './sizes/update-size-dto';
+
+// brands
+export * from './brands/brand-dto';
+export * from './brands/create-brand-dto';
+export * from './brands/update-brand-dto';
+
+// categories
+export * from './categories/category-dto';
+export * from './categories/create-category-dto';
+export * from './categories/update-category-dto';
+
+// providers
+export * from './providers/provider';
+export * from './providers/create-provider-dto';
+export * from './providers/update-provider-dto';
 
 // transfers
 export * from './transfers/transfer-form';

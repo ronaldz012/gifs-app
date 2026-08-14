@@ -1,9 +1,10 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
 import { Size } from '../dtos/sizes/size';
 import { CreateSizeDto } from '../dtos/sizes/create-size-dto';
+import { UpdateSizeDto } from '../dtos/sizes/update-size-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -43,11 +44,23 @@ export class SizeService {
   }
 
   // ── API ───────────────────────────────────────────────────────────────
-  getAll(): Observable<Size[]> {
-    return this.http.get<Size[]>(this.url);
+  getAll(includeInactive?: boolean): Observable<Size[]> {
+    let params = new HttpParams();
+    if (includeInactive) {
+      params = params.set('includeInactive', 'true');
+    }
+    return this.http.get<Size[]>(this.url, { params });
   }
 
   create(body: CreateSizeDto): Observable<Size> {
     return this.http.post<Size>(this.url, body);
+  }
+
+  updateItem(id: GUID, dto: UpdateSizeDto): Observable<boolean> {
+    return this.http.put<boolean>(`${this.url}/${id}`, dto);
+  }
+
+  updateStatus(id: GUID): Observable<boolean> {
+    return this.http.patch<boolean>(`${this.url}/${id}/status`, undefined);
   }
 }

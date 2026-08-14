@@ -193,6 +193,6 @@ export default class ProductList implements OnInit {
     this.router.navigate(['inventory', 'products', id, 'movements']);
   }
   goToCatalogs() {
-    this.router.navigate(['inventory', 'catalogs']);
+    this.router.navigate(['inventory', 'products', 'catalog']);
   }
 }

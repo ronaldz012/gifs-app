@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import BrandList from './brand-list';
 import CategoryList from './category-list';
 import ColorList from './color-list';
@@ -24,9 +25,17 @@ const TABS: { key: CatalogTab; label: string }[] = [
 
 @Component({
   selector: 'app-catalogs-page',
-  imports: [BrandList, CategoryList, ColorList, SizeList],
+  imports: [BrandList, CategoryList, ColorList, SizeList, RouterLink],
   template: `
     <div class="flex flex-col gap-4 w-full">
+      <!-- Header: volver + título -->
+      <div class="flex items-center gap-3">
+        <a routerLink="/inventory/products" class="btn-icon">
+          <span class="material-icons text-base">arrow_back</span>
+        </a>
+        <h1 class="text-lg font-black text-text-main">Catálogos</h1>
+      </div>
+
       <!-- Tabs -->
       <div class="flex gap-1 border-b border-border">
         @for (tab of TABS; track tab.key) {

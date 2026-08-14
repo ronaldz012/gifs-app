@@ -1,13 +1,16 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { SizeService } from '@features/inventory/services/size-service';
 import CreateSize from '@features/inventory/components/create-size/create-size.component';
+import EditSize from '@features/inventory/components/edit-size/edit-size';
+import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/confirm-action-modal/confirm-action-modal';
 import { Size } from '@features/inventory/dtos/sizes/size';
+import { UpdateSizeDto } from '@features/inventory/dtos/sizes/update-size-dto';
 import { ToastService } from '@core/services/toast-service';
 import CatalogList from './catalog-list';
 
 @Component({
   selector: 'app-size-list',
-  imports: [CatalogList, CreateSize],
+  imports: [CatalogList, CreateSize, EditSize, ConfirmActionModal],
   template: `
     <div class="flex flex-col gap-4 w-full">
       <div class="flex items-center justify-between gap-3">
@@ -25,21 +28,42 @@ import CatalogList from './catalog-list';
                    focus:outline-none focus:border-border-strong focus:ring-2 focus:ring-ring-focus-ring"
           />
         </div>
-        <button
-          type="button"
-          (click)="showCreate.set(true)"
-          class="btn btn-primary btn-sm shrink-0 flex items-center gap-1"
-        >
-          <span class="material-icons text-base">add</span>
-          Nueva talla
-        </button>
+
+        <div class="flex items-center gap-3 shrink-0">
+          <label
+            class="flex items-center gap-2 cursor-pointer select-none"
+            title="Mostrar también inactivas"
+          >
+            <span class="relative inline-flex items-center">
+              <input
+                type="checkbox"
+                class="sr-only peer"
+                [checked]="includeInactive()"
+                (change)="onToggleInactive($event)"
+              />
+              <div
+                class="w-9 h-5 bg-bg-muted rounded-full peer peer-checked:bg-accent-ui peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"
+              ></div>
+            </span>
+            <span class="text-sm text-text-muted">Incluir inactivas</span>
+          </label>
+
+          <button
+            type="button"
+            (click)="showCreate.set(true)"
+            class="btn btn-primary btn-sm flex items-center gap-1"
+          >
+            <span class="material-icons text-base">add</span>
+            Nueva talla
+          </button>
+        </div>
       </div>
 
       <app-catalog-list
-        [loading]="service.loading()"
+        [loading]="loading()"
         [items]="filtered()"
-        [headers]="['Nombre', 'Orden']"
-        cols="1.2fr 120px"
+        [headers]="['Nombre', 'Orden', 'Estado', '']"
+        cols="1.2fr 120px 100px 44px"
         [emptyMessage]="emptyMessage()"
         [itemTemplate]="rowTpl"
       />
@@ -47,15 +71,64 @@ import CatalogList from './catalog-list';
 
     <ng-template #rowTpl let-size>
       <div
-        class="hidden lg:grid px-4 py-3 border-b border-border last:border-0 hover:bg-accent-ui/5 transition-colors"
-        style="grid-template-columns: 1.2fr 120px"
+        class="hidden lg:grid px-4 py-3 border-b border-border last:border-0 hover:bg-accent-ui/5 transition-colors items-center"
+        style="grid-template-columns: 1.2fr 120px 100px 44px"
       >
         <span class="text-sm font-medium text-text-main truncate">{{ size.name }}</span>
         <span class="text-sm text-text-muted">{{ size.sortOrder }}</span>
+        <button
+          type="button"
+          (click)="openStatusConfirm(size)"
+          class="justify-self-start inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold"
+          [class]="
+            size.isActive
+              ? 'bg-feedback-success text-feedback-success-text hover:opacity-80'
+              : 'bg-feedback-warning text-feedback-warning-text hover:opacity-80'
+          "
+        >
+          {{ size.isActive ? 'Activa' : 'Inactiva' }}
+        </button>
+        <div class="flex justify-end">
+          <button
+            type="button"
+            (click)="openEdit(size)"
+            class="btn-icon text-text-soft hover:text-text-main"
+            title="Editar"
+          >
+            <span class="material-icons text-base">edit</span>
+          </button>
+        </div>
       </div>
 
       <div class="lg:hidden px-4 py-3 border-b border-border last:border-0">
-        <span class="text-sm font-semibold text-text-main">{{ size.name }}</span>
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-sm font-semibold text-text-main truncate">{{ size.name }}</span>
+            <button
+              type="button"
+              (click)="openStatusConfirm(size)"
+              class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
+              [class]="
+                size.isActive
+                  ? 'bg-feedback-success text-feedback-success-text'
+                  : 'bg-feedback-warning text-feedback-warning-text'
+              "
+            >
+              {{ size.isActive ? 'Activa' : 'Inactiva' }}
+            </button>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-xs text-text-soft">Ord. {{ size.sortOrder }}</span>
+            <button
+              type="button"
+              (click)="openEdit(size)"
+              class="btn-icon text-text-soft hover:text-text-main"
+              title="Editar"
+            >
+              <span class="material-icons text-base">edit</span>
+            </button>
+          </div>
+        </div>
       </div>
     </ng-template>
 
@@ -73,18 +146,57 @@ import CatalogList from './catalog-list';
         </div>
       </div>
     }
+
+    @if (editing()) {
+      <div
+        class="fixed inset-0 bg-overlay z-40 flex items-center justify-center p-4"
+        (click)="closeEdit()"
+      >
+        <div class="w-full max-w-xs" (click)="$event.stopPropagation()">
+          <app-edit-size
+            [item]="editing()!"
+            [saving]="saving()"
+            (saved)="onUpdated($event)"
+            (closed)="closeEdit()"
+          />
+        </div>
+      </div>
+    }
+
+    @if (statusConfirm()) {
+      <app-confirm-action-modal
+        [title]="statusConfirm()!.isActive ? '¿Desactivar talla?' : '¿Activar talla?'"
+        [description]="
+          statusConfirm()!.isActive
+            ? 'La talla dejará de estar disponible para nuevas variantes.'
+            : 'La talla volverá a estar disponible para nuevas variantes.'
+        "
+        [confirmLabel]="statusConfirm()!.isActive ? 'Sí, desactivar' : 'Sí, activar'"
+        [submitting]="saving()"
+        (confirm)="onStatusConfirm()"
+        (close)="statusConfirm.set(null)"
+      />
+    }
   `,
 })
 export default class SizeList {
   readonly service = inject(SizeService);
   private toastService = inject(ToastService);
 
+  items = signal<Size[]>([]);
+  loading = signal(false);
+
   query = signal('');
+  includeInactive = signal(false);
+
   showCreate = signal(false);
+  editing = signal<Size | null>(null);
+  statusConfirm = signal<Size | null>(null);
+  saving = signal(false);
 
   filtered = computed(() => {
     const q = this.query().trim().toLowerCase();
-    const all = this.service.sizes();
+    const all = this.items();
     if (!q) return all;
     return all.filter((s) => s.name.toLowerCase().includes(q));
   });
@@ -94,17 +206,73 @@ export default class SizeList {
   );
 
   constructor() {
-    this.service.load();
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.service.getAll(this.includeInactive()).subscribe({
+      next: (data) => {
+        this.items.set(data);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
   }
 
   onQuery(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
   }
 
+  onToggleInactive(event: Event): void {
+    this.includeInactive.set((event.target as HTMLInputElement).checked);
+    this.load();
+  }
+
   onCreated(size: Size): void {
-    this.service.add(size);
     this.toastService.success('Talla creada');
     this.closeCreate();
+    this.load();
+  }
+
+  openEdit(size: Size): void {
+    this.editing.set(size);
+  }
+
+  closeEdit(): void {
+    this.editing.set(null);
+  }
+
+  onUpdated(dto: UpdateSizeDto): void {
+    const id = this.editing()!.id;
+    this.saving.set(true);
+    this.service.updateItem(id, dto).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.toastService.success('Talla actualizada');
+        this.closeEdit();
+        this.load();
+      },
+      error: () => this.saving.set(false),
+    });
+  }
+
+  openStatusConfirm(size: Size): void {
+    this.statusConfirm.set(size);
+  }
+
+  onStatusConfirm(): void {
+    const id = this.statusConfirm()!.id;
+    this.saving.set(true);
+    this.service.updateStatus(id).subscribe({
+      next: (isActive) => {
+        this.saving.set(false);
+        this.items.update((list) => list.map((s) => (s.id === id ? { ...s, isActive } : s)));
+        this.toastService.success(isActive ? 'Talla activada' : 'Talla desactivada');
+        this.statusConfirm.set(null);
+      },
+      error: () => this.saving.set(false),
+    });
   }
 
   closeCreate(): void {

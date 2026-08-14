@@ -3,4 +3,5 @@ export interface Brand {
   name: string;
   prefix: string;
   description: string;
+  isActive: boolean;
 }

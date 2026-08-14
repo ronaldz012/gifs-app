@@ -1,34 +1,46 @@
 <div class="flex flex-col gap-4 w-full">
-
+  <!-- Header: título + acciones -->
   <div class="flex items-center justify-between gap-3">
-    <app-transfer-filter-bar
-      [params]="query()"
-      (change)="patchQuery($event)" />
+    <h1 class="text-lg font-black text-text-main">Transferencias</h1>
     <button
-      (click)="router.navigate(['inventory','transfers','new'])"
-      class="btn btn-primary btn-sm shrink-0">
+      (click)="router.navigate(['inventory', 'transfers', 'new'])"
+      class="btn btn-primary btn-sm shrink-0"
+    >
       + Nueva transferencia
     </button>
   </div>
+
+  <!-- Filtros -->
+  <app-transfer-filter-bar [params]="query()" (change)="patchQuery($event)" />
 
   <!-- Lista -->
   <app-transfer-list
     [transfers]="transfers()"
     [loading]="loadingTransfers()"
-    (viewDetail)="router.navigate(['inventory','transfers', $event])"
+    (viewDetail)="router.navigate(['inventory', 'transfers', $event])"
     (requestResolve)="openResolveModal($event)"
-    (requestCancel)="openCancelModal($event)" />
+    (requestCancel)="openCancelModal($event)"
+  />
 
   <!-- Estado vacío con filtros activos -->
   @if (!loadingTransfers() && transfers().length === 0 && hasActiveFilters()) {
-    <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-10
-                flex flex-col items-center gap-3">
+    <div
+      class="bg-bg-surface rounded-xl border border-border shadow-sm p-10 flex flex-col items-center gap-3"
+    >
       <span class="text-3xl opacity-30">🔄</span>
       <p class="text-sm text-text-soft">No hay transferencias con esos filtros.</p>
       <button
         class="text-sm text-accent-ui hover:underline"
-        (click)="patchQuery({ status: undefined, direction: undefined,
-                               dateFrom: undefined, dateTo: undefined, page: 1 })">
+        (click)="
+          patchQuery({
+            status: undefined,
+            direction: undefined,
+            dateFrom: undefined,
+            dateTo: undefined,
+            page: 1,
+          })
+        "
+      >
         Limpiar filtros
       </button>
     </div>
@@ -41,9 +53,9 @@
       [pageSize]="query().pageSize!"
       [totalItems]="totalItems()"
       (pageChange)="patchQuery({ page: $event })"
-      (pageSizeChange)="patchQuery({ pageSize: $event, page: 1 })" />
+      (pageSizeChange)="patchQuery({ pageSize: $event, page: 1 })"
+    />
   }
-
 </div>
 
 <!-- ── Modales ────────────────────────────────────────────────────────────── -->
@@ -51,7 +63,8 @@
   <app-resolve-transfer-modal
     [submitting]="submitting()"
     (resolve)="onResolveConfirm($event)"
-    (close)="closeResolveModal()" />
+    (close)="closeResolveModal()"
+  />
 }
 
 @if (cancelModalId() !== null) {
@@ -61,5 +74,6 @@
     confirmLabel="Sí, Cancelar"
     [submitting]="submitting()"
     (confirm)="onCancelConfirm()"
-    (close)="closeCancelModal()" />
+    (close)="closeCancelModal()"
+  />
 }

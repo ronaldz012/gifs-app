@@ -1,9 +1,7 @@
-export interface Provider {
-  id: GUID;
-  name: string;
+export interface UpdateProviderDto {
+  name?: string;
   contactName?: string | null;
   email?: string | null;
   phoneNumber?: string | null;
   address?: string | null;
-  isActive: boolean;
 }

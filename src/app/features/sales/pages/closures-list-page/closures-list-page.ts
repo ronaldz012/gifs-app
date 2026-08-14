@@ -14,13 +14,19 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
   imports: [DatePipe, CurrencyPipe, RouterLink, Paginator, SkeletonList, SmartDatePipe],
   template: `
     <div class="flex flex-col gap-4 w-full">
+      <div class="flex items-center justify-between gap-3">
+        <h1 class="text-lg font-black text-text-main">Cierres de Caja</h1>
+      </div>
 
       @if (loading()) {
         <app-skeleton-list [rows]="4" [columns]="3" />
-
       } @else if (closures().length === 0) {
-        <div class="flex flex-col items-center justify-center gap-3 py-20 bg-bg-surface border border-dashed border-border rounded-2xl text-text-soft">
-          <div class="w-16 h-16 rounded-full bg-bg-muted flex items-center justify-center text-text-soft/40">
+        <div
+          class="flex flex-col items-center justify-center gap-3 py-20 bg-bg-surface border border-dashed border-border rounded-2xl text-text-soft"
+        >
+          <div
+            class="w-16 h-16 rounded-full bg-bg-muted flex items-center justify-center text-text-soft/40"
+          >
             <span class="material-icons text-[36px]">payments</span>
           </div>
           <div class="text-center px-6">
@@ -28,11 +34,11 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
             <p class="text-xs max-w-xs mt-1">No se encontraron cierres de caja registrados.</p>
           </div>
         </div>
-
       } @else {
         <div class="bg-bg-surface rounded-xl border border-border shadow-xs overflow-hidden">
-
-          <div class="hidden lg:grid lg:grid-cols-8 px-4 py-3 bg-bg-muted border-b border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
+          <div
+            class="hidden lg:grid lg:grid-cols-8 px-4 py-3 bg-bg-muted border-b border-border text-[10px] font-bold uppercase tracking-wider text-text-soft"
+          >
             <span class="col-span-2">Apertura</span>
             <span class="text-right">Ventas</span>
             <span class="text-right">Efectivo</span>
@@ -44,8 +50,9 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
 
           <ul class="flex flex-col divide-y divide-border">
             @for (c of closures(); track c.id) {
-              <li class="bg-bg-surface relative overflow-hidden border-b border-border transition-all duration-200 hover:shadow-md">
-
+              <li
+                class="bg-bg-surface relative overflow-hidden border-b border-border transition-all duration-200 hover:shadow-md"
+              >
                 <!-- MOBILE -->
                 <div class="flex items-center gap-4 px-4 py-3.5 lg:hidden">
                   <div class="flex flex-col min-w-0 flex-1">
@@ -54,15 +61,28 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
                     </p>
                     <p class="font-inter text-xs text-text-muted mt-0.5">
                       {{ c.openedByName }}
-                      @if (c.closedAt) { · {{ c.closedAt | date:'HH:mm' }} }
+                      @if (c.closedAt) {
+                        · {{ c.closedAt | date: 'HH:mm' }}
+                      }
                     </p>
                     <p class="text-xs text-text-muted mt-1">
-                      Ventas: <span class="font-medium text-text-main">{{ c.totalSales | currency:'BOB':'symbol':'1.2-2' }}</span>
-                      · Gastos: {{ c.totalExpenses | currency:'BOB':'symbol':'1.2-2' }}
+                      Ventas:
+                      <span class="font-medium text-text-main">{{
+                        c.totalSales | currency: 'BOB' : 'symbol' : '1.2-2'
+                      }}</span>
+                      · Gastos: {{ c.totalExpenses | currency: 'BOB' : 'symbol' : '1.2-2' }}
                     </p>
                     <p class="text-xs mt-0.5">
-                      <span [class.text-feedback-success-text]="c.difference === 0" [class.text-feedback-error-text]="c.difference !== 0" class="font-bold">
-                        @if (c.difference === 0) { Cuadra } @else { Dif: {{ c.difference | currency:'BOB':'symbol':'1.2-2' }} }
+                      <span
+                        [class.text-feedback-success-text]="c.difference === 0"
+                        [class.text-feedback-error-text]="c.difference !== 0"
+                        class="font-bold"
+                      >
+                        @if (c.difference === 0) {
+                          Cuadra
+                        } @else {
+                          Dif: {{ c.difference | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                        }
                       </span>
                     </p>
                   </div>
@@ -75,21 +95,48 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
                 </div>
 
                 <!-- DESKTOP -->
-                <div class="hidden lg:grid lg:grid-cols-8 items-center px-4 py-3 transition-colors duration-150 hover:bg-bg-muted">
+                <div
+                  class="hidden lg:grid lg:grid-cols-8 items-center px-4 py-3 transition-colors duration-150 hover:bg-bg-muted"
+                >
                   <div class="col-span-2">
-                    <p class="text-[13px] font-medium text-text-main">{{ c.openedAt | smartDate }}</p>
-                    <p class="text-[11px] text-text-soft">{{ c.openedByName }} @if (c.closedByName) { → {{ c.closedByName }} }</p>
+                    <p class="text-[13px] font-medium text-text-main">
+                      {{ c.openedAt | smartDate }}
+                    </p>
+                    <p class="text-[11px] text-text-soft">
+                      {{ c.openedByName }}
+                      @if (c.closedByName) {
+                        → {{ c.closedByName }}
+                      }
+                    </p>
                   </div>
-                  <span class="text-right text-[13px] font-mono font-bold text-text-main">{{ c.totalSales | currency:'BOB':'symbol':'1.2-2' }}</span>
-                  <span class="text-right text-[13px] font-mono text-text-main">{{ c.cashSales | currency:'BOB':'symbol':'1.2-2' }}</span>
-                  <span class="text-right text-[13px] font-mono text-feedback-error-text">{{ c.totalExpenses | currency:'BOB':'symbol':'1.2-2' }}</span>
-                  <span class="text-right text-[13px] font-mono text-text-main">{{ c.systemSalesAmount | currency:'BOB':'symbol':'1.2-2' }}</span>
-                  <span class="text-right text-[13px] font-mono text-text-main">{{ c.realCountedAmount | currency:'BOB':'symbol':'1.2-2' }}</span>
+                  <span class="text-right text-[13px] font-mono font-bold text-text-main">{{
+                    c.totalSales | currency: 'BOB' : 'symbol' : '1.2-2'
+                  }}</span>
+                  <span class="text-right text-[13px] font-mono text-text-main">{{
+                    c.cashSales | currency: 'BOB' : 'symbol' : '1.2-2'
+                  }}</span>
+                  <span class="text-right text-[13px] font-mono text-feedback-error-text">{{
+                    c.totalExpenses | currency: 'BOB' : 'symbol' : '1.2-2'
+                  }}</span>
+                  <span class="text-right text-[13px] font-mono text-text-main">{{
+                    c.systemSalesAmount | currency: 'BOB' : 'symbol' : '1.2-2'
+                  }}</span>
+                  <span class="text-right text-[13px] font-mono text-text-main">{{
+                    c.realCountedAmount | currency: 'BOB' : 'symbol' : '1.2-2'
+                  }}</span>
                   <div class="flex justify-end items-center gap-2">
-                    <span class="text-[13px] font-mono font-bold px-2 py-0.5 rounded-md"
-                      [class.bg-feedback-success-bg]="c.difference === 0" [class.text-feedback-success-text]="c.difference === 0"
-                      [class.bg-feedback-error-bg]="c.difference !== 0" [class.text-feedback-error-text]="c.difference !== 0">
-                      @if (c.difference === 0) { 0 } @else { {{ c.difference | currency:'BOB':'symbol':'1.2-2' }} }
+                    <span
+                      class="text-[13px] font-mono font-bold px-2 py-0.5 rounded-md"
+                      [class.bg-feedback-success-bg]="c.difference === 0"
+                      [class.text-feedback-success-text]="c.difference === 0"
+                      [class.bg-feedback-error-bg]="c.difference !== 0"
+                      [class.text-feedback-error-text]="c.difference !== 0"
+                    >
+                      @if (c.difference === 0) {
+                        0
+                      } @else {
+                        {{ c.difference | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                      }
                     </span>
                     <a [routerLink]="['/sales', 'closures', c.id]" class="btn-link">
                       <span class="btn-link-text">Ver más</span>
@@ -97,7 +144,6 @@ import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
                     </a>
                   </div>
                 </div>
-
               </li>
             }
           </ul>
@@ -142,12 +188,12 @@ export default class ClosuresListPage implements OnInit {
   }
 
   onPage(page: number): void {
-    this.query.update(q => ({ ...q, page }));
+    this.query.update((q) => ({ ...q, page }));
     this.load();
   }
 
   onPageSize(pageSize: number): void {
-    this.query.update(q => ({ ...q, pageSize, page: 1 }));
+    this.query.update((q) => ({ ...q, pageSize, page: 1 }));
     this.load();
   }
 }
