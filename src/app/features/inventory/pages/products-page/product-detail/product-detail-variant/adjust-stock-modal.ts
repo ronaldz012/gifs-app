@@ -1,9 +1,7 @@
 import { Component, input, output, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {ProductVariantDto} from '../../../../dtos/products/product-detail-dto';
-import {UpdateProductVariantStockDto} from '../../../../dtos/products/update-product-variant-stock-dto';
-
-
+import { ProductVariantDto } from '../../../../dtos/products/product-detail-dto';
+import { UpdateProductVariantStockDto } from '../../../../dtos/products/update-product-variant-stock-dto';
 
 /**
  * Modal for adjusting the stock of a variant in the current branch.
@@ -56,7 +54,9 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
             class="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center
                    text-text-muted hover:border-border-strong hover:bg-bg-muted transition-colors
                    disabled:opacity-30 disabled:cursor-not-allowed text-lg font-light"
-          >−</button>
+          >
+            −
+          </button>
 
           <div class="text-center min-w-[80px]">
             <p class="text-4xl font-bold tabular-nums" [class]="deltaClass()">{{ newStock() }}</p>
@@ -77,12 +77,14 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
             class="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center
                    text-text-muted hover:border-border-strong hover:bg-bg-muted transition-colors
                    text-lg font-light"
-          >+</button>
+          >
+            +
+          </button>
         </div>
 
         <!-- Current stock reference -->
         <p class="text-center text-xs text-text-soft mb-5">
-          Stock actual: <span class="font-medium text-text-muted">{{ variant().totalAvailable }} u</span>
+          Stock actual: <span class="font-medium text-text-muted">{{ currentStock() }} u</span>
         </p>
 
         <!-- Notes -->
@@ -96,13 +98,17 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
             rows="2"
             class="w-full px-3 py-2 text-sm border rounded-lg resize-none transition-colors
                    focus:outline-none focus:ring-2"
-            [class]="notesInvalid()
-              ? 'border-feedback-error-text focus:ring-feedback-error'
-              : 'border-border focus:border-border-strong focus:ring-ring-focus-ring'"
+            [class]="
+              notesInvalid()
+                ? 'border-feedback-error-text focus:ring-feedback-error'
+                : 'border-border focus:border-border-strong focus:ring-ring-focus-ring'
+            "
             placeholder="Ej: Conteo físico, corrección de error, devolución..."
           ></textarea>
           @if (notesInvalid()) {
-            <p class="text-xs text-feedback-error-text mt-1">El motivo es obligatorio (mínimo 3 caracteres).</p>
+            <p class="text-xs text-feedback-error-text mt-1">
+              El motivo es obligatorio (mínimo 3 caracteres).
+            </p>
           }
         </div>
 
@@ -128,8 +134,14 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
   `,
   styles: `
     @keyframes modal-in {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     .modal-enter {
       animation: modal-in 180ms ease both;
@@ -137,38 +149,39 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
   `,
 })
 export class AdjustStockModal implements OnInit {
-  variant    = input.required<ProductVariantDto>();
+  variant = input.required<ProductVariantDto>();
+  currentStock = input(0);
   submitting = input<boolean>(false);
 
-  save  = output<UpdateProductVariantStockDto>();
+  save = output<UpdateProductVariantStockDto>();
   close = output<void>();
 
   newStock = signal(0);
-  notes   = signal('');
+  notes = signal('');
   touched = signal(false);
 
-  delta = computed(() => this.newStock() - this.variant().totalAvailable);
+  delta = computed(() => this.newStock() - this.currentStock());
 
   deltaClass = computed(() => {
-  const d = this.delta();
-  if (d > 0) return 'text-feedback-success-text';
-  if (d < 0) return 'text-feedback-error-text';
-  return 'text-text-main';
-});
+    const d = this.delta();
+    if (d > 0) return 'text-feedback-success-text';
+    if (d < 0) return 'text-feedback-error-text';
+    return 'text-text-main';
+  });
 
   notesInvalid = computed(() => this.touched() && this.notes().trim().length < 3);
-  canSave      = computed(() => this.notes().trim().length >= 3);
+  canSave = computed(() => this.notes().trim().length >= 3);
 
   ngOnInit(): void {
-    this.newStock.set(this.variant().totalAvailable);
+    this.newStock.set(this.currentStock());
   }
 
   increment(): void {
-    this.newStock.update(v => v + 1);
+    this.newStock.update((v) => v + 1);
   }
 
   decrement(): void {
-    if (this.newStock() > 0) this.newStock.update(v => v - 1);
+    if (this.newStock() > 0) this.newStock.update((v) => v - 1);
   }
 
   onSave(): void {

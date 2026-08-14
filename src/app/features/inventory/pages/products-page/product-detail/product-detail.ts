@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../../services/product-service';
 import {
@@ -259,6 +259,7 @@ import { ToastService } from '@core/services/toast-service';
     @if (adjustingStockVariant()) {
       <app-adjust-stock-modal
         [variant]="adjustingStockVariant()!"
+        [currentStock]="activeBranchStock()"
         [submitting]="submitting()"
         (save)="onSaveStockAdjust($event)"
         (close)="adjustingStockVariant.set(null)"
@@ -320,6 +321,15 @@ export default class ProductDetail implements OnInit {
   adjustingStockVariant = signal<ProductVariantDto | null>(null);
   /** Modal de agregar talla/color abierto o no */
   showAddVariant = signal(false);
+
+  /** Stock de la variante en la sucursal activa (para el modal de ajuste) */
+  activeBranchStock = computed(() => {
+    const v = this.adjustingStockVariant();
+    if (!v) return 0;
+    const branchId = this.branchContext.getActiveBranchId();
+    if (!branchId) return 0;
+    return v.branchStocks.find((s) => s.branchId === branchId)?.stock ?? 0;
+  });
 
   // ── Lifecycle ───────────────────────────────────────────────────────────
   ngOnInit(): void {
