@@ -18,6 +18,7 @@ export interface SaleDetailDto {
 export interface SaleItemDetailDto {
   id: GUID;
   productVariantId: GUID;
+  productSku: string;
   productDisplayName: string;
   unitPrice: number;
   quantity: number;

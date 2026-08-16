@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Observable, map, throwError } from 'rxjs';
 import {
@@ -20,7 +20,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
 @Component({
   selector: 'app-reception-details',
-  imports: [DatePipe, CurrencyPipe, SkeletonList, VerifyActionModal, RouterLink],
+  imports: [DatePipe, CurrencyPipe, SkeletonList, VerifyActionModal],
   templateUrl: './reception-details.html',
   styles: `
     @keyframes fade-up {
@@ -51,6 +51,14 @@ export default class ReceptionDetails implements OnInit {
 
   rollbackModalOpen = signal(false);
   private printService = inject(LabelPrintService);
+
+  goBack(): void {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      this.router.navigate(['inventory', 'receptions']);
+    }
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';

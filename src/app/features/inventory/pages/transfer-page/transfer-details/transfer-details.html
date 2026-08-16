@@ -14,9 +14,9 @@
   } @else if (transfer(); as t) {
     <div class="flex flex-col gap-4">
       <div class="flex items-center gap-3">
-        <a routerLink="/inventory/transfers" class="btn-icon">
+        <button type="button" (click)="goBack()" class="btn-icon">
           <span class="material-icons text-base">arrow_back</span>
-        </a>
+        </button>
         <h1 class="text-lg font-black text-text-main">Detalle de Transferencia</h1>
       </div>
 

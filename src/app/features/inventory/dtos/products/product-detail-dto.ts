@@ -2,6 +2,7 @@ import { Gender } from '../../interfaces/gender';
 
 export interface BranchStockDto {
   branchId: GUID;
+  branchName: string;
   stock: number;
 }
 

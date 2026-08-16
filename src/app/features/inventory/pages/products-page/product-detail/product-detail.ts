@@ -1,11 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../../services/product-service';
-import {
-  BranchStockDto,
-  ProductDetailDto,
-  ProductVariantDto,
-} from '../../../dtos/products/product-detail-dto';
+import { ProductDetailDto, ProductVariantDto } from '../../../dtos/products/product-detail-dto';
 import { BranchContextService } from '@core/services/branch-context-service';
 
 import { UpdateProductVariantStockDto } from '../../../dtos/products/update-product-variant-stock-dto';
@@ -40,9 +36,9 @@ import { ToastService } from '@core/services/toast-service';
       } @else if (!loading() && product(); as p) {
         <div class="flex flex-col gap-4">
           <div class="flex items-center gap-3">
-            <a routerLink="/inventory/products" class="btn-icon">
+            <button type="button" (click)="goBack()" class="btn-icon">
               <span class="material-icons text-base">arrow_back</span>
-            </a>
+            </button>
             <h1 class="text-lg font-black text-text-main">Detalle del Producto</h1>
           </div>
 
@@ -135,14 +131,23 @@ import { ToastService } from '@core/services/toast-service';
               <div
                 class="grid gap-2 text-[10px] text-text-soft tracking-wide
                         px-3 py-2 bg-bg-muted rounded-lg mb-1"
-                [style.grid-template-columns]="gridColumnsStyle"
+                [style.grid-template-columns]="gridColumnsStyle()"
               >
                 <span>SKU</span>
                 <span>TALLA</span>
                 <span>COLOR</span>
                 <span>PRECIO</span>
-                @for (branchId of branchKeys; track branchId) {
-                  <span class="truncate">{{ branchMap[branchId] }}</span>
+                @for (branchId of branchKeys(); track branchId) {
+                  <span
+                    class="truncate text-center"
+                    [class.text-accent-ui]="branchId === activeBranchId()"
+                    [class.font-bold]="branchId === activeBranchId()"
+                  >
+                    {{ branchMap()[branchId] }}
+                    @if (branchId === activeBranchId()) {
+                      <span class="ml-1 text-accent-ui">●</span>
+                    }
+                  </span>
                 }
                 <span>TOTAL VISIBLE</span>
                 <span></span>
@@ -153,9 +158,10 @@ import { ToastService } from '@core/services/toast-service';
                   <app-product-detail-variant
                     [variant]="v"
                     [submitting]="submitting()"
-                    [branchMap]="branchMap"
-                    [branchKeys]="branchKeys"
-                    [gridColumnsStyle]="gridColumnsStyle"
+                    [branchMap]="branchMap()"
+                    [branchKeys]="branchKeys()"
+                    [activeBranchId]="activeBranchId()"
+                    [gridColumnsStyle]="gridColumnsStyle()"
                     (editVariant)="onEditVariant($event)"
                     (deleteVariant)="onDeleteVariant($event)"
                     (adjustStock)="onAdjustStock($event)"
@@ -171,9 +177,10 @@ import { ToastService } from '@core/services/toast-service';
                 <app-product-detail-variant
                   [variant]="v"
                   [submitting]="submitting()"
-                  [branchMap]="branchMap"
-                  [branchKeys]="branchKeys"
-                  [gridColumnsStyle]="gridColumnsStyle"
+                  [branchMap]="branchMap()"
+                  [branchKeys]="branchKeys()"
+                  [activeBranchId]="activeBranchId()"
+                  [gridColumnsStyle]="gridColumnsStyle()"
                   (editVariant)="onEditVariant($event)"
                   (deleteVariant)="onDeleteVariant($event)"
                   (adjustStock)="onAdjustStock($event)"
@@ -260,6 +267,7 @@ import { ToastService } from '@core/services/toast-service';
       <app-adjust-stock-modal
         [variant]="adjustingStockVariant()!"
         [currentStock]="activeBranchStock()"
+        [currentBranchName]="activeBranchName()"
         [submitting]="submitting()"
         (save)="onSaveStockAdjust($event)"
         (close)="adjustingStockVariant.set(null)"
@@ -299,9 +307,45 @@ export default class ProductDetail implements OnInit {
   private branchContext = inject(BranchContextService);
   private toastService = inject(ToastService);
 
-  branchMap: Record<string, string> = {};
-  branchKeys: string[] = [];
-  gridColumnsStyle = '';
+  // ── Sucursales (derivadas del producto) ─────────────────────────────────
+  branchKeys = computed<string[]>(() => {
+    const p = this.product();
+    if (!p) return [];
+    const seen = new Set<string>();
+    const keys: string[] = [];
+    for (const v of p.variants) {
+      for (const s of v.branchStocks) {
+        if (!seen.has(s.branchId)) {
+          seen.add(s.branchId);
+          keys.push(s.branchId);
+        }
+      }
+    }
+    return keys;
+  });
+
+  branchMap = computed<Record<string, string>>(() => {
+    const map: Record<string, string> = {};
+    const p = this.product();
+    if (p) {
+      for (const v of p.variants) {
+        for (const s of v.branchStocks) {
+          map[s.branchId] = s.branchName;
+        }
+      }
+    }
+    return map;
+  });
+
+  gridColumnsStyle = computed(() => {
+    const branchCols = this.branchKeys()
+      .map(() => '96px')
+      .join(' ');
+    return `7.5rem 64px 88px 88px ${branchCols} 80px 128px`;
+  });
+
+  /** Sucursal activa para resaltar su inventario */
+  activeBranchId = computed(() => this.branchContext.getActiveBranchId());
 
   // ── Data ────────────────────────────────────────────────────────────────
   product = signal<ProductDetailDto | null>(null);
@@ -326,20 +370,22 @@ export default class ProductDetail implements OnInit {
   activeBranchStock = computed(() => {
     const v = this.adjustingStockVariant();
     if (!v) return 0;
-    const branchId = this.branchContext.getActiveBranchId();
+    const branchId = this.activeBranchId();
     if (!branchId) return 0;
     return v.branchStocks.find((s) => s.branchId === branchId)?.stock ?? 0;
   });
 
+  /** Nombre de la sucursal activa de la variante en ajuste */
+  activeBranchName = computed(() => {
+    const v = this.adjustingStockVariant();
+    if (!v) return null;
+    const branchId = this.activeBranchId();
+    if (!branchId) return null;
+    return v.branchStocks.find((s) => s.branchId === branchId)?.branchName ?? null;
+  });
+
   // ── Lifecycle ───────────────────────────────────────────────────────────
   ngOnInit(): void {
-    for (const b of this.branchContext.available()) {
-      this.branchMap[b.branchId] = b.branchName;
-    }
-    this.branchKeys = Object.keys(this.branchMap);
-    const branchCols = this.branchKeys.map(() => '96px').join(' ');
-    this.gridColumnsStyle = `7.5rem 64px 88px 88px ${branchCols} 80px 128px`;
-
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.loadProduct(idParam);
@@ -508,5 +554,13 @@ export default class ProductDetail implements OnInit {
 
   onViewHistory(pv: ProductVariantDto) {
     this.router.navigate(['inventory', 'products', pv.id, 'movements']);
+  }
+
+  goBack(): void {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      this.router.navigate(['inventory', 'products']);
+    }
   }
 }

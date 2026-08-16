@@ -5,6 +5,7 @@ import {
   StockMovementParams,
 } from '@features/inventory/dtos/products/list-stock-movements-dto';
 import { MovementType, movementTypeToSpanish } from '@features/inventory/interfaces/movement-type';
+import { ProductVariantDetailsDto } from '@features/inventory/dtos/products/product-variant-details';
 import { ProductService } from '@features/inventory/services/product-service';
 import SkeletonList from '../../../../../shared/ui/skeleton-list/skeleton-list';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
@@ -44,6 +45,7 @@ export default class StockMovementsList {
   totalItems = signal(0);
   loading = signal(false);
   variantId = signal<string>('');
+  variant = signal<ProductVariantDetailsDto | null>(null);
   query = signal<StockMovementParams>({
     page: 1,
     pageSize: 20,
@@ -53,11 +55,26 @@ export default class StockMovementsList {
     const idFromRoute = this.route.snapshot.paramMap.get('id');
     if (idFromRoute) {
       this.variantId.set(idFromRoute);
+      this.loadVariant();
       this.load();
     } else {
       this.router.navigate(['inventory', 'products']);
     }
-    this.load();
+  }
+
+  goBack(): void {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      this.router.navigate(['inventory', 'products']);
+    }
+  }
+
+  private loadVariant() {
+    this.service.getVariantDetails(this.variantId()).subscribe({
+      next: (data) => this.variant.set(data),
+      error: () => this.variant.set(null),
+    });
   }
 
   patchQuery(patch: Partial<{ page: number; pageSize: number }>) {
@@ -81,18 +98,41 @@ export default class StockMovementsList {
 
     switch (type) {
       case MovementType.Reception:
-        this.router.navigate(['inventory', 'receptions', referenceId, 'detail']);
+        this.router.navigate(['inventory', 'receptions', referenceId]);
         break;
       case MovementType.Sale:
-        this.router.navigate(['sales', referenceId, 'detail']);
+        this.router.navigate(['sales', 'sale', referenceId]);
         break;
       case MovementType.Adjustment:
-        this.router.navigate(['inventory', 'adjustments', referenceId, 'detail']);
+        // Ruta de ajustes aún no existe
         break;
       case MovementType.TransferIn:
       case MovementType.TransferOut:
-        this.router.navigate(['inventory', 'transfers', referenceId, 'detail']);
+        this.router.navigate(['inventory', 'transfers', referenceId]);
         break;
+    }
+  }
+
+  canGoToReference(type: MovementType): boolean {
+    return (
+      type === MovementType.Reception ||
+      type === MovementType.Sale ||
+      type === MovementType.TransferIn ||
+      type === MovementType.TransferOut
+    );
+  }
+
+  referenceLabel(type: MovementType): string {
+    switch (type) {
+      case MovementType.Reception:
+        return 'Ver recepción';
+      case MovementType.Sale:
+        return 'Ver venta';
+      case MovementType.TransferIn:
+      case MovementType.TransferOut:
+        return 'Ver transferencia';
+      default:
+        return 'Ver detalle';
     }
   }
   getMovementColorClass(type: MovementType, element: 'badge' | 'text' | 'border'): string {

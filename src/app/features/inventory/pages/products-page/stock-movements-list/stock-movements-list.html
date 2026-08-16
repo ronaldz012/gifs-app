@@ -1,10 +1,18 @@
 <div class="flex flex-col gap-3">
   <!-- Header: volver + título -->
   <div class="flex items-center gap-3">
-    <a routerLink="/inventory/products" class="btn-icon">
+    <button type="button" (click)="goBack()" class="btn-icon">
       <span class="material-icons text-base">arrow_back</span>
-    </a>
-    <h1 class="text-lg font-black text-text-main">Movimientos de Stock</h1>
+    </button>
+    <div class="min-w-0">
+      <h1 class="text-lg font-black text-text-main">Movimientos de Stock</h1>
+      @if (variant(); as v) {
+        <p class="text-xs text-text-muted truncate">
+          <span class="font-semibold text-text-main">{{ v.size }} · {{ v.color }}</span>
+          <span class="font-mono ml-1">{{ v.sku }}</span>
+        </p>
+      }
+    </div>
   </div>
 
   <!-- Lista de movimientos -->
@@ -50,53 +58,48 @@
             ></div>
 
             <!-- ====== MOBILE: Layout Card ====== -->
-            <div class="flex items-center gap-4 px-4 py-3.5 lg:hidden">
-              <div class="flex min-w-0 flex-1 flex-col gap-1">
-                <!-- Badge de Tipo + Fecha -->
-                <div class="flex items-center justify-between">
-                  <span
-                    class="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold"
-                    [ngClass]="getMovementColorClass(m.movementType, 'badge')"
-                  >
-                    {{ movementTypeToSpanish(m.movementType) }}
-                  </span>
-                  <span class="text-xs font-semibold text-text-main font-mono">
-                    {{ m.createdAt | smartDate }}
-                  </span>
-                </div>
-
-                <!-- Info Principal -->
-                <div class="flex items-baseline justify-between mt-1">
-                  <p class="truncate text-sm font-medium text-text-main">
-                    <span class="text-text-muted text-xs">Sucursal:</span> {{ m.branchName }}
-                    @if (m.transferToBranchName) {
-                      <span class="text-accent-ui"> → {{ m.transferToBranchName }}</span>
-                    }
-                  </p>
-                  <span
-                    class="text-base font-extrabold"
-                    [ngClass]="getMovementColorClass(m.movementType, 'text')"
-                  >
-                    {{ m.quantity > 0 ? '+' : '' }}{{ m.quantity }}
-                  </span>
-                </div>
-
-                <!-- Usuario y Notas -->
-                <p class="text-xs text-text-muted truncate">
-                  <span class="font-semibold">{{ m.userName }}</span>
-                  {{ m.notes ? '· ' + m.notes : '' }}
-                </p>
+            <div class="flex flex-col gap-2 px-4 py-3.5 lg:hidden">
+              <!-- Badge de Tipo + Fecha -->
+              <div class="flex items-center justify-between gap-2">
+                <span
+                  class="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold"
+                  [ngClass]="getMovementColorClass(m.movementType, 'badge')"
+                >
+                  {{ movementTypeToSpanish(m.movementType) }}
+                </span>
+                <span class="text-xs font-semibold text-text-main font-mono shrink-0">
+                  {{ m.createdAt | smartDate }}
+                </span>
               </div>
 
-              <!-- Botón Ir a Referencia Mobile -->
-              @if (m.referenceId) {
-                <div class="flex shrink-0">
-                  <button
-                    (click)="goToReference(m.movementType, m.referenceId)"
-                    title="Ver documento de origen"
-                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-btn-secondary-bg text-btn-primary-bg hover:bg-btn-primary-bg hover:text-btn-primary-text transition-all duration-150"
-                  >
-                    <span class="material-icons text-base">receipt_long</span>
+              <!-- Info Principal -->
+              <div class="flex items-baseline justify-between gap-2">
+                <p class="truncate text-sm font-medium text-text-main">
+                  <span class="text-text-muted text-xs">Sucursal:</span> {{ m.branchName }}
+                  @if (m.transferToBranchName) {
+                    <span class="text-accent-ui"> → {{ m.transferToBranchName }}</span>
+                  }
+                </p>
+                <span
+                  class="text-base font-extrabold shrink-0"
+                  [ngClass]="getMovementColorClass(m.movementType, 'text')"
+                >
+                  {{ m.quantity > 0 ? '+' : '' }}{{ m.quantity }}
+                </span>
+              </div>
+
+              <!-- Usuario y Notas -->
+              <p class="text-xs text-text-muted truncate">
+                <span class="font-semibold">{{ m.userName }}</span>
+                {{ m.notes ? '· ' + m.notes : '' }}
+              </p>
+
+              <!-- Botón Ir a Referencia Mobile (abajo a la derecha) -->
+              @if (m.referenceId && canGoToReference(m.movementType)) {
+                <div class="flex justify-end">
+                  <button (click)="goToReference(m.movementType, m.referenceId)" class="btn-link">
+                    <span class="btn-link-text">{{ referenceLabel(m.movementType) }}</span>
+                    <span class="material-icons text-base">chevron_right</span>
                   </button>
                 </div>
               }
@@ -150,13 +153,10 @@
               <div
                 class="flex shrink-0 justify-end opacity-40 group-hover:opacity-100 transition-opacity duration-150"
               >
-                @if (m.referenceId) {
-                  <button
-                    (click)="goToReference(m.movementType, m.referenceId)"
-                    title="Ver documento de origen"
-                    class="flex h-8 w-8 items-center justify-center rounded border border-border bg-btn-secondary-bg text-text-muted hover:bg-btn-primary-bg hover:text-btn-primary-text hover:border-btn-primary-bg transition-all duration-150"
-                  >
-                    <span class="material-icons text-base leading-none">receipt_long</span>
+                @if (m.referenceId && canGoToReference(m.movementType)) {
+                  <button (click)="goToReference(m.movementType, m.referenceId)" class="btn-link">
+                    <span class="btn-link-text">{{ referenceLabel(m.movementType) }}</span>
+                    <span class="material-icons text-base">chevron_right</span>
                   </button>
                 } @else {
                   <span class="text-xs text-text-muted select-none pr-2">—</span>

@@ -84,7 +84,12 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
 
         <!-- Current stock reference -->
         <p class="text-center text-xs text-text-soft mb-5">
-          Stock actual: <span class="font-medium text-text-muted">{{ currentStock() }} u</span>
+          Stock actual
+          @if (currentBranchName()) {
+            en {{ currentBranchName() }}
+          }
+          :
+          <span class="font-medium text-text-muted">{{ currentStock() }} u</span>
         </p>
 
         <!-- Notes -->
@@ -151,6 +156,7 @@ import { UpdateProductVariantStockDto } from '../../../dtos/producclass UpdatePr
 export class AdjustStockModal implements OnInit {
   variant = input.required<ProductVariantDto>();
   currentStock = input(0);
+  currentBranchName = input<string | null>(null);
   submitting = input<boolean>(false);
 
   save = output<UpdateProductVariantStockDto>();
