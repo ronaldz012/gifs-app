@@ -22,6 +22,10 @@ export class CashRegisterService {
     return this.http.get<CurrentRegisterDto>(`${this.baseUrl}/Current`);
   }
 
+  getCurrentDetails(): Observable<ClosureDetailDto> {
+    return this.http.get<ClosureDetailDto>(`${this.baseUrl}/Current/details`);
+  }
+
   openRegister(dto: OpenCashRegisterDto): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/Open`, dto);
   }
@@ -39,9 +43,7 @@ export class CashRegisterService {
   }
 
   getClosures(params: BaseQueryDto): Observable<PagedResult<ClosureListDto>> {
-    let httpParams = new HttpParams()
-      .set('page', params.page)
-      .set('pageSize', params.pageSize);
+    let httpParams = new HttpParams().set('page', params.page).set('pageSize', params.pageSize);
     return this.http.get<PagedResult<ClosureListDto>>(`${this.baseUrl}`, { params: httpParams });
   }
 
