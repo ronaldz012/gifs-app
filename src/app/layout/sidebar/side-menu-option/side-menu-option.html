@@ -1,6 +1,6 @@
 <ul class="flex flex-col gap-1 px-2 py-2">
   @for (menu of features(); track menu.route) {
-    @if (menu.isMenu) {
+    @if (menu.isMenu && perm.hasReadPermission(menu)) {
       <li>
         <a
           #rla="routerLinkActive"

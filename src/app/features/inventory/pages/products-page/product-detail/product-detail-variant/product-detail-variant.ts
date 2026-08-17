@@ -1,6 +1,7 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { ProductVariantDto } from '../../../../dtos/products/product-detail-dto';
 import { CurrencyPipe } from '@angular/common';
+import { PermissionService } from '@features/auth/services/permmision-service';
 
 @Component({
   selector: 'app-product-detail-variant',
@@ -34,30 +35,34 @@ import { CurrencyPipe } from '@angular/common';
         >
           <span class="material-icons text-base">history</span>
         </button>
-        <button
-          (click)="adjustStock.emit(variant())"
-          class="btn-icon
-          hover:text-accent-ui hover:bg-feedback-info"
-          title="Ajustar stock"
-        >
-          <span class="material-icons text-base">inventory</span>
-        </button>
-        <button
-          (click)="editVariant.emit(variant())"
-          class="btn-icon
-          hover:text-text-main hover:bg-bg-muted"
-          title="Editar talla/color"
-        >
-          <span class="material-icons text-base">edit</span>
-        </button>
-        <button
-          (click)="deleteVariant.emit(variant())"
-          class="btn-icon
-          hover:text-feedback-error-text hover:bg-feedback-error"
-          title="Eliminar talla/color"
-        >
-          <span class="material-icons text-base">delete</span>
-        </button>
+        @if (perm.canUpdate('inventory', 'products')) {
+          <button
+            (click)="adjustStock.emit(variant())"
+            class="btn-icon
+            hover:text-accent-ui hover:bg-feedback-info"
+            title="Ajustar stock"
+          >
+            <span class="material-icons text-base">inventory</span>
+          </button>
+          <button
+            (click)="editVariant.emit(variant())"
+            class="btn-icon
+            hover:text-text-main hover:bg-bg-muted"
+            title="Editar talla/color"
+          >
+            <span class="material-icons text-base">edit</span>
+          </button>
+        }
+        @if (perm.canDelete('inventory', 'products')) {
+          <button
+            (click)="deleteVariant.emit(variant())"
+            class="btn-icon
+            hover:text-feedback-error-text hover:bg-feedback-error"
+            title="Eliminar talla/color"
+          >
+            <span class="material-icons text-base">delete</span>
+          </button>
+        }
       </div>
     </li>
 
@@ -94,35 +99,40 @@ import { CurrencyPipe } from '@angular/common';
         >
           <span class="material-icons text-base">history</span>
         </button>
-        <button
-          (click)="adjustStock.emit(variant())"
-          class="btn-icon-md
-          hover:text-accent-ui hover:border-feedback-info"
-          title="Ajustar stock"
-        >
-          <span class="material-icons text-base">inventory</span>
-        </button>
-        <button
-          (click)="editVariant.emit(variant())"
-          class="btn-icon-md
-          hover:text-text-main hover:border-border-strong"
-          title="Editar talla/color"
-        >
-          <span class="material-icons text-base">edit</span>
-        </button>
-        <button
-          (click)="deleteVariant.emit(variant())"
-          class="btn-icon-md
-          hover:text-feedback-error-text hover:border-feedback-error-text"
-          title="Eliminar talla/color"
-        >
-          <span class="material-icons text-base">delete</span>
-        </button>
+        @if (perm.canUpdate('inventory', 'products')) {
+          <button
+            (click)="adjustStock.emit(variant())"
+            class="btn-icon-md
+            hover:text-accent-ui hover:border-feedback-info"
+            title="Ajustar stock"
+          >
+            <span class="material-icons text-base">inventory</span>
+          </button>
+          <button
+            (click)="editVariant.emit(variant())"
+            class="btn-icon-md
+            hover:text-text-main hover:border-border-strong"
+            title="Editar talla/color"
+          >
+            <span class="material-icons text-base">edit</span>
+          </button>
+        }
+        @if (perm.canDelete('inventory', 'products')) {
+          <button
+            (click)="deleteVariant.emit(variant())"
+            class="btn-icon-md
+            hover:text-feedback-error-text hover:border-feedback-error-text"
+            title="Eliminar talla/color"
+          >
+            <span class="material-icons text-base">delete</span>
+          </button>
+        }
       </div>
     </li>
   `,
 })
 export class ProductDetailVariant {
+  readonly perm = inject(PermissionService);
   variant = input.required<ProductVariantDto>();
   submitting = input.required<boolean>();
   branchMap = input<Record<string, string>>({});

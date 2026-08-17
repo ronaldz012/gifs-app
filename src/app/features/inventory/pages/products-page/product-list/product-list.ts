@@ -11,6 +11,7 @@ import { BrandService } from '@features/inventory/services/brand-service';
 import { CategoryService } from '@features/inventory/services/category-service';
 import { ColorService } from '@features/inventory/services/color-service';
 import CreateProductModal from '../create-product-modal/create-product-modal';
+import { PermissionService } from '@features/auth/services/permmision-service';
 
 @Component({
   selector: 'app-product-list',
@@ -32,9 +33,15 @@ import CreateProductModal from '../create-product-modal/create-product-modal';
             Catálogos
           </button>
 
-          <button type="button" (click)="showCreateModal.set(true)" class="btn btn-primary btn-sm">
-            + Nuevo producto
-          </button>
+          @if (perm.canCreate('inventory', 'products')) {
+            <button
+              type="button"
+              (click)="showCreateModal.set(true)"
+              class="btn btn-primary btn-sm"
+            >
+              + Nuevo producto
+            </button>
+          }
         </div>
       </div>
 
@@ -145,6 +152,7 @@ export default class ProductList implements OnInit {
   categoryService = inject(CategoryService);
   colorService = inject(ColorService);
   private router = inject(Router);
+  readonly perm = inject(PermissionService);
 
   products = signal<ListProductDto[]>([]);
   totalItems = signal(0);

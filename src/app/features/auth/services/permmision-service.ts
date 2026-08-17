@@ -8,7 +8,7 @@ import { BranchContextService } from '@core/services/branch-context-service';
  *   readonly perm = inject(PermissionService);
  *
  *   // En template:
- *   @if (perm.can('inventory', 'products', 'canCreate')) { <button>Nuevo</button> }
+ *   @if (perm.can('inventory', 'products', 'create')) { <button>Nuevo</button> }
  *
  *   // O con helpers cortos:
  *   @if (perm.canCreate('inventory', 'products')) { ... }
@@ -49,5 +49,10 @@ export class PermissionService {
       canUpdate: this.canUpdate(moduleRoute, featureRoute),
       canDelete: this.canDelete(moduleRoute, featureRoute),
     };
+  }
+
+  /** Filtra features de menú que el usuario puede leer (para sidebar/dashboard). */
+  hasReadPermission(feature: { permissions: string[] }): boolean {
+    return feature.permissions.includes('*') || feature.permissions.includes('read');
   }
 }

@@ -184,7 +184,7 @@ export const routes: Routes = [
             path: 'closures',
             title: 'Cierres de Caja',
             canActivate: [featureGuard],
-            data: { module: 'sales', feature: 'pos' },
+            data: { module: 'sales', feature: 'closures' },
             loadComponent: () =>
               import('@features/sales/pages/closures-list-page/closures-list-page'),
           },
@@ -192,7 +192,7 @@ export const routes: Routes = [
             path: 'closures/:id',
             title: 'Detalle de Cierre',
             canActivate: [featureGuard],
-            data: { module: 'sales', feature: 'pos' },
+            data: { module: 'sales', feature: 'closures' },
             loadComponent: () =>
               import('@features/sales/pages/closure-detail-page/closure-detail-page'),
           },

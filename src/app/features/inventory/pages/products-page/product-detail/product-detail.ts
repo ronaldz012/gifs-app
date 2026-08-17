@@ -16,6 +16,7 @@ import { UpdateProductDto } from '../../../dtos/products/update-product-dto';
 import { UpdateProductVariantDto } from '../../../dtos/products/update-product-variant-dto';
 import { CreateProductVariantDto } from '../../../dtos/products/create-product-variant-dto';
 import { ToastService } from '@core/services/toast-service';
+import { PermissionService } from '@features/auth/services/permmision-service';
 
 @Component({
   selector: 'app-product-detail',
@@ -62,22 +63,28 @@ import { ToastService } from '@core/services/toast-service';
                 <p class="text-xs font-mono text-text-muted mt-0.5">{{ p.internalCode }}</p>
               </div>
               <div class="flex gap-2 shrink-0">
-                <button
-                  (click)="showToggleStatus.set(true)"
-                  class="btn-secondary"
-                  [title]="p.isActive ? 'Desactivar producto' : 'Activar producto'"
-                >
-                  <span class="material-icons text-base leading-none">toggle_on</span>
-                  <span class="hidden sm:inline">{{ p.isActive ? 'Desactivar' : 'Activar' }}</span>
-                </button>
-                <button (click)="showUpdateProduct.set(true)" class="btn-primary" title="Editar">
-                  <span class="material-icons text-base leading-none">edit</span>
-                  <span class="hidden sm:inline">Editar</span>
-                </button>
-                <button (click)="showDeleteProduct.set(true)" class="btn-danger" title="Eliminar">
-                  <span class="material-icons text-base leading-none">delete</span>
-                  <span class="hidden sm:inline">Eliminar</span>
-                </button>
+                @if (perm.canUpdate('inventory', 'products')) {
+                  <button
+                    (click)="showToggleStatus.set(true)"
+                    class="btn-secondary"
+                    [title]="p.isActive ? 'Desactivar producto' : 'Activar producto'"
+                  >
+                    <span class="material-icons text-base leading-none">toggle_on</span>
+                    <span class="hidden sm:inline">{{
+                      p.isActive ? 'Desactivar' : 'Activar'
+                    }}</span>
+                  </button>
+                  <button (click)="showUpdateProduct.set(true)" class="btn-primary" title="Editar">
+                    <span class="material-icons text-base leading-none">edit</span>
+                    <span class="hidden sm:inline">Editar</span>
+                  </button>
+                }
+                @if (perm.canDelete('inventory', 'products')) {
+                  <button (click)="showDeleteProduct.set(true)" class="btn-danger" title="Eliminar">
+                    <span class="material-icons text-base leading-none">delete</span>
+                    <span class="hidden sm:inline">Eliminar</span>
+                  </button>
+                }
               </div>
             </div>
 
@@ -120,10 +127,12 @@ import { ToastService } from '@core/services/toast-service';
                 Tallas/Colores · {{ p.variants.length }}
                 {{ p.variants.length === 1 ? 'talla/color' : 'tallas/colores' }}
               </p>
-              <button (click)="onAddVariant()" class="btn-secondary btn-sm">
-                <span class="material-icons text-base leading-none">add</span>
-                Agregar
-              </button>
+              @if (perm.canUpdate('inventory', 'products')) {
+                <button (click)="onAddVariant()" class="btn-secondary btn-sm">
+                  <span class="material-icons text-base leading-none">add</span>
+                  Agregar
+                </button>
+              }
             </div>
 
             <!-- ── Desktop ─────────────────────────────────────────────────────── -->
@@ -306,6 +315,7 @@ export default class ProductDetail implements OnInit {
   private productService = inject(ProductService);
   private branchContext = inject(BranchContextService);
   private toastService = inject(ToastService);
+  readonly perm = inject(PermissionService);
 
   // ── Sucursales (derivadas del producto) ─────────────────────────────────
   branchKeys = computed<string[]>(() => {

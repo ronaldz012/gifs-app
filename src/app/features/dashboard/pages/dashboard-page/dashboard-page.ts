@@ -26,26 +26,39 @@ export default class DashboardPage implements OnInit {
 
   readonly username = this.currentUserService.user;
 
-  canSeeToday = computed(() => this.permissionService.canRead('sales', 'pos'));
-  canSeeClosure = computed(() => this.permissionService.canRead('sales', 'pos'));
+  canSeeToday = computed(() => this.permissionService.canRead('sales', 'sales'));
+  canSeeClosure = computed(() => this.permissionService.canRead('sales', 'closures'));
   hasWidgets = computed(() => this.canSeeToday() || this.canSeeClosure());
 
-  menuFeatures = computed(() => this.authService.getFeatures().filter((f) => f.isMenu));
+  menuFeatures = computed(() =>
+    this.authService
+      .getFeatures()
+      .filter((f) => f.isMenu && this.permissionService.hasReadPermission(f)),
+  );
 
   routeSegments(route: string): string[] {
     return ['/', ...route.split('/').filter(Boolean)];
   }
 
   ngOnInit(): void {
-    this.dashboardService.getTodaySales().subscribe({
-      next: (d) => this.today.set(d),
-      error: () => this.today.set(null),
-      complete: () => this.loadingToday.set(false),
-    });
-    this.dashboardService.getLastClosure().subscribe({
-      next: (d) => this.lastClosure.set(d),
-      error: () => this.lastClosure.set(null),
-      complete: () => this.loadingClosure.set(false),
-    });
+    if (this.canSeeToday()) {
+      this.dashboardService.getTodaySales().subscribe({
+        next: (d) => this.today.set(d),
+        error: () => this.today.set(null),
+        complete: () => this.loadingToday.set(false),
+      });
+    } else {
+      this.loadingToday.set(false);
+    }
+
+    if (this.canSeeClosure()) {
+      this.dashboardService.getLastClosure().subscribe({
+        next: (d) => this.lastClosure.set(d),
+        error: () => this.lastClosure.set(null),
+        complete: () => this.loadingClosure.set(false),
+      });
+    } else {
+      this.loadingClosure.set(false);
+    }
   }
 }
