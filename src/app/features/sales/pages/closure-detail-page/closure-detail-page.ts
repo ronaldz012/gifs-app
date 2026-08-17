@@ -119,76 +119,95 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
           </div>
 
           @if (c.sales.length > 0) {
-            <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
-              <p class="section-title mb-4">Ventas del turno ({{ c.sales.length }})</p>
-              <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                  <thead>
-                    <tr
-                      class="text-[10px] font-bold uppercase tracking-wider text-text-soft border-b border-border"
-                    >
-                      <th class="text-left py-2 pr-4">Hora</th>
-                      <th class="text-left py-2 pr-4">Vendedor</th>
-                      <th class="text-right py-2 px-4">Total</th>
-                      <th class="text-center py-2 px-4">Pago</th>
-                      <th class="text-center py-2 px-4">Doc.</th>
-                      <th class="text-right py-2 pl-4">Arts.</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-border">
-                    @for (sale of c.sales; track sale.id) {
-                      <tr>
-                        <td class="py-2.5 pr-4 text-sm text-text-main font-mono">
-                          {{ sale.createdAt | date: 'HH:mm' }}
-                        </td>
-                        <td class="py-2.5 pr-4 text-sm text-text-muted">{{ sale.soldByName }}</td>
-                        <td
-                          class="py-2.5 px-4 text-right text-sm font-mono font-bold text-text-main"
-                        >
+            <div class="bg-bg-surface rounded-xl border border-border-strong overflow-hidden">
+              <div class="px-6 pt-5 pb-3">
+                <p class="section-title mb-0">Ventas del turno ({{ c.sales.length }})</p>
+              </div>
+
+              <div
+                class="hidden lg:grid lg:grid-cols-4 px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft"
+              >
+                <span>Hora</span>
+                <span class="text-right">Monto</span>
+                <span class="text-center">Pago</span>
+                <span class="text-right">Arts.</span>
+              </div>
+
+              <ul class="flex flex-col">
+                @for (sale of c.sales; track sale.id) {
+                  <li class="bg-bg-surface border-b border-border last:border-b-0">
+                    <!-- MOBILE -->
+                    <div class="flex items-center gap-4 px-6 py-3.5 lg:hidden">
+                      <div class="flex flex-col min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-text-main">
                           {{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}
-                        </td>
-                        <td class="py-2.5 px-4 text-center">
-                          <span
-                            class="text-[11px] font-medium px-2 py-0.5 rounded-md"
-                            [class.bg-bg-muted]="sale.paymentMethod === 'Cash'"
-                            [class.text-text-muted]="sale.paymentMethod === 'Cash'"
-                            [class.bg-feedback-info-bg]="sale.paymentMethod !== 'Cash'"
-                            [class.text-feedback-info-text]="sale.paymentMethod !== 'Cash'"
-                          >
+                        </p>
+                        <p class="mt-0.5 text-xs text-text-muted">
+                          {{ sale.createdAt | date: 'HH:mm' }}
+                          <span class="mx-1">·</span>
+                          <span [class.text-feedback-info-text]="sale.paymentMethod !== 'Cash'">
                             {{ sale.paymentMethod === 'Cash' ? 'Efectivo' : sale.paymentMethod }}
                           </span>
-                        </td>
-                        <td class="py-2.5 px-4 text-center">
-                          <span
-                            class="text-[11px] font-medium px-2 py-0.5 rounded-md"
-                            [class.bg-bg-muted]="sale.documentType === 'Ticket'"
-                            [class.text-text-muted]="sale.documentType === 'Ticket'"
-                            [class.bg-feedback-success-bg]="sale.documentType === 'Invoice'"
-                            [class.text-feedback-success-text]="sale.documentType === 'Invoice'"
-                            [class.bg-feedback-warning-bg]="sale.documentType === 'PendingInvoice'"
-                            [class.text-feedback-warning-text]="
-                              sale.documentType === 'PendingInvoice'
-                            "
-                          >
-                            @if (sale.documentType === 'Invoice') {
-                              Factura
-                            } @else if (sale.documentType === 'PendingInvoice') {
-                              Pendiente
-                            } @else {
-                              Boleta
-                            }
-                          </span>
-                        </td>
-                        <td
-                          class="py-2.5 pl-4 text-right text-sm font-mono text-accent-ui font-bold"
+                          <span class="mx-1">·</span>
+                          {{ sale.itemsCount }} {{ sale.itemsCount === 1 ? 'art' : 'arts' }}
+                          <span class="mx-1">·</span>
+                          {{ sale.soldByName }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- DESKTOP -->
+                    <div
+                      class="hidden lg:grid lg:grid-cols-4 items-center px-6 py-3 transition-colors hover:bg-bg-muted/30"
+                    >
+                      <span class="text-[13px] text-text-main font-mono">{{
+                        sale.createdAt | date: 'HH:mm'
+                      }}</span>
+                      <span class="text-right text-[13px] font-mono font-bold text-text-main">{{
+                        sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2'
+                      }}</span>
+                      <span class="text-center">
+                        <span
+                          class="text-[11px] font-medium px-2 py-0.5 rounded-md"
+                          [class.bg-bg-muted]="sale.paymentMethod === 'Cash'"
+                          [class.text-text-muted]="sale.paymentMethod === 'Cash'"
+                          [class.bg-feedback-info-bg]="sale.paymentMethod !== 'Cash'"
+                          [class.text-feedback-info-text]="sale.paymentMethod !== 'Cash'"
                         >
-                          {{ sale.itemsCount }}
-                        </td>
-                      </tr>
+                          {{ sale.paymentMethod === 'Cash' ? 'Efectivo' : sale.paymentMethod }}
+                        </span>
+                      </span>
+                      <span class="text-right text-[13px] font-mono text-text-soft">{{
+                        sale.itemsCount
+                      }}</span>
+                    </div>
+
+                    <!-- Items de la venta -->
+                    @if (sale.items.length > 0) {
+                      <div class="px-6 pb-3 lg:pb-2">
+                        <div class="border-t border-border/60 pt-2">
+                          @for (item of sale.items; track item.productVariantId) {
+                            <div class="flex items-center justify-between gap-3 text-xs py-0.5">
+                              <span class="min-w-0 flex items-center gap-2">
+                                <span class="font-mono text-text-soft shrink-0">{{
+                                  item.productSku
+                                }}</span>
+                                <span class="truncate text-text-muted font-medium">{{
+                                  item.productDisplayName
+                                }}</span>
+                              </span>
+                              <span class="shrink-0 text-text-soft font-mono">
+                                x{{ item.quantity }} ·
+                                {{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                              </span>
+                            </div>
+                          }
+                        </div>
+                      </div>
                     }
-                  </tbody>
-                </table>
-              </div>
+                  </li>
+                }
+              </ul>
             </div>
           }
 
@@ -244,29 +263,62 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
           }
 
           @if (c.variantStocks.length) {
-            <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
-              <p class="section-title mb-4">
-                Stock actual para reposición ({{ c.variantStocks.length }})
-              </p>
-              <div class="overflow-x-auto">
+            <div class="bg-bg-surface rounded-xl border border-border-strong overflow-hidden">
+              <div class="px-6 pt-5 pb-3">
+                <p class="section-title mb-0">
+                  Stock actual para reposición ({{ c.variantStocks.length }})
+                </p>
+              </div>
+
+              <!-- MOBILE -->
+              <ul class="flex flex-col divide-y divide-border md:hidden">
+                @for (v of c.variantStocks; track v.productVariantId) {
+                  <li class="flex items-center gap-3 px-6 py-3">
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-text-main truncate">
+                        {{ v.productDisplayName }}
+                      </p>
+                      <p class="field-label">
+                        <span class="font-mono text-text-muted">{{ v.productSku }}</span>
+                      </p>
+                    </div>
+                    <div class="shrink-0 text-right">
+                      <p
+                        class="text-sm font-bold tabular-nums"
+                        [class.text-feedback-error-text]="v.currentStock <= 0"
+                        [class.text-feedback-warning-text]="
+                          v.currentStock > 0 && v.currentStock <= 5
+                        "
+                        [class.text-text-main]="v.currentStock > 5"
+                      >
+                        {{ v.currentStock }}
+                        <span class="text-xs font-normal text-text-soft">uds</span>
+                      </p>
+                    </div>
+                  </li>
+                }
+              </ul>
+
+              <!-- DESKTOP -->
+              <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-sm">
                   <thead>
                     <tr
                       class="text-[10px] font-bold uppercase tracking-wider text-text-soft border-b border-border"
                     >
-                      <th class="text-left py-2 pr-4">Producto</th>
                       <th class="text-left py-2 pr-4">SKU</th>
+                      <th class="text-left py-2 pr-4">Producto</th>
                       <th class="text-right py-2 pl-4">Stock</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-border">
                     @for (v of c.variantStocks; track v.productVariantId) {
                       <tr>
-                        <td class="py-2.5 pr-4 text-sm text-text-main">
-                          {{ v.productDisplayName }}
-                        </td>
-                        <td class="py-2.5 pr-4 text-sm font-mono text-text-muted">
+                        <td class="py-2.5 pr-4 font-mono text-xs text-text-muted">
                           {{ v.productSku }}
+                        </td>
+                        <td class="py-2.5 pr-4 text-text-main font-medium">
+                          {{ v.productDisplayName }}
                         </td>
                         <td
                           class="py-2.5 pl-4 text-right text-sm font-mono font-bold"

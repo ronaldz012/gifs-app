@@ -162,18 +162,25 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                       }}</span>
                     </div>
                     @if (sale.items.length > 0) {
-                      <div class="px-6 pb-3 lg:pb-2 space-y-1">
-                        @for (item of sale.items; track item.productVariantId) {
-                          <div class="flex items-center justify-between gap-3 text-xs">
-                            <span class="min-w-0 truncate text-text-muted font-medium">{{
-                              item.productDisplayName
-                            }}</span>
-                            <span class="shrink-0 text-text-soft font-mono">
-                              x{{ item.quantity }} ·
-                              {{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}
-                            </span>
-                          </div>
-                        }
+                      <div class="px-6 pb-3 lg:pb-2">
+                        <div class="border-t border-border/60 pt-2">
+                          @for (item of sale.items; track item.productVariantId) {
+                            <div class="flex items-center justify-between gap-3 text-xs py-0.5">
+                              <span class="min-w-0 flex items-center gap-2">
+                                <span class="font-mono text-text-soft shrink-0">{{
+                                  item.productSku
+                                }}</span>
+                                <span class="truncate text-text-muted font-medium">{{
+                                  item.productDisplayName
+                                }}</span>
+                              </span>
+                              <span class="shrink-0 text-text-soft font-mono">
+                                x{{ item.quantity }} ·
+                                {{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                              </span>
+                            </div>
+                          }
+                        </div>
                       </div>
                     }
                   </li>
