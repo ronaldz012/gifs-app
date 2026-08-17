@@ -25,17 +25,17 @@
 
         @if (menuFeatures().length > 0) {
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full max-w-2xl mt-4">
-            @for (entry of menuFeatures(); track entry.feature.key) {
+            @for (feature of menuFeatures(); track feature.key) {
               <a
-                [routerLink]="['/', entry.moduleRoute, entry.feature.route]"
+                [routerLink]="routeSegments(feature.route)"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-bg-muted/40 hover:bg-bg-muted hover:border-border-strong transition-colors"
               >
-                <span class="material-icons text-xl text-text-muted">{{ entry.feature.icon }}</span>
+                <span class="material-icons text-xl text-text-muted">{{ feature.icon }}</span>
                 <div class="text-left min-w-0">
                   <p class="text-sm font-semibold text-text-main truncate">
-                    {{ entry.feature.displayName }}
+                    {{ feature.displayName }}
                   </p>
-                  <p class="text-xs text-text-soft capitalize">{{ entry.moduleRoute }}</p>
+                  <p class="text-xs text-text-soft capitalize">{{ feature.module }}</p>
                 </div>
                 <span class="material-icons text-lg text-text-soft ml-auto">chevron_right</span>
               </a>

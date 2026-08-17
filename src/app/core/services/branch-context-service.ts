@@ -1,9 +1,9 @@
-import {inject, Injectable, signal} from '@angular/core';
-import {Observable} from 'rxjs';
-import {BranchDto} from '../interfaces/branch.model';
-import {HttpClient} from '@angular/common/http';
-import {environment} from 'environments/environment';
-import { Branch, Module } from '@features/auth/models/LoginResponse';
+import { inject, Injectable, signal } from '@angular/core';
+import { Observable } from 'rxjs';
+import { BranchDto } from '../interfaces/branch.model';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'environments/environment';
+import { Branch, SessionFeatureDto } from '@features/auth/models/LoginResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -14,9 +14,9 @@ export class BranchContextService {
 
   readonly available = this._available.asReadonly();
   readonly active = this._active.asReadonly();
-  private ACTIVE_BRANCH_ID_KEY = 'active_branch_id'
-  private  http = inject(HttpClient)
-  private readonly URL = environment.BACKEND_URL+'/api/Branch';
+  private ACTIVE_BRANCH_ID_KEY = 'active_branch_id';
+  private http = inject(HttpClient);
+  private readonly URL = environment.BACKEND_URL + '/api/Branch';
 
   setAvailable(branches: Branch[]): void {
     this._available.set(branches);
@@ -32,20 +32,20 @@ export class BranchContextService {
   }
 
   getBranchIds(branches: Branch[]): string {
-    return branches.map(b => b.branchId).join(',');
+    return branches.map((b) => b.branchId).join(',');
   }
 
   private normalizeRoutes(branches: Branch[]): Branch[] {
-    return branches.map(b => ({
+    return branches.map((b) => ({
       ...b,
-      modules: b.modules.map(m => ({
-        ...m,
-        route: m.route.replace(/^\//, ''),
-        features: m.features.map(f => ({
-          ...f,
-          route: f.route.replace(/^\//, ''),
-        })),
-      })),
+      features: b.features.map((f) => {
+        const module = f.module.replace(/^\//, '').toLowerCase();
+        let route = f.route.replace(/^\//, '');
+        if (!route.startsWith(module + '/')) {
+          route = `${module}/${route}`;
+        }
+        return { ...f, module, route };
+      }),
     }));
   }
 
@@ -54,7 +54,7 @@ export class BranchContextService {
     this._available.set(branches);
 
     const savedId = localStorage.getItem(this.ACTIVE_BRANCH_ID_KEY);
-    const saved = branches.find(b => b.branchId === savedId);
+    const saved = branches.find((b) => b.branchId === savedId);
     this._active.set(saved ?? branches[0] ?? null);
 
     if (this._active()) {
@@ -68,11 +68,11 @@ export class BranchContextService {
     localStorage.removeItem(this.ACTIVE_BRANCH_ID_KEY);
   }
 
-  getActiveModules(): Module[] {
-    return this._active()?.modules ?? [];
+  getActiveFeatures(): SessionFeatureDto[] {
+    return this._active()?.features ?? [];
   }
 
-  getBranches():Observable<BranchDto[]> {
+  getBranches(): Observable<BranchDto[]> {
     return this.http.get<BranchDto[]>(this.URL);
   }
 }

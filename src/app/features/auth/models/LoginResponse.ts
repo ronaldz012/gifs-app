@@ -1,4 +1,3 @@
-
 export default interface LoginResponse {
   accessToken: string;
   refreshToken: string;
@@ -40,20 +39,15 @@ export interface Branch {
   branchId: string;
   branchName: string;
   role: string;
-  modules: Module[];
+  features: SessionFeatureDto[];
 }
 
-export interface Module {
-  name: string;
-  route: string;
-  features: Feature[];
-}
-
-export interface Feature {
+export interface SessionFeatureDto {
   key: string;
   displayName: string;
   route: string;
   icon: string;
+  module: string;
   isMenu: boolean;
-  permission: string[];
+  permissions: string[];
 }

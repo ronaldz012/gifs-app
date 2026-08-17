@@ -72,12 +72,6 @@ export const routes: Routes = [
                 loadComponent: () =>
                   import('@features/inventory/pages/catalogs-page/catalogs-page'),
               },
-              {
-                path: 'providers',
-                title: 'Proveedores',
-                loadComponent: () =>
-                  import('@features/inventory/pages/providers-page/providers-page'),
-              },
             ],
           },
           {
@@ -106,6 +100,12 @@ export const routes: Routes = [
                 data: { module: 'inventory', feature: 'receptions' },
                 loadComponent: () =>
                   import('@features/inventory/pages/receptions-page/reception-details/reception-details'),
+              },
+              {
+                path: 'providers',
+                title: 'Proveedores',
+                loadComponent: () =>
+                  import('@features/inventory/pages/providers-page/providers-page'),
               },
             ],
           },

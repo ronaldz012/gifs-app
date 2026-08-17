@@ -16,7 +16,7 @@ import { ToastService } from '@core/services/toast-service';
       <!-- Header: volver + título + acciones -->
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-          <a routerLink="/inventory/products" class="btn-icon">
+          <a routerLink="/inventory/receptions" class="btn-icon">
             <span class="material-icons text-base">arrow_back</span>
           </a>
           <h1 class="text-lg font-black text-text-main">Proveedores</h1>

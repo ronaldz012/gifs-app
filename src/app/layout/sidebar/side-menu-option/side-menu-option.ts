@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, input, output} from '@angular/core';
-import { RouterLink, RouterLinkActive} from "@angular/router";
-import { Module } from '@features/auth/models/LoginResponse';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { SessionFeatureDto } from '@features/auth/models/LoginResponse';
 
 @Component({
   selector: 'app-side-menu-option',
@@ -9,7 +9,10 @@ import { Module } from '@features/auth/models/LoginResponse';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class SideMenuOption {
-  modules    = input.required<Module[]>();
+  features = input.required<SessionFeatureDto[]>();
   onNavigate = output<void>();
 
+  routeSegments(route: string): string[] {
+    return ['/', ...route.split('/').filter(Boolean)];
+  }
 }

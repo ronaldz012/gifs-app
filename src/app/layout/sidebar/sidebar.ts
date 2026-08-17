@@ -4,7 +4,7 @@ import SideMenuOption from './side-menu-option/side-menu-option';
 import { SideBarService } from '@layout/services/side-bar-service';
 import { AuthService } from '@features/auth/services/auth-service';
 import { CurrentUserService } from '@features/auth/services/current-user-service';
-import { Module } from '@features/auth/models/LoginResponse';
+import { SessionFeatureDto } from '@features/auth/models/LoginResponse';
 
 @Component({
   selector: 'app-sidebar',
@@ -67,7 +67,7 @@ import { Module } from '@features/auth/models/LoginResponse';
           </a>
         </nav>
 
-        <app-side-menu-option [modules]="modules()" (onNavigate)="sidebarSvc.close()" />
+        <app-side-menu-option [features]="features()" (onNavigate)="sidebarSvc.close()" />
 
         @if (currentUser.user()?.isAdmin) {
           <div class="mt-auto px-2 py-2 border-t border-border">
@@ -102,7 +102,7 @@ export default class Sidebar {
   readonly authService = inject(AuthService);
   readonly sidebarSvc = inject(SideBarService);
   readonly currentUser = inject(CurrentUserService);
-  readonly modules = signal<Module[]>(this.authService.getModules());
+  readonly features = signal<SessionFeatureDto[]>(this.authService.getFeatures());
   readonly ready = signal(false);
 
   constructor() {

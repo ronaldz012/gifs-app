@@ -30,12 +30,11 @@ export default class DashboardPage implements OnInit {
   canSeeClosure = computed(() => this.permissionService.canRead('sales', 'pos'));
   hasWidgets = computed(() => this.canSeeToday() || this.canSeeClosure());
 
-  menuFeatures = computed(() => {
-    const modules = this.authService.getModules();
-    return modules.flatMap((m) =>
-      m.features.filter((f) => f.isMenu).map((f) => ({ moduleRoute: m.route, feature: f })),
-    );
-  });
+  menuFeatures = computed(() => this.authService.getFeatures().filter((f) => f.isMenu));
+
+  routeSegments(route: string): string[] {
+    return ['/', ...route.split('/').filter(Boolean)];
+  }
 
   ngOnInit(): void {
     this.dashboardService.getTodaySales().subscribe({

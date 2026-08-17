@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { FeaturePermission } from '@core/auth/feature-guard';
 import { BranchContextService } from '@core/services/branch-context-service';
 
-
 /**
  * Uso en componentes:
  *
@@ -22,12 +21,9 @@ export class PermissionService {
     const active = this.branchContext.active();
     if (!active) return false;
 
-    const mod = active.modules.find(m => m.route === moduleRoute);
-    if (!mod) return false;
-
-    const feature = mod.features.find(f => f.route === featureRoute);
+    const feature = active.features.find((f) => f.route === `${moduleRoute}/${featureRoute}`);
     if (!feature) return false;
-    return feature.permission.includes('*') || feature.permission.includes(permission);
+    return feature.permissions.includes('*') || feature.permissions.includes(permission);
   }
 
   canRead(moduleRoute: string, featureRoute: string): boolean {
