@@ -1,10 +1,9 @@
-import { Component, inject, HostListener, signal, afterNextRender } from '@angular/core';
+import { Component, computed, inject, HostListener, signal, afterNextRender } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import SideMenuOption from './side-menu-option/side-menu-option';
 import { SideBarService } from '@layout/services/side-bar-service';
-import { AuthService } from '@features/auth/services/auth-service';
 import { CurrentUserService } from '@features/auth/services/current-user-service';
-import { SessionFeatureDto } from '@features/auth/models/LoginResponse';
+import { BranchContextService } from '@core/services/branch-context-service';
 
 @Component({
   selector: 'app-sidebar',
@@ -99,11 +98,12 @@ import { SessionFeatureDto } from '@features/auth/models/LoginResponse';
   `,
 })
 export default class Sidebar {
-  readonly authService = inject(AuthService);
   readonly sidebarSvc = inject(SideBarService);
   readonly currentUser = inject(CurrentUserService);
-  readonly features = signal<SessionFeatureDto[]>(this.authService.getFeatures());
+  readonly branchContext = inject(BranchContextService);
   readonly ready = signal(false);
+
+  readonly features = computed(() => this.branchContext.active()?.features ?? []);
 
   constructor() {
     afterNextRender(() => this.ready.set(true));

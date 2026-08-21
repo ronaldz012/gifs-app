@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DashboardService } from '../../services/dashboard-service';
@@ -7,17 +7,19 @@ import { LastClosureSummaryDto } from '../../dtos/last-closure-summary-dto';
 import { PermissionService } from '@features/auth/services/permmision-service';
 import { CurrentUserService } from '@features/auth/services/current-user-service';
 import { AuthService } from '@features/auth/services/auth-service';
+import { BranchContextService } from '@core/services/branch-context-service';
 
 @Component({
   selector: 'app-dashboard-page',
   imports: [CurrencyPipe, DatePipe, RouterLink],
   templateUrl: './dashboard-page.html',
 })
-export default class DashboardPage implements OnInit {
+export default class DashboardPage {
   private dashboardService = inject(DashboardService);
   private permissionService = inject(PermissionService);
   private currentUserService = inject(CurrentUserService);
   private authService = inject(AuthService);
+  private branchContext = inject(BranchContextService);
 
   today = signal<TodaySalesDto | null>(null);
   lastClosure = signal<LastClosureSummaryDto | null>(null);
@@ -40,25 +42,36 @@ export default class DashboardPage implements OnInit {
     return ['/', ...route.split('/').filter(Boolean)];
   }
 
-  ngOnInit(): void {
-    if (this.canSeeToday()) {
-      this.dashboardService.getTodaySales().subscribe({
-        next: (d) => this.today.set(d),
-        error: () => this.today.set(null),
-        complete: () => this.loadingToday.set(false),
-      });
-    } else {
-      this.loadingToday.set(false);
-    }
+  constructor() {
+    // Reacciona al branch activo: cuando cambia, reinicia los widgets y recarga
+    effect(() => {
+      // Lee el branch activo para establecer dependencia reactiva
+      this.branchContext.active();
 
-    if (this.canSeeClosure()) {
-      this.dashboardService.getLastClosure().subscribe({
-        next: (d) => this.lastClosure.set(d),
-        error: () => this.lastClosure.set(null),
-        complete: () => this.loadingClosure.set(false),
-      });
-    } else {
-      this.loadingClosure.set(false);
-    }
+      this.today.set(null);
+      this.lastClosure.set(null);
+      this.loadingToday.set(true);
+      this.loadingClosure.set(true);
+
+      if (this.canSeeToday()) {
+        this.dashboardService.getTodaySales().subscribe({
+          next: (d) => this.today.set(d),
+          error: () => this.today.set(null),
+          complete: () => this.loadingToday.set(false),
+        });
+      } else {
+        this.loadingToday.set(false);
+      }
+
+      if (this.canSeeClosure()) {
+        this.dashboardService.getLastClosure().subscribe({
+          next: (d) => this.lastClosure.set(d),
+          error: () => this.lastClosure.set(null),
+          complete: () => this.loadingClosure.set(false),
+        });
+      } else {
+        this.loadingClosure.set(false);
+      }
+    });
   }
 }

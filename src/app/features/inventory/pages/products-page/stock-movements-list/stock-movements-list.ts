@@ -14,7 +14,7 @@ import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 
 @Component({
   selector: 'app-stock-movements-list',
-  imports: [SkeletonList, Paginator, NgClass, SmartDatePipe, RouterLink],
+  imports: [SkeletonList, Paginator, NgClass, SmartDatePipe],
   templateUrl: './stock-movements-list.html',
   styles: [
     `

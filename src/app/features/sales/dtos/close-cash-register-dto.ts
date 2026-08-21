@@ -1,3 +1,3 @@
 export interface CloseCashRegisterDto {
-  closingBalance: number;
+  RealCountedAmount: number;
 }

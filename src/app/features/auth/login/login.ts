@@ -1,51 +1,24 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '../services/auth-service';
-import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [],
   templateUrl: './login.html',
 })
 export default class Login {
-  loginForm = new FormGroup({
-    emailOrUsername: new FormControl('', { validators: [Validators.required], nonNullable: true }),
-    password: new FormControl('', {
-      validators: [Validators.required, Validators.minLength(4)],
-      nonNullable: true,
-    }),
-  });
-
-  private authService = inject(AuthService);
-  private router = inject(Router);
-
+  private auth0 = inject(Auth0Service);
   loading = signal(false);
   errorMessage = signal<string | null>(null);
 
-  onSubmit() {
-    if (this.loginForm.invalid) return;
+  onLogin() {
     this.loading.set(true);
     this.errorMessage.set(null);
-
-    this.authService
-      .login(this.loginForm.value.emailOrUsername!, this.loginForm.value.password!)
-      .subscribe({
-        next: () => {
-          this.loading.set(false);
-          this.router.navigate(['/dashboard']);
-        },
-        error: (err: HttpErrorResponse) => {
-          this.loading.set(false);
-          if (err.status === 404) {
-            this.errorMessage.set('Usuario no encontrado.');
-          } else if (err.status === 400) {
-            this.errorMessage.set('Contraseña incorrecta.');
-          } else {
-            this.errorMessage.set('Error al iniciar sesión. Intenta de nuevo.');
-          }
-        },
-      });
+    this.auth0.loginWithRedirect().subscribe({
+      error: () => {
+        this.loading.set(false);
+        this.errorMessage.set('Error al iniciar sesión. Intenta de nuevo.');
+      },
+    });
   }
 }

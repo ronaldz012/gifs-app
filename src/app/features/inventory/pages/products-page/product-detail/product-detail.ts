@@ -27,7 +27,6 @@ import { PermissionService } from '@features/auth/services/permmision-service';
     AdjustStockModal,
     AddVariantModal,
     ConfirmActionModal,
-    RouterLink,
     SkeletonList,
   ],
   template: `

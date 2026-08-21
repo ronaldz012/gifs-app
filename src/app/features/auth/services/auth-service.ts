@@ -6,7 +6,8 @@ import { environment } from 'environments/environment';
 import { CurrentUserService } from './current-user-service';
 import { TenantService } from './tenant-service';
 import { SessionService } from './session-service';
-import LoginResponse, { SessionFeatureDto, SessionState } from '../models/LoginResponse';
+import { AuthService as Auth0Service } from '@auth0/auth0-angular';
+import { SessionFeatureDto, SessionState } from '../models/LoginResponse';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -14,27 +15,9 @@ export class AuthService {
   private readonly branchContext = inject(BranchContextService);
   private readonly tenantService = inject(TenantService);
   private readonly sessionService = inject(SessionService);
+  private readonly auth0 = inject(Auth0Service);
   private readonly http = inject(HttpClient);
   private readonly url = environment.BACKEND_URL + '/api/Auth';
-
-  login(emailOrUsername: string, password: string) {
-    return this.http
-      .post<LoginResponse>(
-        this.url + '/Login',
-        { email: emailOrUsername, password },
-        {
-          headers: { 'X-Forwarded-Host': 'livican' },
-        },
-      )
-      .pipe(
-        tap((res) => {
-          if (res == null) return;
-          this.currentUserService.set(res.session.user);
-          this.branchContext.initialize(res.session.branches);
-          this.sessionService.markRestored();
-        }),
-      );
-  }
 
   authMe(): Observable<SessionState> {
     return this.http.get<SessionState>(`${this.url}/Me`);
@@ -59,6 +42,7 @@ export class AuthService {
     this.currentUserService.clear();
     this.branchContext.clear();
     this.sessionService.clear();
+    this.auth0.logout({ logoutParams: { returnTo: window.location.origin } });
   }
 
   getFeatures(): SessionFeatureDto[] {

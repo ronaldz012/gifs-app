@@ -353,7 +353,7 @@ export default class CloseRegisterPage implements OnInit {
     this.submitting.set(true);
     this.closeError.set(null);
 
-    this.cashRegisterService.closeRegister({ closingBalance: this.closingBalance() }).subscribe({
+    this.cashRegisterService.closeRegister({ RealCountedAmount: this.closingBalance() }).subscribe({
       next: () => {
         this.router.navigate(['/sales/pos']);
       },

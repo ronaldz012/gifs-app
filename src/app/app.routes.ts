@@ -94,18 +94,18 @@ export const routes: Routes = [
                   import('@features/inventory/pages/receptions-page/reception-form/reception-form'),
               },
               {
+                path: 'providers',
+                title: 'Proveedores',
+                loadComponent: () =>
+                  import('@features/inventory/pages/providers-page/providers-page'),
+              },
+              {
                 path: ':id',
                 title: 'Detalle de Recepción',
                 canActivate: [featureGuard],
                 data: { module: 'inventory', feature: 'receptions' },
                 loadComponent: () =>
                   import('@features/inventory/pages/receptions-page/reception-details/reception-details'),
-              },
-              {
-                path: 'providers',
-                title: 'Proveedores',
-                loadComponent: () =>
-                  import('@features/inventory/pages/providers-page/providers-page'),
               },
             ],
           },

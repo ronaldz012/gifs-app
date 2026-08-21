@@ -6,9 +6,6 @@ import { SessionState } from '../models/LoginResponse';
 import { CurrentUserService } from './current-user-service';
 import { BranchContextService } from '@core/services/branch-context-service';
 
-interface AuthMeResponse {
-  sessionState: SessionState;
-}
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -24,9 +21,9 @@ export class SessionService {
     if (this._restored) return of(void 0);
     if (this.inflight$) return this.inflight$;
 
-    this.inflight$ = this.http.get<AuthMeResponse>(`${this.url}/Me`).pipe(
+    this.inflight$ = this.http.get<SessionState>(`${this.url}/Me`).pipe(
       tap(res => {
-        const session = res.sessionState;
+        const session = res;
         this.currentUser.set(session.user);
         this.branchContext.initialize(session.branches);
         this._restored = true;
