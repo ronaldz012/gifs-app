@@ -10,6 +10,8 @@ export interface ProductSearchResult {
   categoryName: string;
   gender: Gender;
   isActive?: boolean;
+  variantsCount?: number;
+  createdAt?: string;
   productVariants: ProductVariantOption[];
 }
 export interface ProductVariantOption {
@@ -20,4 +22,5 @@ export interface ProductVariantOption {
   colorId: GUID;
   colorName: string;
   price: number;
+  averageCost?: number;
 }

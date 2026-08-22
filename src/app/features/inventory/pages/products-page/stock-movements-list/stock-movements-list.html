@@ -34,11 +34,12 @@
       <!-- Header columnas — Solo Desktop (lg) -->
       <div
         class="hidden px-4 py-3 border-b border-border bg-bg-muted lg:grid font-inter text-xs font-semibold uppercase tracking-wider text-text-soft"
-        style="grid-template-columns: 10rem 11rem 7rem 12rem 1fr 4rem"
+        style="grid-template-columns: 10rem 11rem 5rem 6rem 12rem 1fr 4rem"
       >
         <span>Fecha</span>
         <span>Tipo de Movimiento</span>
-        <span class="text-right pr-4">Cantidad</span>
+        <span class="text-right pr-4">Cant.</span>
+        <span class="text-right pr-4">Costo</span>
         <span>Origen / Destino</span>
         <span>Notas</span>
         <span></span>
@@ -91,6 +92,7 @@
               <!-- Usuario y Notas -->
               <p class="text-xs text-text-muted truncate">
                 <span class="font-semibold">{{ m.userName }}</span>
+                · costo {{ m.unitCost | currency: 'BOB':'symbol':'1.2-2' }}
                 {{ m.notes ? '· ' + m.notes : '' }}
               </p>
 
@@ -108,7 +110,7 @@
             <!-- ====== DESKTOP: Fila tipo Tabla ====== -->
             <div
               class="group hidden items-center lg:grid px-4 py-2.5 transition-colors duration-150 hover:bg-bg-muted"
-              style="grid-template-columns: 10rem 11rem 7rem 12rem 1fr 4rem"
+              style="grid-template-columns: 10rem 11rem 5rem 6rem 12rem 1fr 4rem"
             >
               <!-- Fecha -->
               <span class="text-xs font-mono text-text-main">
@@ -131,6 +133,11 @@
                 [ngClass]="getMovementColorClass(m.movementType, 'text')"
               >
                 {{ m.quantity > 0 ? '+' : '' }}{{ m.quantity }}
+              </span>
+
+              <!-- Costo -->
+              <span class="pr-4 text-right font-mono text-xs text-text-soft">
+                {{ m.unitCost | currency: 'BOB':'symbol':'1.2-2' }}
               </span>
 
               <!-- Sucursales / Usuario -->

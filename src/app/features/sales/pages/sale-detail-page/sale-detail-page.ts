@@ -107,29 +107,30 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
             <!-- MOBILE -->
             <ul class="flex flex-col divide-y divide-border md:hidden">
               @for (item of sale()!.items; track item.id) {
-                <li class="flex items-center gap-3 py-3">
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-text-main truncate">
-                      {{ item.productDisplayName }}
-                    </p>
-                    <p class="field-label">
-                      <span class="font-mono text-text-muted">{{ item.productSku }}</span>
-                    </p>
+                <li class="flex flex-col gap-1 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-text-main truncate">
+                        {{ item.productDisplayName }}
+                      </p>
+                      <p class="field-label">
+                        <span class="font-mono text-text-muted">{{ item.productSku }}</span>
+                      </p>
+                    </div>
+                    <div class="shrink-0 text-right">
+                      <p class="text-sm font-semibold tabular-nums text-text-main">
+                        {{ item.quantity }}
+                        <span class="text-xs font-normal text-text-soft">uds</span>
+                      </p>
+                      <p class="field-label tabular-nums">
+                        {{ item.unitPrice | currency: 'BOB' : 'symbol' : '1.2-2' }} c/u
+                      </p>
+                    </div>
                   </div>
-                  <div class="shrink-0 text-right">
-                    <p class="text-sm font-semibold tabular-nums text-text-main">
-                      {{ item.quantity }}
-                      <span class="text-xs font-normal text-text-soft">uds</span>
-                    </p>
-                    <p class="field-label tabular-nums">
-                      {{ item.unitPrice | currency: 'BOB' : 'symbol' : '1.2-2' }} c/u
-                    </p>
-                  </div>
-                  <div class="shrink-0 text-right w-20 hidden sm:block">
-                    <p class="text-sm tabular-nums text-text-muted">
-                      {{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}
-                    </p>
-                    <p class="field-label">subtotal</p>
+                  <div class="flex items-center justify-between text-xs font-mono">
+                    <span class="text-text-soft">Costo {{ item.unitCost | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                    <span class="text-feedback-success-text">Margen {{ ((item.unitPrice - (item.unitCost ?? 0))) * item.quantity | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                    <span class="font-bold text-text-main">{{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                   </div>
                 </li>
               }
@@ -144,8 +145,10 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                   >
                     <th class="text-left py-2 pr-4">SKU</th>
                     <th class="text-left py-2 pr-4">Producto</th>
+                    <th class="text-right py-2 px-4">Costo</th>
                     <th class="text-right py-2 px-4">P. Unitario</th>
                     <th class="text-right py-2 px-4">Cant.</th>
+                    <th class="text-right py-2 px-4">Margen</th>
                     <th class="text-right py-2 px-4">Descuento</th>
                     <th class="text-right py-2 pl-4">Subtotal</th>
                   </tr>
@@ -159,11 +162,17 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                       <td class="py-2.5 pr-4 text-text-main font-medium">
                         {{ item.productDisplayName }}
                       </td>
+                      <td class="py-2.5 px-4 text-right text-text-soft font-mono tabular-nums">
+                        {{ item.unitCost | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                      </td>
                       <td class="py-2.5 px-4 text-right text-text-muted font-mono tabular-nums">
                         {{ item.unitPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}
                       </td>
                       <td class="py-2.5 px-4 text-right text-text-main font-mono tabular-nums">
                         {{ item.quantity }} <span class="text-xs text-text-soft">uds</span>
+                      </td>
+                      <td class="py-2.5 px-4 text-right font-mono tabular-nums text-feedback-success-text">
+                        {{ ((item.unitPrice - (item.unitCost ?? 0))) * item.quantity | currency: 'BOB' : 'symbol' : '1.2-2' }}
                       </td>
                       <td
                         class="py-2.5 px-4 text-right text-feedback-error-text font-mono tabular-nums"

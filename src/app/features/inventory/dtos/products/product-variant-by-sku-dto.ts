@@ -8,6 +8,7 @@ export interface ProductVariantBySkuDto {
   colorId: GUID;
   colorName: string;
   price: number;
+  averageCost?: number;
   branchId: GUID;
   availableStockInBranch: number;
   productId: GUID;

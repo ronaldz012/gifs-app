@@ -4,6 +4,7 @@ export interface ClosureSaleItemDetailDto {
   productDisplayName: string;
   quantity: number;
   unitPrice: number;
+  unitCost?: number;
   discountAmount: number;
   finalPrice: number;
 }

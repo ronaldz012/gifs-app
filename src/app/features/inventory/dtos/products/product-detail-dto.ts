@@ -31,6 +31,7 @@ export interface ProductVariantDto {
   color: string;
   colorId: GUID;
   price: number;
+  averageCost?: number;
   totalAvailable: number;
   branchStocks: BranchStockDto[];
 }

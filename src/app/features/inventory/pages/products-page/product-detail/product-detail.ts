@@ -145,6 +145,8 @@ import { PermissionService } from '@features/auth/services/permmision-service';
                 <span>TALLA</span>
                 <span>COLOR</span>
                 <span>PRECIO</span>
+                <span>COSTO</span>
+                <span>MARGEN</span>
                 @for (branchId of branchKeys(); track branchId) {
                   <span
                     class="truncate text-center"
@@ -350,7 +352,7 @@ export default class ProductDetail implements OnInit {
     const branchCols = this.branchKeys()
       .map(() => '96px')
       .join(' ');
-    return `7.5rem 64px 88px 88px ${branchCols} 80px 128px`;
+    return `7.5rem 56px 64px 72px 64px 64px ${branchCols} 72px 128px`;
   });
 
   /** Sucursal activa para resaltar su inventario */

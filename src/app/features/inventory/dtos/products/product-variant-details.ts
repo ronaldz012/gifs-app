@@ -19,5 +19,7 @@ export interface ProductVariantDetailsDto {
 
   price: number;
 
+  averageCost?: number;
+
   currentStock: number;
 }

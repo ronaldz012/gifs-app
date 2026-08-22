@@ -10,6 +10,8 @@ export interface ListStockMovementDto {
 
   quantity: number;
 
+  unitCost?: number;
+
   userName: string;
 
   branchName: string;

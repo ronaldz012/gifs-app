@@ -21,6 +21,7 @@ export interface SaleItemDetailDto {
   productSku: string;
   productDisplayName: string;
   unitPrice: number;
+  unitCost?: number;
   quantity: number;
   discountAmount: number;
   finalPrice: number;

@@ -10,14 +10,16 @@ import {
 } from '@angular/core';
 import { debounceTime, distinctUntilChanged, finalize, Subject, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 
 import { ProductService } from '../../services/product-service';
 import { ProductSearchResult } from './product-search-result.component';
+import { Gender } from '../../interfaces/gender';
 
 @Component({
   selector: 'app-product-search',
   standalone: true,
-  imports: [],
+  imports: [SmartDatePipe],
   template: `
     <div class="relative w-full" (focusout)="handleFocusOut($event)">
       <div class="relative">
@@ -40,26 +42,48 @@ import { ProductSearchResult } from './product-search-result.component';
         }
       </div>
 
-      @if (showDropdown()) {
+       @if (showDropdown()) {
         <div
-          class="absolute z-50 mt-1 w-full bg-bg-elevated border border-border rounded-lg shadow-lg max-h-64 overflow-y-auto"
+          class="absolute z-50 mt-1 w-full bg-bg-elevated border border-border rounded-lg shadow-lg max-h-80 overflow-y-auto"
         >
           @for (product of visibleResults(); track product.id; let i = $index) {
             <button
               type="button"
               (click)="select(product)"
               (mouseenter)="activeIndex.set(i)"
-              class="w-full text-left px-3 py-2 text-[12px] transition-colors flex items-center gap-3
+              class="w-full text-left px-3 py-2.5 transition-colors flex flex-col gap-1
                      [&.active]:bg-accent-ui/10"
               [class.active]="i === activeIndex()"
               [class.bg-accent-ui/10]="i === activeIndex()"
             >
-              <span class="w-20 shrink-0 font-mono text-[11px] text-text-soft truncate">{{
-                product.internalCode
-              }}</span>
-              <span class="flex-1 font-medium text-text-main truncate">{{ product.name }}</span>
-              <span class="text-[11px] text-text-muted shrink-0">{{ product.brandName }}</span>
+              <div class="flex items-center gap-2 w-full">
+                <span class="font-mono text-[11px] text-text-soft shrink-0">{{ product.internalCode }}</span>
+                <span class="flex-1 font-medium text-text-main text-[13px] truncate">{{ product.name }}</span>
+                @if (product.variantsCount != null) {
+                  <span class="text-[10px] bg-bg-muted px-1.5 py-0.5 rounded text-text-muted shrink-0"
+                    >{{ product.variantsCount }} tallas/colores</span
+                  >
+                }
+              </div>
+              <div class="flex items-center gap-1.5 text-[11px] text-text-muted w-full truncate">
+                <span>{{ product.brandName }}</span>
+                <span class="text-text-soft">·</span> 
+                <span>{{ product.categoryName }}</span>
+                @if (product.gender != null) {
+                  <span class="text-text-soft">·</span>
+                  <span>{{ genderLabel(product.gender) }}</span>
+                }
+                @if (product.createdAt) {
+                  <span class="text-text-soft">·</span>
+                  <span>{{ product.createdAt | smartDate }}</span>
+                }
+              </div>
             </button>
+          }
+          @if (visibleResults().length === 10) {
+            <div class="px-3 py-1.5 text-[11px] text-text-soft bg-bg-muted/50 border-t border-border text-center">
+              Mostrando los primeros 10 — refina tu búsqueda
+            </div>
           }
           @if (allowCreate()) {
             <button
@@ -178,6 +202,10 @@ export class ProductSearch implements OnInit {
   onCreateNew(): void {
     this.isOpen.set(false);
     this.createNew.emit(this.query());
+  }
+
+  genderLabel(g: Gender | number): string {
+    return Gender[g as Gender] ?? '';
   }
 
   onKeyDown(event: KeyboardEvent): void {

@@ -9,12 +9,12 @@ import { ProductVariantDetailsDto } from '@features/inventory/dtos/products/prod
 import { ProductService } from '@features/inventory/services/product-service';
 import SkeletonList from '../../../../../shared/ui/skeleton-list/skeleton-list';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
-import { NgClass } from '@angular/common';
+import { CurrencyPipe, NgClass } from '@angular/common';
 import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 
 @Component({
   selector: 'app-stock-movements-list',
-  imports: [SkeletonList, Paginator, NgClass, SmartDatePipe],
+  imports: [SkeletonList, Paginator, NgClass, SmartDatePipe, CurrencyPipe],
   templateUrl: './stock-movements-list.html',
   styles: [
     `

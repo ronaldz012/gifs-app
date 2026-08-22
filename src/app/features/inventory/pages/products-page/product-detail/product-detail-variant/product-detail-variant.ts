@@ -17,6 +17,8 @@ import { PermissionService } from '@features/auth/services/permmision-service';
       <span class="field-value">{{ variant().size }}</span>
       <span class="field-value">{{ variant().color }}</span>
       <span class="field-value">{{ variant().price | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+      <span class="field-value text-text-soft">{{ variant().averageCost | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+      <span class="field-value font-mono" [class.text-feedback-success-text]="(variant().price - (variant().averageCost ?? 0)) > 0" [class.text-text-soft]="(variant().price - (variant().averageCost ?? 0)) <= 0">{{ ((variant().price - (variant().averageCost ?? 0))) | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
       @for (branchId of branchKeys(); track branchId) {
         <span
           class="tabular-nums text-center"
@@ -75,6 +77,8 @@ import { PermissionService } from '@features/auth/services/permmision-service';
         </p>
         <p class="text-xs text-text-muted mt-0.5">
           {{ variant().price | currency: 'BOB' : 'symbol' : '1.2-2' }}
+          · costo {{ variant().averageCost | currency: 'BOB' : 'symbol' : '1.2-2' }}
+          · margen {{ ((variant().price - (variant().averageCost ?? 0))) | currency: 'BOB' : 'symbol' : '1.2-2' }}
           ·
           <span class="font-medium text-feedback-success-text"
             >{{ variant().totalAvailable }} u</span
