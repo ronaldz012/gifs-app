@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProviderService } from '@features/inventory/services/provider-service';
 import CreateProvider from '@features/inventory/components/create-provider/create-provider';
 import EditProvider from '@features/inventory/components/edit-provider/edit-provider';
@@ -7,6 +7,7 @@ import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/conf
 import { Provider } from '@features/inventory/dtos/providers/provider';
 import { UpdateProviderDto } from '@features/inventory/dtos/providers/update-provider-dto';
 import { ToastService } from '@core/services/toast-service';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 
 @Component({
   selector: 'app-providers-page',
@@ -23,7 +24,7 @@ import { ToastService } from '@core/services/toast-service';
         </div>
         <button
           type="button"
-          (click)="showCreate.set(true)"
+          (click)="openCreate()"
           class="btn btn-primary btn-sm shrink-0 flex items-center gap-1"
         >
           <span class="material-icons text-base">add</span>
@@ -249,7 +250,7 @@ import { ToastService } from '@core/services/toast-service';
         [confirmLabel]="statusConfirm()!.isActive ? 'Sí, desactivar' : 'Sí, activar'"
         [submitting]="saving()"
         (confirm)="onStatusConfirm()"
-        (close)="statusConfirm.set(null)"
+        (close)="closeModal()"
       />
     }
   `,
@@ -257,6 +258,8 @@ import { ToastService } from '@core/services/toast-service';
 export default class ProvidersPage {
   private providerService = inject(ProviderService);
   private toastService = inject(ToastService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   items = signal<Provider[]>([]);
   loading = signal(false);
@@ -282,6 +285,26 @@ export default class ProvidersPage {
 
   constructor() {
     this.load();
+    this.route.queryParamMap.subscribe((params) => {
+      const modal = params.get('modal');
+      this.showCreate.set(modal === 'create');
+      const editId = getModalId(modal, 'edit');
+      const statusId = getModalId(modal, 'status');
+      if (editId) {
+        this.editing.set(this.items().find((p) => p.id === editId) ?? null);
+      } else {
+        this.editing.set(null);
+      }
+      if (statusId) {
+        this.statusConfirm.set(this.items().find((p) => p.id === statusId) ?? null);
+      } else {
+        this.statusConfirm.set(null);
+      }
+    });
+  }
+
+  closeModal(): void {
+    closeModal(this.router, this.route);
   }
 
   load(): void {
@@ -304,6 +327,10 @@ export default class ProvidersPage {
     this.load();
   }
 
+  openCreate(): void {
+    openModal(this.router, this.route, 'create');
+  }
+
   onCreated(provider: Provider): void {
     this.toastService.success('Proveedor creado');
     this.closeCreate();
@@ -311,11 +338,11 @@ export default class ProvidersPage {
   }
 
   openEdit(provider: Provider): void {
-    this.editing.set(provider);
+    openModal(this.router, this.route, `edit:${provider.id}`);
   }
 
   closeEdit(): void {
-    this.editing.set(null);
+    this.closeModal();
   }
 
   onUpdated(dto: UpdateProviderDto): void {
@@ -333,7 +360,7 @@ export default class ProvidersPage {
   }
 
   openStatusConfirm(provider: Provider): void {
-    this.statusConfirm.set(provider);
+    openModal(this.router, this.route, `status:${provider.id}`);
   }
 
   onStatusConfirm(): void {
@@ -344,13 +371,13 @@ export default class ProvidersPage {
         this.saving.set(false);
         this.items.update((list) => list.map((p) => (p.id === id ? { ...p, isActive } : p)));
         this.toastService.success(isActive ? 'Proveedor activado' : 'Proveedor desactivado');
-        this.statusConfirm.set(null);
+        this.closeModal();
       },
       error: () => this.saving.set(false),
     });
   }
 
   closeCreate(): void {
-    this.showCreate.set(false);
+    this.closeModal();
   }
 }

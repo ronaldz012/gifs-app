@@ -17,6 +17,7 @@ import { UpdateProductVariantDto } from '../../../dtos/products/update-product-v
 import { CreateProductVariantDto } from '../../../dtos/products/create-product-variant-dto';
 import { ToastService } from '@core/services/toast-service';
 import { PermissionService } from '@features/auth/services/permmision-service';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 
 @Component({
   selector: 'app-product-detail',
@@ -64,7 +65,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
               <div class="flex gap-2 shrink-0">
                 @if (perm.canUpdate('inventory', 'products')) {
                   <button
-                    (click)="showToggleStatus.set(true)"
+                    (click)="openToggleStatus()"
                     class="btn-secondary"
                     [title]="p.isActive ? 'Desactivar producto' : 'Activar producto'"
                   >
@@ -73,13 +74,13 @@ import { PermissionService } from '@features/auth/services/permmision-service';
                       p.isActive ? 'Desactivar' : 'Activar'
                     }}</span>
                   </button>
-                  <button (click)="showUpdateProduct.set(true)" class="btn-primary" title="Editar">
+                  <button (click)="openUpdateProduct()" class="btn-primary" title="Editar">
                     <span class="material-icons text-base leading-none">edit</span>
                     <span class="hidden sm:inline">Editar</span>
                   </button>
                 }
                 @if (perm.canDelete('inventory', 'products')) {
-                  <button (click)="showDeleteProduct.set(true)" class="btn-danger" title="Eliminar">
+                  <button (click)="openDeleteProduct()" class="btn-danger" title="Eliminar">
                     <span class="material-icons text-base leading-none">delete</span>
                     <span class="hidden sm:inline">Eliminar</span>
                   </button>
@@ -127,7 +128,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
                 {{ p.variants.length === 1 ? 'talla/color' : 'tallas/colores' }}
               </p>
               @if (perm.canUpdate('inventory', 'products')) {
-                <button (click)="onAddVariant()" class="btn-secondary btn-sm">
+                <button (click)="openAddVariant()" class="btn-secondary btn-sm">
                   <span class="material-icons text-base leading-none">add</span>
                   Agregar
                 </button>
@@ -211,7 +212,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
         [product]="product()!"
         [submitting]="submitting()"
         (save)="onUpdateProduct($event)"
-        (close)="showUpdateProduct.set(false)"
+        (close)="closeModal()"
       />
     }
 
@@ -225,7 +226,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
         confirmButtonClass="bg-red-500 hover:bg-red-600"
         [submitting]="submitting()"
         (confirm)="onDeleteProduct()"
-        (close)="showDeleteProduct.set(false)"
+        (close)="closeModal()"
       />
     }
 
@@ -242,7 +243,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
         submittingLabel="Guardando..."
         [submitting]="submitting()"
         (confirm)="onToggleStatus()"
-        (close)="showToggleStatus.set(false)"
+        (close)="closeModal()"
       />
     }
 
@@ -252,7 +253,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
         [variant]="editingVariant()!"
         [submitting]="submitting()"
         (save)="onUpdateVariant($event)"
-        (close)="editingVariant.set(null)"
+        (close)="closeModal()"
       />
     }
 
@@ -268,7 +269,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
         confirmButtonClass="bg-red-500 hover:bg-red-600"
         [submitting]="submitting()"
         (confirm)="DeleteVariant()"
-        (close)="deletingVariant.set(null)"
+        (close)="closeModal()"
       />
     }
 
@@ -280,7 +281,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
         [currentBranchName]="activeBranchName()"
         [submitting]="submitting()"
         (save)="onSaveStockAdjust($event)"
-        (close)="adjustingStockVariant.set(null)"
+        (close)="closeModal()"
       />
     }
 
@@ -290,7 +291,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
         [existingVariants]="product()!.variants"
         [submitting]="submitting()"
         (save)="onAddVariantSave($event)"
-        (close)="showAddVariant.set(false)"
+        (close)="closeModal()"
       />
     }
   `,
@@ -376,8 +377,6 @@ export default class ProductDetail implements OnInit {
   adjustingStockVariant = signal<ProductVariantDto | null>(null);
   /** Modal de agregar talla/color abierto o no */
   showAddVariant = signal(false);
-
-  /** Stock de la variante en la sucursal activa (para el modal de ajuste) */
   activeBranchStock = computed(() => {
     const v = this.adjustingStockVariant();
     if (!v) return 0;
@@ -396,6 +395,46 @@ export default class ProductDetail implements OnInit {
   });
 
   // ── Lifecycle ───────────────────────────────────────────────────────────
+  constructor() {
+    this.route.queryParamMap.subscribe((params) => {
+      const modal = params.get('modal');
+      this.showUpdateProduct.set(modal === 'product');
+      this.showDeleteProduct.set(modal === 'delete-product');
+      this.showToggleStatus.set(modal === 'toggle-status');
+      this.showAddVariant.set(modal === 'add-variant');
+
+      const editId = getModalId(modal, 'edit');
+      const deleteId = getModalId(modal, 'delete');
+      const adjustId = getModalId(modal, 'adjust');
+
+      if (editId) {
+        this.editingVariant.set(this.findVariant(editId));
+      } else {
+        this.editingVariant.set(null);
+      }
+
+      if (deleteId) {
+        this.deletingVariant.set(this.findVariant(deleteId));
+      } else {
+        this.deletingVariant.set(null);
+      }
+
+      if (adjustId) {
+        this.adjustingStockVariant.set(this.findVariant(adjustId));
+      } else {
+        this.adjustingStockVariant.set(null);
+      }
+    });
+  }
+
+  private findVariant(id: GUID): ProductVariantDto | null {
+    return this.product()?.variants.find((v) => v.id === id) ?? null;
+  }
+
+  closeModal(): void {
+    closeModal(this.router, this.route);
+  }
+
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
@@ -419,8 +458,24 @@ export default class ProductDetail implements OnInit {
   }
 
   // ── Child output handlers ───────────────────────────────────────────────
+  openUpdateProduct(): void {
+    openModal(this.router, this.route, 'product');
+  }
+
+  openDeleteProduct(): void {
+    openModal(this.router, this.route, 'delete-product');
+  }
+
+  openToggleStatus(): void {
+    openModal(this.router, this.route, 'toggle-status');
+  }
+
+  openAddVariant(): void {
+    openModal(this.router, this.route, 'add-variant');
+  }
+
   onEditVariant(v: ProductVariantDto): void {
-    this.editingVariant.set(v);
+    openModal(this.router, this.route, `edit:${v.id}`);
   }
 
   onDeleteVariant(v: ProductVariantDto): void {
@@ -438,7 +493,7 @@ export default class ProductDetail implements OnInit {
           );
           return;
         }
-        this.deletingVariant.set(v);
+        openModal(this.router, this.route, `delete:${v.id}`);
       },
       error: () => {
         this.submitting.set(false);
@@ -448,11 +503,7 @@ export default class ProductDetail implements OnInit {
   }
 
   onAdjustStock(v: ProductVariantDto): void {
-    this.adjustingStockVariant.set(v);
-  }
-
-  onAddVariant(): void {
-    this.showAddVariant.set(true);
+    openModal(this.router, this.route, `adjust:${v.id}`);
   }
 
   onAddVariantSave(dto: CreateProductVariantDto): void {
@@ -460,7 +511,7 @@ export default class ProductDetail implements OnInit {
     this.productService.createVariants(this.productId, { variants: [dto] }).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.showAddVariant.set(false);
+        this.closeModal();
         this.toastService.success('Talla/color agregada');
         this.loadProduct(this.productId);
       },
@@ -477,7 +528,7 @@ export default class ProductDetail implements OnInit {
     this.productService.update(this.productId, dto).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.showUpdateProduct.set(false);
+        this.closeModal();
         this.loadProduct(this.productId);
       },
       error: () => this.submitting.set(false),
@@ -502,7 +553,7 @@ export default class ProductDetail implements OnInit {
     this.productService.updateStatus(p.id, !p.isActive).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.showToggleStatus.set(false);
+        this.closeModal();
         this.toastService.success(p.isActive ? 'Producto desactivado' : 'Producto activado');
         this.loadProduct(p.id);
       },
@@ -519,7 +570,7 @@ export default class ProductDetail implements OnInit {
     this.productService.updateVariant(this.productId, variantId, dto).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.editingVariant.set(null);
+        this.closeModal();
         this.loadProduct(this.productId);
       },
       error: () => this.submitting.set(false),
@@ -532,7 +583,7 @@ export default class ProductDetail implements OnInit {
     this.productService.deleteVariant(this.productId, variantId).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.deletingVariant.set(null);
+        this.closeModal();
         this.toastService.success('Talla/color eliminada');
         this.loadProduct(this.productId);
       },
@@ -542,7 +593,7 @@ export default class ProductDetail implements OnInit {
           this.toastService.error(
             'Esta variante está asociada a movimientos o transferencias y no se puede eliminar.',
           );
-          this.deletingVariant.set(null);
+          this.closeModal();
           return;
         }
         this.toastService.error('Error al eliminar la talla/color.');
@@ -556,7 +607,7 @@ export default class ProductDetail implements OnInit {
     this.productService.adjustVariantStock(this.productId, variantId, dto).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.adjustingStockVariant.set(null);
+        this.closeModal();
         this.loadProduct(this.productId);
       },
       error: () => this.submitting.set(false),

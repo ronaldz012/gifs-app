@@ -45,8 +45,6 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
               [transfer]="t"
               [index]="t.id"
               (viewDetail)="viewDetail.emit($event)"
-              (requestResolve)="requestResolve.emit($event)"
-              (requestCancel)="requestCancel.emit($event)"
             />
           }
         </ul>
@@ -89,6 +87,4 @@ export class TransferList {
   loading = input<boolean>(false);
 
   viewDetail = output<GUID>();
-  requestResolve = output<GUID>();
-  requestCancel = output<GUID>();
 }

@@ -1,6 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { form, required } from '@angular/forms/signals';
 import { ReceptionItem } from './reception-item/reception-item';
 import CatalogueItemModal from '../catalogue-item-modal/catalogue-item-modal';
@@ -14,10 +14,17 @@ import { ProviderService } from '@features/inventory/services/provider-service';
 import { ItemForm, Reception, VariantForm } from '@features/inventory/models/variant-form.model';
 import { ProductSearchResult } from '@features/inventory/components/product-search/product-search-result.component';
 import ProviderSelectCtrl from '@features/inventory/components/provider-select-ctrl/provider-select-ctrl';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 
 @Component({
   selector: 'app-reception-form',
-  imports: [ReceptionItem, CurrencyPipe, CatalogueItemModal, CreateProductModal, ProviderSelectCtrl],
+  imports: [
+    ReceptionItem,
+    CurrencyPipe,
+    CatalogueItemModal,
+    CreateProductModal,
+    ProviderSelectCtrl,
+  ],
   templateUrl: './reception-form.html',
 })
 export default class ReceptionForm implements OnInit {
@@ -33,6 +40,7 @@ export default class ReceptionForm implements OnInit {
   private colorService = inject(ColorService);
   private brandService = inject(BrandService);
   private providerService = inject(ProviderService);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
 
   providerModel = signal<{ id: GUID | null; name: string }>({ id: null, name: '' });
@@ -68,6 +76,29 @@ export default class ReceptionForm implements OnInit {
       ),
   );
 
+  constructor() {
+    this.route.queryParamMap.subscribe((params) => {
+      const modal = params.get('modal');
+      this.showAddCatalogueModal.set(modal === 'catalogue');
+      this.showCreateProductModal.set(modal === 'product');
+
+      const editId = getModalId(modal, 'edit');
+      if (editId) {
+        const idx = parseInt(editId, 10);
+        const item = this.reception().items[idx] ?? null;
+        this.editingItem.set(item ? { index: idx, item } : null);
+        this.showEditModal.set(!!item);
+      } else {
+        this.editingItem.set(null);
+        this.showEditModal.set(false);
+      }
+    });
+  }
+
+  closeModal(): void {
+    closeModal(this.router, this.route);
+  }
+
   updateNotes(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.reception.update((r) => ({ ...r, notes: target.value }));
@@ -82,7 +113,8 @@ export default class ReceptionForm implements OnInit {
       return;
     }
     this.reception.update((r) => ({ ...r, items: [...r.items, group.item] }));
-    this.showAddCatalogueModal.set(false);
+    this.pendingProduct.set(null);
+    this.closeModal();
   }
 
   updateItem(itemToUpdate: { index: number | null; item: ItemForm }): void {
@@ -91,8 +123,8 @@ export default class ReceptionForm implements OnInit {
       items[itemToUpdate.index!] = itemToUpdate.item;
       return { ...r, items };
     });
-    this.showEditModal.set(false);
-    this.editingItem.set(null);
+    this.pendingCreated.set(null);
+    this.closeModal();
   }
 
   removeGroup(index: number): void {
@@ -144,44 +176,38 @@ export default class ReceptionForm implements OnInit {
   }
 
   editGroup(index: number) {
-    const edit = this.reception().items[index];
     this.pendingCreated.set(null);
-    this.editingItem.set({ index, item: edit });
-    this.showEditModal.set(true);
+    openModal(this.router, this.route, `edit:${index}`);
   }
 
   onNotFound(query: string): void {
     this.creatingFromEdit.set(this.showEditModal());
-    this.showEditModal.set(false);
-    this.showAddCatalogueModal.set(false);
     this.pendingName.set(query);
-    this.showCreateProductModal.set(true);
+    openModal(this.router, this.route, 'product');
   }
 
   onProductCreated(product: ProductSearchResult): void {
-    this.showCreateProductModal.set(false);
     this.pendingProduct.set(product);
     if (this.creatingFromEdit()) {
       this.creatingFromEdit.set(false);
       this.pendingCreated.set(product);
-      this.showEditModal.set(true);
+      openModal(this.router, this.route, 'edit:' + this.editingItem()!.index);
     } else {
-      this.showAddCatalogueModal.set(true);
+      openModal(this.router, this.route, 'catalogue');
     }
   }
 
   onCreateProductCancelled(): void {
-    this.showCreateProductModal.set(false);
     if (this.creatingFromEdit()) {
       this.creatingFromEdit.set(false);
-      this.showEditModal.set(true);
+      openModal(this.router, this.route, 'edit:' + this.editingItem()!.index);
     } else {
-      this.showAddCatalogueModal.set(true);
+      openModal(this.router, this.route, 'catalogue');
     }
   }
 
   openAddCatalogueModal(): void {
     this.pendingProduct.set(null);
-    this.showAddCatalogueModal.set(true);
+    openModal(this.router, this.route, 'catalogue');
   }
 }

@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SizeService } from '@features/inventory/services/size-service';
 import CreateSize from '@features/inventory/components/create-size/create-size.component';
 import EditSize from '@features/inventory/components/edit-size/edit-size';
@@ -6,6 +7,7 @@ import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/conf
 import { Size } from '@features/inventory/dtos/sizes/size';
 import { UpdateSizeDto } from '@features/inventory/dtos/sizes/update-size-dto';
 import { ToastService } from '@core/services/toast-service';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 import CatalogList from './catalog-list';
 
 @Component({
@@ -50,7 +52,7 @@ import CatalogList from './catalog-list';
 
           <button
             type="button"
-            (click)="showCreate.set(true)"
+            (click)="openCreate()"
             class="btn btn-primary btn-sm flex items-center gap-1"
           >
             <span class="material-icons text-base">add</span>
@@ -174,7 +176,7 @@ import CatalogList from './catalog-list';
         [confirmLabel]="statusConfirm()!.isActive ? 'Sí, desactivar' : 'Sí, activar'"
         [submitting]="saving()"
         (confirm)="onStatusConfirm()"
-        (close)="statusConfirm.set(null)"
+        (close)="closeModal()"
       />
     }
   `,
@@ -182,6 +184,8 @@ import CatalogList from './catalog-list';
 export default class SizeList {
   readonly service = inject(SizeService);
   private toastService = inject(ToastService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   items = signal<Size[]>([]);
   loading = signal(false);
@@ -207,6 +211,33 @@ export default class SizeList {
 
   constructor() {
     this.load();
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      const modal = params.get('modal');
+      if (tab && tab !== 'tallas') {
+        this.showCreate.set(false);
+        this.editing.set(null);
+        this.statusConfirm.set(null);
+        return;
+      }
+      this.showCreate.set(modal === 'create');
+      const editId = getModalId(modal, 'edit');
+      const statusId = getModalId(modal, 'status');
+      if (editId) {
+        this.editing.set(this.items().find((b) => b.id === editId) ?? null);
+      } else {
+        this.editing.set(null);
+      }
+      if (statusId) {
+        this.statusConfirm.set(this.items().find((b) => b.id === statusId) ?? null);
+      } else {
+        this.statusConfirm.set(null);
+      }
+    });
+  }
+
+  closeModal(): void {
+    closeModal(this.router, this.route);
   }
 
   load(): void {
@@ -229,6 +260,10 @@ export default class SizeList {
     this.load();
   }
 
+  openCreate(): void {
+    openModal(this.router, this.route, 'create');
+  }
+
   onCreated(size: Size): void {
     this.toastService.success('Talla creada');
     this.closeCreate();
@@ -236,11 +271,11 @@ export default class SizeList {
   }
 
   openEdit(size: Size): void {
-    this.editing.set(size);
+    openModal(this.router, this.route, `edit:${ size.id }`);
   }
 
   closeEdit(): void {
-    this.editing.set(null);
+    this.closeModal();
   }
 
   onUpdated(dto: UpdateSizeDto): void {
@@ -258,7 +293,7 @@ export default class SizeList {
   }
 
   openStatusConfirm(size: Size): void {
-    this.statusConfirm.set(size);
+    openModal(this.router, this.route, `status:${ size.id }`);
   }
 
   onStatusConfirm(): void {
@@ -269,13 +304,13 @@ export default class SizeList {
         this.saving.set(false);
         this.items.update((list) => list.map((s) => (s.id === id ? { ...s, isActive } : s)));
         this.toastService.success(isActive ? 'Talla activada' : 'Talla desactivada');
-        this.statusConfirm.set(null);
+        this.closeModal();
       },
       error: () => this.saving.set(false),
     });
   }
 
   closeCreate(): void {
-    this.showCreate.set(false);
+    this.closeModal();
   }
 }

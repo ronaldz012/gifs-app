@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryService } from '@features/inventory/services/category-service';
 import { CreateCategory } from '@features/inventory/components/create-category/create-category.component';
 import EditCategory from '@features/inventory/components/edit-category/edit-category';
@@ -6,6 +7,7 @@ import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/conf
 import { Category } from '@features/inventory/dtos/categories/category-dto';
 import { UpdateCategoryDto } from '@features/inventory/dtos/categories/update-category-dto';
 import { ToastService } from '@core/services/toast-service';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 import CatalogList from './catalog-list';
 
 @Component({
@@ -50,7 +52,7 @@ import CatalogList from './catalog-list';
 
           <button
             type="button"
-            (click)="showCreate.set(true)"
+            (click)="openCreate()"
             class="btn btn-primary btn-sm flex items-center gap-1"
           >
             <span class="material-icons text-base">add</span>
@@ -174,7 +176,7 @@ import CatalogList from './catalog-list';
         [confirmLabel]="statusConfirm()!.isActive ? 'Sí, desactivar' : 'Sí, activar'"
         [submitting]="saving()"
         (confirm)="onStatusConfirm()"
-        (close)="statusConfirm.set(null)"
+        (close)="closeModal()"
       />
     }
   `,
@@ -182,6 +184,8 @@ import CatalogList from './catalog-list';
 export default class CategoryList {
   readonly service = inject(CategoryService);
   private toastService = inject(ToastService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   items = signal<Category[]>([]);
   loading = signal(false);
@@ -209,6 +213,33 @@ export default class CategoryList {
 
   constructor() {
     this.load();
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      const modal = params.get('modal');
+      if (tab && tab !== 'categorias') {
+        this.showCreate.set(false);
+        this.editing.set(null);
+        this.statusConfirm.set(null);
+        return;
+      }
+      this.showCreate.set(modal === 'create');
+      const editId = getModalId(modal, 'edit');
+      const statusId = getModalId(modal, 'status');
+      if (editId) {
+        this.editing.set(this.items().find((b) => b.id === editId) ?? null);
+      } else {
+        this.editing.set(null);
+      }
+      if (statusId) {
+        this.statusConfirm.set(this.items().find((b) => b.id === statusId) ?? null);
+      } else {
+        this.statusConfirm.set(null);
+      }
+    });
+  }
+
+  closeModal(): void {
+    closeModal(this.router, this.route);
   }
 
   load(): void {
@@ -231,6 +262,10 @@ export default class CategoryList {
     this.load();
   }
 
+  openCreate(): void {
+    openModal(this.router, this.route, 'create');
+  }
+
   onCreated(category: Category): void {
     this.toastService.success('Categoría creada');
     this.closeCreate();
@@ -238,11 +273,11 @@ export default class CategoryList {
   }
 
   openEdit(category: Category): void {
-    this.editing.set(category);
+    openModal(this.router, this.route, `edit:${ category.id }`);
   }
 
   closeEdit(): void {
-    this.editing.set(null);
+    this.closeModal();
   }
 
   onUpdated(dto: UpdateCategoryDto): void {
@@ -260,7 +295,7 @@ export default class CategoryList {
   }
 
   openStatusConfirm(category: Category): void {
-    this.statusConfirm.set(category);
+    openModal(this.router, this.route, `status:${ category.id }`);
   }
 
   onStatusConfirm(): void {
@@ -271,13 +306,13 @@ export default class CategoryList {
         this.saving.set(false);
         this.items.update((list) => list.map((c) => (c.id === id ? { ...c, isActive } : c)));
         this.toastService.success(isActive ? 'Categoría activada' : 'Categoría desactivada');
-        this.statusConfirm.set(null);
+        this.closeModal();
       },
       error: () => this.saving.set(false),
     });
   }
 
   closeCreate(): void {
-    this.showCreate.set(false);
+    this.closeModal();
   }
 }

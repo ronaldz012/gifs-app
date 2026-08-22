@@ -136,18 +136,12 @@
       @if (canCancel(t) || canResolve(t)) {
         <div class="flex flex-col gap-2">
           @if (canCancel(t)) {
-            <button
-              (click)="openCancelModal(t.id)"
-              class="btn-danger btn-sm w-full py-3 rounded-xl"
-            >
+            <button (click)="openCancelModal()" class="btn-danger btn-sm w-full py-3 rounded-xl">
               Cancelar transferencia
             </button>
           }
           @if (canResolve(t)) {
-            <button
-              (click)="openResolveModal(t.id)"
-              class="btn-primary btn-sm w-full py-3 rounded-xl"
-            >
+            <button (click)="openResolveModal()" class="btn-primary btn-sm w-full py-3 rounded-xl">
               Resolver
             </button>
           }
@@ -158,7 +152,7 @@
 </div>
 
 <!-- ── Modales ────────────────────────────────────────────────────────────── -->
-@if (resolveModalId() !== null) {
+@if (showResolveModal()) {
   <app-resolve-transfer-modal
     [submitting]="submitting()"
     (resolve)="onResolveConfirm($event)"
@@ -166,7 +160,7 @@
   />
 }
 
-@if (cancelModalId() !== null) {
+@if (showCancelModal()) {
   <app-confirm-action-modal
     title="¿Cancelar Transferencia?"
     description="Esta acción cancelará la transferencia seleccionada"

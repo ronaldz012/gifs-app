@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ColorService } from '@features/inventory/services/color-service';
 import CreateColor from '@features/inventory/components/create-color/create-color.component';
 import EditColor from '@features/inventory/components/edit-color/edit-color';
@@ -6,6 +7,7 @@ import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/conf
 import { Color } from '@features/inventory/dtos/colors/color';
 import { UpdateColorDto } from '@features/inventory/dtos/colors/update-color-dto';
 import { ToastService } from '@core/services/toast-service';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 import CatalogList from './catalog-list';
 
 @Component({
@@ -50,7 +52,7 @@ import CatalogList from './catalog-list';
 
           <button
             type="button"
-            (click)="showCreate.set(true)"
+            (click)="openCreate()"
             class="btn btn-primary btn-sm flex items-center gap-1"
           >
             <span class="material-icons text-base">add</span>
@@ -170,7 +172,7 @@ import CatalogList from './catalog-list';
         [confirmLabel]="statusConfirm()!.isActive ? 'Sí, desactivar' : 'Sí, activar'"
         [submitting]="saving()"
         (confirm)="onStatusConfirm()"
-        (close)="statusConfirm.set(null)"
+        (close)="closeModal()"
       />
     }
   `,
@@ -178,6 +180,8 @@ import CatalogList from './catalog-list';
 export default class ColorList {
   readonly service = inject(ColorService);
   private toastService = inject(ToastService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   items = signal<Color[]>([]);
   loading = signal(false);
@@ -203,6 +207,33 @@ export default class ColorList {
 
   constructor() {
     this.load();
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      const modal = params.get('modal');
+      if (tab && tab !== 'colores') {
+        this.showCreate.set(false);
+        this.editing.set(null);
+        this.statusConfirm.set(null);
+        return;
+      }
+      this.showCreate.set(modal === 'create');
+      const editId = getModalId(modal, 'edit');
+      const statusId = getModalId(modal, 'status');
+      if (editId) {
+        this.editing.set(this.items().find((b) => b.id === editId) ?? null);
+      } else {
+        this.editing.set(null);
+      }
+      if (statusId) {
+        this.statusConfirm.set(this.items().find((b) => b.id === statusId) ?? null);
+      } else {
+        this.statusConfirm.set(null);
+      }
+    });
+  }
+
+  closeModal(): void {
+    closeModal(this.router, this.route);
   }
 
   load(): void {
@@ -225,6 +256,10 @@ export default class ColorList {
     this.load();
   }
 
+  openCreate(): void {
+    openModal(this.router, this.route, 'create');
+  }
+
   onCreated(color: Color): void {
     this.toastService.success('Color creado');
     this.closeCreate();
@@ -232,11 +267,11 @@ export default class ColorList {
   }
 
   openEdit(color: Color): void {
-    this.editing.set(color);
+    openModal(this.router, this.route, `edit:${ color.id }`);
   }
 
   closeEdit(): void {
-    this.editing.set(null);
+    this.closeModal();
   }
 
   onUpdated(dto: UpdateColorDto): void {
@@ -254,7 +289,7 @@ export default class ColorList {
   }
 
   openStatusConfirm(color: Color): void {
-    this.statusConfirm.set(color);
+    openModal(this.router, this.route, `status:${ color.id }`);
   }
 
   onStatusConfirm(): void {
@@ -265,13 +300,13 @@ export default class ColorList {
         this.saving.set(false);
         this.items.update((list) => list.map((c) => (c.id === id ? { ...c, isActive } : c)));
         this.toastService.success(isActive ? 'Color activado' : 'Color desactivado');
-        this.statusConfirm.set(null);
+        this.closeModal();
       },
       error: () => this.saving.set(false),
     });
   }
 
   closeCreate(): void {
-    this.showCreate.set(false);
+    this.closeModal();
   }
 }

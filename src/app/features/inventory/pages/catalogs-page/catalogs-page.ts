@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import BrandList from './brand-list';
 import CategoryList from './category-list';
 import ColorList from './color-list';
@@ -41,7 +41,7 @@ const TABS: { key: CatalogTab; label: string }[] = [
         @for (tab of TABS; track tab.key) {
           <button
             type="button"
-            (click)="activeTab.set(tab.key)"
+            (click)="openTab(tab.key)"
             class="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px
                    hover:text-text-main focus:outline-none"
             [class.text-accent-ui]="activeTab() === tab.key"
@@ -69,6 +69,10 @@ const TABS: { key: CatalogTab; label: string }[] = [
 export default class CatalogsPage {
   readonly TABS = TABS;
   readonly CatalogTab = CatalogTab;
+
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
   activeTab = signal<CatalogTab>(CatalogTab.Marcas);
 
   private brandService = inject(BrandService);
@@ -81,5 +85,22 @@ export default class CatalogsPage {
     this.categoryService.load();
     this.colorService.load();
     this.sizeService.load();
+
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab') as CatalogTab | null;
+      if (tab && Object.values(CatalogTab).includes(tab)) {
+        this.activeTab.set(tab);
+      } else {
+        this.activeTab.set(CatalogTab.Marcas);
+      }
+    });
+  }
+
+  openTab(tab: CatalogTab): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab, modal: null },
+      queryParamsHandling: 'merge',
+    });
   }
 }

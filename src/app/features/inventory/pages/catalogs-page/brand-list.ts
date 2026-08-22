@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BrandService } from '@features/inventory/services/brand-service';
 import CreateBrand from '@features/inventory/components/create-brand/create-brand.component';
 import EditBrand from '@features/inventory/components/edit-brand/edit-brand';
@@ -7,6 +8,7 @@ import { Brand } from '@features/inventory/dtos/brands/brand-dto';
 import { UpdateBrandDto } from '@features/inventory/dtos/brands/update-brand-dto';
 import { ToastService } from '@core/services/toast-service';
 import CatalogList from './catalog-list';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 
 @Component({
   selector: 'app-brand-list',
@@ -50,7 +52,7 @@ import CatalogList from './catalog-list';
 
           <button
             type="button"
-            (click)="showCreate.set(true)"
+            (click)="openCreate()"
             class="btn btn-primary btn-sm flex items-center gap-1"
           >
             <span class="material-icons text-base">add</span>
@@ -184,7 +186,7 @@ import CatalogList from './catalog-list';
         [confirmLabel]="statusConfirm()!.isActive ? 'Sí, desactivar' : 'Sí, activar'"
         [submitting]="saving()"
         (confirm)="onStatusConfirm()"
-        (close)="statusConfirm.set(null)"
+        (close)="closeModal()"
       />
     }
   `,
@@ -192,6 +194,8 @@ import CatalogList from './catalog-list';
 export default class BrandList {
   readonly service = inject(BrandService);
   private toastService = inject(ToastService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   items = signal<Brand[]>([]);
   loading = signal(false);
@@ -219,6 +223,33 @@ export default class BrandList {
 
   constructor() {
     this.load();
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      const modal = params.get('modal');
+      if (tab && tab !== 'marcas') {
+        this.showCreate.set(false);
+        this.editing.set(null);
+        this.statusConfirm.set(null);
+        return;
+      }
+      this.showCreate.set(modal === 'create');
+      const editId = getModalId(modal, 'edit');
+      const statusId = getModalId(modal, 'status');
+      if (editId) {
+        this.editing.set(this.items().find((b) => b.id === editId) ?? null);
+      } else {
+        this.editing.set(null);
+      }
+      if (statusId) {
+        this.statusConfirm.set(this.items().find((b) => b.id === statusId) ?? null);
+      } else {
+        this.statusConfirm.set(null);
+      }
+    });
+  }
+
+  closeModal(): void {
+    closeModal(this.router, this.route);
   }
 
   load(): void {
@@ -241,6 +272,10 @@ export default class BrandList {
     this.load();
   }
 
+  openCreate(): void {
+    openModal(this.router, this.route, 'create');
+  }
+
   onCreated(brand: Brand): void {
     this.toastService.success('Marca creada');
     this.closeCreate();
@@ -248,11 +283,11 @@ export default class BrandList {
   }
 
   openEdit(brand: Brand): void {
-    this.editing.set(brand);
+    openModal(this.router, this.route, `edit:${brand.id}`);
   }
 
   closeEdit(): void {
-    this.editing.set(null);
+    this.closeModal();
   }
 
   onUpdated(dto: UpdateBrandDto): void {
@@ -270,7 +305,7 @@ export default class BrandList {
   }
 
   openStatusConfirm(brand: Brand): void {
-    this.statusConfirm.set(brand);
+    openModal(this.router, this.route, `status:${brand.id}`);
   }
 
   onStatusConfirm(): void {
@@ -281,13 +316,13 @@ export default class BrandList {
         this.saving.set(false);
         this.items.update((list) => list.map((b) => (b.id === id ? { ...b, isActive } : b)));
         this.toastService.success(isActive ? 'Marca activada' : 'Marca desactivada');
-        this.statusConfirm.set(null);
+        this.closeModal();
       },
       error: () => this.saving.set(false),
     });
   }
 
   closeCreate(): void {
-    this.showCreate.set(false);
+    this.closeModal();
   }
 }

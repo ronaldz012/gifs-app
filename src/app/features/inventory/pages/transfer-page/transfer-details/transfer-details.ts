@@ -8,6 +8,7 @@ import { TransferService } from '../../../services/transfer-service';
 import { TransferDirection, TransferStatus } from '../../../dtos/transfers/transfer-enums';
 import { StockTransferDetailDto } from '../../../dtos/transfers/stock-transfer-detail-dto';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
+import { closeModal, openModal } from '@shared/utils/modal-query';
 
 @Component({
   selector: 'app-transfer-details',
@@ -41,6 +42,10 @@ export default class TransferDetails implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
 
+  showResolveModal = signal(false);
+  showCancelModal = signal(false);
+  submitting = signal(false);
+
   goBack(): void {
     if (window.history.length > 1) {
       window.history.back();
@@ -49,13 +54,15 @@ export default class TransferDetails implements OnInit {
     }
   }
 
-  resolveModalId = signal<GUID | null>(null);
-  cancelModalId = signal<GUID | null>(null);
-  submitting = signal(false);
-
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
     this.loadDetail(id);
+
+    this.route.queryParamMap.subscribe((params) => {
+      const modal = params.get('modal');
+      this.showResolveModal.set(modal === 'resolve');
+      this.showCancelModal.set(modal === 'cancel');
+    });
   }
 
   private loadDetail(id: GUID): void {
@@ -73,45 +80,42 @@ export default class TransferDetails implements OnInit {
     });
   }
 
-  // ── Modal: Resolve ────────────────────────────────────────────────────────
-  openResolveModal(id: GUID): void {
-    this.resolveModalId.set(id);
+  openResolveModal(): void {
+    openModal(this.router, this.route, 'resolve');
   }
   closeResolveModal(): void {
-    this.resolveModalId.set(null);
+    closeModal(this.router, this.route);
   }
 
   onResolveConfirm(action: 'complete' | 'reject'): void {
-    const id = this.resolveModalId();
+    const id = this.transfer()?.id;
     if (!id) return;
     this.submitting.set(true);
     this.transferService.resolveTransfer(id, action).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.closeResolveModal();
-        this.router.navigate(['transfers']);
+        this.router.navigate(['inventory', 'transfers']);
       },
       error: () => this.submitting.set(false),
     });
   }
 
   // ── Modal: Cancel ─────────────────────────────────────────────────────────
-  openCancelModal(id: GUID): void {
-    this.cancelModalId.set(id);
+  openCancelModal(): void {
+    openModal(this.router, this.route, 'cancel');
   }
   closeCancelModal(): void {
-    this.cancelModalId.set(null);
+    closeModal(this.router, this.route);
   }
 
   onCancelConfirm(): void {
-    const id = this.cancelModalId();
+    const id = this.transfer()?.id;
     if (!id) return;
     this.submitting.set(true);
     this.transferService.cancelTransfer(id).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.closeCancelModal();
-        this.router.navigate(['transfers']);
+        this.router.navigate(['inventory', 'transfers']);
       },
       error: () => this.submitting.set(false),
     });

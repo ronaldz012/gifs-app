@@ -90,7 +90,9 @@
         </span>
         <span>
           Costo total:
-          <span class="font-extrabold text-accent-ui">{{ totalCost() | currency:'BOB':'symbol':'1.2-2' }}</span>
+          <span class="font-extrabold text-accent-ui">{{
+            totalCost() | currency: 'BOB' : 'symbol' : '1.2-2'
+          }}</span>
         </span>
       </div>
 
@@ -120,7 +122,7 @@
       [initialProduct]="pendingProduct()"
       [existingProductIds]="existingProductIds()"
       (confirm)="addGroup($event)"
-      (close)="showAddCatalogueModal.set(false)"
+      (close)="closeModal()"
       (notFound)="onNotFound($event)"
     />
   }
@@ -132,7 +134,7 @@
       [index]="editingItem()!.index"
       [initialProduct]="pendingCreated()"
       (confirm)="updateItem($event)"
-      (close)="showEditModal.set(false); editingItem.set(null)"
+      (close)="closeModal()"
       (notFound)="onNotFound($event)"
     />
   }

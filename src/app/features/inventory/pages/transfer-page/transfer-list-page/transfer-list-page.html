@@ -18,8 +18,6 @@
     [transfers]="transfers()"
     [loading]="loadingTransfers()"
     (viewDetail)="router.navigate(['inventory', 'transfers', $event])"
-    (requestResolve)="openResolveModal($event)"
-    (requestCancel)="openCancelModal($event)"
   />
 
   <!-- Estado vacío con filtros activos -->
@@ -57,23 +55,3 @@
     />
   }
 </div>
-
-<!-- ── Modales ────────────────────────────────────────────────────────────── -->
-@if (resolveModalId() !== null) {
-  <app-resolve-transfer-modal
-    [submitting]="submitting()"
-    (resolve)="onResolveConfirm($event)"
-    (close)="closeResolveModal()"
-  />
-}
-
-@if (cancelModalId() !== null) {
-  <app-confirm-action-modal
-    title="¿Cancelar Transferencia?"
-    description="Esta acción cancelará la transferencia seleccionada"
-    confirmLabel="Sí, Cancelar"
-    [submitting]="submitting()"
-    (confirm)="onCancelConfirm()"
-    (close)="closeCancelModal()"
-  />
-}
