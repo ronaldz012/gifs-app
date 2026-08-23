@@ -1,16 +1,19 @@
 <div class="w-full max-w-7xl mx-auto px-4 pb-4 md:px-6 md:pb-6">
-
   @switch (registerState()) {
     @case ('loading') {
       <div class="flex flex-col items-center justify-center gap-4 py-32">
-        <div class="w-10 h-10 border-4 border-border border-t-accent-ui rounded-full animate-spin"></div>
+        <div
+          class="w-10 h-10 border-4 border-border border-t-accent-ui rounded-full animate-spin"
+        ></div>
         <p class="text-sm text-text-soft">Verificando estado de caja...</p>
       </div>
     }
 
     @case ('closed') {
       <div class="flex items-center justify-center py-20">
-        <div class="w-full max-w-md bg-bg-surface border border-border rounded-2xl p-8 shadow-sm text-center space-y-6">
+        <div
+          class="w-full max-w-md bg-bg-surface border border-border rounded-2xl p-8 shadow-sm text-center space-y-6"
+        >
           <div class="w-20 h-20 mx-auto rounded-full bg-bg-muted flex items-center justify-center">
             <span class="material-icons text-[40px] text-text-soft/50">lock</span>
           </div>
@@ -67,7 +70,8 @@
 
     @case ('open') {
       @if (currentRegister(); as reg) {
-        <div class="flex items-center gap-2 px-3 py-2 mb-1 rounded-lg"
+        <div
+          class="flex items-center gap-2 px-3 py-2 mb-1 rounded-lg"
           [class.bg-feedback-success-bg/10]="registerDayStatus() === 'today'"
           [class.bg-feedback-warning-bg/15]="registerDayStatus() === 'yesterday'"
           [class.bg-feedback-error-bg/10]="registerDayStatus() === 'old'"
@@ -75,7 +79,8 @@
           [class.text-feedback-warning-text]="registerDayStatus() === 'yesterday'"
           [class.text-feedback-error-text]="registerDayStatus() === 'old'"
         >
-          <span class="w-2 h-2 rounded-full shrink-0"
+          <span
+            class="w-2 h-2 rounded-full shrink-0"
             [class.bg-feedback-success-text]="registerDayStatus() === 'today'"
             [class.bg-feedback-warning-text]="registerDayStatus() === 'yesterday'"
             [class.bg-feedback-error-text]="registerDayStatus() === 'old'"
@@ -84,15 +89,10 @@
         </div>
       }
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-
         <div class="lg:col-span-2 flex flex-col gap-5">
-
           <div class="bg-bg-surface rounded-xl border border-border shadow-xs">
-
             <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4">
-
               <div class="flex items-center gap-2 w-full sm:w-auto">
-
                 <div class="relative flex-1 sm:w-64">
                   <input
                     #skuInput
@@ -141,6 +141,13 @@
                 Gastos
               </a>
               <a
+                routerLink="/sales/pos/returns"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-[12px] font-semibold text-text-main hover:bg-bg-muted hover:border-border-strong transition-all"
+              >
+                <span class="material-icons !text-[16px]">assignment_return</span>
+                Reembolsos
+              </a>
+              <a
                 routerLink="/sales/pos/close-register"
                 class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium text-text-soft hover:text-feedback-error-text transition-all"
               >
@@ -148,61 +155,67 @@
                 Cerrar Caja
               </a>
             </div>
-
           </div>
 
           @if (posModel().items.length) {
-
             <div class="flex flex-col gap-3">
-              @for (cartItem of posForm.items; track cartItem().value().productVariantId; let i = $index) {
-                <app-pos-cart-item-card
-                  [item]="cartItem"
-                  [index]="i"
-                  (removed)="removeItem(i)"
-                />
+              @for (
+                cartItem of posForm.items;
+                track cartItem().value().productVariantId;
+                let i = $index
+              ) {
+                <app-pos-cart-item-card [item]="cartItem" [index]="i" (removed)="removeItem(i)" />
               }
             </div>
 
-            <div class="lg:hidden mt-2 bg-bg-surface border border-border-strong rounded-xl p-4 flex items-center justify-between shadow-sm">
-              <span class="text-sm font-bold text-text-muted">Total Parcial ({{ posModel().items.length }} art.)</span>
-              <span class="text-2xl font-black text-accent-ui font-mono">{{ totalCart() | currency:'BOB':'symbol':'1.2-2' }}</span>
+            <div
+              class="lg:hidden mt-2 bg-bg-surface border border-border-strong rounded-xl p-4 flex items-center justify-between shadow-sm"
+            >
+              <span class="text-sm font-bold text-text-muted"
+                >Total Parcial ({{ posModel().items.length }} art.)</span
+              >
+              <span class="text-2xl font-black text-accent-ui font-mono">{{
+                totalCart() | currency: 'BOB' : 'symbol' : '1.2-2'
+              }}</span>
             </div>
-
           } @else {
-
-            <div class="flex flex-col items-center justify-center gap-3 py-20 bg-bg-surface border border-dashed border-border rounded-2xl text-text-soft">
-              <div class="w-16 h-16 rounded-full bg-bg-muted flex items-center justify-center text-text-soft/40">
+            <div
+              class="flex flex-col items-center justify-center gap-3 py-20 bg-bg-surface border border-dashed border-border rounded-2xl text-text-soft"
+            >
+              <div
+                class="w-16 h-16 rounded-full bg-bg-muted flex items-center justify-center text-text-soft/40"
+              >
                 <span class="material-icons text-[36px]">shopping_bag</span>
               </div>
               <div class="text-center px-6">
                 <p class="font-bold text-text-main text-sm">El carrito está vacío</p>
                 <p class="text-xs max-w-xs mt-1">
-                  Digita el código SKU arriba presionando Enter, usa la pistola de barras o activa el escáner de cámara.
+                  Digita el código SKU arriba presionando Enter, usa la pistola de barras o activa
+                  el escáner de cámara.
                 </p>
               </div>
             </div>
-
           }
         </div>
 
         <div class="hidden lg:block sticky top-6">
-            <app-pos-desktop-pay-panel
-              [total]="totalCart()"
-              [itemCount]="posModel().items.length"
-              [currentMethod]="posForm.paymentMethod()"
-              [transactionCode]="posForm.transactionCode()"
-              (submitted)="submitSale()"
-            />
+          <app-pos-desktop-pay-panel
+            [total]="totalCart()"
+            [itemCount]="posModel().items.length"
+            [currentMethod]="posForm.paymentMethod()"
+            [transactionCode]="posForm.transactionCode()"
+            (submitted)="submitSale()"
+          />
         </div>
-
       </div>
     }
   }
-
 </div>
 
 @if (registerState() === 'open' && posModel().items.length) {
-  <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-bg-surface border-t border-border-strong p-4 z-40">
+  <div
+    class="lg:hidden fixed bottom-0 left-0 right-0 bg-bg-surface border-t border-border-strong p-4 z-40"
+  >
     <button
       type="button"
       (click)="isMobilePayOpen.set(true)"
@@ -214,7 +227,7 @@
         <span class="text-sm tracking-tight font-bold">Cobrar Carrito</span>
       </div>
       <span class="font-mono text-base bg-bg-muted/20 px-2.5 py-0.5 rounded-lg">
-        {{ totalCart() | currency:'BOB':'symbol':'1.2-2' }}
+        {{ totalCart() | currency: 'BOB' : 'symbol' : '1.2-2' }}
       </span>
     </button>
   </div>
@@ -232,13 +245,8 @@
   />
 }
 
-<app-qr-scanner-modal
-  (scanned)="onScanned($event)"
-/>
+<app-qr-scanner-modal (scanned)="onScanned($event)" />
 
 @if (isSearchOpen()) {
-  <app-pos-search-modal
-    (variantSelected)="onVariantPicked($event)"
-    (closed)="closeSearch()"
-  />
+  <app-pos-search-modal (variantSelected)="onVariantPicked($event)" (closed)="closeSearch()" />
 }
