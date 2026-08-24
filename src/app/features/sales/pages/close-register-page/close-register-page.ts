@@ -1,14 +1,15 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { ClosureDetailDto } from '@features/sales/dtos/closure-detail-dto';
+import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
 @Component({
   selector: 'app-close-register-page',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, RouterLink, SkeletonList],
+  imports: [CurrencyPipe, RouterLink, SkeletonList, SmartDatePipe],
   styles: `
     @keyframes fade-up {
       from {
@@ -25,7 +26,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
     }
   `,
   template: `
-    <div class="max-w-3xl mx-auto fade-up">
+    <div class="max-w-6xl mx-auto fade-up">
       @if (state() === 'init') {
         <app-skeleton-list [rows]="3" [columns]="2" />
       } @else if (state() === 'already-closed') {
@@ -58,22 +59,20 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
             <h1 class="text-lg font-black text-text-main">Cierre de Caja</h1>
           </div>
 
-          <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
+          <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5 shadow-xs">
             <p class="section-title mb-4">Información del turno</p>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <p class="field-label">Abierto</p>
-                <p class="field-value">{{ c.openedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+                <p class="field-value text-sm font-medium">{{ c.openedAt | smartDate }}</p>
               </div>
               <div>
                 <p class="field-label">Abrió</p>
-                <p class="field-value">{{ c.openedByName }}</p>
+                <p class="field-value text-sm font-medium truncate">{{ c.openedByName }}</p>
               </div>
               <div>
                 <p class="field-label">Apertura</p>
-                <p class="field-value">
-                  {{ c.openingBalance | currency: 'BOB' : 'symbol' : '1.2-2' }}
-                </p>
+                <p class="field-value text-sm font-bold font-mono">{{ c.openingBalance | currency: 'BOB' : 'symbol' : '1.2-2' }}</p>
               </div>
             </div>
           </div>
@@ -106,80 +105,81 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
           </div>
 
           @if (c.sales.length > 0) {
-            <div class="bg-bg-surface rounded-xl border border-border-strong overflow-hidden">
-              <div class="px-6 pt-5 pb-3">
-                <p class="section-title mb-0">Ventas del turno ({{ c.sales.length }})</p>
+            <div class="bg-bg-surface rounded-xl border border-border shadow-xs overflow-hidden">
+              <div class="px-6 pt-5 pb-3 flex items-center justify-between">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-text-soft">Ventas del turno ({{ c.sales.length }})</p>
+                <span class="text-xs font-bold text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">{{ c.sales.length }} venta(s)</span>
               </div>
-              <div
-                class="hidden lg:grid lg:grid-cols-4 px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft"
-              >
+              <div class="hidden lg:grid lg:grid-cols-[9rem_8rem_7rem_6rem] px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
                 <span>Hora</span>
                 <span class="text-right">Monto</span>
                 <span class="text-center">Pago</span>
-                <span class="text-right">Arts.</span>
+                <span class="text-right">Artículos</span>
               </div>
-              <ul class="flex flex-col">
+              <ul class="flex flex-col divide-y divide-border">
                 @for (sale of c.sales; track sale.id) {
-                  <li class="bg-bg-surface border-b border-border last:border-b-0">
-                    <div class="flex items-center gap-4 px-6 py-3.5 lg:hidden">
-                      <div class="flex flex-col min-w-0 flex-1">
-                        <p class="text-sm font-semibold text-text-main">
-                          {{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}
-                        </p>
-                        <p class="mt-0.5 text-xs text-text-muted">
-                          {{ sale.createdAt | date: 'HH:mm' }}
-                          <span class="mx-1">·</span>
-                          <span [class.text-feedback-info-text]="sale.paymentMethod !== 'Cash'">
-                            {{ sale.paymentMethod === 'Cash' ? 'Efectivo' : sale.paymentMethod }}
-                          </span>
-                          <span class="mx-1">·</span>
-                          {{ sale.itemsCount }} {{ sale.itemsCount === 1 ? 'art' : 'arts' }}
-                        </p>
+                  <li class="bg-bg-surface">
+                    <!-- Mobile card -->
+                    <div class="lg:hidden px-4 py-4 flex flex-col gap-3">
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-bold text-text-main font-mono">{{ sale.createdAt | smartDate }}</span>
+                        <span class="text-sm font-mono font-black text-text-main">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                       </div>
-                    </div>
-                    <div
-                      class="hidden lg:grid lg:grid-cols-4 items-center px-6 py-3 transition-colors hover:bg-bg-muted/30"
-                    >
-                      <span class="text-[13px] text-text-main font-mono">{{
-                        sale.createdAt | date: 'HH:mm'
-                      }}</span>
-                      <span class="text-right text-[13px] font-mono font-bold text-text-main">{{
-                        sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2'
-                      }}</span>
-                      <span class="text-center">
-                        <span
-                          class="text-[11px] font-medium px-2 py-0.5 rounded-md"
-                          [class.bg-bg-muted]="sale.paymentMethod === 'Cash'"
-                          [class.text-text-muted]="sale.paymentMethod === 'Cash'"
-                          [class.bg-feedback-info-bg]="sale.paymentMethod !== 'Cash'"
-                          [class.text-feedback-info-text]="sale.paymentMethod !== 'Cash'"
-                        >
-                          {{ sale.paymentMethod === 'Cash' ? 'Efectivo' : sale.paymentMethod }}
-                        </span>
-                      </span>
-                      <span class="text-right text-[13px] font-mono text-text-soft">{{
-                        sale.itemsCount
-                      }}</span>
-                    </div>
-                    @if (sale.items.length > 0) {
-                      <div class="px-6 pb-3 lg:pb-2">
-                        <div class="border-t border-border/60 pt-2">
+                      <div class="flex flex-wrap items-center gap-2">
+                        @if (sale.paymentMethod === 'Cash') {
+                          <span class="text-[11px] font-medium text-text-muted bg-bg-muted px-2 py-0.5 rounded-md">Efectivo</span>
+                        } @else {
+                          <span class="text-[11px] font-medium text-feedback-info-text bg-feedback-info-bg/15 px-2 py-0.5 rounded-md">Pago Móvil</span>
+                        }
+                        <span class="text-xs font-bold text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">{{ sale.itemsCount }} art.</span>
+                      </div>
+                      @if (sale.items.length > 0) {
+                        <ul class="flex flex-col divide-y divide-border border border-border rounded-lg overflow-hidden">
                           @for (item of sale.items; track item.productVariantId) {
-                            <div class="flex items-center justify-between gap-3 text-xs py-0.5 font-mono">
-                              <span class="min-w-0 flex items-center gap-2">
-                                <span class="font-mono text-text-soft shrink-0">{{ item.productSku }}</span>
-                                <span class="truncate text-text-muted font-medium">{{ item.productDisplayName }}</span>
-                              </span>
-                              <span class="shrink-0 flex items-center gap-2">
-                                <span class="text-text-soft">costo {{ item.unitCost | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
-                                <span class="text-feedback-success-text">margen {{ ((item.unitPrice - (item.unitCost ?? 0))) * item.quantity | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
-                                <span class="text-text-soft">x{{ item.quantity }} · {{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
-                              </span>
+                            <li class="px-3 py-2.5 flex flex-col gap-1 bg-bg-surface">
+                              <span class="font-mono text-[11px] font-bold tracking-wide text-accent-ui">{{ item.productSku }}</span>
+                              <p class="text-[13px] font-semibold text-text-main break-words leading-snug">{{ item.productDisplayName }}</p>
+                              <div class="flex flex-wrap items-center gap-2 text-xs">
+                                <span class="px-2 py-0.5 rounded-md bg-bg-muted border border-border font-mono font-medium text-text-main">×{{ item.quantity }} · {{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                                <span class="text-text-soft font-mono">costo {{ item.unitCost | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                                <span class="font-mono font-bold" [class.text-feedback-success-text]="((item.unitPrice - (item.unitCost ?? 0)) * item.quantity) > 0">{{ ((item.unitPrice - (item.unitCost ?? 0))) * item.quantity | currency: 'BOB' : 'symbol' : '1.2-2' }} margen</span>
+                              </div>
+                            </li>
+                          }
+                        </ul>
+                      }
+                    </div>
+                    <!-- Desktop row -->
+                    <div class="hidden lg:block">
+                      <div class="grid lg:grid-cols-[9rem_8rem_7rem_6rem] items-center px-6 py-3 hover:bg-bg-muted/30 transition-colors">
+                        <span class="text-[13px] text-text-main font-mono">{{ sale.createdAt | smartDate }}</span>
+                        <span class="text-right text-[13px] font-mono font-bold text-text-main">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                        <span class="text-center">
+                          @if (sale.paymentMethod === 'Cash') {
+                            <span class="text-[11px] font-medium text-text-muted bg-bg-muted px-2 py-0.5 rounded-md">Efectivo</span>
+                          } @else {
+                            <span class="text-[11px] font-medium text-feedback-info-text bg-feedback-info-bg/10 px-2 py-0.5 rounded-md">Pago Móvil</span>
+                          }
+                        </span>
+                        <span class="text-right text-xs font-bold font-mono text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md w-fit ml-auto">{{ sale.itemsCount }}</span>
+                      </div>
+                      @if (sale.items.length > 0) {
+                        <div class="mx-6 mb-3 rounded-lg border border-border bg-bg-muted/30 overflow-hidden">
+                          <div class="hidden lg:grid lg:grid-cols-[8rem_1fr_6rem_6rem_7rem] px-3 py-1.5 bg-bg-muted border-b border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
+                            <span>SKU</span><span>Producto</span><span class="text-right">Costo</span><span class="text-right">Margen</span><span class="text-right">Subtotal</span>
+                          </div>
+                          @for (item of sale.items; track item.productVariantId) {
+                            <div class="grid lg:grid-cols-[8rem_1fr_6rem_6rem_7rem] items-center px-3 py-2 text-xs gap-2 border-b border-border/50 last:border-0 bg-bg-surface">
+                              <span class="font-mono text-accent-ui font-bold truncate">{{ item.productSku }}</span>
+                              <span class="font-medium text-text-main truncate" [title]="item.productDisplayName">{{ item.productDisplayName }}</span>
+                              <span class="text-right font-mono text-text-soft">{{ item.unitCost | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                              <span class="text-right font-mono font-bold text-feedback-success-text">{{ ((item.unitPrice - (item.unitCost ?? 0))) * item.quantity | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                              <span class="text-right font-mono font-bold text-text-main">×{{ item.quantity }} · {{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                             </div>
                           }
                         </div>
-                      </div>
-                    }
+                      }
+                    </div>
                   </li>
                 }
               </ul>
@@ -215,7 +215,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                             {{ m.type === 'Outflow' ? 'Salida' : 'Entrada' }}
                           </span>
                           <span class="mx-1">·</span>
-                          {{ m.createdAt | date: 'HH:mm' }}
+                          {{ m.createdAt | smartDate }}
                         </p>
                       </div>
                       <div class="shrink-0 text-right">
@@ -256,9 +256,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                             | currency: 'BOB' : 'symbol' : '1.2-2'
                         }}
                       </span>
-                      <span class="text-right text-[13px] text-text-soft">{{
-                        m.createdAt | date: 'HH:mm'
-                      }}</span>
+                      <span class="text-right text-[13px] text-text-soft">{{ m.createdAt | smartDate }}</span>
                     </div>
                   </li>
                 }
