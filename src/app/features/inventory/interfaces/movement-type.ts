@@ -1,9 +1,11 @@
 export enum MovementType {
   Reception = 0,
   Sale = 1,
-  Adjustment = 2,
-  TransferOut = 3,
-  TransferIn = 4,
+  Return = 2,
+  Adjustment = 3,
+  TransferOut = 4,
+  TransferIn = 5,
+  ReceptionRevert = 6,
 }
 export function movementTypeToSpanish(type: MovementType): string {
   switch (type) {
@@ -13,6 +15,9 @@ export function movementTypeToSpanish(type: MovementType): string {
     case MovementType.Sale:
       return 'Venta';
 
+    case MovementType.Return:
+      return 'Devolución';
+
     case MovementType.Adjustment:
       return 'Ajuste';
 
@@ -21,6 +26,9 @@ export function movementTypeToSpanish(type: MovementType): string {
 
     case MovementType.TransferIn:
       return 'Transferencia de entrada';
+
+    case MovementType.ReceptionRevert:
+      return 'Reversión de recepción';
 
     default:
       return 'Desconocido';

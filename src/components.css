@@ -35,6 +35,25 @@
   @apply w-8 h-8 rounded-lg border border-border flex items-center justify-center text-text-soft transition-colors;
 }
 
+@utility action-btn {
+  @apply h-7 w-7 rounded-lg border border-border bg-bg-surface flex items-center justify-center text-text-soft transition-colors;
+}
+@utility action-btn--edit {
+  @apply hover:text-accent-ui hover:border-accent-ui/30 hover:bg-accent-ui/10;
+}
+@utility action-btn--delete {
+  @apply hover:text-feedback-error-text hover:border-feedback-error/30 hover:bg-feedback-error/10;
+}
+@utility action-text {
+  @apply text-xs font-bold hover:underline transition-colors;
+}
+@utility action-text--edit {
+  @apply text-accent-ui;
+}
+@utility action-text--delete {
+  @apply text-feedback-error-text;
+}
+
 @utility field-label {
   @apply text-[11px] text-text-soft mb-0.5;
 }

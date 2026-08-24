@@ -7,6 +7,7 @@ import { OpenCashRegisterDto } from '@features/sales/dtos/open-cash-register-dto
 import { CloseCashRegisterDto } from '@features/sales/dtos/close-cash-register-dto';
 import { MovementListDto } from '@features/sales/dtos/movement-list-dto';
 import { CreateMovementDto } from '@features/sales/dtos/create-movement-dto';
+import { UpdateMovementDto } from '@features/sales/dtos/update-movement-dto';
 import { ClosureListDto } from '@features/sales/dtos/closure-list-dto';
 import { ClosureDetailDto } from '@features/sales/dtos/closure-detail-dto';
 import { BaseQueryDto } from '@features/inventory/dtos/base-query-dto';
@@ -40,6 +41,14 @@ export class CashRegisterService {
 
   createMovement(dto: CreateMovementDto): Observable<void> {
     return this.http.post<void>(this.movementUrl, dto);
+  }
+
+  updateMovement(id: GUID, dto: UpdateMovementDto): Observable<void> {
+    return this.http.put<void>(`${this.movementUrl}/${id}`, dto);
+  }
+
+  deleteMovement(id: GUID): Observable<void> {
+    return this.http.delete<void>(`${this.movementUrl}/${id}`);
   }
 
   getClosures(params: BaseQueryDto): Observable<PagedResult<ClosureListDto>> {

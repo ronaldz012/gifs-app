@@ -1,3 +1,19 @@
+export enum SaleType {
+  Sale = 0,
+  Return = 1,
+}
+
+export enum PaymentMethod {
+  Cash = 0,
+  QrCode = 1,
+}
+
+export enum DocumentType {
+  Ticket = 0,
+  Invoice = 1,
+  PendingInvoice = 2,
+}
+
 export interface SaleItemDetailDto {
   id: GUID;
   productVariantId: GUID;
@@ -15,6 +31,7 @@ export interface SaleRefundDto {
   id: GUID;
   createdAt: string;
   totalAmount: number;
+  returnNumber?: string | null;
 }
 
 export interface SaleDetailDto {
@@ -22,10 +39,10 @@ export interface SaleDetailDto {
   branchId: GUID;
   soldById: GUID;
   soldByName: string;
-  type: number | string;
+  type: SaleType;
   totalItems: number;
-  documentType: number | string;
-  paymentMethod: number | string;
+  documentType: DocumentType;
+  paymentMethod: PaymentMethod;
   transactionCode: string | null;
   totalAmount: number;
   invoiceNumber: number | null;

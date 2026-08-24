@@ -29,39 +29,19 @@ import { PermissionService } from '@features/auth/services/permmision-service';
       }
       <span class="tabular-nums font-semibold text-center">{{ variant().totalAvailable }}</span>
       <div class="flex gap-1 justify-end">
-        <button
-          (click)="viewHistory.emit(variant())"
-          class="btn-icon
-          hover:text-text-main hover:bg-bg-muted"
-          title="Ver movimientos"
-        >
+        <button (click)="viewHistory.emit(variant())" class="action-btn" title="Ver movimientos">
           <span class="material-icons text-base">history</span>
         </button>
         @if (perm.canUpdate('inventory', 'products')) {
-          <button
-            (click)="adjustStock.emit(variant())"
-            class="btn-icon
-            hover:text-accent-ui hover:bg-feedback-info"
-            title="Ajustar stock"
-          >
+          <button (click)="adjustStock.emit(variant())" class="action-btn action-btn--edit" title="Ajustar stock">
             <span class="material-icons text-base">inventory</span>
           </button>
-          <button
-            (click)="editVariant.emit(variant())"
-            class="btn-icon
-            hover:text-text-main hover:bg-bg-muted"
-            title="Editar talla/color"
-          >
+          <button (click)="editVariant.emit(variant())" class="action-btn action-btn--edit" title="Editar talla/color">
             <span class="material-icons text-base">edit</span>
           </button>
         }
         @if (perm.canDelete('inventory', 'products')) {
-          <button
-            (click)="deleteVariant.emit(variant())"
-            class="btn-icon
-            hover:text-feedback-error-text hover:bg-feedback-error"
-            title="Eliminar talla/color"
-          >
+          <button (click)="deleteVariant.emit(variant())" class="action-btn action-btn--delete" title="Eliminar talla/color">
             <span class="material-icons text-base">delete</span>
           </button>
         }
@@ -69,67 +49,31 @@ import { PermissionService } from '@features/auth/services/permmision-service';
     </li>
 
     <!-- ── Mobile Card ──────────────────────────────────────────────────────── -->
-    <li class="flex sm:hidden items-center gap-3 py-3">
+    <li class="flex sm:hidden flex-col gap-2 py-3">
       <div class="flex-1 min-w-0">
         <p class="font-mono text-xs text-text-soft truncate mb-0.5">{{ variant().sku }}</p>
-        <p class="text-sm font-medium text-text-main">
-          {{ variant().size }} · {{ variant().color }}
-        </p>
+        <p class="text-sm font-medium text-text-main">{{ variant().size }} · {{ variant().color }}</p>
         <p class="text-xs text-text-muted mt-0.5">
           {{ variant().price | currency: 'BOB' : 'symbol' : '1.2-2' }}
           · costo {{ variant().averageCost | currency: 'BOB' : 'symbol' : '1.2-2' }}
           · margen {{ ((variant().price - (variant().averageCost ?? 0))) | currency: 'BOB' : 'symbol' : '1.2-2' }}
           ·
-          <span class="font-medium text-feedback-success-text"
-            >{{ variant().totalAvailable }} u</span
-          >
+          <span class="font-medium text-feedback-success-text">{{ variant().totalAvailable }} u</span>
         </p>
         <div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-text-muted mt-1">
           @for (branchId of branchKeys(); track branchId) {
-            <span
-              [class.text-accent-ui]="branchId === activeBranchId()"
-              [class.font-semibold]="branchId === activeBranchId()"
-              >{{ branchMap()[branchId] }}: {{ getStock(branchId) }}u</span
-            >
+            <span [class.text-accent-ui]="branchId === activeBranchId()" [class.font-semibold]="branchId === activeBranchId()">{{ branchMap()[branchId] }}: {{ getStock(branchId) }}u</span>
           }
         </div>
       </div>
-      <div class="flex gap-1 shrink-0">
-        <button
-          (click)="viewHistory.emit(variant())"
-          class="btn-icon-md
-          hover:text-text-main hover:border-border-strong"
-          title="Ver movimientos"
-        >
-          <span class="material-icons text-base">history</span>
-        </button>
+      <div class="flex items-center gap-3">
+        <button (click)="viewHistory.emit(variant())" class="btn-link"><span class="btn-link-text">Ver movimientos</span><span class="material-icons text-base">chevron_right</span></button>
         @if (perm.canUpdate('inventory', 'products')) {
-          <button
-            (click)="adjustStock.emit(variant())"
-            class="btn-icon-md
-            hover:text-accent-ui hover:border-feedback-info"
-            title="Ajustar stock"
-          >
-            <span class="material-icons text-base">inventory</span>
-          </button>
-          <button
-            (click)="editVariant.emit(variant())"
-            class="btn-icon-md
-            hover:text-text-main hover:border-border-strong"
-            title="Editar talla/color"
-          >
-            <span class="material-icons text-base">edit</span>
-          </button>
+          <button (click)="adjustStock.emit(variant())" class="action-text action-text--edit">Ajustar</button>
+          <button (click)="editVariant.emit(variant())" class="action-text action-text--edit">Editar</button>
         }
         @if (perm.canDelete('inventory', 'products')) {
-          <button
-            (click)="deleteVariant.emit(variant())"
-            class="btn-icon-md
-            hover:text-feedback-error-text hover:border-feedback-error-text"
-            title="Eliminar talla/color"
-          >
-            <span class="material-icons text-base">delete</span>
-          </button>
+          <button (click)="deleteVariant.emit(variant())" class="action-text action-text--delete">Eliminar</button>
         }
       </div>
     </li>

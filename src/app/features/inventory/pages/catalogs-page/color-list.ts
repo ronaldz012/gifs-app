@@ -65,7 +65,7 @@ import CatalogList from './catalog-list';
         [loading]="loading()"
         [items]="filtered()"
         [headers]="['Nombre', 'Estado', '']"
-        cols="1fr 100px 44px"
+        cols="1fr 90px 72px"
         [emptyMessage]="emptyMessage()"
         [itemTemplate]="rowTpl"
       />
@@ -74,58 +74,36 @@ import CatalogList from './catalog-list';
     <ng-template #rowTpl let-color>
       <div
         class="hidden lg:grid px-4 py-3 border-b border-border last:border-0 hover:bg-accent-ui/5 transition-colors items-center"
-        style="grid-template-columns: 1fr 100px 44px"
+        style="grid-template-columns: 1fr 90px 72px"
       >
         <span class="text-sm font-medium text-text-main truncate">{{ color.name }}</span>
-        <button
-          type="button"
-          (click)="openStatusConfirm(color)"
-          class="justify-self-start inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold"
-          [class]="
-            color.isActive
-              ? 'bg-feedback-success text-feedback-success-text hover:opacity-80'
-              : 'bg-feedback-warning text-feedback-warning-text hover:opacity-80'
-          "
-        >
+        <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold justify-self-start"
+          [class]="color.isActive ? 'bg-feedback-success text-feedback-success-text' : 'bg-feedback-warning text-feedback-warning-text'">
           {{ color.isActive ? 'Activo' : 'Inactivo' }}
-        </button>
-        <div class="flex justify-end">
-          <button
-            type="button"
-            (click)="openEdit(color)"
-            class="btn-icon text-text-soft hover:text-text-main"
-            title="Editar"
-          >
+        </span>
+        <div class="flex justify-end gap-1">
+          <button type="button" (click)="openStatusConfirm(color)" class="action-btn" [class.action-btn--edit]="color.isActive" [class.action-btn--delete]="!color.isActive" [title]="color.isActive ? 'Desactivar' : 'Activar'">
+            <span class="material-icons text-base">{{ color.isActive ? 'toggle_on' : 'toggle_off' }}</span>
+          </button>
+          <button type="button" (click)="openEdit(color)" class="action-btn action-btn--edit" title="Editar">
             <span class="material-icons text-base">edit</span>
           </button>
         </div>
       </div>
 
-      <div class="lg:hidden px-4 py-3 border-b border-border last:border-0">
+      <div class="lg:hidden px-4 py-3 border-b border-border last:border-0 flex flex-col gap-2">
         <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-sm font-semibold text-text-main truncate">{{ color.name }}</span>
-            <button
-              type="button"
-              (click)="openStatusConfirm(color)"
-              class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
-              [class]="
-                color.isActive
-                  ? 'bg-feedback-success text-feedback-success-text'
-                  : 'bg-feedback-warning text-feedback-warning-text'
-              "
-            >
-              {{ color.isActive ? 'Activo' : 'Inactivo' }}
-            </button>
-          </div>
-          <button
-            type="button"
-            (click)="openEdit(color)"
-            class="btn-icon text-text-soft hover:text-text-main shrink-0"
-            title="Editar"
-          >
-            <span class="material-icons text-base">edit</span>
+          <span class="text-sm font-semibold text-text-main truncate">{{ color.name }}</span>
+          <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
+            [class]="color.isActive ? 'bg-feedback-success text-feedback-success-text' : 'bg-feedback-warning text-feedback-warning-text'">
+            {{ color.isActive ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button type="button" (click)="openStatusConfirm(color)" class="action-text" [class.action-text--edit]="color.isActive" [class.action-text--delete]="!color.isActive">
+            {{ color.isActive ? 'Desactivar' : 'Activar' }}
           </button>
+          <button type="button" (click)="openEdit(color)" class="action-text action-text--edit">Editar</button>
         </div>
       </div>
     </ng-template>

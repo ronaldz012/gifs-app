@@ -9,8 +9,6 @@ export interface SkuSearchQuery {
 
 export interface MatchedItemDto {
   saleItemId: GUID;
-  productDisplayName: string;
-  productSku: string;
   quantity: number;
   unitPrice: number;
 }
@@ -22,7 +20,19 @@ export interface SaleSkuSearchDto {
   soldByName: string;
   totalItems: number;
   totalUnitsSold: number;
-  matchedItems: MatchedItemDto;
+  matchedItem: MatchedItemDto;
+}
+
+export interface SkuSearchResponseDto {
+  searchedSku: string;
+  searchedDisplayName: string;
+  sales: {
+    items: SaleSkuSearchDto[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  };
 }
 
 export interface CreateReturnItemDto {

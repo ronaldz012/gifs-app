@@ -65,7 +65,7 @@ import CatalogList from './catalog-list';
         [loading]="loading()"
         [items]="filtered()"
         [headers]="['Nombre', 'Orden', 'Estado', '']"
-        cols="1.2fr 120px 100px 44px"
+        cols="1.2fr 80px 90px 72px"
         [emptyMessage]="emptyMessage()"
         [itemTemplate]="rowTpl"
       />
@@ -74,62 +74,38 @@ import CatalogList from './catalog-list';
     <ng-template #rowTpl let-size>
       <div
         class="hidden lg:grid px-4 py-3 border-b border-border last:border-0 hover:bg-accent-ui/5 transition-colors items-center"
-        style="grid-template-columns: 1.2fr 120px 100px 44px"
+        style="grid-template-columns: 1.2fr 80px 90px 72px"
       >
         <span class="text-sm font-medium text-text-main truncate">{{ size.name }}</span>
-        <span class="text-sm text-text-muted">{{ size.sortOrder }}</span>
-        <button
-          type="button"
-          (click)="openStatusConfirm(size)"
-          class="justify-self-start inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold"
-          [class]="
-            size.isActive
-              ? 'bg-feedback-success text-feedback-success-text hover:opacity-80'
-              : 'bg-feedback-warning text-feedback-warning-text hover:opacity-80'
-          "
-        >
+        <span class="text-sm text-text-muted">Ord. {{ size.sortOrder }}</span>
+        <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold justify-self-start"
+          [class]="size.isActive ? 'bg-feedback-success text-feedback-success-text' : 'bg-feedback-warning text-feedback-warning-text'">
           {{ size.isActive ? 'Activa' : 'Inactiva' }}
-        </button>
-        <div class="flex justify-end">
-          <button
-            type="button"
-            (click)="openEdit(size)"
-            class="btn-icon text-text-soft hover:text-text-main"
-            title="Editar"
-          >
+        </span>
+        <div class="flex justify-end gap-1">
+          <button type="button" (click)="openStatusConfirm(size)" class="action-btn" [class.action-btn--edit]="size.isActive" [class.action-btn--delete]="!size.isActive" [title]="size.isActive ? 'Desactivar' : 'Activar'">
+            <span class="material-icons text-base">{{ size.isActive ? 'toggle_on' : 'toggle_off' }}</span>
+          </button>
+          <button type="button" (click)="openEdit(size)" class="action-btn action-btn--edit" title="Editar">
             <span class="material-icons text-base">edit</span>
           </button>
         </div>
       </div>
 
-      <div class="lg:hidden px-4 py-3 border-b border-border last:border-0">
+      <div class="lg:hidden px-4 py-3 border-b border-border last:border-0 flex flex-col gap-2">
         <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-sm font-semibold text-text-main truncate">{{ size.name }}</span>
-            <button
-              type="button"
-              (click)="openStatusConfirm(size)"
-              class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
-              [class]="
-                size.isActive
-                  ? 'bg-feedback-success text-feedback-success-text'
-                  : 'bg-feedback-warning text-feedback-warning-text'
-              "
-            >
-              {{ size.isActive ? 'Activa' : 'Inactiva' }}
-            </button>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <span class="text-xs text-text-soft">Ord. {{ size.sortOrder }}</span>
-            <button
-              type="button"
-              (click)="openEdit(size)"
-              class="btn-icon text-text-soft hover:text-text-main"
-              title="Editar"
-            >
-              <span class="material-icons text-base">edit</span>
-            </button>
-          </div>
+          <span class="text-sm font-semibold text-text-main truncate">{{ size.name }}</span>
+          <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
+            [class]="size.isActive ? 'bg-feedback-success text-feedback-success-text' : 'bg-feedback-warning text-feedback-warning-text'">
+            {{ size.isActive ? 'Activa' : 'Inactiva' }}
+          </span>
+        </div>
+        <p class="text-xs text-text-soft">Ord. {{ size.sortOrder }}</p>
+        <div class="flex items-center gap-3">
+          <button type="button" (click)="openStatusConfirm(size)" class="action-text" [class.action-text--edit]="size.isActive" [class.action-text--delete]="!size.isActive">
+            {{ size.isActive ? 'Desactivar' : 'Activar' }}
+          </button>
+          <button type="button" (click)="openEdit(size)" class="action-text action-text--edit">Editar</button>
         </div>
       </div>
     </ng-template>

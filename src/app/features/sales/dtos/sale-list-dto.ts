@@ -1,10 +1,19 @@
+import { SaleType, PaymentMethod, DocumentType } from './sale-detail-dto';
+
 export interface SaleListDto {
   id: GUID;
   createdAt: string;
   totalAmount: number;
-  paymentMethod: number;
-  documentType: string;
+  soldByName: string;
+  firstItemDisplayName: string;
+  totalQuantity: number;
+  totalDistinctItems: number;
+  type: SaleType;
+  originalSaleId: GUID | null;
+  paymentMethod: PaymentMethod;
+  documentType: DocumentType;
   invoiceNumber: number | null;
   transactionCode: string | null;
-  itemCount: number;
+  hasReturn: boolean;
+  returnedAmount: number;
 }

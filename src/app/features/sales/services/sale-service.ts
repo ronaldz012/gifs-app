@@ -11,7 +11,7 @@ import {
   CreateReturnDto,
   CreateReturnResponse,
   SaleForReturnDto,
-  SaleSkuSearchDto,
+  SkuSearchResponseDto,
   SkuSearchQuery,
 } from '@features/sales/dtos/returns-dto';
 
@@ -24,6 +24,8 @@ export class SaleService {
     let params = new HttpParams();
     if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
     if (query.dateTo) params = params.set('dateTo', query.dateTo);
+    if (query.type !== undefined && query.type !== null) params = params.set('type', query.type.toString());
+    if (query.hasReturn !== undefined && query.hasReturn !== null) params = params.set('hasReturn', query.hasReturn.toString());
     if (query.page) params = params.set('page', query.page);
     if (query.pageSize) params = params.set('pageSize', query.pageSize);
     return this.http.get<PagedResult<SaleListDto>>(this.baseUrl, { params });
@@ -37,13 +39,13 @@ export class SaleService {
     return this.http.get<SaleDetailDto>(`${this.baseUrl}/${id}/details`);
   }
 
-  searchBySku(query: SkuSearchQuery): Observable<PagedResult<SaleSkuSearchDto>> {
+  searchBySku(query: SkuSearchQuery): Observable<SkuSearchResponseDto> {
     let params = new HttpParams();
     if (query.sku) params = params.set('sku', query.sku);
     if (query.days) params = params.set('days', query.days.toString());
     if (query.page) params = params.set('page', query.page.toString());
     if (query.pageSize) params = params.set('pageSize', query.pageSize.toString());
-    return this.http.get<PagedResult<SaleSkuSearchDto>>(`${this.baseUrl}/search-by-sku`, {
+    return this.http.get<SkuSearchResponseDto>(`${this.baseUrl}/search-by-sku`, {
       params,
     });
   }

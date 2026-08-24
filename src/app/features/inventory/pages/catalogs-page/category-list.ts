@@ -65,7 +65,7 @@ import CatalogList from './catalog-list';
         [loading]="loading()"
         [items]="filtered()"
         [headers]="['Nombre', 'Descripción', 'Estado', '']"
-        cols="1.2fr 1fr 100px 44px"
+        cols="1.2fr 1fr 90px 72px"
         [emptyMessage]="emptyMessage()"
         [itemTemplate]="rowTpl"
       />
@@ -74,63 +74,43 @@ import CatalogList from './catalog-list';
     <ng-template #rowTpl let-category>
       <div
         class="hidden lg:grid px-4 py-3 border-b border-border last:border-0 hover:bg-accent-ui/5 transition-colors items-center"
-        style="grid-template-columns: 1.2fr 1fr 100px 44px"
+        style="grid-template-columns: 1.2fr 1fr 90px 72px"
       >
         <span class="text-sm font-medium text-text-main truncate">{{ category.name }}</span>
         <span class="text-sm text-text-muted truncate">{{ category.description || '—' }}</span>
-        <button
-          type="button"
-          (click)="openStatusConfirm(category)"
-          class="justify-self-start inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold"
-          [class]="
-            category.isActive
-              ? 'bg-feedback-success text-feedback-success-text hover:opacity-80'
-              : 'bg-feedback-warning text-feedback-warning-text hover:opacity-80'
-          "
-        >
+        <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold justify-self-start"
+          [class]="category.isActive ? 'bg-feedback-success text-feedback-success-text' : 'bg-feedback-warning text-feedback-warning-text'">
           {{ category.isActive ? 'Activa' : 'Inactiva' }}
-        </button>
-        <div class="flex justify-end">
-          <button
-            type="button"
-            (click)="openEdit(category)"
-            class="btn-icon text-text-soft hover:text-text-main"
-            title="Editar"
-          >
+        </span>
+        <div class="flex justify-end gap-1">
+          <button type="button" (click)="openStatusConfirm(category)" class="action-btn" [class.action-btn--edit]="category.isActive" [class.action-btn--delete]="!category.isActive" [title]="category.isActive ? 'Desactivar' : 'Activar'">
+            <span class="material-icons text-base">{{ category.isActive ? 'toggle_on' : 'toggle_off' }}</span>
+          </button>
+          <button type="button" (click)="openEdit(category)" class="action-btn action-btn--edit" title="Editar">
             <span class="material-icons text-base">edit</span>
           </button>
         </div>
       </div>
 
-      <div class="lg:hidden px-4 py-3 border-b border-border last:border-0">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-sm font-semibold text-text-main truncate">{{ category.name }}</span>
-            <button
-              type="button"
-              (click)="openStatusConfirm(category)"
-              class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
-              [class]="
-                category.isActive
-                  ? 'bg-feedback-success text-feedback-success-text'
-                  : 'bg-feedback-warning text-feedback-warning-text'
-              "
-            >
-              {{ category.isActive ? 'Activa' : 'Inactiva' }}
-            </button>
+      <div class="lg:hidden px-4 py-3 border-b border-border last:border-0 flex flex-col gap-2">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-text-main truncate">{{ category.name }}</p>
+            @if (category.description) {
+              <p class="text-xs text-text-muted truncate">{{ category.description }}</p>
+            }
           </div>
-          <button
-            type="button"
-            (click)="openEdit(category)"
-            class="btn-icon text-text-soft hover:text-text-main shrink-0"
-            title="Editar"
-          >
-            <span class="material-icons text-base">edit</span>
-          </button>
+          <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
+            [class]="category.isActive ? 'bg-feedback-success text-feedback-success-text' : 'bg-feedback-warning text-feedback-warning-text'">
+            {{ category.isActive ? 'Activa' : 'Inactiva' }}
+          </span>
         </div>
-        @if (category.description) {
-          <p class="mt-1 text-xs text-text-muted truncate">{{ category.description }}</p>
-        }
+        <div class="flex items-center gap-3">
+          <button type="button" (click)="openStatusConfirm(category)" class="action-text" [class.action-text--edit]="category.isActive" [class.action-text--delete]="!category.isActive">
+            {{ category.isActive ? 'Desactivar' : 'Activar' }}
+          </button>
+          <button type="button" (click)="openEdit(category)" class="action-text action-text--edit">Editar</button>
+        </div>
       </div>
     </ng-template>
 

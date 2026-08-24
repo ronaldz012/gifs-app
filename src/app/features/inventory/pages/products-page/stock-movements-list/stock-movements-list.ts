@@ -98,9 +98,11 @@ export default class StockMovementsList {
 
     switch (type) {
       case MovementType.Reception:
+      case MovementType.ReceptionRevert:
         this.router.navigate(['inventory', 'receptions', referenceId]);
         break;
       case MovementType.Sale:
+      case MovementType.Return:
         this.router.navigate(['sales', 'sale', referenceId]);
         break;
       case MovementType.Adjustment:
@@ -116,7 +118,9 @@ export default class StockMovementsList {
   canGoToReference(type: MovementType): boolean {
     return (
       type === MovementType.Reception ||
+      type === MovementType.ReceptionRevert ||
       type === MovementType.Sale ||
+      type === MovementType.Return ||
       type === MovementType.TransferIn ||
       type === MovementType.TransferOut
     );
@@ -126,8 +130,12 @@ export default class StockMovementsList {
     switch (type) {
       case MovementType.Reception:
         return 'Ver recepción';
+      case MovementType.ReceptionRevert:
+        return 'Ver reversión';
       case MovementType.Sale:
         return 'Ver venta';
+      case MovementType.Return:
+        return 'Ver devolución';
       case MovementType.TransferIn:
       case MovementType.TransferOut:
         return 'Ver transferencia';
@@ -136,30 +144,38 @@ export default class StockMovementsList {
     }
   }
   getMovementColorClass(type: MovementType, element: 'badge' | 'text' | 'border'): string {
-    const maps = {
+    const maps: Record<string, Record<MovementType, string>> = {
       badge: {
         [MovementType.Reception]:
           'bg-feedback-success/15 text-feedback-success-text border border-feedback-success/30',
         [MovementType.Sale]:
           'bg-feedback-info/15 text-feedback-info-text border border-feedback-info/30',
+        [MovementType.Return]:
+          'bg-feedback-success/15 text-feedback-success-text border border-feedback-success/30',
         [MovementType.Adjustment]:
           'bg-feedback-warning/15 text-feedback-warning-text border border-feedback-warning/30',
         [MovementType.TransferOut]: 'bg-bg-muted text-text-soft border border-border',
         [MovementType.TransferIn]: 'bg-accent-ui/10 text-accent-ui border border-accent-ui/20',
+        [MovementType.ReceptionRevert]:
+          'bg-feedback-error/10 text-feedback-error-text border border-feedback-error/30',
       },
       text: {
         [MovementType.Reception]: 'text-feedback-success-text',
-        [MovementType.Sale]: 'text-feedback-error-text', // Rojo al ser egreso
+        [MovementType.Sale]: 'text-feedback-error-text',
+        [MovementType.Return]: 'text-feedback-success-text',
         [MovementType.Adjustment]: 'text-feedback-warning-text',
-        [MovementType.TransferOut]: 'text-feedback-error-text', // Rojo al ser egreso
+        [MovementType.TransferOut]: 'text-feedback-error-text',
         [MovementType.TransferIn]: 'text-feedback-success-text',
+        [MovementType.ReceptionRevert]: 'text-feedback-error-text',
       },
       border: {
         [MovementType.Reception]: 'bg-feedback-success-text',
         [MovementType.Sale]: 'bg-feedback-info-text',
+        [MovementType.Return]: 'bg-feedback-success-text',
         [MovementType.Adjustment]: 'bg-feedback-warning-text',
         [MovementType.TransferOut]: 'bg-text-soft',
         [MovementType.TransferIn]: 'bg-accent-ui',
+        [MovementType.ReceptionRevert]: 'bg-feedback-error-text',
       },
     };
     return maps[element][type] || '';
