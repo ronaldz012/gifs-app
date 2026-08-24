@@ -15,6 +15,7 @@ import { ItemForm, Reception, VariantForm } from '@features/inventory/models/var
 import { ProductSearchResult } from '@features/inventory/components/product-search/product-search-result.component';
 import ProviderSelectCtrl from '@features/inventory/components/provider-select-ctrl/provider-select-ctrl';
 import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
+import { ToastService } from '@core/services/toast-service';
 
 @Component({
   selector: 'app-reception-form',
@@ -41,6 +42,7 @@ export default class ReceptionForm implements OnInit {
   private brandService = inject(BrandService);
   private providerService = inject(ProviderService);
   private route = inject(ActivatedRoute);
+  private toast = inject(ToastService);
   private router = inject(Router);
 
   providerModel = signal<{ id: GUID | null; name: string }>({ id: null, name: '' });
@@ -163,10 +165,12 @@ export default class ReceptionForm implements OnInit {
         this.isSubmitting.set(false);
         this.router.navigate(['inventory', 'receptions']);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         this.isSubmitting.set(false);
-        this.submitError.set('Error al guardar la recepción. Intentá de nuevo.');
-        console.error(err);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        const msg = e?.error?.detail || e?.error?.title || e?.message || 'Error al guardar la recepción. Intentá de nuevo.';
+        this.submitError.set(msg);
+        this.toast.error(msg);
       },
     });
   }

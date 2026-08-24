@@ -304,7 +304,11 @@ export default class ProvidersPage {
         this.closeEdit();
         this.load();
       },
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al actualizar el proveedor.');
+      },
     });
   }
 
@@ -322,7 +326,11 @@ export default class ProvidersPage {
         this.toastService.success(isActive ? 'Proveedor activado' : 'Proveedor desactivado');
         this.closeModal();
       },
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al cambiar el estado del proveedor.');
+      },
     });
   }
 

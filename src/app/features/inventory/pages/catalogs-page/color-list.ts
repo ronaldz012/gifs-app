@@ -262,7 +262,11 @@ export default class ColorList {
         this.closeEdit();
         this.load();
       },
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al actualizar el color.');
+      },
     });
   }
 
@@ -280,7 +284,11 @@ export default class ColorList {
         this.toastService.success(isActive ? 'Color activado' : 'Color desactivado');
         this.closeModal();
       },
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al cambiar el estado del color.');
+      },
     });
   }
 

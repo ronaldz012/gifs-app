@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UserAdminService } from '../services/user-admin-service';
+import { ToastService } from '@core/services/toast-service';
 import { GetBranchDetailsResponse } from '../dtos/branches/get-branch-details-response';
 import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/confirm-action-modal/confirm-action-modal';
 import CreateBranchPanel from './create-branch-panel/create-branch-panel';
@@ -105,6 +106,7 @@ import CreateBranchPanel from './create-branch-panel/create-branch-panel';
 export default class BranchDetailPage implements OnInit {
   private route = inject(ActivatedRoute);
   private userAdminService = inject(UserAdminService);
+  private toast = inject(ToastService);
 
   branch = signal<GetBranchDetailsResponse | null>(null);
   loading = signal(true);
@@ -143,9 +145,14 @@ export default class BranchDetailPage implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.showToggleConfirm.set(false);
+        this.toast.success('Estado de sucursal actualizado');
         this.loadBranch(b.id);
       },
-      error: () => this.submitting.set(false),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toast.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al cambiar el estado de la sucursal.');
+      },
     });
   }
 }

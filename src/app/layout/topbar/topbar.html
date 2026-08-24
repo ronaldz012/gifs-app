@@ -11,20 +11,9 @@
     </span>
   </button>
 
-  <div class="flex-1"></div>
-
-  <app-branch-selector />
-
-  <!-- Toggle de tema -->
-  <button
-    type="button"
-    (click)="themeSvc.toggle()"
-    title="{{ themeSvc.isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro' }}"
-    class="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-bg-muted hover:text-text-main focus-visible:outline-none">
-    <span class="material-icons text-[20px]">
-      {{ themeSvc.isDark() ? 'light_mode' : 'dark_mode' }}
-    </span>
-  </button>
+  <div class="flex-1 min-w-0">
+    <app-branch-selector />
+  </div>
 
   <app-user-menu />
 </header>

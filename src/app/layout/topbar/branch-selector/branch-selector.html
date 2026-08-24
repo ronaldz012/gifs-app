@@ -1,15 +1,13 @@
-<div class="relative">
+<div class="relative flex-1 min-w-0 max-w-[220px]">
   <button
     type="button"
     (click)="isOpen.set(!isOpen())"
     [class.border-accent-ui]="isOpen()"
     [class.bg-bg-surface]="isOpen()"
-    class="flex h-[34px] items-center gap-2 rounded-lg border border-border bg-bg-main px-2.5 transition-all hover:border-accent-ui hover:bg-bg-surface md:min-w-40 md:px-3"
+    class="flex h-[34px] w-full items-center gap-1.5 sm:gap-2 rounded-lg border border-border bg-bg-main px-2 sm:px-3 transition-all hover:border-accent-ui hover:bg-bg-surface"
   >
     <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-feedback-success"></span>
-    <span
-      class="max-w-[80px] text-left text-sm font-bold text-text-main truncate md:flex-1 md:max-w-none"
-    >
+    <span class="flex-1 min-w-0 text-left text-[13px] sm:text-sm font-bold text-text-main truncate">
       {{ active()?.branchName ?? 'Sin sucursal' }}
     </span>
     <svg

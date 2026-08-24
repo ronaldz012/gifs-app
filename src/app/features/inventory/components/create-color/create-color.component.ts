@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { ColorService } from '../../services/color-service';
+import { ToastService } from '@core/services/toast-service';
 import { Color } from '../../dtos/colors/color';
 
 @Component({
@@ -17,6 +18,7 @@ export default class CreateColor implements AfterViewInit {
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
 
   private colorService = inject(ColorService);
+  private toast = inject(ToastService);
 
   // --- Inputs / Outputs ---
   initialName = input.required<string>();
@@ -74,6 +76,9 @@ export default class CreateColor implements AfterViewInit {
         if (err.status === 409) {
           this.colorModel.update(m => m); // trigger re-check
           this._serverError.set('Este nombre ya existe');
+        } else {
+          const msg = err?.error?.detail || err?.error?.title || err?.message || 'Error al crear el color.';
+          this.toast.error(msg);
         }
       }
     });

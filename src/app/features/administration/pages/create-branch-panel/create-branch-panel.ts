@@ -1,6 +1,7 @@
 import { Component, inject, input, OnInit, output, signal } from '@angular/core';
 import { applyWhen, form, FormField, minLength, required, schema } from '@angular/forms/signals';
 import { UserAdminService } from '../../services/user-admin-service';
+import { ToastService } from '@core/services/toast-service';
 import { GetBranchDetailsResponse } from '../../dtos/branches/get-branch-details-response';
 import {
   BranchType,
@@ -137,6 +138,7 @@ const typeSchema = schema<string>((c) => {
 })
 export default class CreateBranchPanel implements OnInit {
   private userAdminService = inject(UserAdminService);
+  private toast = inject(ToastService);
 
   branchId = input<GUID>();
   branchDetails = input<GetBranchDetailsResponse>();
@@ -204,9 +206,12 @@ export default class CreateBranchPanel implements OnInit {
         this.isSubmitting.set(false);
         this.close.emit();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.isSubmitting.set(false);
-        this.error.set('Error al guardar la sucursal.');
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        const msg = e?.error?.detail || e?.error?.title || e?.message || 'Error al guardar la sucursal.';
+        this.error.set(msg);
+        this.toast.error(msg);
       },
     });
   }

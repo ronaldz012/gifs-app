@@ -2,6 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
+import { ToastService } from '@core/services/toast-service';
 import { ClosureDetailDto } from '@features/sales/dtos/closure-detail-dto';
 import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
@@ -311,6 +312,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 export default class CloseRegisterPage implements OnInit {
   private router = inject(Router);
   private cashRegisterService = inject(CashRegisterService);
+  private toast = inject(ToastService);
 
   state = signal<'init' | 'ready' | 'already-closed' | 'error'>('init');
   closure = signal<ClosureDetailDto | null>(null);
@@ -350,11 +352,15 @@ export default class CloseRegisterPage implements OnInit {
 
     this.cashRegisterService.closeRegister({ RealCountedAmount: this.closingBalance() }).subscribe({
       next: () => {
+        this.toast.success('Caja cerrada');
         this.router.navigate(['/sales/pos']);
       },
       error: (err) => {
         this.submitting.set(false);
-        this.closeError.set(err?.error?.message || 'Error al cerrar la caja. Intente de nuevo.');
+        const e = err as { error?: { detail?: string; title?: string; message?: string }; message?: string };
+        const msg = e?.error?.detail || e?.error?.title || e?.error?.message || e?.message || 'Error al cerrar la caja. Intentá de nuevo.';
+        this.closeError.set(msg);
+        this.toast.error(msg);
       },
     });
   }

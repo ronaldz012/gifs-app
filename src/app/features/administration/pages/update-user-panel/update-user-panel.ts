@@ -5,6 +5,7 @@ import { UpdateUserRequest } from '../../dtos/users/create-user-request';
 import { RoleListItemDto } from '../../dtos/roles/role-list-item-dto';
 import { BranchListItemDto } from '../../dtos/branches/branch-list-item-dto';
 import { UserType } from '@features/auth/models/LoginResponse';
+import { ToastService } from '@core/services/toast-service';
 
 interface BranchRoleEntry {
   branchId: GUID;
@@ -23,6 +24,7 @@ export default class UpdateUserPanel implements OnInit {
   protected readonly UserType = UserType;
 
   private userAdminService = inject(UserAdminService);
+  private toast = inject(ToastService);
 
   userId = input.required<GUID>();
   initialUserType = input.required<UserType>();
@@ -177,15 +179,21 @@ export default class UpdateUserPanel implements OnInit {
               this.isSubmitting.set(false);
               this.close.emit();
             },
-            error: () => {
+            error: (err: unknown) => {
               this.isSubmitting.set(false);
-              this.error.set('Error al cambiar el tipo de usuario.');
+              const e = err as { error?: { detail?: string; title?: string }; message?: string };
+              const msg = e?.error?.detail || e?.error?.title || e?.message || 'Error al cambiar el tipo de usuario.';
+              this.error.set(msg);
+              this.toast.error(msg);
             },
           });
         },
-        error: () => {
+        error: (err: unknown) => {
           this.isSubmitting.set(false);
-          this.error.set('Error al actualizar el usuario.');
+          const e = err as { error?: { detail?: string; title?: string }; message?: string };
+          const msg = e?.error?.detail || e?.error?.title || e?.message || 'Error al actualizar el usuario.';
+          this.error.set(msg);
+          this.toast.error(msg);
         },
       });
       return;
@@ -199,15 +207,21 @@ export default class UpdateUserPanel implements OnInit {
               this.isSubmitting.set(false);
               this.close.emit();
             },
-            error: () => {
+            error: (err: unknown) => {
               this.isSubmitting.set(false);
-              this.error.set('Error al cambiar el tipo de usuario.');
+              const e = err as { error?: { detail?: string; title?: string }; message?: string };
+              const msg = e?.error?.detail || e?.error?.title || e?.message || 'Error al cambiar el tipo de usuario.';
+              this.error.set(msg);
+              this.toast.error(msg);
             },
           });
         },
-        error: () => {
+        error: (err: unknown) => {
           this.isSubmitting.set(false);
-          this.error.set('Error al actualizar el usuario.');
+          const e = err as { error?: { detail?: string; title?: string }; message?: string };
+          const msg = e?.error?.detail || e?.error?.title || e?.message || 'Error al actualizar el usuario.';
+          this.error.set(msg);
+          this.toast.error(msg);
         },
       });
       return;
@@ -218,9 +232,12 @@ export default class UpdateUserPanel implements OnInit {
         this.isSubmitting.set(false);
         this.close.emit();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.isSubmitting.set(false);
-        this.error.set('Error al actualizar el usuario.');
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        const msg = e?.error?.detail || e?.error?.title || e?.message || 'Error al actualizar el usuario.';
+        this.error.set(msg);
+        this.toast.error(msg);
       },
     });
   }

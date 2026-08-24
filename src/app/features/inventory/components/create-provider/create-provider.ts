@@ -12,6 +12,7 @@ import {
 import { email, FormField, form, maxLength, minLength, required } from '@angular/forms/signals';
 import { Provider } from '../../dtos/providers/provider';
 import { ProviderService } from '@features/inventory/services/provider-service';
+import { ToastService } from '@core/services/toast-service';
 
 @Component({
   selector: 'app-create-provider',
@@ -23,6 +24,7 @@ export default class CreateProvider implements AfterViewInit {
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
 
   private providerService = inject(ProviderService);
+  private toast = inject(ToastService);
   private elRef = inject(ElementRef);
 
   initialName = input.required<string>();
@@ -126,6 +128,10 @@ export default class CreateProvider implements AfterViewInit {
         error: (err) => {
           this.isLoading.set(false);
           if (err.status === 409) this.serverError.set('Este proveedor ya existe');
+          else {
+            const msg = err?.error?.detail || err?.error?.title || err?.message || 'Error al crear el proveedor.';
+            this.toast.error(msg);
+          }
         },
       });
   }

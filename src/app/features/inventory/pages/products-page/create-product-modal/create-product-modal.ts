@@ -199,10 +199,12 @@ export default class CreateProductModal implements OnInit {
           }
           this.router.navigate(['inventory', 'products', created.id, 'detail']);
         },
-        error: () => {
+        error: (err: unknown) => {
           this.isConfirming.set(false);
-          this.toastService.error('Error al crear el producto.');
-          this.error.set('Error al crear el producto. Intentá de nuevo.');
+          const e = err as { error?: { detail?: string; title?: string }; message?: string };
+          const msg = e?.error?.detail || e?.error?.title || e?.message || 'Error al crear el producto.';
+          this.toastService.error(msg);
+          this.error.set(msg);
         },
       });
   }

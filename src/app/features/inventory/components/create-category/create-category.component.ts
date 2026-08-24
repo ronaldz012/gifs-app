@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { CategoryService } from '../../services/category-service';
+import { ToastService } from '@core/services/toast-service';
 import { Category } from '../../dtos/categories/category-dto';
 
 @Component({
@@ -17,6 +18,7 @@ export class CreateCategory implements AfterViewInit {
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
 
   private categoryService = inject(CategoryService);
+  private toast = inject(ToastService);
   private elRef           = inject(ElementRef);
 
   // --- Inputs / Outputs ---
@@ -79,6 +81,10 @@ save(): void {
     error: (err) => {
       this.isLoading.set(false);
       if (err.status === 409) this.serverError.set('Esta categoría ya existe');
+      else {
+        const msg = err?.error?.detail || err?.error?.title || err?.message || 'Error al crear la categoría.';
+        this.toast.error(msg);
+      }
     }
   });
 }

@@ -6,6 +6,7 @@ import { ReceptionService } from '../../../services/reception-service';
 import {ReceptionQueryParams, StockReceptionListDto } from '../../../dtos/receptions/stock-reception-list-dto';
 import {ReceptionFilterBar} from '../reception-filter-bar/reception-filter-bar';
 import {Paginator} from '@shared/components/app-paginator/app-paginator';
+import { ToastService } from '@core/services/toast-service';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 
 
@@ -17,6 +18,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 })
 export default class ReceptionListPage implements OnInit {
   private receptionService = inject(ReceptionService);
+  private toast = inject(ToastService);
   readonly router          = inject(Router);
 
   receptions        = signal<StockReceptionListDto[]>([]);
@@ -71,7 +73,11 @@ export default class ReceptionListPage implements OnInit {
         this.closeRollbackModal();
         this.load();
       },
-      error: () => this.submitting.set(false),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toast.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al anular la recepción.');
+      },
     });
   }
 }

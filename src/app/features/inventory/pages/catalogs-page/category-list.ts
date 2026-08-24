@@ -270,7 +270,11 @@ export default class CategoryList {
         this.closeEdit();
         this.load();
       },
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al actualizar la categoría.');
+      },
     });
   }
 
@@ -288,7 +292,11 @@ export default class CategoryList {
         this.toastService.success(isActive ? 'Categoría activada' : 'Categoría desactivada');
         this.closeModal();
       },
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al cambiar el estado de la categoría.');
+      },
     });
   }
 

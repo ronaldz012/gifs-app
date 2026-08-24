@@ -264,7 +264,11 @@ export default class SizeList {
         this.closeEdit();
         this.load();
       },
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al actualizar la talla.');
+      },
     });
   }
 
@@ -282,7 +286,11 @@ export default class SizeList {
         this.toastService.success(isActive ? 'Talla activada' : 'Talla desactivada');
         this.closeModal();
       },
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al cambiar el estado de la talla.');
+      },
     });
   }
 

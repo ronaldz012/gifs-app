@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UserAdminService } from '../services/user-admin-service';
+import { ToastService } from '@core/services/toast-service';
 import { GetUserDetailsResponse, UserTypeLabel } from '../dtos/users/get-user-details-response';
 import { UserStatusLabel } from '../dtos/users/get-user-response';
 import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/confirm-action-modal/confirm-action-modal';
@@ -156,6 +157,7 @@ export default class UserDetailPage implements OnInit {
 
   private route = inject(ActivatedRoute);
   private userAdminService = inject(UserAdminService);
+  private toast = inject(ToastService);
 
   user = signal<GetUserDetailsResponse | null>(null);
   loading = signal(true);
@@ -194,9 +196,14 @@ export default class UserDetailPage implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.showToggleConfirm.set(false);
+        this.toast.success('Estado de usuario actualizado');
         this.loadUser(u.id);
       },
-      error: () => this.submitting.set(false),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toast.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al cambiar el estado del usuario.');
+      },
     });
   }
 

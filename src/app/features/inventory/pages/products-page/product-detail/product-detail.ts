@@ -515,9 +515,10 @@ export default class ProductDetail implements OnInit {
         this.toastService.success('Talla/color agregada');
         this.loadProduct(this.productId);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.toastService.error('Error al agregar la talla/color.');
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al agregar la talla/color.');
       },
     });
   }
@@ -531,7 +532,11 @@ export default class ProductDetail implements OnInit {
         this.closeModal();
         this.loadProduct(this.productId);
       },
-      error: () => this.submitting.set(false),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al actualizar el producto.');
+      },
     });
   }
 
@@ -540,9 +545,14 @@ export default class ProductDetail implements OnInit {
     this.productService.delete(this.productId).subscribe({
       next: () => {
         this.submitting.set(false);
-        // TODO: navigate back to product list after deletion
+        this.toastService.success('Producto eliminado');
+        this.router.navigate(['inventory', 'products']);
       },
-      error: () => this.submitting.set(false),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al eliminar el producto.');
+      },
     });
   }
 
@@ -557,9 +567,10 @@ export default class ProductDetail implements OnInit {
         this.toastService.success(p.isActive ? 'Producto desactivado' : 'Producto activado');
         this.loadProduct(p.id);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        this.toastService.error('Error al cambiar el estado del producto.');
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al cambiar el estado del producto.');
       },
     });
   }
@@ -573,7 +584,11 @@ export default class ProductDetail implements OnInit {
         this.closeModal();
         this.loadProduct(this.productId);
       },
-      error: () => this.submitting.set(false),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al actualizar la talla/color.');
+      },
     });
   }
 
@@ -587,16 +602,15 @@ export default class ProductDetail implements OnInit {
         this.toastService.success('Talla/color eliminada');
         this.loadProduct(this.productId);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         this.submitting.set(false);
-        if (err.status === 409) {
-          this.toastService.error(
-            'Esta variante está asociada a movimientos o transferencias y no se puede eliminar.',
-          );
+        const e = err as { status?: number; error?: { detail?: string; title?: string }; message?: string };
+        if (e.status === 409) {
+          this.toastService.error(e?.error?.detail || e?.error?.title || 'Esta variante está asociada a movimientos o transferencias y no se puede eliminar.');
           this.closeModal();
           return;
         }
-        this.toastService.error('Error al eliminar la talla/color.');
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al eliminar la talla/color.');
       },
     });
   }
@@ -608,9 +622,14 @@ export default class ProductDetail implements OnInit {
       next: () => {
         this.submitting.set(false);
         this.closeModal();
+        this.toastService.success('Stock ajustado');
         this.loadProduct(this.productId);
       },
-      error: () => this.submitting.set(false),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al ajustar el stock.');
+      },
     });
   }
 

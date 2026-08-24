@@ -9,6 +9,7 @@ import { TransferDirection, TransferStatus } from '../../../dtos/transfers/trans
 import { StockTransferDetailDto } from '../../../dtos/transfers/stock-transfer-detail-dto';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 import { closeModal, openModal } from '@shared/utils/modal-query';
+import { ToastService } from '@core/services/toast-service';
 
 @Component({
   selector: 'app-transfer-details',
@@ -32,6 +33,7 @@ import { closeModal, openModal } from '@shared/utils/modal-query';
 })
 export default class TransferDetails implements OnInit {
   private transferService = inject(TransferService);
+  private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
   readonly router = inject(Router);
 
@@ -94,9 +96,14 @@ export default class TransferDetails implements OnInit {
     this.transferService.resolveTransfer(id, action).subscribe({
       next: () => {
         this.submitting.set(false);
+        this.toast.success(action === 'complete' ? 'Transferencia completada' : 'Transferencia rechazada');
         this.router.navigate(['inventory', 'transfers']);
       },
-      error: () => this.submitting.set(false),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toast.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al resolver la transferencia.');
+      },
     });
   }
 
@@ -115,9 +122,14 @@ export default class TransferDetails implements OnInit {
     this.transferService.cancelTransfer(id).subscribe({
       next: () => {
         this.submitting.set(false);
+        this.toast.success('Transferencia cancelada');
         this.router.navigate(['inventory', 'transfers']);
       },
-      error: () => this.submitting.set(false),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toast.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al cancelar la transferencia.');
+      },
     });
   }
 

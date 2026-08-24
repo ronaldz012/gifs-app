@@ -5,6 +5,7 @@ import {
 import { form, FormField, required, minLength, maxLength, validate } from '@angular/forms/signals';
 import { Brand } from '../../dtos/brands/brand-dto';
 import { BrandService } from '@features/inventory/services/brand-service';
+import { ToastService } from '@core/services/toast-service';
 
 @Component({
   selector: 'app-create-brand',
@@ -17,6 +18,7 @@ export default class CreateBrand implements AfterViewInit {
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
 
   private brandService = inject(BrandService);
+  private toast = inject(ToastService);
 
   // --- Inputs / Outputs ---
   initialName = input.required<string>();
@@ -89,6 +91,9 @@ export default class CreateBrand implements AfterViewInit {
           } else {
             this.serverError.set('Este nombre ya existe');
           }
+        } else {
+          const msg = err?.error?.detail || err?.error?.title || err?.message || 'Error al crear la marca.';
+          this.toast.error(msg);
         }
       }
     });

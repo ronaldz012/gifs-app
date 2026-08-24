@@ -1,5 +1,6 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
+import { ToastService } from '@core/services/toast-service';
 import { CreateMovementDto } from '@features/sales/dtos/create-movement-dto';
 
 @Component({
@@ -93,6 +94,7 @@ export default class CreateExpenseModal {
   close = output<void>();
 
   private cashRegisterService = inject(CashRegisterService);
+  private toast = inject(ToastService);
 
   amount = signal(0);
   description = signal('');
@@ -114,12 +116,14 @@ export default class CreateExpenseModal {
 
     this.cashRegisterService.createMovement(dto).subscribe({
       next: () => {
+        this.toast.success('Gasto creado');
         this.saved.emit();
         this.close.emit();
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        alert('Error al crear el gasto. Intente de nuevo.');
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toast.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al crear el gasto. Intentá de nuevo.');
       }
     });
   }

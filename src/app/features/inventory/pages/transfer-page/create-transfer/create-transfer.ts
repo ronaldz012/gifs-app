@@ -108,7 +108,10 @@ export default class CreateTransfer implements OnInit {
         this.toastService.success('Transferencia creada');
         this.router.navigate(['inventory', 'transfers']);
       },
-      error: () => this.toastService.error('Error al crear la transferencia.'),
+      error: (err: unknown) => {
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        this.toastService.error(e?.error?.detail || e?.error?.title || e?.message || 'Error al crear la transferencia.');
+      },
     });
   }
 

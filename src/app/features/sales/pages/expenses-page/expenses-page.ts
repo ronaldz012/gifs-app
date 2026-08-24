@@ -196,7 +196,7 @@ export default class ExpensesPage implements OnInit {
       },
       error: (err) => {
         this.deleting.set(false);
-        this.toast.error(err?.error?.detail || 'Error al eliminar el gasto');
+        this.toast.error(err?.error?.detail || err?.error?.title || err?.message || 'Error al eliminar el gasto');
       },
     });
   }

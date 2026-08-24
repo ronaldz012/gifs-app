@@ -4,6 +4,7 @@ import SideMenuOption from './side-menu-option/side-menu-option';
 import { SideBarService } from '@layout/services/side-bar-service';
 import { CurrentUserService } from '@features/auth/services/current-user-service';
 import { BranchContextService } from '@core/services/branch-context-service';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -68,8 +69,20 @@ import { BranchContextService } from '@core/services/branch-context-service';
 
         <app-side-menu-option [features]="features()" (onNavigate)="sidebarSvc.close()" />
 
+        <!-- Theme toggle -->
+        <div class="mt-auto px-2 pb-2">
+          <button
+            type="button"
+            (click)="themeSvc.toggle()"
+            class="flex w-full items-center gap-2 mx-2 px-3 py-2 font-inter text-sm font-medium text-layout-sidebar-text rounded-lg hover:bg-white/5 transition-colors"
+          >
+            <span class="material-icons text-lg">{{ themeSvc.isDark() ? 'light_mode' : 'dark_mode' }}</span>
+            {{ themeSvc.isDark() ? 'Modo claro' : 'Modo oscuro' }}
+          </button>
+        </div>
+
         @if (currentUser.user()?.isAdmin) {
-          <div class="mt-auto px-2 py-2 border-t border-border">
+          <div class="px-2 py-2 border-t border-white/10">
             <a
               #rla="routerLinkActive"
               class="relative flex items-center gap-2 mx-2 px-3 py-2
@@ -101,6 +114,7 @@ export default class Sidebar {
   readonly sidebarSvc = inject(SideBarService);
   readonly currentUser = inject(CurrentUserService);
   readonly branchContext = inject(BranchContextService);
+  readonly themeSvc = inject(ThemeService);
   readonly ready = signal(false);
 
   readonly features = computed(() => this.branchContext.active()?.features ?? []);

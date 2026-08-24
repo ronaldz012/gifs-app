@@ -6,6 +6,7 @@ import { RoleListItemDto } from '../../dtos/roles/role-list-item-dto';
 import { BranchListItemDto } from '../../dtos/branches/branch-list-item-dto';
 import { CreateUserResponse } from '../../dtos/users/create-user-response';
 import { CreateTenantAdminRequest } from '../../dtos/users/create-tenant-admin-request';
+import { ToastService } from '@core/services/toast-service';
 
 interface BranchRoleEntry {
   branchId: GUID;
@@ -22,6 +23,7 @@ interface BranchRoleEntry {
 })
 export default class CreateUserPanel implements OnInit {
   private userAdminService = inject(UserAdminService);
+  private toast = inject(ToastService);
 
   close = output<void>();
 
@@ -140,9 +142,12 @@ export default class CreateUserPanel implements OnInit {
         this.isSubmitting.set(false);
         this.result.set(res);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.isSubmitting.set(false);
-        this.error.set('Error al crear el usuario.');
+        const e = err as { error?: { detail?: string; title?: string }; message?: string };
+        const msg = e?.error?.detail || e?.error?.title || e?.message || 'Error al crear el usuario.';
+        this.error.set(msg);
+        this.toast.error(msg);
       },
     });
   }

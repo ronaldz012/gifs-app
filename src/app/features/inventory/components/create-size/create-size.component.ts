@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { form, FormField, required, minLength } from '@angular/forms/signals';
 import { SizeService } from '../../services/size-service';
+import { ToastService } from '@core/services/toast-service';
 import { Size } from '../../dtos/sizes/size';
 
 @Component({
@@ -22,6 +23,7 @@ export default class CreateSize implements AfterViewInit {
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
 
   private sizeService = inject(SizeService);
+  private toast = inject(ToastService);
 
   // --- Inputs / Outputs ---
   initialName = input.required<string>();
@@ -74,6 +76,9 @@ export default class CreateSize implements AfterViewInit {
         this.isLoading.set(false);
         if (err.status === 409) {
           this._serverError.set('Este nombre ya existe');
+        } else {
+          const msg = err?.error?.detail || err?.error?.title || err?.message || 'Error al crear la talla.';
+          this.toast.error(msg);
         }
       },
     });
