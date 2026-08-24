@@ -263,9 +263,9 @@ export default class PosPage implements OnInit {
           );
 
           if (existingItemIndex > -1) {
-            const currentItem = updatedItems[existingItemIndex];
-            if (currentItem.quantity < variant.availableStockInBranch) {
-              currentItem.quantity += 1;
+            const existing = updatedItems[existingItemIndex];
+            if (existing.quantity < variant.availableStockInBranch) {
+              updatedItems[existingItemIndex] = { ...existing, quantity: existing.quantity + 1 };
             } else {
               this.toast.warning(`Stock máximo: ${variant.availableStockInBranch} u.`, 2000);
             }
