@@ -184,7 +184,7 @@ export default class PosPage implements OnInit {
   }
 
   searchBySku(skuValue: string): void {
-    const cleanSku = skuValue?.trim();
+    const cleanSku = skuValue?.trim().toUpperCase();
     if (!cleanSku) return;
 
     // Reutiliza la misma lógica exacta de búsqueda y validación del backend
@@ -249,7 +249,10 @@ export default class PosPage implements OnInit {
    * Procesa el código escaneado (SKU), busca en el backend e interactúa con el carrito
    */
   onScanned(skuValue: string): void {
-    this.productService.getVariantBySku(skuValue).subscribe({
+    const cleanSku = skuValue.trim().toUpperCase();
+    if (!cleanSku) return;
+
+    this.productService.getVariantBySku(cleanSku).subscribe({
       next: (variant: ProductVariantBySkuDto) => {
         if (variant.availableStockInBranch <= 0) {
           this.toast.warning(`SKU ${variant.sku} sin stock en esta sucursal.`, 2500);
@@ -292,14 +295,14 @@ export default class PosPage implements OnInit {
       },
       error: (err) => {
         if (err.status === 409) {
-          this.toast.error(`Producto ${skuValue} inactivo — no se puede vender.`);
+          this.toast.error(`Producto ${cleanSku} inactivo — no se puede vender.`);
           return;
         }
         if (err.status === 404) {
-          this.toast.error(`SKU "${skuValue}" no encontrado.`);
+          this.toast.error(`SKU "${cleanSku}" no encontrado.`);
           return;
         }
-        this.toast.error(this.friendlyError(err, `No se encontró producto con código: ${skuValue}`));
+        this.toast.error(this.friendlyError(err, `No se encontró producto con código: ${cleanSku}`));
       },
     });
   }
