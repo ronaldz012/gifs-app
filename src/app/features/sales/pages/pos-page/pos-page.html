@@ -71,7 +71,7 @@
     @case ('open') {
       @if (currentRegister(); as reg) {
         <div
-          class="flex items-center gap-2 px-3 py-2 mb-1 rounded-lg"
+          class="flex items-center justify-between gap-3 px-3 py-2 mb-1 rounded-lg"
           [class.bg-feedback-success-bg/10]="registerDayStatus() === 'today'"
           [class.bg-feedback-warning-bg/15]="registerDayStatus() === 'yesterday'"
           [class.bg-feedback-error-bg/10]="registerDayStatus() === 'old'"
@@ -79,17 +79,26 @@
           [class.text-feedback-warning-text]="registerDayStatus() === 'yesterday'"
           [class.text-feedback-error-text]="registerDayStatus() === 'old'"
         >
-          <span
-            class="w-2 h-2 rounded-full shrink-0"
-            [class.bg-feedback-success-text]="registerDayStatus() === 'today'"
-            [class.bg-feedback-warning-text]="registerDayStatus() === 'yesterday'"
-            [class.bg-feedback-error-text]="registerDayStatus() === 'old'"
-          ></span>
-          <span class="text-[13px] font-medium tracking-tight">{{ registerLabel() }}</span>
+          <div class="flex items-center gap-2 min-w-0">
+            <span
+              class="w-2 h-2 rounded-full shrink-0"
+              [class.bg-feedback-success-text]="registerDayStatus() === 'today'"
+              [class.bg-feedback-warning-text]="registerDayStatus() === 'yesterday'"
+              [class.bg-feedback-error-text]="registerDayStatus() === 'old'"
+            ></span>
+            <span class="text-[12px] sm:text-[13px] font-medium tracking-tight truncate">{{ registerLabel() }}</span>
+          </div>
+          <a
+            routerLink="/sales/pos/close-register"
+            class="inline-flex items-center gap-1.5 shrink-0 text-[11px] sm:text-[12px] font-semibold text-text-soft hover:text-feedback-error-text transition-all"
+          >
+            <span class="material-icons !text-[16px]">logout</span>
+            Cerrar Caja
+          </a>
         </div>
       }
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div class="lg:col-span-2 flex flex-col gap-5">
+        <div class="lg:col-span-2 flex flex-col gap-5 pb-24 lg:pb-0">
           <div class="bg-bg-surface rounded-xl border border-border shadow-xs">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4">
               <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -132,27 +141,20 @@
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-3 px-4 py-2 border-t border-border">
+            <div class="flex items-center justify-end gap-2 px-4 py-2 border-t border-border">
               <a
                 routerLink="/sales/pos/expenses"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-[12px] font-semibold text-text-main hover:bg-bg-muted hover:border-border-strong transition-all"
+                class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 border border-border rounded-lg text-[11px] sm:text-[12px] font-semibold text-text-main hover:bg-bg-muted hover:border-border-strong transition-all"
               >
                 <span class="material-icons !text-[16px]">receipt_long</span>
                 Gastos
               </a>
               <a
                 routerLink="/sales/pos/returns"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-[12px] font-semibold text-text-main hover:bg-bg-muted hover:border-border-strong transition-all"
+                class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 border border-border rounded-lg text-[11px] sm:text-[12px] font-semibold text-text-main hover:bg-bg-muted hover:border-border-strong transition-all"
               >
                 <span class="material-icons !text-[16px]">assignment_return</span>
                 Reembolsos
-              </a>
-              <a
-                routerLink="/sales/pos/close-register"
-                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium text-text-soft hover:text-feedback-error-text transition-all"
-              >
-                <span class="material-icons !text-[16px]">logout</span>
-                Cerrar Caja
               </a>
             </div>
           </div>
@@ -168,16 +170,6 @@
               }
             </div>
 
-            <div
-              class="lg:hidden mt-2 bg-bg-surface border border-border-strong rounded-xl p-4 flex items-center justify-between shadow-sm"
-            >
-              <span class="text-sm font-bold text-text-muted"
-                >Total Parcial ({{ posModel().items.length }} art.)</span
-              >
-              <span class="text-2xl font-black text-accent-ui font-mono">{{
-                totalCart() | currency: 'BOB' : 'symbol' : '1.2-2'
-              }}</span>
-            </div>
           } @else {
             <div
               class="flex flex-col items-center justify-center gap-3 py-20 bg-bg-surface border border-dashed border-border rounded-2xl text-text-soft"
