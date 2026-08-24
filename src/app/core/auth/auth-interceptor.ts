@@ -16,30 +16,26 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
-  // Obtenemos el token desde Auth0 (memoria o renovación silenciosa automática)
-  return auth0.getAccessTokenSilently().pipe(
+  const audience = environment.auth0.authorizationParams.audience;
+
+  return auth0.getAccessTokenSilently({ authorizationParams: { audience } } as never).pipe(
     switchMap((token) => {
+      if (!token) {
+        return next(req);
+      }
       const headers: Record<string, string> = {
         Authorization: `Bearer ${token}`,
       };
-
-      // Inyectar X-Branch-Id si no existe en la petición original
       const existingBranchId = req.headers.get('X-Branch-Id');
       if (!existingBranchId) {
         const branchId = branchContext.getActiveBranchId();
         if (branchId) headers['X-Branch-Id'] = branchId;
       }
-
       const authReq = req.clone({ setHeaders: headers });
       return next(authReq);
     }),
-    catchError((error: HttpErrorResponse) => {
-      // Si Auth0 no puede obtener token o el backend retorna 401
-      if (error.status === 401) {
-        // Redirigir al login unificado de Auth0
-        auth0.loginWithRedirect();
-      }
-      return throwError(() => error);
+    catchError((error: unknown) => {
+      return throwError(() => error as HttpErrorResponse);
     }),
   );
 };

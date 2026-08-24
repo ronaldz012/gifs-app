@@ -103,51 +103,29 @@ import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
       } @else {
         <!-- Desktop -->
         <div class="hidden lg:block bg-bg-surface rounded-xl border border-border overflow-hidden">
-          <div
-            class="hidden lg:grid grid-cols-[1.2fr_1fr_1fr_1fr_100px_44px] px-4 py-3 bg-bg-muted border-b border-border"
-          >
-            <span class="text-[10px] font-bold uppercase tracking-wider text-text-soft"
-              >Nombre</span
-            >
-            <span class="text-[10px] font-bold uppercase tracking-wider text-text-soft"
-              >Contacto</span
-            >
-            <span class="text-[10px] font-bold uppercase tracking-wider text-text-soft">Email</span>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-text-soft"
-              >Teléfono</span
-            >
-            <span class="text-[10px] font-bold uppercase tracking-wider text-text-soft"
-              >Estado</span
-            >
+          <div class="hidden lg:grid grid-cols-[1.2fr_1fr_1fr_1fr_90px_72px] px-4 py-3 bg-bg-muted border-b border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
+            <span>Nombre</span>
+            <span>Contacto</span>
+            <span>Email</span>
+            <span>Teléfono</span>
+            <span>Estado</span>
             <span></span>
           </div>
           @for (p of filteredProviders(); track p.id) {
-            <div
-              class="hidden lg:grid grid-cols-[1.2fr_1fr_1fr_1fr_100px_44px] px-4 py-3 border-b border-border last:border-0 hover:bg-accent-ui/5 transition-colors items-center"
-            >
+            <div class="hidden lg:grid grid-cols-[1.2fr_1fr_1fr_1fr_90px_72px] px-4 py-3 border-b border-border last:border-0 hover:bg-accent-ui/5 transition-colors items-center">
               <span class="text-sm font-medium text-text-main truncate">{{ p.name }}</span>
               <span class="text-sm text-text-muted truncate">{{ p.contactName || '—' }}</span>
               <span class="text-sm text-text-muted truncate">{{ p.email || '—' }}</span>
               <span class="text-sm text-text-muted truncate">{{ p.phoneNumber || '—' }}</span>
-              <button
-                type="button"
-                (click)="openStatusConfirm(p)"
-                class="justify-self-start inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold"
-                [class]="
-                  p.isActive
-                    ? 'bg-feedback-success text-feedback-success-text hover:opacity-80'
-                    : 'bg-feedback-warning text-feedback-warning-text hover:opacity-80'
-                "
-              >
+              <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold justify-self-start"
+                [class]="p.isActive ? 'bg-feedback-success text-feedback-success-text' : 'bg-feedback-warning text-feedback-warning-text'">
                 {{ p.isActive ? 'Activo' : 'Inactivo' }}
-              </button>
-              <div class="flex justify-end">
-                <button
-                  type="button"
-                  (click)="openEdit(p)"
-                  class="btn-icon text-text-soft hover:text-text-main"
-                  title="Editar"
-                >
+              </span>
+              <div class="flex justify-end gap-1">
+                <button type="button" (click)="openStatusConfirm(p)" class="action-btn" [class.action-btn--edit]="p.isActive" [class.action-btn--delete]="!p.isActive" [title]="p.isActive ? 'Desactivar' : 'Activar'">
+                  <span class="material-icons text-base">{{ p.isActive ? 'toggle_on' : 'toggle_off' }}</span>
+                </button>
+                <button type="button" (click)="openEdit(p)" class="action-btn action-btn--edit" title="Editar">
                   <span class="material-icons text-base">edit</span>
                 </button>
               </div>
@@ -158,47 +136,25 @@ import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
         <!-- Mobile -->
         <div class="lg:hidden flex flex-col gap-3">
           @for (p of filteredProviders(); track p.id) {
-            <div class="bg-bg-surface rounded-xl border border-border p-4">
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 min-w-0">
-                  <span class="text-sm font-semibold text-text-main truncate">{{ p.name }}</span>
-                  <button
-                    type="button"
-                    (click)="openStatusConfirm(p)"
-                    class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
-                    [class]="
-                      p.isActive
-                        ? 'bg-feedback-success text-feedback-success-text'
-                        : 'bg-feedback-warning text-feedback-warning-text'
-                    "
-                  >
-                    {{ p.isActive ? 'Activo' : 'Inactivo' }}
-                  </button>
+            <div class="bg-bg-surface rounded-xl border border-border p-4 flex flex-col gap-2">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-text-main truncate">{{ p.name }}</p>
+                  @if (p.contactName) { <p class="text-xs text-text-muted truncate">{{ p.contactName }}</p> }
+                  @if (p.email) { <p class="text-xs text-text-muted truncate">{{ p.email }}</p> }
+                  @if (p.phoneNumber) { <p class="text-xs font-mono text-text-soft">{{ p.phoneNumber }}</p> }
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
-                  @if (p.phoneNumber) {
-                    <span class="tag-neutral">{{ p.phoneNumber }}</span>
-                  }
-                  <button
-                    type="button"
-                    (click)="openEdit(p)"
-                    class="btn-icon text-text-soft hover:text-text-main"
-                    title="Editar"
-                  >
-                    <span class="material-icons text-base">edit</span>
-                  </button>
-                </div>
+                <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold shrink-0"
+                  [class]="p.isActive ? 'bg-feedback-success text-feedback-success-text' : 'bg-feedback-warning text-feedback-warning-text'">
+                  {{ p.isActive ? 'Activo' : 'Inactivo' }}
+                </span>
               </div>
-              @if (p.contactName || p.email) {
-                <div class="mt-2 flex flex-col gap-1 text-xs text-text-muted">
-                  @if (p.contactName) {
-                    <span>{{ p.contactName }}</span>
-                  }
-                  @if (p.email) {
-                    <span>{{ p.email }}</span>
-                  }
-                </div>
-              }
+              <div class="flex items-center gap-3">
+                <button type="button" (click)="openStatusConfirm(p)" class="action-text" [class.action-text--edit]="p.isActive" [class.action-text--delete]="!p.isActive">
+                  {{ p.isActive ? 'Desactivar' : 'Activar' }}
+                </button>
+                <button type="button" (click)="openEdit(p)" class="action-text action-text--edit">Editar</button>
+              </div>
             </div>
           }
         </div>
@@ -223,19 +179,12 @@ import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 
     <!-- Modal editar -->
     @if (editing()) {
-      <div
-        class="fixed inset-0 bg-overlay z-40 flex items-center justify-center p-4"
-        (click)="closeEdit()"
-      >
-        <div class="w-full max-w-md" (click)="$event.stopPropagation()">
-          <app-edit-provider
-            [item]="editing()!"
-            [saving]="saving()"
-            (saved)="onUpdated($event)"
-            (closed)="closeEdit()"
-          />
-        </div>
-      </div>
+      <app-edit-provider
+        [item]="editing()!"
+        [saving]="saving()"
+        (saved)="onUpdated($event)"
+        (closed)="closeEdit()"
+      />
     }
 
     <!-- Modal estado -->

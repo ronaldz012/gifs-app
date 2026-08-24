@@ -8,7 +8,10 @@ import { UpdateProviderDto } from '../../dtos/providers/update-provider-dto';
   standalone: true,
   imports: [FormField],
   template: `
-    <div class="bg-bg-surface border border-border rounded-lg shadow-lg p-4 w-80">
+    <div class="fixed inset-0 bg-overlay z-40 flex items-end sm:items-center justify-center backdrop-blur-[2px]" (click)="closed.emit()">
+      <div class="modal-enter w-full sm:w-[480px] bg-bg-surface rounded-t-2xl sm:rounded-2xl shadow-lg z-50 px-5 pt-5 pb-7 sm:pb-5 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+        <div class="sm:hidden w-10 h-1 rounded-full bg-bg-muted mx-auto mb-5"></div>
+        <div class="bg-bg-surface p-0">
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <h3 class="section-title mb-0">Editar Proveedor</h3>
@@ -120,26 +123,19 @@ import { UpdateProviderDto } from '../../dtos/providers/update-provider-dto';
         </div>
 
         <!-- Acciones -->
-        <div class="flex gap-2 pt-1">
-          <button
-            type="button"
-            (click)="closed.emit()"
-            [disabled]="saving()"
-            class="btn btn-secondary btn-sm flex-1"
-          >
-            Cancelar
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+          <button type="button" (click)="closed.emit()" [disabled]="saving()" class="btn-secondary flex-1 py-2.5 rounded-xl">Cancelar</button>
+          <button type="button" (click)="save()" [disabled]="saving() || editForm().invalid()" class="btn-primary flex-1 py-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed">
+            {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
           </button>
-          <button
-            type="button"
-            (click)="save()"
-            [disabled]="saving() || editForm().invalid()"
-            class="btn btn-primary btn-sm flex-1"
-          >
-            {{ saving() ? 'Guardando...' : 'GUARDAR' }}
-          </button>
+        </div>
         </div>
       </div>
     </div>
+  `,
+  styles: `
+    @keyframes modal-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-enter { animation: modal-in 180ms ease both; }
   `,
 })
 export default class EditProvider implements OnInit {

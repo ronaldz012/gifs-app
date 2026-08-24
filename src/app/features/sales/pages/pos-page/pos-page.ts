@@ -17,6 +17,7 @@ import { CashRegisterService } from '@features/sales/services/cash-register-serv
 import { CurrentRegisterDto } from '@features/sales/dtos/current-register-dto';
 import { SaleService } from '@features/sales/services/sale-service';
 import { CreateSaleDto, CreateSaleItemDto } from '@features/sales/dtos/create-sale-dto';
+import { ToastService } from '@core/services/toast-service';
 
 @Component({
   selector: 'app-pos-page',
@@ -41,6 +42,7 @@ export default class PosPage implements OnInit {
 
   private cashRegisterService = inject(CashRegisterService);
   private saleService = inject(SaleService);
+  private toast = inject(ToastService);
 
   // ── POS state ──────────────────────────────────────────────────────────
 
@@ -139,6 +141,11 @@ export default class PosPage implements OnInit {
     this.checkRegister();
   }
 
+  private friendlyError(err: unknown, fallback: string): string {
+    const e = err as { error?: { detail?: string; title?: string; message?: string }; message?: string; status?: number };
+    return e?.error?.detail || e?.error?.title || e?.error?.message || e?.message || fallback;
+  }
+
   checkRegister(): void {
     this.cashRegisterService.getCurrentRegister().subscribe({
       next: (register) => {
@@ -149,7 +156,13 @@ export default class PosPage implements OnInit {
           this.registerState.set('closed');
         }
       },
-      error: () => this.registerState.set('closed'),
+      error: (err) => {
+        this.registerState.set('closed');
+        const status = (err as { status?: number })?.status;
+        if (status && status !== 404) {
+          this.toast.error(this.friendlyError(err, 'No se pudo verificar la caja. Reintentá.'));
+        }
+      },
     });
   }
 
@@ -164,8 +177,9 @@ export default class PosPage implements OnInit {
         this.showOpenForm.set(false);
         this.openingBalance.set(0);
         this.checkRegister();
+        this.toast.success('Caja abierta');
       },
-      error: () => alert('Error al abrir la caja. Intente de nuevo.'),
+      error: (err) => this.toast.error(this.friendlyError(err, 'Error al abrir la caja. Intentá de nuevo.')),
     });
   }
 
@@ -218,6 +232,7 @@ export default class PosPage implements OnInit {
     this.saleService.createSale(dto).subscribe({
       next: () => {
         this.isMobilePayOpen.set(false);
+        this.toast.success(`Venta procesada por Bs ${this.totalCart().toFixed(2)}`);
         this.posModel.set({
           paymentMethod: null,
           transactionCode: null,
@@ -226,7 +241,7 @@ export default class PosPage implements OnInit {
           items: [],
         });
       },
-      error: () => alert('Error al procesar la venta. Intente de nuevo.'),
+      error: (err) => this.toast.error(this.friendlyError(err, 'Error al procesar la venta. Intentá de nuevo.')),
     });
   }
 
@@ -237,9 +252,7 @@ export default class PosPage implements OnInit {
     this.productService.getVariantBySku(skuValue).subscribe({
       next: (variant: ProductVariantBySkuDto) => {
         if (variant.availableStockInBranch <= 0) {
-          alert(
-            `La talla/color SKU ${variant.sku} no cuenta con stock disponible en esta sucursal.`,
-          );
+          this.toast.warning(`SKU ${variant.sku} sin stock en esta sucursal.`, 2500);
           return;
         }
 
@@ -254,9 +267,7 @@ export default class PosPage implements OnInit {
             if (currentItem.quantity < variant.availableStockInBranch) {
               currentItem.quantity += 1;
             } else {
-              alert(
-                `No puedes agregar más unidades. Stock máximo disponible: ${variant.availableStockInBranch} u.`,
-              );
+              this.toast.warning(`Stock máximo: ${variant.availableStockInBranch} u.`, 2000);
             }
           } else {
             const newItem: PosCartItem = {
@@ -281,10 +292,14 @@ export default class PosPage implements OnInit {
       },
       error: (err) => {
         if (err.status === 409) {
-          alert(`El producto ${skuValue} está inactivo y no puede venderse.`);
+          this.toast.error(`Producto ${skuValue} inactivo — no se puede vender.`);
           return;
         }
-        alert(`No se encontró ningún producto con el código: ${skuValue}`);
+        if (err.status === 404) {
+          this.toast.error(`SKU "${skuValue}" no encontrado.`);
+          return;
+        }
+        this.toast.error(this.friendlyError(err, `No se encontró producto con código: ${skuValue}`));
       },
     });
   }

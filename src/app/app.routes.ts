@@ -4,7 +4,10 @@ import { featureGuard } from '@core/auth/feature-guard';
 import { adminGuard } from '@core/auth/admin-guard';
 
 export const routes: Routes = [
-  // ── Layout principal (con sidebar/topbar) ────────────────────────────────
+  {
+    path: 'callback',
+    loadComponent: () => import('@features/auth/callback/callback'),
+  },
   {
     path: 'login',
     loadComponent: () => import('@features/auth/login/login'),
