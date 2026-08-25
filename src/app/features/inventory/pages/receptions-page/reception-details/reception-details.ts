@@ -154,7 +154,7 @@ export default class ReceptionDetails implements OnInit {
               receptionId: data.receptionId,
             })),
           );
-          const doc = await this.printService.generatePdf(labels);
+          const doc = await this.printService.generatePdfCompact(labels);
           doc.save(`etiquetas-recepcion-${data.receptionId}.pdf`);
         } catch (e) {
           console.error('Error generando PDF de etiquetas', e);
