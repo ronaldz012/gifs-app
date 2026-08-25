@@ -1,2 +1,17 @@
 <router-outlet />
 <app-toast-container />
+@if (!connectivity.isOnline()) {
+  <div class="fixed inset-0 z-[70] flex flex-col items-center justify-center gap-4 bg-overlay backdrop-blur-[2px] p-6 text-center">
+    <div class="w-14 h-14 rounded-full bg-bg-surface flex items-center justify-center shadow-sm">
+      <span class="material-icons text-3xl text-text-soft">{{ connectivity.reason() === 'backend-down' ? 'cloud_off' : 'wifi_off' }}</span>
+    </div>
+    @if (connectivity.reason() === 'backend-down') {
+      <h2 class="text-lg font-black text-white">Servicio no disponible</h2>
+      <p class="text-sm text-white/80 max-w-sm">No es tu conexión. El servidor no responde, reintentando automáticamente...</p>
+    } @else {
+      <h2 class="text-lg font-black text-white">Sin conexión</h2>
+      <p class="text-sm text-white/80 max-w-sm">Revisá tu conexión a internet. La app se reanudará automáticamente cuando vuelva la conexión.</p>
+    }
+    <div class="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin mt-2"></div>
+  </div>
+}

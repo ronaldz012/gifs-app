@@ -153,8 +153,8 @@ interface RefundFormModel {
                       <span class="material-icons text-base">add</span>
                     </button>
                   </div>
-                  <span class="text-sm font-mono font-black min-w-[5.5rem] text-right" [class.text-accent-ui]="(f.returnQuantity().value() ?? 0) > 0" [class.text-text-soft]="!f.selected().value()">
-                    {{ ((f.returnQuantity().value() ?? 0) * f.unitPrice().value()!) | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                  <span class="text-sm font-mono font-black min-w-[5.5rem] text-right" [class.text-accent-ui]="(f.returnQuantity().value()) > 0" [class.text-text-soft]="!f.selected().value()">
+                    {{ ((f.returnQuantity().value()) * f.unitPrice().value()!) | currency: 'BOB' : 'symbol' : '1.2-2' }}
                   </span>
                 </div>
               </li>
@@ -183,8 +183,8 @@ interface RefundFormModel {
                     <span class="material-icons text-sm">add</span>
                   </button>
                 </div>
-                <span class="text-right text-sm font-mono font-bold" [class.text-accent-ui]="(f.returnQuantity().value() ?? 0) > 0">
-                  {{ ((f.returnQuantity().value() ?? 0) * f.unitPrice().value()!) | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                <span class="text-right text-sm font-mono font-bold" [class.text-accent-ui]="(f.returnQuantity().value()) > 0">
+                  {{ ((f.returnQuantity().value()) * f.unitPrice().value()!) | currency: 'BOB' : 'symbol' : '1.2-2' }}
                 </span>
               </li>
               @if (f.returnQuantity().touched() && f.returnQuantity().invalid()) {

@@ -18,6 +18,7 @@ import { CurrentRegisterDto } from '@features/sales/dtos/current-register-dto';
 import { SaleService } from '@features/sales/services/sale-service';
 import { CreateSaleDto, CreateSaleItemDto } from '@features/sales/dtos/create-sale-dto';
 import { ToastService } from '@core/services/toast-service';
+import { PermissionService } from '@features/auth/services/permmision-service';
 
 @Component({
   selector: 'app-pos-page',
@@ -43,6 +44,7 @@ export default class PosPage implements OnInit {
   private cashRegisterService = inject(CashRegisterService);
   private saleService = inject(SaleService);
   private toast = inject(ToastService);
+  readonly perm = inject(PermissionService);
 
   // ── POS state ──────────────────────────────────────────────────────────
 
@@ -210,6 +212,10 @@ export default class PosPage implements OnInit {
    * Ejecución final del guardado de la venta en el sistema
    */
   submitSale(): void {
+    if (!this.perm.can('sales', 'pos', 'create')) {
+      this.toast.error('No tenés permiso para procesar ventas.');
+      return;
+    }
     if (!this.isFormValid()) return;
 
     const state = this.posModel();

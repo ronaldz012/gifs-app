@@ -171,6 +171,8 @@ export const routes: Routes = [
           },
           {
             path: 'pos/returns',
+            canActivate: [featureGuard],
+            data: { module: 'sales', feature: 'pos' },
             children: [
               {
                 path: '',
