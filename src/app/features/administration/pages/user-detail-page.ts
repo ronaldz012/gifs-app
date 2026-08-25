@@ -4,7 +4,6 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UserAdminService } from '../services/user-admin-service';
 import { ToastService } from '@core/services/toast-service';
 import { GetUserDetailsResponse, UserTypeLabel } from '../dtos/users/get-user-details-response';
-import { UserStatusLabel } from '../dtos/users/get-user-response';
 import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/confirm-action-modal/confirm-action-modal';
 import UpdateUserPanel from './update-user-panel/update-user-panel';
 
@@ -62,10 +61,6 @@ import UpdateUserPanel from './update-user-panel/update-user-panel';
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             <div>
-              <p class="field-label">Usuario</p>
-              <p class="field-value">{{ user()!.username }}</p>
-            </div>
-            <div>
               <p class="field-label">Email</p>
               <p class="field-value">{{ user()!.email || '—' }}</p>
             </div>
@@ -94,15 +89,30 @@ import UpdateUserPanel from './update-user-panel/update-user-panel';
               <p class="field-value">{{ UserTypeLabel[user()!.userType] }}</p>
             </div>
             <div>
-              <p class="field-label">Estado</p>
-              <p class="field-value">{{ UserStatusLabel[user()!.status] }}</p>
-            </div>
-            <div>
               <p class="field-label">Creado el</p>
               <p class="field-value">{{ user()!.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
             </div>
           </div>
         </div>
+
+        @if (user()!.setupUrl) {
+          <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
+            <p class="section-title mb-3">Link de acceso</p>
+            <div class="flex flex-col gap-2">
+              <div class="flex gap-2">
+                <input readonly [value]="user()!.setupUrl" class="flex-1 w-0 px-3 py-2 text-xs font-mono text-text-main bg-bg-muted border border-border rounded-md truncate" />
+                <button type="button" (click)="copySetupUrl()" class="btn-secondary btn-sm shrink-0">
+                  <span class="material-icons text-sm">content_copy</span>
+                  {{ copiedSetup() ? 'Copiado' : 'Copiar' }}
+                </button>
+              </div>
+              @if (user()!.setupUrlExpiresAt) {
+                <p class="text-xs text-text-soft">Expira: {{ user()!.setupUrlExpiresAt | date:'dd/MM/yyyy HH:mm' }}</p>
+              }
+              <p class="text-xs text-text-soft">Compartí este link con el usuario para que configure su contraseña. Se puede cerrar sin copiar, el link quedará aquí.</p>
+            </div>
+          </div>
+        }
 
         @if (user()!.branchRoles.length > 0) {
           <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
@@ -152,7 +162,6 @@ import UpdateUserPanel from './update-user-panel/update-user-panel';
 })
 export default class UserDetailPage implements OnInit {
   protected readonly UserTypeLabel = UserTypeLabel;
-  protected readonly UserStatusLabel = UserStatusLabel;
   
 
   private route = inject(ActivatedRoute);
@@ -164,6 +173,7 @@ export default class UserDetailPage implements OnInit {
   submitting = signal(false);
   showPanel = signal(false);
   showToggleConfirm = signal(false);
+  copiedSetup = signal(false);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -185,6 +195,16 @@ export default class UserDetailPage implements OnInit {
     this.showPanel.set(false);
     const u = this.user();
     if (u) this.loadUser(u.id);
+  }
+
+  copySetupUrl(): void {
+    const url = this.user()?.setupUrl;
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
+      this.copiedSetup.set(true);
+      this.toast.success('Link copiado');
+      setTimeout(() => this.copiedSetup.set(false), 2000);
+    });
   }
 
   onToggleActive(): void {

@@ -3,6 +3,7 @@ import { CurrencyPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { ClosureDetailDto } from '@features/sales/dtos/closure-detail-dto';
+import { isReturnType, isCashPayment } from '@features/sales/dtos/sale-detail-dto';
 import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
@@ -123,9 +124,10 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                 <p class="text-[11px] font-bold uppercase tracking-wider text-text-soft">Ventas del turno ({{ c.sales.length }})</p>
                 <span class="text-xs font-bold text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">{{ c.sales.length }} venta(s)</span>
               </div>
-              <div class="hidden lg:grid lg:grid-cols-[9rem_8rem_7rem_6rem] px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
+              <div class="hidden lg:grid lg:grid-cols-[9rem_8rem_6rem_7rem_6rem] px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
                 <span>Hora</span>
                 <span class="text-right">Monto</span>
+                <span class="text-center">Tipo</span>
                 <span class="text-center">Pago</span>
                 <span class="text-right">Artículos</span>
               </div>
@@ -139,7 +141,12 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                         <span class="text-sm font-mono font-black text-text-main">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
-                        @if (sale.paymentMethod === 'Cash') {
+                        @if (isReturnType(sale.type)) {
+                          <span class="text-[11px] font-bold text-feedback-warning-text bg-feedback-warning/15 border border-feedback-warning/30 px-2 py-0.5 rounded-md">Devolución</span>
+                        } @else {
+                          <span class="text-[11px] font-bold text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">Venta</span>
+                        }
+                        @if (isCashPayment(sale.paymentMethod)) {
                           <span class="text-[11px] font-medium text-text-muted bg-bg-muted px-2 py-0.5 rounded-md">Efectivo</span>
                         } @else {
                           <span class="text-[11px] font-medium text-feedback-info-text bg-feedback-info-bg/15 px-2 py-0.5 rounded-md">Pago Móvil</span>
@@ -165,11 +172,18 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                     </div>
                     <!-- Desktop -->
                     <div class="hidden lg:block">
-                      <div class="grid lg:grid-cols-[9rem_8rem_7rem_6rem] items-center px-6 py-3 hover:bg-bg-muted/30 transition-colors">
+                      <div class="grid lg:grid-cols-[9rem_8rem_6rem_7rem_6rem] items-center px-6 py-3 hover:bg-bg-muted/30 transition-colors">
                         <span class="text-[13px] text-text-main font-mono">{{ sale.createdAt | smartDate }}</span>
-                        <span class="text-right text-[13px] font-mono font-bold text-text-main">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                        <span class="text-right text-[13px] font-mono font-bold text-text-main" [class.text-feedback-warning-text]="isReturnType(sale.type)">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                         <span class="text-center">
-                          @if (sale.paymentMethod === 'Cash') {
+                          @if (isReturnType(sale.type)) {
+                            <span class="text-[11px] font-bold text-feedback-warning-text bg-feedback-warning/15 border border-feedback-warning/30 px-2 py-0.5 rounded-md">Devolución</span>
+                          } @else {
+                            <span class="text-[11px] font-bold text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">Venta</span>
+                          }
+                        </span>
+                        <span class="text-center">
+                          @if (isCashPayment(sale.paymentMethod)) {
                             <span class="text-[11px] font-medium text-text-muted bg-bg-muted px-2 py-0.5 rounded-md">Efectivo</span>
                           } @else {
                             <span class="text-[11px] font-medium text-feedback-info-text bg-feedback-info-bg/10 px-2 py-0.5 rounded-md">Pago Móvil</span>
@@ -317,6 +331,8 @@ export default class ClosureDetailPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cashRegisterService = inject(CashRegisterService);
+  protected isReturnType = isReturnType;
+  protected isCashPayment = isCashPayment;
 
   closure = signal<ClosureDetailDto | null>(null);
   loading = signal(true);

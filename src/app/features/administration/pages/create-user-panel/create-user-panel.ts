@@ -38,7 +38,6 @@ export default class CreateUserPanel implements OnInit {
   model = signal({
     firstName: '',
     lastName: '',
-    username: '',
     email: '',
     ci: '',
     nationality: '',
@@ -52,15 +51,7 @@ export default class CreateUserPanel implements OnInit {
     minLength(s.firstName, 3, { message: 'Mínimo 3 caracteres' });
     required(s.lastName, { message: 'Requerido' });
     minLength(s.lastName, 3, { message: 'Mínimo 3 caracteres' });
-    required(s.username, { message: 'Requerido' });
-    minLength(s.username, 3, { message: 'Mínimo 3 caracteres' });
-    maxLength(s.username, 50, { message: 'Máximo 50 caracteres' });
-    validate(s.username, ({ value }) => {
-      if (!/^[a-zA-Z0-9]+$/.test(value())) {
-        return { kind: 'pattern', message: 'Solo letras y números' };
-      }
-      return null;
-    });
+    required(s.email, { message: 'Email requerido' });
     email(s.email, { message: 'Email inválido' });
   });
 
@@ -115,8 +106,8 @@ export default class CreateUserPanel implements OnInit {
     this.error.set(null);
 
     const m = this.model();
-    const base = {
-      username: m.username,
+    const base: CreateUserRequest | CreateTenantAdminRequest = {
+      email: m.email,
       firstName: m.firstName,
       lastName: m.lastName,
       ci: m.ci,
@@ -124,9 +115,7 @@ export default class CreateUserPanel implements OnInit {
       birthDate: m.birthDate
         ? new Date(m.birthDate).toISOString()
         : new Date(0).toISOString(),
-    };
-
-    if (m.email) (base as any).email = m.email;
+    } as CreateUserRequest;
 
     const request$ = this.isAdmin()
       ? this.userAdminService.createTenantAdmin(base as CreateTenantAdminRequest)

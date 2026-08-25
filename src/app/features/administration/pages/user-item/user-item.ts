@@ -10,17 +10,16 @@ import { GetUserResponse } from '../../dtos/users/get-user-response';
     <div
       class="row-enter px-4 py-3 flex flex-wrap items-center gap-y-2
              transition-colors duration-150 hover:bg-bg-muted"
-      style="grid-template-columns: 1fr 10rem 1fr 7.5rem 5rem"
+      style="grid-template-columns: 1fr 1fr 7.5rem 5rem"
     >
       <div class="w-full lg:w-auto lg:flex-1 min-w-0">
         <div class="flex items-center gap-2">
-          <p class="text-sm font-medium text-text-main truncate">{{ user().fullName || user().username }}</p>
+          <p class="text-sm font-medium text-text-main truncate">{{ user().fullName || (user().firstName + ' ' + user().lastName) }}</p>
           @if (user().isAdmin) {
             <span class="tag-warning text-[10px] leading-none tracking-normal uppercase">Admin</span>
           }
         </div>
       </div>
-      <span class="w-full lg:w-[10rem] text-sm text-text-muted truncate">{{ user().username }}</span>
       <span class="w-full lg:w-auto lg:flex-1 text-sm text-text-muted truncate">{{ user().email }}</span>
       <div class="w-full lg:w-[7.5rem]">
         <span class="pill-success text-[10px] font-semibold"

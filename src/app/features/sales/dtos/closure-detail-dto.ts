@@ -1,3 +1,5 @@
+import { DocumentType, PaymentMethod, SaleType } from './sale-detail-dto';
+
 export interface ClosureSaleItemDetailDto {
   productVariantId: GUID;
   productSku: string;
@@ -14,8 +16,9 @@ export interface ClosureSaleItemDto {
   createdAt: string;
   soldByName: string;
   totalAmount: number;
-  paymentMethod: string;
-  documentType: string;
+  paymentMethod: PaymentMethod;
+  documentType: DocumentType;
+  type: SaleType;
   invoiceNumber: number | null;
   transactionCode: string | null;
   itemsCount: number;

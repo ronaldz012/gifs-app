@@ -3,7 +3,7 @@ import { UserType } from '@features/auth/models/LoginResponse';
 
 export interface GetUserDetailsResponse {
   id: GUID;
-  username: string;
+  username?: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -15,6 +15,8 @@ export interface GetUserDetailsResponse {
   status: UserStatus;
   isActive: boolean;
   createdAt: string;
+  setupUrl?: string | null;
+  setupUrlExpiresAt?: string | null;
   branchRoles: UserBranchRoleDetailDto[];
 }
 

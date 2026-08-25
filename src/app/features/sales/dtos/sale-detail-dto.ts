@@ -8,10 +8,30 @@ export enum PaymentMethod {
   QrCode = 1,
 }
 
+export function paymentMethodLabel(v: PaymentMethod | string | number): string {
+  const n = typeof v === 'string' ? (v === 'Cash' ? 0 : v === 'QrCode' ? 1 : NaN) : (v as number);
+  return n === PaymentMethod.QrCode ? 'Pago Móvil' : 'Efectivo';
+}
+export function isCashPayment(v: PaymentMethod | string | number): boolean {
+  return paymentMethodLabel(v) === 'Efectivo';
+}
+
 export enum DocumentType {
   Ticket = 0,
   Invoice = 1,
   PendingInvoice = 2,
+}
+
+export function documentTypeLabel(v: DocumentType | string | number): string {
+  const n = typeof v === 'string' ? (v === 'Ticket' ? 0 : v === 'Invoice' ? 1 : v === 'PendingInvoice' ? 2 : NaN) : (v as number);
+  if (n === DocumentType.Invoice) return 'Factura';
+  if (n === DocumentType.PendingInvoice) return 'Pendiente';
+  return 'Boleta';
+}
+
+export function isReturnType(v: SaleType | string | number): boolean {
+  if (typeof v === 'string') return v === 'Return' || v === '1';
+  return (v as number) === SaleType.Return;
 }
 
 export interface SaleItemDetailDto {

@@ -1,6 +1,5 @@
 export interface CreateTenantAdminRequest {
-  username: string;
-  email?: string;
+  email: string;
   firstName: string;
   lastName: string;
   ci: string;

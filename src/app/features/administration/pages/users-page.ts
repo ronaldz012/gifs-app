@@ -28,7 +28,7 @@ import CreateUserPanel from './create-user-panel/create-user-panel';
           <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-base text-text-soft pointer-events-none">search</span>
           <input
             type="text"
-            placeholder="Buscar por nombre, usuario o email..."
+            placeholder="Buscar por nombre o email..."
             class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-bg-muted text-text-main placeholder:text-text-soft outline-none transition-colors focus:border-border-strong"
             [value]="query().filter ?? ''"
             (input)="onSearch($event)"
@@ -73,9 +73,8 @@ import CreateUserPanel from './create-user-panel/create-user-panel';
         <div class="flex flex-col overflow-hidden rounded-xl border border-border bg-bg-surface shadow-xs">
           <div class="hidden px-4 py-3 border-b border-border bg-bg-muted lg:grid
                       font-inter text-xs font-semibold uppercase tracking-wider text-text-soft"
-               style="grid-template-columns: 1fr 10rem 1fr 7.5rem 5rem">
+               style="grid-template-columns: 1fr 1fr 7.5rem 5rem">
             <span>Nombre</span>
-            <span>Usuario</span>
             <span>Email</span>
             <span>Estado</span>
             <span></span>

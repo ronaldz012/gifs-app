@@ -3,7 +3,9 @@ import { CurrencyPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { ToastService } from '@core/services/toast-service';
+import { PermissionService } from '@features/auth/services/permmision-service';
 import { ClosureDetailDto } from '@features/sales/dtos/closure-detail-dto';
+import { isReturnType, isCashPayment } from '@features/sales/dtos/sale-detail-dto';
 import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 
@@ -111,9 +113,10 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                 <p class="text-[11px] font-bold uppercase tracking-wider text-text-soft">Ventas del turno ({{ c.sales.length }})</p>
                 <span class="text-xs font-bold text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">{{ c.sales.length }} venta(s)</span>
               </div>
-              <div class="hidden lg:grid lg:grid-cols-[9rem_8rem_7rem_6rem] px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
+              <div class="hidden lg:grid lg:grid-cols-[9rem_8rem_6rem_7rem_6rem] px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
                 <span>Hora</span>
                 <span class="text-right">Monto</span>
+                <span class="text-center">Tipo</span>
                 <span class="text-center">Pago</span>
                 <span class="text-right">Artículos</span>
               </div>
@@ -127,7 +130,12 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                         <span class="text-sm font-mono font-black text-text-main">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
-                        @if (sale.paymentMethod === 'Cash') {
+                        @if (isReturnType(sale.type)) {
+                          <span class="text-[11px] font-bold text-feedback-warning-text bg-feedback-warning/15 border border-feedback-warning/30 px-2 py-0.5 rounded-md">Devolución</span>
+                        } @else {
+                          <span class="text-[11px] font-bold text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">Venta</span>
+                        }
+                        @if (isCashPayment(sale.paymentMethod)) {
                           <span class="text-[11px] font-medium text-text-muted bg-bg-muted px-2 py-0.5 rounded-md">Efectivo</span>
                         } @else {
                           <span class="text-[11px] font-medium text-feedback-info-text bg-feedback-info-bg/15 px-2 py-0.5 rounded-md">Pago Móvil</span>
@@ -152,11 +160,18 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                     </div>
                     <!-- Desktop row -->
                     <div class="hidden lg:block">
-                      <div class="grid lg:grid-cols-[9rem_8rem_7rem_6rem] items-center px-6 py-3 hover:bg-bg-muted/30 transition-colors">
+                      <div class="grid lg:grid-cols-[9rem_8rem_6rem_7rem_6rem] items-center px-6 py-3 hover:bg-bg-muted/30 transition-colors">
                         <span class="text-[13px] text-text-main font-mono">{{ sale.createdAt | smartDate }}</span>
-                        <span class="text-right text-[13px] font-mono font-bold text-text-main">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                        <span class="text-right text-[13px] font-mono font-bold text-text-main" [class.text-feedback-warning-text]="isReturnType(sale.type)">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                         <span class="text-center">
-                          @if (sale.paymentMethod === 'Cash') {
+                          @if (isReturnType(sale.type)) {
+                            <span class="text-[11px] font-bold text-feedback-warning-text bg-feedback-warning/15 border border-feedback-warning/30 px-2 py-0.5 rounded-md">Devolución</span>
+                          } @else {
+                            <span class="text-[11px] font-bold text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">Venta</span>
+                          }
+                        </span>
+                        <span class="text-center">
+                          @if (isCashPayment(sale.paymentMethod)) {
                             <span class="text-[11px] font-medium text-text-muted bg-bg-muted px-2 py-0.5 rounded-md">Efectivo</span>
                           } @else {
                             <span class="text-[11px] font-medium text-feedback-info-text bg-feedback-info-bg/10 px-2 py-0.5 rounded-md">Pago Móvil</span>
@@ -265,45 +280,47 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
             </div>
           }
 
-          <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
-            <p class="section-title mb-4">Cerrar turno</p>
-            <div class="flex flex-col gap-4">
-              <div>
-                <label class="field-label">Monto contado en caja</label>
-                <input
-                  type="number"
-                  placeholder="0"
-                  [value]="closingBalance()"
-                  (input)="closingBalance.set(+$event.target.value)"
-                  class="w-full max-w-xs px-4 py-2.5 text-lg font-mono font-bold border border-border rounded-xl bg-bg-surface text-text-main focus:outline-none focus:border-accent-ui [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                />
+          @if (perm.can('sales', 'closures', 'update')) {
+            <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
+              <p class="section-title mb-4">Cerrar turno</p>
+              <div class="flex flex-col gap-4">
+                <div>
+                  <label class="field-label">Monto contado en caja</label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    [value]="closingBalance()"
+                    (input)="closingBalance.set(+$event.target.value)"
+                    class="w-full max-w-xs px-4 py-2.5 text-lg font-mono font-bold border border-border rounded-xl bg-bg-surface text-text-main focus:outline-none focus:border-accent-ui [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
+                </div>
+                <div class="flex gap-3">
+                  <a
+                    routerLink="/sales/pos"
+                    class="px-6 py-2.5 border border-border rounded-xl text-sm font-semibold text-text-muted hover:bg-bg-muted transition-all"
+                  >
+                    Cancelar
+                  </a>
+                  <button
+                    type="button"
+                    (click)="confirmClose()"
+                    [disabled]="closingBalance() <= 0 || submitting()"
+                    class="px-6 py-2.5 bg-accent-ui text-white rounded-xl text-sm font-bold hover:bg-accent-ui/90 disabled:opacity-40 transition-all flex items-center gap-2"
+                  >
+                    @if (submitting()) {
+                      <span
+                        class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                      ></span>
+                    }
+                    Confirmar Cierre
+                  </button>
+                </div>
+                @if (closeError()) {
+                  <p class="text-sm text-feedback-error-text">{{ closeError() }}</p>
+                }
               </div>
-              <div class="flex gap-3">
-                <a
-                  routerLink="/sales/pos"
-                  class="px-6 py-2.5 border border-border rounded-xl text-sm font-semibold text-text-muted hover:bg-bg-muted transition-all"
-                >
-                  Cancelar
-                </a>
-                <button
-                  type="button"
-                  (click)="confirmClose()"
-                  [disabled]="closingBalance() <= 0 || submitting()"
-                  class="px-6 py-2.5 bg-accent-ui text-white rounded-xl text-sm font-bold hover:bg-accent-ui/90 disabled:opacity-40 transition-all flex items-center gap-2"
-                >
-                  @if (submitting()) {
-                    <span
-                      class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
-                    ></span>
-                  }
-                  Confirmar Cierre
-                </button>
-              </div>
-              @if (closeError()) {
-                <p class="text-sm text-feedback-error-text">{{ closeError() }}</p>
-              }
             </div>
-          </div>
+          }
         </div>
       }
     </div>
@@ -313,6 +330,9 @@ export default class CloseRegisterPage implements OnInit {
   private router = inject(Router);
   private cashRegisterService = inject(CashRegisterService);
   private toast = inject(ToastService);
+  readonly perm = inject(PermissionService);
+  protected isReturnType = isReturnType;
+  protected isCashPayment = isCashPayment;
 
   state = signal<'init' | 'ready' | 'already-closed' | 'error'>('init');
   closure = signal<ClosureDetailDto | null>(null);
