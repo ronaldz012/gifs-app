@@ -150,8 +150,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                               <p class="text-[13px] font-semibold text-text-main break-words leading-snug">{{ item.productDisplayName }}</p>
                               <div class="flex flex-wrap items-center gap-2 text-xs">
                                 <span class="px-2 py-0.5 rounded-md bg-bg-muted border border-border font-mono font-medium text-text-main">×{{ item.quantity }} · {{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
-                                <span class="text-text-soft font-mono">costo {{ item.unitCost | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
-                                <span class="font-mono font-bold" [class.text-feedback-success-text]="((item.unitPrice - (item.unitCost ?? 0)) * item.quantity) > 0">{{ ((item.unitPrice - (item.unitCost ?? 0))) * item.quantity | currency: 'BOB' : 'symbol' : '1.2-2' }} margen</span>
+                                <span class="text-text-soft font-mono">{{ item.unitPrice | currency: 'BOB' : 'symbol' : '1.2-2' }} c/u</span>
                               </div>
                             </li>
                           }
@@ -181,16 +180,16 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                       </div>
                       @if (sale.items.length > 0) {
                         <div class="mx-6 mb-3 rounded-lg border border-border bg-bg-muted/30 overflow-hidden">
-                          <div class="hidden lg:grid lg:grid-cols-[8rem_1fr_6rem_6rem_7rem] px-3 py-1.5 bg-bg-muted border-b border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
-                            <span>SKU</span><span>Producto</span><span class="text-right">Costo</span><span class="text-right">Margen</span><span class="text-right">Subtotal</span>
+                          <div class="hidden lg:grid lg:grid-cols-[8rem_1fr_6.5rem_5rem_7rem] px-3 py-1.5 bg-bg-muted border-b border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
+                            <span>SKU</span><span>Producto</span><span class="text-right">Precio</span><span class="text-right">Cant.</span><span class="text-right">Subtotal</span>
                           </div>
                           @for (item of sale.items; track item.productVariantId) {
-                            <div class="grid lg:grid-cols-[8rem_1fr_6rem_6rem_7rem] items-center px-3 py-2 text-xs gap-2 border-b border-border/50 last:border-0 bg-bg-surface">
+                            <div class="grid lg:grid-cols-[8rem_1fr_6.5rem_5rem_7rem] items-center px-3 py-2 text-xs gap-2 border-b border-border/50 last:border-0 bg-bg-surface">
                               <span class="font-mono text-accent-ui font-bold truncate">{{ item.productSku }}</span>
                               <span class="font-medium text-text-main truncate" [title]="item.productDisplayName">{{ item.productDisplayName }}</span>
-                              <span class="text-right font-mono text-text-soft">{{ item.unitCost | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
-                              <span class="text-right font-mono font-bold text-feedback-success-text">{{ ((item.unitPrice - (item.unitCost ?? 0))) * item.quantity | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
-                              <span class="text-right font-mono font-bold text-text-main">×{{ item.quantity }} · {{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                              <span class="text-right font-mono text-text-soft">{{ item.unitPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                              <span class="text-right font-mono font-bold text-text-main">×{{ item.quantity }}</span>
+                              <span class="text-right font-mono font-bold text-text-main">{{ item.finalPrice | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                             </div>
                           }
                         </div>

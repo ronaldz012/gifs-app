@@ -5,6 +5,7 @@ export function openModal(router: Router, route: ActivatedRoute, modal: string):
     relativeTo: route,
     queryParams: { modal },
     queryParamsHandling: 'merge',
+    replaceUrl: true,
   });
 }
 
@@ -13,6 +14,7 @@ export function closeModal(router: Router, route: ActivatedRoute): void {
     relativeTo: route,
     queryParams: { modal: null },
     queryParamsHandling: 'merge',
+    replaceUrl: true,
   });
 }
 
