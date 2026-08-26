@@ -7,6 +7,7 @@ import {
 import { MovementType, movementTypeToSpanish } from '@features/inventory/interfaces/movement-type';
 import { ProductVariantDetailsDto } from '@features/inventory/dtos/products/product-variant-details';
 import { ProductService } from '@features/inventory/services/product-service';
+import { PermissionService } from '@features/auth/services/permmision-service';
 import SkeletonList from '../../../../../shared/ui/skeleton-list/skeleton-list';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
 import { CurrencyPipe, NgClass } from '@angular/common';
@@ -37,7 +38,8 @@ import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 export default class StockMovementsList {
   private router = inject(Router);
   private service = inject(ProductService);
-  private route = inject(ActivatedRoute); // <-- Inyectamos la ruta activa
+  private route = inject(ActivatedRoute);
+  readonly perm = inject(PermissionService);
 
   protected readonly movementTypeToSpanish = movementTypeToSpanish;
 
@@ -116,14 +118,19 @@ export default class StockMovementsList {
   }
 
   canGoToReference(type: MovementType): boolean {
-    return (
+    if (
       type === MovementType.Reception ||
-      type === MovementType.ReceptionRevert ||
-      type === MovementType.Sale ||
-      type === MovementType.Return ||
-      type === MovementType.TransferIn ||
-      type === MovementType.TransferOut
-    );
+      type === MovementType.ReceptionRevert
+    ) {
+      return this.perm.can('inventory', 'receptions', 'read');
+    }
+    if (type === MovementType.Sale || type === MovementType.Return) {
+      return this.perm.can('sales', 'sales', 'read');
+    }
+    if (type === MovementType.TransferIn || type === MovementType.TransferOut) {
+      return this.perm.can('inventory', 'transfers', 'read');
+    }
+    return false;
   }
 
   referenceLabel(type: MovementType): string {

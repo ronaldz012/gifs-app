@@ -7,6 +7,7 @@ import { TotalQtyPipe } from '../../../dtos/transfers/total-qty.pipe';
 import { TransferService } from '../../../services/transfer-service';
 import { TransferDirection, TransferStatus } from '../../../dtos/transfers/transfer-enums';
 import { StockTransferDetailDto } from '../../../dtos/transfers/stock-transfer-detail-dto';
+import { PermissionService } from '@features/auth/services/permmision-service';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 import { closeModal, openModal } from '@shared/utils/modal-query';
 import { ToastService } from '@core/services/toast-service';
@@ -36,6 +37,7 @@ export default class TransferDetails implements OnInit {
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
   readonly router = inject(Router);
+  readonly perm = inject(PermissionService);
 
   readonly Status = TransferStatus;
   readonly Direction = TransferDirection;
@@ -150,11 +152,19 @@ export default class TransferDetails implements OnInit {
   }
 
   canResolve(t: StockTransferDetailDto): boolean {
-    return t.direction === TransferDirection.Entrada && t.status === TransferStatus.Pendiente;
+    return (
+      this.perm.can('inventory', 'transfers', 'update') &&
+      t.direction === TransferDirection.Entrada &&
+      t.status === TransferStatus.Pendiente
+    );
   }
 
   canCancel(t: StockTransferDetailDto): boolean {
-    return t.direction === TransferDirection.Salida && t.status === TransferStatus.Pendiente;
+    return (
+      this.perm.can('inventory', 'transfers', 'delete') &&
+      t.direction === TransferDirection.Salida &&
+      t.status === TransferStatus.Pendiente
+    );
   }
 
   variantLabel(item: { variantDescription: string; size: string; color: string }): string {

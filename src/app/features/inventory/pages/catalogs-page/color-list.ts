@@ -8,6 +8,7 @@ import { Color } from '@features/inventory/dtos/colors/color';
 import { UpdateColorDto } from '@features/inventory/dtos/colors/update-color-dto';
 import { ToastService } from '@core/services/toast-service';
 import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
+import { PermissionService } from '@features/auth/services/permmision-service';
 import CatalogList from './catalog-list';
 
 @Component({
@@ -50,6 +51,7 @@ import CatalogList from './catalog-list';
             <span class="text-sm text-text-muted">Incluir inactivos</span>
           </label>
 
+          @if (perm.can('inventory','products','create')) {
           <button
             type="button"
             (click)="openCreate()"
@@ -58,6 +60,7 @@ import CatalogList from './catalog-list';
             <span class="material-icons text-base">add</span>
             Nuevo color
           </button>
+          }
         </div>
       </div>
 
@@ -82,12 +85,14 @@ import CatalogList from './catalog-list';
           {{ color.isActive ? 'Activo' : 'Inactivo' }}
         </span>
         <div class="flex justify-end gap-1">
+          @if (perm.can('inventory','products','update')) {
           <button type="button" (click)="openStatusConfirm(color)" class="action-btn" [class.action-btn--edit]="color.isActive" [class.action-btn--delete]="!color.isActive" [title]="color.isActive ? 'Desactivar' : 'Activar'">
             <span class="material-icons text-base">{{ color.isActive ? 'toggle_on' : 'toggle_off' }}</span>
           </button>
           <button type="button" (click)="openEdit(color)" class="action-btn action-btn--edit" title="Editar">
             <span class="material-icons text-base">edit</span>
           </button>
+          }
         </div>
       </div>
 
@@ -100,10 +105,12 @@ import CatalogList from './catalog-list';
           </span>
         </div>
         <div class="flex items-center gap-3">
+          @if (perm.can('inventory','products','update')) {
           <button type="button" (click)="openStatusConfirm(color)" class="action-text" [class.action-text--edit]="color.isActive" [class.action-text--delete]="!color.isActive">
             {{ color.isActive ? 'Desactivar' : 'Activar' }}
           </button>
           <button type="button" (click)="openEdit(color)" class="action-text action-text--edit">Editar</button>
+          }
         </div>
       </div>
     </ng-template>
@@ -156,6 +163,7 @@ import CatalogList from './catalog-list';
   `,
 })
 export default class ColorList {
+  readonly perm = inject(PermissionService);
   readonly service = inject(ColorService);
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
@@ -235,6 +243,7 @@ export default class ColorList {
   }
 
   openCreate(): void {
+    if (!this.perm.can('inventory','products','create')) return;
     openModal(this.router, this.route, 'create');
   }
 
@@ -245,6 +254,7 @@ export default class ColorList {
   }
 
   openEdit(color: Color): void {
+    if (!this.perm.can('inventory','products','update')) return;
     openModal(this.router, this.route, `edit:${ color.id }`);
   }
 
@@ -271,6 +281,7 @@ export default class ColorList {
   }
 
   openStatusConfirm(color: Color): void {
+    if (!this.perm.can('inventory','products','update')) return;
     openModal(this.router, this.route, `status:${ color.id }`);
   }
 

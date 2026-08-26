@@ -8,6 +8,7 @@ import { Category } from '@features/inventory/dtos/categories/category-dto';
 import { UpdateCategoryDto } from '@features/inventory/dtos/categories/update-category-dto';
 import { ToastService } from '@core/services/toast-service';
 import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
+import { PermissionService } from '@features/auth/services/permmision-service';
 import CatalogList from './catalog-list';
 
 @Component({
@@ -50,6 +51,7 @@ import CatalogList from './catalog-list';
             <span class="text-sm text-text-muted">Incluir inactivas</span>
           </label>
 
+          @if (perm.can('inventory','products','create')) {
           <button
             type="button"
             (click)="openCreate()"
@@ -58,6 +60,7 @@ import CatalogList from './catalog-list';
             <span class="material-icons text-base">add</span>
             Nueva categoría
           </button>
+          }
         </div>
       </div>
 
@@ -83,12 +86,14 @@ import CatalogList from './catalog-list';
           {{ category.isActive ? 'Activa' : 'Inactiva' }}
         </span>
         <div class="flex justify-end gap-1">
+          @if (perm.can('inventory','products','update')) {
           <button type="button" (click)="openStatusConfirm(category)" class="action-btn" [class.action-btn--edit]="category.isActive" [class.action-btn--delete]="!category.isActive" [title]="category.isActive ? 'Desactivar' : 'Activar'">
             <span class="material-icons text-base">{{ category.isActive ? 'toggle_on' : 'toggle_off' }}</span>
           </button>
           <button type="button" (click)="openEdit(category)" class="action-btn action-btn--edit" title="Editar">
             <span class="material-icons text-base">edit</span>
           </button>
+          }
         </div>
       </div>
 
@@ -106,10 +111,12 @@ import CatalogList from './catalog-list';
           </span>
         </div>
         <div class="flex items-center gap-3">
+          @if (perm.can('inventory','products','update')) {
           <button type="button" (click)="openStatusConfirm(category)" class="action-text" [class.action-text--edit]="category.isActive" [class.action-text--delete]="!category.isActive">
             {{ category.isActive ? 'Desactivar' : 'Activar' }}
           </button>
           <button type="button" (click)="openEdit(category)" class="action-text action-text--edit">Editar</button>
+          }
         </div>
       </div>
     </ng-template>
@@ -162,6 +169,7 @@ import CatalogList from './catalog-list';
   `,
 })
 export default class CategoryList {
+  readonly perm = inject(PermissionService);
   readonly service = inject(CategoryService);
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
@@ -243,6 +251,7 @@ export default class CategoryList {
   }
 
   openCreate(): void {
+    if (!this.perm.can('inventory','products','create')) return;
     openModal(this.router, this.route, 'create');
   }
 
@@ -253,6 +262,7 @@ export default class CategoryList {
   }
 
   openEdit(category: Category): void {
+    if (!this.perm.can('inventory','products','update')) return;
     openModal(this.router, this.route, `edit:${ category.id }`);
   }
 
@@ -279,6 +289,7 @@ export default class CategoryList {
   }
 
   openStatusConfirm(category: Category): void {
+    if (!this.perm.can('inventory','products','update')) return;
     openModal(this.router, this.route, `status:${ category.id }`);
   }
 

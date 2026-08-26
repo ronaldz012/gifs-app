@@ -80,7 +80,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
             </div>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
             <div class="bg-bg-surface rounded-xl border border-border-strong px-4 py-4">
               <p class="field-label">Ventas</p>
               <p class="text-lg font-black text-text-main font-mono">
@@ -91,6 +91,12 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
               <p class="field-label">Efectivo</p>
               <p class="text-lg font-black text-text-main font-mono">
                 {{ c.cashSales | currency: 'BOB' : 'symbol' : '1.2-2' }}
+              </p>
+            </div>
+            <div class="bg-bg-surface rounded-xl border border-border-strong px-4 py-4">
+              <p class="field-label">QR</p>
+              <p class="text-lg font-black text-text-main font-mono">
+                {{ c.qrSales | currency: 'BOB' : 'symbol' : '1.2-2' }}
               </p>
             </div>
             <div class="bg-bg-surface rounded-xl border border-border-strong px-4 py-4">
@@ -283,15 +289,26 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
             <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
               <p class="section-title mb-4">Cerrar turno</p>
               <div class="flex flex-col gap-4">
-                <div>
-                  <label class="field-label">Monto contado en caja</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    [value]="closingBalance()"
-                    (input)="closingBalance.set(+$event.target.value)"
-                    class="w-full max-w-xs px-4 py-2.5 text-lg font-mono font-bold border border-border rounded-xl bg-bg-surface text-text-main focus:outline-none focus:border-accent-ui [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  />
+                <div class="flex flex-col sm:flex-row gap-4 items-start">
+                  <div class="flex-1 max-w-xs">
+                    <label class="field-label">Monto contado en caja</label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      [value]="closingBalance() ?? ''"
+                      (input)="closingBalance.set($any($event.target).value ? +$any($event.target).value : null)"
+                      class="w-full px-4 py-2.5 text-lg font-mono font-bold border border-border rounded-xl bg-bg-surface text-text-main focus:outline-none focus:border-accent-ui [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    />
+                  </div>
+                  <div class="flex-1 bg-accent-ui/10 border border-accent-ui/30 rounded-xl px-4 py-3 flex flex-col gap-1">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-accent-ui">Esperado</span>
+                    <span class="text-xl font-black font-mono text-accent-ui">{{ expectedAmount() | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                    @if (closingBalance() !== null && closingBalance()! > 0) {
+                      <span class="text-xs font-mono" [class.text-feedback-success-text]="(closingBalance()! - expectedAmount()) === 0" [class.text-feedback-error-text]="(closingBalance()! - expectedAmount()) !== 0">
+                        Dif: {{ (closingBalance()! - expectedAmount()) | currency: 'BOB' : 'symbol' : '1.2-2' }}
+                      </span>
+                    }
+                  </div>
                 </div>
                 <div class="flex gap-3">
                   <a
@@ -303,7 +320,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                   <button
                     type="button"
                     (click)="confirmClose()"
-                    [disabled]="closingBalance() <= 0 || submitting()"
+                    [disabled]="closingBalance() === null || closingBalance()! <= 0 || submitting()"
                     class="px-6 py-2.5 bg-accent-ui text-white rounded-xl text-sm font-bold hover:bg-accent-ui/90 disabled:opacity-40 transition-all flex items-center gap-2"
                   >
                     @if (submitting()) {
@@ -335,7 +352,7 @@ export default class CloseRegisterPage implements OnInit {
 
   state = signal<'init' | 'ready' | 'already-closed' | 'error'>('init');
   closure = signal<ClosureDetailDto | null>(null);
-  closingBalance = signal<number>(0);
+  closingBalance = signal<number | null>(null);
   submitting = signal(false);
   closeError = signal<string | null>(null);
   errorMessage = signal('');
@@ -364,12 +381,13 @@ export default class CloseRegisterPage implements OnInit {
   }
 
   confirmClose(): void {
-    if (this.closingBalance() <= 0 || this.submitting()) return;
+    const bal = this.closingBalance();
+    if (bal === null || bal <= 0 || this.submitting()) return;
 
     this.submitting.set(true);
     this.closeError.set(null);
 
-    this.cashRegisterService.closeRegister({ RealCountedAmount: this.closingBalance() }).subscribe({
+    this.cashRegisterService.closeRegister({ RealCountedAmount: bal! }).subscribe({
       next: () => {
         this.toast.success('Caja cerrada');
         this.router.navigate(['/sales/pos']);

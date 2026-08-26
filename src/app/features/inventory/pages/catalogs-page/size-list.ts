@@ -8,6 +8,7 @@ import { Size } from '@features/inventory/dtos/sizes/size';
 import { UpdateSizeDto } from '@features/inventory/dtos/sizes/update-size-dto';
 import { ToastService } from '@core/services/toast-service';
 import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
+import { PermissionService } from '@features/auth/services/permmision-service';
 import CatalogList from './catalog-list';
 
 @Component({
@@ -50,6 +51,7 @@ import CatalogList from './catalog-list';
             <span class="text-sm text-text-muted">Incluir inactivas</span>
           </label>
 
+          @if (perm.can('inventory','products','create')) {
           <button
             type="button"
             (click)="openCreate()"
@@ -58,6 +60,7 @@ import CatalogList from './catalog-list';
             <span class="material-icons text-base">add</span>
             Nueva talla
           </button>
+          }
         </div>
       </div>
 
@@ -83,12 +86,14 @@ import CatalogList from './catalog-list';
           {{ size.isActive ? 'Activa' : 'Inactiva' }}
         </span>
         <div class="flex justify-end gap-1">
+          @if (perm.can('inventory','products','update')) {
           <button type="button" (click)="openStatusConfirm(size)" class="action-btn" [class.action-btn--edit]="size.isActive" [class.action-btn--delete]="!size.isActive" [title]="size.isActive ? 'Desactivar' : 'Activar'">
             <span class="material-icons text-base">{{ size.isActive ? 'toggle_on' : 'toggle_off' }}</span>
           </button>
           <button type="button" (click)="openEdit(size)" class="action-btn action-btn--edit" title="Editar">
             <span class="material-icons text-base">edit</span>
           </button>
+          }
         </div>
       </div>
 
@@ -102,10 +107,12 @@ import CatalogList from './catalog-list';
         </div>
         <p class="text-xs text-text-soft">Ord. {{ size.sortOrder }}</p>
         <div class="flex items-center gap-3">
+          @if (perm.can('inventory','products','update')) {
           <button type="button" (click)="openStatusConfirm(size)" class="action-text" [class.action-text--edit]="size.isActive" [class.action-text--delete]="!size.isActive">
             {{ size.isActive ? 'Desactivar' : 'Activar' }}
           </button>
           <button type="button" (click)="openEdit(size)" class="action-text action-text--edit">Editar</button>
+          }
         </div>
       </div>
     </ng-template>
@@ -158,6 +165,7 @@ import CatalogList from './catalog-list';
   `,
 })
 export default class SizeList {
+  readonly perm = inject(PermissionService);
   readonly service = inject(SizeService);
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
@@ -237,6 +245,7 @@ export default class SizeList {
   }
 
   openCreate(): void {
+    if (!this.perm.can('inventory','products','create')) return;
     openModal(this.router, this.route, 'create');
   }
 
@@ -247,6 +256,7 @@ export default class SizeList {
   }
 
   openEdit(size: Size): void {
+    if (!this.perm.can('inventory','products','update')) return;
     openModal(this.router, this.route, `edit:${ size.id }`);
   }
 
@@ -273,6 +283,7 @@ export default class SizeList {
   }
 
   openStatusConfirm(size: Size): void {
+    if (!this.perm.can('inventory','products','update')) return;
     openModal(this.router, this.route, `status:${ size.id }`);
   }
 

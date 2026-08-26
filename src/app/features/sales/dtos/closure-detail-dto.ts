@@ -53,6 +53,7 @@ export interface ClosureDetailDto {
   difference: number;
   totalSales: number;
   cashSales: number;
+  qrSales: number;
   totalExpenses: number;
   sales: ClosureSaleItemDto[];
   movements: ClosureMovementDto[];

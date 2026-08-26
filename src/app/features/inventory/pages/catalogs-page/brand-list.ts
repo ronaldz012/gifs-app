@@ -7,6 +7,7 @@ import { ConfirmActionModal } from '@features/inventory/pages/transfer-page/conf
 import { Brand } from '@features/inventory/dtos/brands/brand-dto';
 import { UpdateBrandDto } from '@features/inventory/dtos/brands/update-brand-dto';
 import { ToastService } from '@core/services/toast-service';
+import { PermissionService } from '@features/auth/services/permmision-service';
 import CatalogList from './catalog-list';
 import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 
@@ -50,6 +51,7 @@ import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
             <span class="text-sm text-text-muted">Incluir inactivas</span>
           </label>
 
+          @if (perm.can('inventory','products','create')) {
           <button
             type="button"
             (click)="openCreate()"
@@ -58,6 +60,7 @@ import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
             <span class="material-icons text-base">add</span>
             Nueva marca
           </button>
+          }
         </div>
       </div>
 
@@ -85,12 +88,14 @@ import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
           {{ brand.isActive ? 'Activa' : 'Inactiva' }}
         </span>
         <div class="flex justify-end gap-1">
+          @if (perm.can('inventory','products','update')) {
           <button type="button" (click)="openStatusConfirm(brand)" class="action-btn" [class.action-btn--edit]="brand.isActive" [class.action-btn--delete]="!brand.isActive" [title]="brand.isActive ? 'Desactivar' : 'Activar'">
             <span class="material-icons text-base">{{ brand.isActive ? 'toggle_on' : 'toggle_off' }}</span>
           </button>
           <button type="button" (click)="openEdit(brand)" class="action-btn action-btn--edit" title="Editar">
             <span class="material-icons text-base">edit</span>
           </button>
+          }
         </div>
       </div>
 
@@ -110,10 +115,12 @@ import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
           </span>
         </div>
         <div class="flex items-center gap-3">
+          @if (perm.can('inventory','products','update')) {
           <button type="button" (click)="openStatusConfirm(brand)" class="action-text" [class.action-text--edit]="brand.isActive" [class.action-text--delete]="!brand.isActive">
             {{ brand.isActive ? 'Desactivar' : 'Activar' }}
           </button>
           <button type="button" (click)="openEdit(brand)" class="action-text action-text--edit">Editar</button>
+          }
         </div>
       </div>
     </ng-template>
@@ -166,6 +173,7 @@ import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
   `,
 })
 export default class BrandList {
+  readonly perm = inject(PermissionService);
   readonly service = inject(BrandService);
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
@@ -247,6 +255,7 @@ export default class BrandList {
   }
 
   openCreate(): void {
+    if (!this.perm.can('inventory','products','create')) return;
     openModal(this.router, this.route, 'create');
   }
 
@@ -257,6 +266,7 @@ export default class BrandList {
   }
 
   openEdit(brand: Brand): void {
+    if (!this.perm.can('inventory','products','update')) return;
     openModal(this.router, this.route, `edit:${brand.id}`);
   }
 
@@ -283,6 +293,7 @@ export default class BrandList {
   }
 
   openStatusConfirm(brand: Brand): void {
+    if (!this.perm.can('inventory','products','update')) return;
     openModal(this.router, this.route, `status:${brand.id}`);
   }
 

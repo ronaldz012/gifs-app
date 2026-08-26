@@ -146,8 +146,10 @@ import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
                 <span>TALLA</span>
                 <span>COLOR</span>
                 <span>PRECIO</span>
-                <span>COSTO</span>
-                <span>MARGEN</span>
+                @if (perm.canUpdate('inventory', 'products')) {
+                  <span>COSTO</span>
+                  <span>MARGEN</span>
+                }
                 @for (branchId of branchKeys(); track branchId) {
                   <span
                     class="truncate text-center"
@@ -350,10 +352,12 @@ export default class ProductDetail implements OnInit {
   });
 
   gridColumnsStyle = computed(() => {
+    const showCost = this.perm.canUpdate('inventory', 'products');
     const branchCols = this.branchKeys()
       .map(() => '96px')
       .join(' ');
-    return `7.5rem 56px 64px 72px 64px 64px ${branchCols} 72px 128px`;
+    const costCols = showCost ? '64px 64px ' : '';
+    return `7.5rem 56px 64px 72px ${costCols}${branchCols} 72px 128px`;
   });
 
   /** Sucursal activa para resaltar su inventario */
