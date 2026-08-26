@@ -1,12 +1,12 @@
 export const environment = {
-  BACKEND_URL: 'http://localhost:5253',
+  BACKEND_URL: '$BACKEND_URL',
   tenant: 'client1',
   auth0: {
-    domain: 'dev-1lyf0fvp3apjejc8.us.auth0.com',
-    clientId: 'kGenrfzeyzRYl9oLS1vH0IKiDYLomGUQ',
+    domain: '$AUTH0_DOMAIN',
+    clientId: '$AUTH0_CLIENT_ID',
     authorizationParams: {
       redirect_uri: `${window.location.origin}/dashboard`,
-      audience: 'https://mi-api',
+      audience: '$BACKEND_URL',
     },
   },
 };
