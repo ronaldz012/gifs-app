@@ -71,10 +71,14 @@ export class ProductService {
   getById(number: GUID) {
     const branchIds = this.branchContext
       .available()
+      .filter((b) => {
+        const f = b.features.find((feat) => feat.route === 'inventory/products');
+        return !!f && (f.permissions.includes('*') || f.permissions.includes('read'));
+      })
       .map((b) => b.branchId)
       .join(',');
-    const headers = new HttpHeaders({ 'X-Branch-Id': branchIds });
-    return this.http.get<ProductDetailDto>(this.product_url + '/' + number, { headers });
+    const headers = branchIds ? new HttpHeaders({ 'X-Branch-Id': branchIds }) : undefined;
+    return this.http.get<ProductDetailDto>(this.product_url + '/' + number, headers ? { headers } : {});
   }
   update(productId: GUID, dto: UpdateProductDto) {
     return this.http.put<void>(this.product_url + '/' + productId, dto);
