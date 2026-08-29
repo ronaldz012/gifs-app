@@ -295,15 +295,17 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                     <input
                       type="number"
                       placeholder="0"
+                      min="0"
+                      step="0.01"
                       [value]="closingBalance() ?? ''"
-                      (input)="closingBalance.set($any($event.target).value ? +$any($event.target).value : null)"
+                      (input)="onBalanceInput($any($event.target).value)"
                       class="w-full px-4 py-2.5 text-lg font-mono font-bold border border-border rounded-xl bg-bg-surface text-text-main focus:outline-none focus:border-accent-ui [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     />
                   </div>
                   <div class="flex-1 bg-accent-ui/10 border border-accent-ui/30 rounded-xl px-4 py-3 flex flex-col gap-1">
                     <span class="text-[11px] font-bold uppercase tracking-wider text-accent-ui">Esperado</span>
                     <span class="text-xl font-black font-mono text-accent-ui">{{ expectedAmount() | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
-                    @if (closingBalance() !== null && closingBalance()! > 0) {
+                    @if (closingBalance() !== null) {
                       <span class="text-xs font-mono" [class.text-feedback-success-text]="(closingBalance()! - expectedAmount()) === 0" [class.text-feedback-error-text]="(closingBalance()! - expectedAmount()) !== 0">
                         Dif: {{ (closingBalance()! - expectedAmount()) | currency: 'BOB' : 'symbol' : '1.2-2' }}
                       </span>
@@ -320,7 +322,7 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                   <button
                     type="button"
                     (click)="confirmClose()"
-                    [disabled]="closingBalance() === null || closingBalance()! <= 0 || submitting()"
+                    [disabled]="closingBalance() === null || closingBalance()! < 0 || submitting()"
                     class="px-6 py-2.5 bg-accent-ui text-white rounded-xl text-sm font-bold hover:bg-accent-ui/90 disabled:opacity-40 transition-all flex items-center gap-2"
                   >
                     @if (submitting()) {
@@ -380,9 +382,18 @@ export default class CloseRegisterPage implements OnInit {
     });
   }
 
+  onBalanceInput(value: string): void {
+    if (value === '' || value === null || value === undefined) {
+      this.closingBalance.set(null);
+      return;
+    }
+    const num = Number(value);
+    this.closingBalance.set(Number.isFinite(num) ? num : null);
+  }
+
   confirmClose(): void {
     const bal = this.closingBalance();
-    if (bal === null || bal <= 0 || this.submitting()) return;
+    if (bal === null || bal < 0 || !Number.isFinite(bal) || this.submitting()) return;
 
     this.submitting.set(true);
     this.closeError.set(null);
