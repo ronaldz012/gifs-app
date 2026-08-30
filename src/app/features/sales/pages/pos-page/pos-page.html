@@ -68,6 +68,14 @@
       </div>
     }
 
+    @case ('error') {
+      <div class="flex flex-col items-center justify-center gap-4 py-20">
+        <span class="material-icons text-4xl text-feedback-warning-text">wifi_off</span>
+        <p class="text-sm font-medium text-text-muted text-center max-w-sm">{{ registerError() }}</p>
+        <button type="button" (click)="checkRegister()" class="btn-primary btn-sm">Reintentar</button>
+      </div>
+    }
+
     @case ('open') {
       @if (currentRegister(); as reg) {
         <div
