@@ -25,19 +25,13 @@ export default class Login implements OnInit {
         }
       } else {
         this.canLogin.set(false);
-        if (!this.checking()) {
-          const msg = this.connectivity.reason() === 'backend-down'
-            ? 'El servicio no responde. No es tu conexión, reintentando...'
-            : 'Sin conexión. Revisá tu conexión a internet.';
-          this.errorMessage.set(msg);
-        }
+        if (!this.checking()) this.errorMessage.set('Sin conexión. Revisá tu conexión a internet.');
       }
     });
   }
 
   ngOnInit(): void {
     this.checkConnectivity();
-
     if (typeof window !== 'undefined') {
       window.addEventListener('online', () => this.checkConnectivity());
       window.addEventListener('offline', () => {
@@ -53,13 +47,11 @@ export default class Login implements OnInit {
       this.canLogin.set(false);
       this.checking.set(false);
       this.errorMessage.set('Sin conexión. Revisá tu conexión a internet.');
-      this.connectivity.markOffline('offline');
+      this.connectivity.reportFailure();
       return;
     }
-
     this.checking.set(true);
     this.errorMessage.set(null);
-
     this.connectivity.checkNow().subscribe((ok) => {
       this.checking.set(false);
       if (ok) {
@@ -67,23 +59,16 @@ export default class Login implements OnInit {
         this.errorMessage.set(null);
       } else {
         this.canLogin.set(false);
-        const msg = this.connectivity.reason() === 'backend-down'
-          ? 'El servicio no responde. No es tu conexión, reintentando...'
-          : 'Sin conexión. Revisá tu conexión a internet.';
-        this.errorMessage.set(msg);
+        this.errorMessage.set('Sin conexión. Revisá tu conexión a internet.');
       }
     });
   }
 
   onLogin(): void {
     if (!this.canLogin() || this.checking()) {
-      const isBackendDown = this.connectivity.reason() === 'backend-down';
-      this.errorMessage.set(isBackendDown
-        ? 'El servicio no responde. No es tu conexión, reintentando...'
-        : 'Sin conexión. Revisá tu conexión a internet.');
+      this.errorMessage.set('Sin conexión. Revisá tu conexión a internet.');
       return;
     }
-
     this.loading.set(true);
     this.errorMessage.set(null);
     this.auth0.loginWithRedirect().subscribe({
