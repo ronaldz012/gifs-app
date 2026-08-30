@@ -86,10 +86,7 @@ export default class Callback implements OnInit {
     this.error.set('');
     this.session.restore().subscribe({
       next: () => {
-        const active = this.branchContext.active();
-        const hasPos = !!active?.features.find((f) => f.route === 'sales/pos' && (f.permissions.includes('read') || f.permissions.includes('*')));
-        const target = hasPos ? '/sales/pos' : '/dashboard';
-        this.router.navigate([target], { replaceUrl: true });
+        this.router.navigate(['/'], { replaceUrl: true });
       },
       error: (err: { status?: number; error?: { detail?: string; title?: string }; message?: string; name?: string }) => {
         const status = err?.status;

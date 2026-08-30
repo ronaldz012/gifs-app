@@ -1,8 +1,11 @@
 import { Component, inject } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
 import sidebar from '../sidebar/sidebar';
 import { RouterOutlet } from '@angular/router';
 import Topbar from '../topbar/topbar';
 import { ConnectivityService } from '@core/services/connectivity-service';
+import { BranchContextService } from '@core/services/branch-context-service';
 
 @Component({
   selector: 'app-main-layout',
@@ -33,4 +36,18 @@ import { ConnectivityService } from '@core/services/connectivity-service';
 })
 export default class MainLayout {
   readonly connectivity = inject(ConnectivityService);
+  private router = inject(Router);
+  private branchContext = inject(BranchContextService);
+
+  constructor() {
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e) => {
+      const url = (e as NavigationEnd).urlAfterRedirects;
+      if (url.startsWith('/login') || url.startsWith('/callback') || url.includes('modal=')) return;
+      const active = this.branchContext.active();
+      if (!active) return;
+      try {
+        localStorage.setItem('last_view', JSON.stringify({ branchId: active.branchId, path: url }));
+      } catch {}
+    });
+  }
 }
