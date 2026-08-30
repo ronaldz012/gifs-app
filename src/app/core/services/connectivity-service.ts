@@ -13,16 +13,24 @@ export class ConnectivityService {
   private healthUrl = `${environment.BACKEND_URL}/api/Auth/health`;
 
   readonly isOnline = signal(true);
+  readonly status = signal<'online' | 'no-internet' | 'server-down'>('online');
 
   private probeInFlight: Observable<boolean> | null = null;
   private lastToastAt = 0;
 
   constructor() {
     if (typeof window !== 'undefined') {
-      if (!navigator.onLine) this.isOnline.set(false);
-      window.addEventListener('online', () => this.isOnline.set(true));
+      if (!navigator.onLine) {
+        this.isOnline.set(false);
+        this.status.set('no-internet');
+      }
+      window.addEventListener('online', () => {
+        this.isOnline.set(true);
+        this.status.set('online');
+      });
       window.addEventListener('offline', () => {
         this.isOnline.set(false);
+        this.status.set('no-internet');
         this.toastOnce('Sin conexión. Verificá tu WiFi o datos móviles.');
       });
     }
@@ -31,22 +39,26 @@ export class ConnectivityService {
   reportFailure(): void {
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       this.isOnline.set(false);
+      this.status.set('no-internet');
       this.toastOnce('Sin conexión. Verificá tu WiFi o datos móviles.');
       return;
     }
     this.probeExternal().subscribe((hasInternet) => {
       this.isOnline.set(false);
+      this.status.set(hasInternet ? 'server-down' : 'no-internet');
       this.toastOnce(hasInternet ? 'No pudimos conectar con el servidor.' : 'Sin conexión. Verificá tu WiFi o datos móviles.');
     });
   }
 
   reportSuccess(): void {
     this.isOnline.set(true);
+    this.status.set('online');
   }
 
   checkNow(): Observable<boolean> {
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       this.isOnline.set(false);
+      this.status.set('no-internet');
       return of(false);
     }
     return this.http.get(this.healthUrl, { observe: 'response', responseType: 'text' as const }).pipe(
@@ -54,10 +66,12 @@ export class ConnectivityService {
       map((res) => {
         const ok = !!res && res.status >= 200 && res.status < 300;
         this.isOnline.set(ok);
+        this.status.set(ok ? 'online' : 'server-down');
         return ok;
       }),
       catchError(() => {
         this.isOnline.set(false);
+        this.status.set(typeof navigator !== 'undefined' && !navigator.onLine ? 'no-internet' : 'server-down');
         return of(false);
       }),
     );

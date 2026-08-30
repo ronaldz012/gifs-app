@@ -25,7 +25,13 @@ export default class Login implements OnInit {
         }
       } else {
         this.canLogin.set(false);
-        if (!this.checking()) this.errorMessage.set('Sin conexión. Revisá tu conexión a internet.');
+        if (!this.checking()) {
+          this.errorMessage.set(
+            this.connectivity.status() === 'server-down'
+              ? 'No pudimos conectar con el servidor.'
+              : 'Sin conexión. Revisá tu conexión a internet.'
+          );
+        }
       }
     });
   }
@@ -59,14 +65,22 @@ export default class Login implements OnInit {
         this.errorMessage.set(null);
       } else {
         this.canLogin.set(false);
-        this.errorMessage.set('Sin conexión. Revisá tu conexión a internet.');
+        this.errorMessage.set(
+          this.connectivity.status() === 'server-down'
+            ? 'No pudimos conectar con el servidor.'
+            : 'Sin conexión. Revisá tu conexión a internet.'
+        );
       }
     });
   }
 
   onLogin(): void {
     if (!this.canLogin() || this.checking()) {
-      this.errorMessage.set('Sin conexión. Revisá tu conexión a internet.');
+      this.errorMessage.set(
+        this.connectivity.status() === 'server-down'
+          ? 'No pudimos conectar con el servidor.'
+          : 'Sin conexión. Revisá tu conexión a internet.'
+      );
       return;
     }
     this.loading.set(true);
