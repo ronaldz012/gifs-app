@@ -24,6 +24,7 @@ export default class ReceptionListPage implements OnInit {
   receptions        = signal<StockReceptionListDto[]>([]);
   totalItems        = signal(0);
   loadingReceptions = signal(false);
+  error = signal<string | null>(null);
 
   rollbackModalId = signal<GUID | null>(null);
   submitting      = signal(false);
@@ -47,15 +48,16 @@ export default class ReceptionListPage implements OnInit {
     this.load();
   }
 
-  private load(): void {
+  load(): void {
     this.loadingReceptions.set(true);
+    this.error.set(null);
     this.receptionService.getAll(this.query()).subscribe({
       next: data => {
         this.receptions.set(data.items);
         this.totalItems.set(data.totalCount); // ajusta al campo real de tu PagedResult
         this.loadingReceptions.set(false);
       },
-      error: () => this.loadingReceptions.set(false),
+      error: (err: any) => { this.loadingReceptions.set(false); const e = err as { error?: { detail?: string; title?: string }; message?: string }; this.error.set(e?.error?.detail || e?.error?.title || e?.message || 'Error al cargar recepciones.'); },
     });
   }
 

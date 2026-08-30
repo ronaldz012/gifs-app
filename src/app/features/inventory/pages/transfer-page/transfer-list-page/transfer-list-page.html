@@ -20,8 +20,21 @@
     (viewDetail)="router.navigate(['inventory', 'transfers', $event])"
   />
 
+  @if (error()) {
+    <div class="flex flex-col items-center gap-3 p-8 rounded border border-border bg-bg-surface shadow-sm">
+      <span class="material-icons text-3xl text-feedback-error-text">error_outline</span>
+      <p class="text-sm text-text-main">{{ error() }}</p>
+      <button class="btn btn-primary btn-sm" (click)="load()">Reintentar</button>
+    </div>
+  } @else if (transfers().length === 0 && !loadingTransfers() && !hasActiveFilters()) {
+    <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-10 flex flex-col items-center gap-3">
+      <span class="material-icons text-3xl text-text-soft opacity-60">swap_horiz</span>
+      <p class="text-sm text-text-muted">Todavía no hay transferencias.</p>
+    </div>
+  }
+
   <!-- Estado vacío con filtros activos -->
-  @if (!loadingTransfers() && transfers().length === 0 && hasActiveFilters()) {
+  @if (!loadingTransfers() && !error() && transfers().length === 0 && hasActiveFilters()) {
     <div
       class="bg-bg-surface rounded-xl border border-border shadow-sm p-10 flex flex-col items-center gap-3"
     >

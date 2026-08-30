@@ -51,6 +51,12 @@ import { PermissionService } from '@features/auth/services/permmision-service';
       <!-- Lista -->
       @if (loading()) {
         <app-skeleton-list [rows]="4" [columns]="3" />
+      } @else if (error()) {
+        <div class="flex flex-col items-center gap-3 p-8 rounded border border-border bg-bg-surface shadow-sm">
+          <span class="material-icons text-3xl text-feedback-error-text">error_outline</span>
+          <p class="text-sm text-text-main">{{ error() }}</p>
+          <button class="btn btn-primary btn-sm" (click)="load()">Reintentar</button>
+        </div>
       } @else if (products().length === 0) {
         <!-- Empty state -->
         <div
@@ -157,6 +163,7 @@ export default class ProductList implements OnInit {
   products = signal<ListProductDto[]>([]);
   totalItems = signal(0);
   loading = signal(false);
+  error = signal<string | null>(null);
 
   query = signal<ProductQueryParams>({
     page: 1,
@@ -181,13 +188,14 @@ export default class ProductList implements OnInit {
 
   load() {
     this.loading.set(true);
+    this.error.set(null);
     this.productService.getProducts(this.query()).subscribe({
       next: (data) => {
         this.products.set(data.items);
         this.totalItems.set(data.totalCount); // ajusta al nombre real de tu PagedResult
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: any) => { this.loading.set(false); const e = err as { error?: { detail?: string; title?: string }; message?: string }; this.error.set(e?.error?.detail || e?.error?.title || e?.message || 'Error al cargar productos.'); },
     });
     this.brandService.load();
     this.categoryService.load();

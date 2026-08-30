@@ -22,6 +22,7 @@ export default class TransferListPage implements OnInit {
   transfers = signal<StockTransferListDto[]>([]);
   totalItems = signal(0);
   loadingTransfers = signal(false);
+  error = signal<string | null>(null);
 
   query = signal<TransferQueryParams>({
     page: 1,
@@ -42,15 +43,16 @@ export default class TransferListPage implements OnInit {
     this.load();
   }
 
-  private load(): void {
+  load(): void {
     this.loadingTransfers.set(true);
+    this.error.set(null);
     this.transferService.getTransfers(this.query()).subscribe({
       next: (data) => {
         this.transfers.set(data.items);
         this.totalItems.set(data.totalCount);
         this.loadingTransfers.set(false);
       },
-      error: () => this.loadingTransfers.set(false),
+      error: (err: any) => { this.loadingTransfers.set(false); const e = err as { error?: { detail?: string; title?: string }; message?: string }; this.error.set(e?.error?.detail || e?.error?.title || e?.message || 'Error al cargar transferencias.'); },
     });
   }
 }
