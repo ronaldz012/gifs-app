@@ -39,8 +39,5 @@ export const lastViewGuard: CanActivateFn = () => {
     }
   } catch {}
 
-  // Fallback: si la última branch activa tiene POS, ir a POS, si no dashboard
-  const active = branchContext.active();
-  const hasPos = !!active?.features.find((f) => f.route === 'sales/pos' && (f.permissions.includes('read') || f.permissions.includes('*')));
-  return router.createUrlTree([hasPos ? '/sales/pos' : '/dashboard']);
+  return router.createUrlTree(['/dashboard']);
 };
