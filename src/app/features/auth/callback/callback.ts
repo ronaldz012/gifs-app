@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
 import { SessionService } from '@features/auth/services/session-service';
+import { BranchContextService } from '@core/services/branch-context-service';
 
 @Component({
   selector: 'app-callback',
@@ -38,6 +39,7 @@ export default class Callback implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   private session = inject(SessionService);
+  private branchContext = inject(BranchContextService);
   error = signal('');
   state = signal<'loading' | 'retrying' | 'error' | 'idle'>('loading');
   attempt = signal(0);
@@ -83,7 +85,12 @@ export default class Callback implements OnInit {
     this.state.set(attempt === 0 ? 'loading' : 'retrying');
     this.error.set('');
     this.session.restore().subscribe({
-      next: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+      next: () => {
+        const active = this.branchContext.active();
+        const hasPos = !!active?.features.find((f) => f.route === 'sales/pos' && (f.permissions.includes('read') || f.permissions.includes('*')));
+        const target = hasPos ? '/sales/pos' : '/dashboard';
+        this.router.navigate([target], { replaceUrl: true });
+      },
       error: (err: { status?: number; error?: { detail?: string; title?: string }; message?: string; name?: string }) => {
         const status = err?.status;
         if (status === 403 || (status === 401 && (err as { error?: { reason?: string } })?.error?.reason === 'deactivated')) {
