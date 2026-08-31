@@ -47,6 +47,12 @@ import { SaleType } from '@features/sales/dtos/sale-detail-dto';
 
       @if (loading()) {
         <app-skeleton-list [rows]="4" [columns]="3" />
+      } @else if (error()) {
+        <div class="flex flex-col items-center gap-3 p-8 rounded border border-border bg-bg-surface shadow-sm">
+          <span class="material-icons text-3xl text-feedback-error-text">error_outline</span>
+          <p class="text-sm text-text-main">{{ error() }}</p>
+          <button class="btn btn-primary btn-sm" (click)="load()">Reintentar</button>
+        </div>
       } @else if (sales().length === 0) {
         <div class="flex flex-col items-center justify-center gap-3 py-20 bg-bg-surface border border-dashed border-border rounded-2xl text-text-soft">
           <div class="w-16 h-16 rounded-full bg-bg-muted flex items-center justify-center text-text-soft/40">
@@ -161,6 +167,7 @@ export default class SalesListPage implements OnInit {
   sales = signal<SaleListDto[]>([]);
   totalItems = signal(0);
   loading = signal(true);
+  error = signal<string | null>(null);
 
   query = signal<SalesQueryDto>({ page: 1, pageSize: 20 });
 
@@ -173,13 +180,14 @@ export default class SalesListPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    this.error.set(null);
     this.saleService.getSales(this.query()).subscribe({
       next: (data) => {
         this.sales.set(data.items);
         this.totalItems.set(data.totalCount);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: any) => { this.loading.set(false); const e = err as { error?: { detail?: string; title?: string }; message?: string }; this.error.set(e?.error?.detail || e?.error?.title || e?.message || 'Error al cargar ventas.'); },
     });
   }
 

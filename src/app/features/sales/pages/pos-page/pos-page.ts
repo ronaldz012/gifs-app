@@ -36,7 +36,8 @@ import { PermissionService } from '@features/auth/services/permmision-service';
 })
 export default class PosPage implements OnInit {
   // ── Register state ────────────────────────────────────────────────────
-  registerState = signal<'loading' | 'closed' | 'open'>('loading');
+  registerState = signal<'loading' | 'closed' | 'open' | 'error'>('loading');
+  registerError = signal<string | null>(null);
   currentRegister = signal<CurrentRegisterDto | null>(null);
   showOpenForm = signal(false);
   openingBalance = signal<number>(0);
@@ -149,6 +150,8 @@ export default class PosPage implements OnInit {
   }
 
   checkRegister(): void {
+    this.registerState.set('loading');
+    this.registerError.set(null);
     this.cashRegisterService.getCurrentRegister().subscribe({
       next: (register) => {
         if (register.isOpen) {
@@ -159,10 +162,12 @@ export default class PosPage implements OnInit {
         }
       },
       error: (err) => {
-        this.registerState.set('closed');
         const status = (err as { status?: number })?.status;
+        const msg = this.friendlyError(err, 'No se pudo verificar la caja.');
+        this.registerError.set(msg);
+        this.registerState.set('error');
         if (status && status !== 404) {
-          this.toast.error(this.friendlyError(err, 'No se pudo verificar la caja. Reintentá.'));
+          this.toast.error(msg);
         }
       },
     });
