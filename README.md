@@ -2,7 +2,9 @@
 
 > A POS built for the real market conditions in Bolivia and across LatAm: informal SKUs, color/size variants, cash + QR payments. Built for the counter, installable as an app.
 
-<video src="docs/demo.mp4" controls muted playsinline style="width:100%; max-width:800px; border-radius:12px; border:1px solid #E8E8E8;"></video>
+<video src="https://github.com/user-attachments/assets/a29fd52c-76a5-440f-a8bc-5888c25d80cc" controls muted playsinline style="width:100%; max-width:800px; border-radius:12px; border:1px solid #E8E8E8;"></video>
+
+> If the video doesn't load here, [watch the .mp4 directly](https://github.com/user-attachments/assets/a29fd52c-76a5-440f-a8bc-5888c25d80cc) or [local fallback `docs/demo.mp4`](docs/demo.mp4).
 
 **Stack:** Angular 21 (standalone + signals) · Tailwind v4 · ASP.NET Core · Auth0 (PKCE)
 **Backend:** [Inventory-ERP-API](https://github.com/ronaldz012/DriveCore.System.Monolith)
@@ -60,4 +62,12 @@ ng serve
 Requires the backend above running at and an Auth0 Tenant config, check enviroment variable `https://localhost:5253` (or `192.168.100.124:5253` for LAN access).
 
 ---
+
+## Technical notes
+
+**Frontend:** Angular 21.2 standalone + signals, Tailwind v4, Signal Forms, `provideAuth0` (`/callback` + `handleRedirectCallback` + `last_view` branch+feature + `featureGuard`/`PermissionService`), **PWA** (`provideServiceWorker` + `ConnectivityService` `isOnline | status` with `gstatic.com/generate_204` probe coalesced, banner `wifi_off` / `cloud_off`, `last_view` restores counter position).
+
+**Backend:** companion repo above — `api/Auth/health`, `SaleType Return`, `MovementType` 7 values, `ClosureDetailDto{qrSales}`.
+
+See `docs/qa-permissions-checklist.md` for the manual QA flow (Admin vs Vendedor).
 
