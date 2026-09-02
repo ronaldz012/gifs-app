@@ -174,18 +174,8 @@ export const routes: Routes = [
             path: 'pos/returns',
             canActivate: [featureGuard],
             data: { module: 'sales', feature: 'pos' },
-            children: [
-              {
-                path: '',
-                title: 'Reembolsos',
-                loadComponent: () => import('@features/sales/pages/returns-page/returns-search'),
-              },
-              {
-                path: ':saleId',
-                title: 'Procesar devolución',
-                loadComponent: () => import('@features/sales/pages/returns-page/return-refund'),
-              },
-            ],
+            title: 'Reembolsos',
+            loadComponent: () => import('@features/sales/pages/returns-page/returns-search'),
           },
           {
             path: 'sales',

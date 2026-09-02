@@ -5,7 +5,7 @@ import { BranchContextService } from '@core/services/branch-context-service';
 const LAST_VIEW_KEY = 'last_view';
 
 export interface LastView {
-  branchId: string;
+  branchId: GUID;
   path: string;
 }
 

@@ -418,7 +418,7 @@ export default class CloseRegisterPage implements OnInit {
     this.closingBalance.set(Number.isFinite(num) ? num : null);
   }
 
-  goToRefund(saleId: string): void {
+  goToRefund(saleId: GUID): void {
     this.router.navigate(['/sales/pos/returns', saleId]);
   }
 

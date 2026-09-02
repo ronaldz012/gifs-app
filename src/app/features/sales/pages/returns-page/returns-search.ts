@@ -8,10 +8,12 @@ import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 import { SkuInput } from '@shared/components/sku-input/sku-input';
 import { QrScannerModal, isBarcodeApiAvailable } from '@features/sales/components/qr-scanner-modal/qr-scanner-modal';
 import { SaleSkuSearchDto } from '@features/sales/dtos/returns-dto';
+import ReturnRefund from './return-refund';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 
 @Component({
   selector: 'app-returns-search',
-  imports: [CurrencyPipe, RouterLink, SkeletonList, Paginator, SmartDatePipe, SkuInput, QrScannerModal],
+  imports: [CurrencyPipe, RouterLink, SkeletonList, Paginator, SmartDatePipe, SkuInput, QrScannerModal, ReturnRefund],
   styles: `
     @keyframes fade-up {
       from { opacity: 0; transform: translateY(8px); }
@@ -143,6 +145,16 @@ import { SaleSkuSearchDto } from '@features/sales/dtos/returns-dto';
       }
     </div>
     <app-qr-scanner-modal #scanner (scanned)="onSkuSubmit($event)" />
+
+    <!-- Procesar devolución: bottom-sheet en mobile, side-panel en desktop -->
+    @if (refundSaleId(); as rid) {
+      <div class="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-overlay backdrop-blur-[1px]" (click)="closeRefund()"></div>
+        <div class="relative z-10 w-full md:w-[600px] md:max-w-[90%] h-[92vh] md:h-screen bg-bg-surface rounded-t-2xl md:rounded-none md:border-l md:border-border md:shadow-[-20px_0_40px_-15px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden animate-fade-in">
+          <app-return-refund class="flex-1 min-h-0 flex flex-col" [saleId]="rid" (closed)="closeRefund()" (refunded)="onRefunded()" />
+        </div>
+      </div>
+    }
   `,
 })
 export default class ReturnsSearch implements OnInit {
@@ -151,6 +163,7 @@ export default class ReturnsSearch implements OnInit {
   private router = inject(Router);
 
   scannerAvailable = signal(false);
+  refundSaleId = signal<GUID | null>(null);
 
   private readonly DAYS = 7;
 
@@ -177,6 +190,11 @@ export default class ReturnsSearch implements OnInit {
 
   constructor() {
     this.route.queryParamMap.subscribe((params) => {
+      const modal = params.get('modal');
+      const rid = getModalId(modal, 'return');
+      this.refundSaleId.set(rid);
+    });
+    this.route.queryParamMap.subscribe((params) => {
       const sku = params.get('sku') ?? '';
       this.skuValue.set(sku);
       if (sku.trim()) {
@@ -201,9 +219,16 @@ export default class ReturnsSearch implements OnInit {
   }
 
   openRefund(sale: SaleSkuSearchDto): void {
-    this.router.navigate(['/sales/pos/returns', sale.id], {
-      queryParams: { sku: this.skuValue().trim() },
-    });
+    openModal(this.router, this.route, `return:${sale.id}`);
+  }
+
+  closeRefund(): void {
+    closeModal(this.router, this.route);
+  }
+
+  onRefunded(): void {
+    closeModal(this.router, this.route);
+    this.doSearch(this.skuValue().trim());
   }
 
   onPage(page: number): void {
