@@ -22,6 +22,9 @@ export interface ClosureSaleItemDto {
   invoiceNumber: number | null;
   transactionCode: string | null;
   itemsCount: number;
+  hasReturn: boolean;
+  canReturn: boolean;
+  cantReturnReason: string | null;
   items: ClosureSaleItemDetailDto[];
 }
 

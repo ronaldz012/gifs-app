@@ -119,12 +119,13 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                 <p class="text-[11px] font-bold uppercase tracking-wider text-text-soft">Ventas del turno ({{ c.sales.length }})</p>
                 <span class="text-xs font-bold text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">{{ c.sales.length }} venta(s)</span>
               </div>
-              <div class="hidden lg:grid lg:grid-cols-[9rem_8rem_6rem_7rem_6rem] px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
+              <div class="hidden lg:grid lg:grid-cols-[9rem_8rem_6rem_7rem_5rem_5rem] px-6 py-2 bg-bg-muted border-y border-border text-[10px] font-bold uppercase tracking-wider text-text-soft">
                 <span>Hora</span>
                 <span class="text-right">Monto</span>
                 <span class="text-center">Tipo</span>
                 <span class="text-center">Pago</span>
-                <span class="text-right">Artículos</span>
+                <span class="text-right">Art.</span>
+                <span></span>
               </div>
               <ul class="flex flex-col divide-y divide-border">
                 @for (sale of c.sales; track sale.id) {
@@ -162,10 +163,23 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                           }
                         </ul>
                       }
+                      @if (perm.can('sales', 'pos', 'create')) {
+                        <div class="flex justify-end">
+                          @if (sale.hasReturn) {
+                            <span class="text-[11px] font-bold text-text-soft bg-bg-muted px-2 py-1 rounded-md" [title]="sale.cantReturnReason || 'Con reembolso'">Con reembolso</span>
+                          } @else if (!sale.canReturn) {
+                            @if (sale.cantReturnReason !== 'IS_RETURN') {
+                              <span class="text-[11px] font-bold text-text-soft bg-bg-muted px-2 py-1 rounded-md" [title]="sale.cantReturnReason || ''">No disponible</span>
+                            }
+                          } @else {
+                            <button type="button" (click)="goToRefund(sale.id)" class="action-text action-text--edit">Devolver</button>
+                          }
+                        </div>
+                      }
                     </div>
                     <!-- Desktop row -->
                     <div class="hidden lg:block">
-                      <div class="grid lg:grid-cols-[9rem_8rem_6rem_7rem_6rem] items-center px-6 py-3 hover:bg-bg-muted/30 transition-colors">
+                      <div class="grid lg:grid-cols-[9rem_8rem_6rem_7rem_5rem_5rem] items-center px-6 py-3 hover:bg-bg-muted/30 transition-colors">
                         <span class="text-[13px] text-text-main font-mono">{{ sale.createdAt | smartDate }}</span>
                         <span class="text-right text-[13px] font-mono font-bold text-text-main" [class.text-feedback-warning-text]="isReturnType(sale.type)">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                         <span class="text-center">
@@ -183,6 +197,19 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
                           }
                         </span>
                         <span class="text-right text-xs font-bold font-mono text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md w-fit ml-auto">{{ sale.itemsCount }}</span>
+                        <span class="flex justify-end">
+                          @if (perm.can('sales', 'pos', 'create')) {
+                            @if (sale.hasReturn) {
+                              <span class="text-[11px] font-bold text-text-soft bg-bg-muted px-2 py-1 rounded-md" [title]="sale.cantReturnReason || 'Con reembolso ya realizado'">Con reembolso</span>
+                            } @else if (sale.canReturn) {
+                              <button type="button" (click)="goToRefund(sale.id)" class="action-btn action-btn--edit" title="Devolver">
+                                <span class="material-icons text-base">assignment_return</span>
+                              </button>
+                            }
+                          } @else {
+                            <span class="text-xs text-text-soft">—</span>
+                          }
+                        </span>
                       </div>
                       @if (sale.items.length > 0) {
                         <div class="mx-6 mb-3 rounded-lg border border-border bg-bg-muted/30 overflow-hidden">
@@ -389,6 +416,10 @@ export default class CloseRegisterPage implements OnInit {
     }
     const num = Number(value);
     this.closingBalance.set(Number.isFinite(num) ? num : null);
+  }
+
+  goToRefund(saleId: string): void {
+    this.router.navigate(['/sales/pos/returns', saleId]);
   }
 
   confirmClose(): void {
