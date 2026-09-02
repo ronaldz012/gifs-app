@@ -1,9 +1,11 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ProductVariantSearch } from '../../../components/product-variant-search/product-variant-search.component';
+import { SkuInput } from '@shared/components/sku-input/sku-input';
+import { QrScannerModal, isBarcodeApiAvailable } from '@features/sales/components/qr-scanner-modal/qr-scanner-modal';
 import { CreateTransferItemList } from './create-transfer-item-list/create-transfer-item-list';
 import { TransferService } from '../../../services/transfer-service';
+import { ProductService } from '@features/inventory/services/product-service';
 
 import { TransferItem } from '../../../interfaces/transfer-item';
 import { TransferForm } from '../../../dtos/transfers/transfer-form';
@@ -15,14 +17,19 @@ import { ToastService } from '@core/services/toast-service';
 
 @Component({
   selector: 'app-create-transfer',
-  imports: [ProductVariantSearch, CreateTransferItemList, FormsModule, BranchSelectorDestination],
+  imports: [SkuInput, QrScannerModal, CreateTransferItemList, FormsModule, BranchSelectorDestination],
   templateUrl: './create-transfer.html',
 })
 export default class CreateTransfer implements OnInit {
   private transferService = inject(TransferService);
+  private productService = inject(ProductService);
   private branchService = inject(BranchContextService);
   private toastService = inject(ToastService);
   readonly router = inject(Router);
+
+  searchingSku = signal(false);
+  skuError = signal('');
+  scannerAvailable = signal(false);
 
   branches = signal<BranchDto[]>([]);
   loadingBranches = signal(false);
@@ -41,8 +48,13 @@ export default class CreateTransfer implements OnInit {
 
   originName = computed(() => this.branchService.active()?.branchName ?? '');
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    this.scannerAvailable.set(await isBarcodeApiAvailable());
     this.loadBranches();
+  }
+
+  openScanner(scanner: QrScannerModal): void {
+    scanner.open();
   }
 
   private loadBranches(): void {
@@ -65,9 +77,25 @@ export default class CreateTransfer implements OnInit {
     this.form.update((f) => ({ ...f, notes }));
   }
 
-  onProductFound(variant: ProductVariantBySkuDto): void {
-    const existing = this.items().find((i) => i.variantId === variant.id);
+  onSkuSubmit(sku: string): void {
+    if (!sku || this.searchingSku()) return;
+    this.searchingSku.set(true);
+    this.skuError.set('');
+    this.productService.getVariantBySku(sku).subscribe({
+      next: (variant) => {
+        this.searchingSku.set(false);
+        this.addVariantToTransfer(variant);
+      },
+      error: (err) => {
+        this.searchingSku.set(false);
+        const msg = err.status === 404 ? `No se encontró "${sku}"` : err.status === 409 ? `El producto "${sku}" está inactivo` : 'Error al buscar el producto';
+        this.skuError.set(msg);
+      },
+    });
+  }
 
+  private addVariantToTransfer(variant: ProductVariantBySkuDto): void {
+    const existing = this.items().find((i) => i.variantId === variant.id);
     if (existing) {
       if (existing.quantity >= variant.availableStockInBranch) return;
       this.items.update((items) =>
@@ -90,6 +118,11 @@ export default class CreateTransfer implements OnInit {
         },
       ]);
     }
+  }
+
+  // @deprecated - mantener compatibilidad hasta eliminar ProductVariantSearch
+  onProductFound(variant: ProductVariantBySkuDto): void {
+    this.addVariantToTransfer(variant);
   }
 
   submit(): void {

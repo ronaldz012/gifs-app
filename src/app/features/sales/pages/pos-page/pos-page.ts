@@ -1,11 +1,9 @@
-import { Component, OnInit, signal, ViewChild, inject, computed } from '@angular/core';
+import { Component, OnInit, ViewChild, signal, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SkuInput } from '@shared/components/sku-input/sku-input';
+import { isBarcodeApiAvailable, QrScannerModal } from '@features/sales/components/qr-scanner-modal/qr-scanner-modal';
 import { form, applyEach, min, validate } from '@angular/forms/signals';
 import { ProductService } from '@features/inventory/services';
-import {
-  isBarcodeApiAvailable,
-  QrScannerModal,
-} from '@features/sales/components/qr-scanner-modal/qr-scanner-modal';
 import { PosCartItemCardComponent } from './pos-item/pos-item.component';
 import { PosCartItem, PosSaleState } from '@features/sales/models/pos-sale-state.model';
 import { ProductVariantBySkuDto } from '@features/inventory/dtos/products/product-variant-by-sku-dto';
@@ -25,6 +23,7 @@ import { PermissionService } from '@features/auth/services/permmision-service';
   standalone: true,
   imports: [
     RouterLink,
+    SkuInput,
     QrScannerModal,
     PosCartItemCardComponent,
     CurrencyPipe,
@@ -50,10 +49,7 @@ export default class PosPage implements OnInit {
   // ── POS state ──────────────────────────────────────────────────────────
 
   @ViewChild(QrScannerModal) scanner!: QrScannerModal;
-
   private productService = inject(ProductService);
-
-  /** Muestra el botón solo si la API está disponible en este dispositivo */
   scannerAvailable = signal(false);
 
   // Control de apertura para el BottomSheet de cobro en móviles
@@ -144,6 +140,10 @@ export default class PosPage implements OnInit {
     this.checkRegister();
   }
 
+  openScanner(): void {
+    this.scanner.open();
+  }
+
   private friendlyError(err: unknown, fallback: string): string {
     const e = err as { error?: { detail?: string; title?: string; message?: string }; message?: string; status?: number };
     return e?.error?.detail || e?.error?.title || e?.error?.message || e?.message || fallback;
@@ -188,17 +188,6 @@ export default class PosPage implements OnInit {
       },
       error: (err) => this.toast.error(this.friendlyError(err, 'Error al abrir la caja. Intentá de nuevo.')),
     });
-  }
-
-  searchBySku(skuValue: string): void {
-    const cleanSku = skuValue?.trim().toUpperCase();
-    if (!cleanSku) return;
-
-    // Reutiliza la misma lógica exacta de búsqueda y validación del backend
-    this.onScanned(cleanSku);
-  }
-  openScanner(): void {
-    this.scanner.open();
   }
 
   openSearch(): void {
