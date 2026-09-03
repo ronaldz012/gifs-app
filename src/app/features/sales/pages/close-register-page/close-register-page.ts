@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CashRegisterService } from '@features/sales/services/cash-register-service';
 import { ToastService } from '@core/services/toast-service';
 import { PermissionService } from '@features/auth/services/permmision-service';
@@ -8,11 +8,13 @@ import { ClosureDetailDto } from '@features/sales/dtos/closure-detail-dto';
 import { isReturnType, isCashPayment } from '@features/sales/dtos/sale-detail-dto';
 import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
+import ReturnRefund from '@features/sales/pages/returns-page/return-refund';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 
 @Component({
   selector: 'app-close-register-page',
   standalone: true,
-  imports: [CurrencyPipe, RouterLink, SkeletonList, SmartDatePipe],
+  imports: [CurrencyPipe, RouterLink, SkeletonList, SmartDatePipe, ReturnRefund],
   styles: `
     @keyframes fade-up {
       from {
@@ -367,12 +369,24 @@ import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
             </div>
           }
         </div>
+
       }
     </div>
+
+    <!-- Devolución: bottom-sheet en mobile, side-panel en desktop (fuera del contenedor animado para que el fixed use el viewport) -->
+    @if (refundSaleId(); as rid) {
+      <div class="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-overlay backdrop-blur-[1px]" (click)="closeRefund()"></div>
+        <div class="relative z-10 w-full md:w-[600px] md:max-w-[90%] h-[92vh] md:h-screen bg-bg-surface rounded-t-2xl md:rounded-none md:border-l md:border-border md:shadow-[-20px_0_40px_-15px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden animate-fade-in">
+          <app-return-refund class="flex-1 min-h-0 flex flex-col" [saleId]="rid" (closed)="closeRefund()" (refunded)="onRefunded()" />
+        </div>
+      </div>
+    }
   `,
 })
 export default class CloseRegisterPage implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private cashRegisterService = inject(CashRegisterService);
   private toast = inject(ToastService);
   readonly perm = inject(PermissionService);
@@ -385,6 +399,7 @@ export default class CloseRegisterPage implements OnInit {
   submitting = signal(false);
   closeError = signal<string | null>(null);
   errorMessage = signal('');
+  refundSaleId = signal<GUID | null>(null);
 
   expectedAmount = computed(() => {
     const c = this.closure();
@@ -393,12 +408,23 @@ export default class CloseRegisterPage implements OnInit {
   });
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      this.refundSaleId.set(getModalId(params.get('modal'), 'return'));
+    });
+    this.loadClosure(true);
+  }
+
+  private loadClosure(initial = false): void {
     this.cashRegisterService.getCurrentDetails().subscribe({
       next: (c) => {
         this.closure.set(c);
-        this.state.set('ready');
+        if (initial) this.state.set('ready');
       },
       error: (err) => {
+        if (!initial) {
+          this.toast.error('No se pudo actualizar los datos del turno.');
+          return;
+        }
         if (err?.status === 404) {
           this.state.set('already-closed');
           return;
@@ -419,7 +445,16 @@ export default class CloseRegisterPage implements OnInit {
   }
 
   goToRefund(saleId: GUID): void {
-    this.router.navigate(['/sales/pos/returns', saleId]);
+    openModal(this.router, this.route, `return:${saleId}`);
+  }
+
+  closeRefund(): void {
+    closeModal(this.router, this.route);
+  }
+
+  onRefunded(): void {
+    closeModal(this.router, this.route);
+    this.loadClosure();
   }
 
   confirmClose(): void {
