@@ -50,7 +50,7 @@ export default class StockMovementsList {
   variant = signal<ProductVariantDetailsDto | null>(null);
   query = signal<StockMovementParams>({
     page: 1,
-    pageSize: 20,
+    pageSize: 10,
   });
 
   ngOnInit() {

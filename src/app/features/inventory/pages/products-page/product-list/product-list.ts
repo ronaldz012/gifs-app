@@ -167,7 +167,7 @@ export default class ProductList implements OnInit {
 
   query = signal<ProductQueryParams>({
     page: 1,
-    pageSize: 20,
+    pageSize: 10,
   });
 
   showCreateModal = signal(false);

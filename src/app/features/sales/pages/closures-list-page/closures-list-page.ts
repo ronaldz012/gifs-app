@@ -176,7 +176,7 @@ export default class ClosuresListPage implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
 
-  query = signal<BaseQueryDto>({ page: 1, pageSize: 20 });
+  query = signal<BaseQueryDto>({ page: 1, pageSize: 10 });
 
   ngOnInit(): void {
     this.load();

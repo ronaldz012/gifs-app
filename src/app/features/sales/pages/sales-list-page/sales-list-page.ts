@@ -8,7 +8,7 @@ import { DateRangeFilter, DateRange } from '@shared/components/date-range-filter
 import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
-import { SaleType } from '@features/sales/dtos/sale-detail-dto';
+import { SaleType, isReturnType } from '@features/sales/dtos/sale-detail-dto';
 
 @Component({
   selector: 'app-sales-list-page',
@@ -81,17 +81,17 @@ import { SaleType } from '@features/sales/dtos/sale-detail-dto';
           <ul class="flex flex-col divide-y divide-border">
             @for (sale of sales(); track sale.id) {
               <li class="row-enter bg-bg-surface relative overflow-hidden border-b border-border transition-all duration-200 hover:shadow-md"
-                  [class.border-l-4]="sale.type === SaleType.Return"
-                  [class.border-feedback-warning]="sale.type === SaleType.Return">
+                  [class.border-l-4]="isReturnType(sale.type)"
+                  [class.border-feedback-warning]="isReturnType(sale.type)">
                 <div class="absolute bottom-0 left-0 top-0 w-[4px] opacity-0 transition-opacity duration-150 group-hover:opacity-100 lg:block hidden"
-                     [class.bg-accent-ui]="sale.type === SaleType.Sale" [class.bg-feedback-warning]="sale.type === SaleType.Return"></div>
+                     [class.bg-accent-ui]="!isReturnType(sale.type)" [class.bg-feedback-warning]="isReturnType(sale.type)"></div>
 
                 <!-- MOBILE -->
                 <div class="flex items-center gap-4 px-4 py-3.5 lg:hidden">
                   <div class="flex flex-col min-w-0 flex-1">
                     <p class="flex items-center gap-1.5 truncate font-inter text-sm font-bold leading-tight text-text-main">
                       {{ sale.createdAt | smartDate }}
-                      @if (sale.type === SaleType.Return) {
+                      @if (isReturnType(sale.type)) {
                         <span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-feedback-warning/15 text-feedback-warning-text border border-feedback-warning/30">Devolución</span>
                       }
                       @if (sale.hasReturn) {
@@ -100,7 +100,7 @@ import { SaleType } from '@features/sales/dtos/sale-detail-dto';
                     </p>
                     <p class="truncate text-xs text-text-muted mt-0.5">{{ sale.firstItemDisplayName || '—' }}</p>
                     <p class="mt-1 font-inter text-xs text-text-muted flex flex-wrap items-center gap-1.5">
-                      <span class="font-bold" [class.text-accent-ui]="sale.type===SaleType.Sale" [class.text-feedback-warning-text]="sale.type===SaleType.Return">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                      <span class="font-bold" [class.text-accent-ui]="!isReturnType(sale.type)" [class.text-feedback-warning-text]="isReturnType(sale.type)">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                       <span class="font-bold text-accent-ui bg-accent-ui/10 px-1.5 py-0.5 rounded text-[11px]">{{ sale.totalDistinctItems }} art. · {{ sale.totalQuantity }} unid.</span>
                       @if (sale.hasReturn) {
                         <span class="text-feedback-warning-text bg-feedback-warning/10 px-1.5 py-0.5 rounded text-[11px]">Dev. {{ sale.returnedAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
@@ -121,7 +121,7 @@ import { SaleType } from '@features/sales/dtos/sale-detail-dto';
                   <span class="text-[13px] font-medium text-text-main">{{ sale.createdAt | smartDate }}</span>
                   <span class="text-xs text-text-main font-medium truncate pr-2" [title]="sale.firstItemDisplayName">{{ sale.firstItemDisplayName || '—' }}</span>
                   <span class="flex justify-center">
-                    @if (sale.type === SaleType.Return) {
+                    @if (isReturnType(sale.type)) {
                       <span class="text-[11px] font-bold text-feedback-warning-text bg-feedback-warning/15 border border-feedback-warning/30 px-2 py-0.5 rounded-md">Devolución</span>
                     } @else {
                       <span class="text-[11px] font-medium text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">Venta</span>
@@ -130,11 +130,11 @@ import { SaleType } from '@features/sales/dtos/sale-detail-dto';
                   <span class="text-center">
                     <span class="text-xs font-bold font-mono text-accent-ui bg-accent-ui/10 px-2 py-0.5 rounded-md">{{ sale.totalDistinctItems }} · {{ sale.totalQuantity }}</span>
                   </span>
-                  <span class="text-right text-[13px] font-mono font-bold" [class.text-feedback-warning-text]="sale.type===SaleType.Return" [class.text-text-main]="sale.type===SaleType.Sale">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
+                  <span class="text-right text-[13px] font-mono font-bold" [class.text-feedback-warning-text]="isReturnType(sale.type)" [class.text-text-main]="!isReturnType(sale.type)">{{ sale.totalAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
                   <span class="text-center">
                     @if (sale.hasReturn) {
                       <span class="text-xs font-bold text-feedback-warning-text bg-feedback-warning/10 px-2 py-0.5 rounded-md">{{ sale.returnedAmount | currency: 'BOB' : 'symbol' : '1.2-2' }}</span>
-                    } @else if (sale.type === SaleType.Return) {
+                    } @else if (isReturnType(sale.type)) {
                       <span class="text-xs text-text-soft">—</span>
                     } @else {
                       <span class="text-xs text-text-soft">Sin reembolso</span>
@@ -163,13 +163,14 @@ export default class SalesListPage implements OnInit {
   private saleService = inject(SaleService);
 
   SaleType = SaleType;
+  protected isReturnType = isReturnType;
 
   sales = signal<SaleListDto[]>([]);
   totalItems = signal(0);
   loading = signal(true);
   error = signal<string | null>(null);
 
-  query = signal<SalesQueryDto>({ page: 1, pageSize: 20 });
+  query = signal<SalesQueryDto>({ page: 1, pageSize: 10 });
 
   hasDateFilter = computed(() => !!(this.query().dateFrom || this.query().dateTo));
   hasActiveFilters = computed(() => this.query().type != null || this.query().hasReturn != null);
@@ -182,9 +183,12 @@ export default class SalesListPage implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     this.saleService.getSales(this.query()).subscribe({
-      next: (data) => {
-        this.sales.set(data.items);
-        this.totalItems.set(data.totalCount);
+      next: (data: any) => {
+        // El backend puede devolver array plano o el wrapper paginado
+        const items: SaleListDto[] = Array.isArray(data) ? data : (data?.items ?? []);
+        const total: number = Array.isArray(data) ? data.length : (data?.totalCount ?? items.length);
+        this.sales.set(items);
+        this.totalItems.set(total);
         this.loading.set(false);
       },
       error: (err: any) => { this.loading.set(false); const e = err as { error?: { detail?: string; title?: string }; message?: string }; this.error.set(e?.error?.detail || e?.error?.title || e?.message || 'Error al cargar ventas.'); },
