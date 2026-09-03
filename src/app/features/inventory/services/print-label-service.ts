@@ -6,6 +6,26 @@ import JsBarcode from 'jsbarcode';
 
 type CodeType = 'qr' | 'barcode';
 
+/** Formatos de hoja soportados para etiquetas. */
+export type SheetFormat = 'a4' | 'a5' | 'a6';
+
+const SHEET_MM: Record<SheetFormat, { w: number; h: number }> = {
+  a4: { w: 210, h: 297 },
+  a5: { w: 148, h: 210 },
+  a6: { w: 105, h: 148 },
+};
+
+/** Grilla compacta resuelta para un formato de hoja. */
+interface CompactLayout {
+  pageW: number;
+  pageH: number;
+  leftMargin: number;
+  topMargin: number;
+  columns: number;
+  rows: number;
+  labelsPerSheet: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -21,22 +41,41 @@ export class LabelPrintService {
   };
 
   /**
-   * Etiqueta compacta 2x3.5cm, formato vertical:
-   * QR (arriba, máx 18mm) -> SKU legible -> nombre (1 línea) -> talla/color | precio
+   * Etiqueta compacta oficial 23x38mm, formato vertical:
+   * QR (arriba, 19mm) -> SKU legible -> nombre (1-2 líneas) -> talla -> color
    * Pensada para espacios reducidos donde el barcode ya no es viable (ver
    * cálculo de módulos CODE128 vs QR para SKUs tipo NIK12-011).
+   * La grilla (columnas/filas) se resuelve dinámicamente según el formato
+   * de hoja (ver resolveCompactLayout).
    */
-  private readonly COMPACT_CONFIG = {
-    leftMargin: 9,
+  private readonly COMPACT_LABEL = {
     topMargin: 20,
+    bottomMargin: 5,
+    minSideMargin: 5,
     labelWidth: 23,
     labelHeight: 38,
-    gap: 1,
-    columns: 8,
-    rows: 7,
-    labelsPerSheet: 56,
+    gap: 0,
     padding: 1,
   };
+
+  /**
+   * Calcula cuántas etiquetas entran en la hoja y con qué márgenes.
+   * La grilla se centra horizontalmente para aprovechar cada formato.
+   * Etiquetas unidas (gap 0) con borde como guía de corte.
+   * A4 → 8x7 = 56 · A5 → 6x4 = 24 · A6 → 4x3 = 12.
+   */
+  private resolveCompactLayout(format: SheetFormat): CompactLayout {
+    const { w: pageW, h: pageH } = SHEET_MM[format];
+    const { labelWidth: lw, labelHeight: lh, gap, topMargin, bottomMargin, minSideMargin } = this.COMPACT_LABEL;
+
+    const columns = Math.max(1, Math.floor((pageW - minSideMargin * 2 + gap) / (lw + gap)));
+    const gridW = columns * lw + (columns - 1) * gap;
+    const leftMargin = (pageW - gridW) / 2;
+
+    const rows = Math.max(1, Math.floor((pageH - topMargin - bottomMargin + gap) / (lh + gap)));
+
+    return { pageW, pageH, leftMargin, topMargin, columns, rows, labelsPerSheet: columns * rows };
+  }
 
   // ============================================================
   // API EXISTENTE (etiquetas grandes 60x32mm, QR o barcode)
@@ -152,7 +191,7 @@ export class LabelPrintService {
     doc.setTextColor(30, 58, 95);
     doc.text(label.brandName.toUpperCase(), x + 2, y + 19.5);
 
-    const cleanName = (label.productName || '').replace(/[\/\s]+$/, '').trim();
+    const cleanName = (label.productName || '').trim();
     doc.setFontSize(this.getProductFontSize(cleanName.length));
     doc.setTextColor(17, 17, 17);
     const lines = doc.splitTextToSize(cleanName, 24);
@@ -194,7 +233,7 @@ export class LabelPrintService {
     doc.setTextColor(30, 58, 95);
     doc.text(label.brandName.toUpperCase(), infoX, y + 6);
 
-    const cleanName = (label.productName || '').replace(/[\/\s]+$/, '').trim();
+    const cleanName = (label.productName || '').trim();
     doc.setFontSize(this.getProductFontSize(cleanName.length));
     doc.setTextColor(17, 17, 17);
     const lines = doc.splitTextToSize(cleanName, 30);
@@ -238,22 +277,29 @@ export class LabelPrintService {
   // NUEVO: etiqueta compacta 2x3.5cm (solo QR, para espacios chicos)
   // ============================================================
 
-  public async generatePdfCompact(labels: LabelData[]): Promise<jsPDF> {
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  public async generatePdfCompact(labels: LabelData[], format: SheetFormat = 'a4'): Promise<jsPDF> {
+    const layout = this.resolveCompactLayout(format);
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format });
 
     for (let i = 0; i < labels.length; i++) {
-      if (i > 0 && i % this.COMPACT_CONFIG.labelsPerSheet === 0) {
+      if (i > 0 && i % layout.labelsPerSheet === 0) {
         doc.addPage();
       }
-      await this.drawCompactLabel(doc, labels[i], i);
+      await this.drawCompactLabel(doc, labels[i], i, layout);
     }
 
     return doc;
   }
 
-  private async drawCompactLabel(doc: jsPDF, label: LabelData, globalIndex: number): Promise<void> {
-    const { x, y } = this.calculateCompactPosition(globalIndex);
-    const { labelWidth: w, padding: pad } = this.COMPACT_CONFIG;
+  private async drawCompactLabel(
+    doc: jsPDF,
+    label: LabelData,
+    globalIndex: number,
+    layout: CompactLayout,
+  ): Promise<void> {
+    const { x, y } = this.calculateCompactPosition(globalIndex, layout);
+    const w = this.COMPACT_LABEL.labelWidth;
+    const pad = this.COMPACT_LABEL.padding;
 
     this.drawCompactBorder(doc, x, y);
     await this.drawCompactQr(doc, label.sku, x, y, w, pad);
@@ -262,21 +308,25 @@ export class LabelPrintService {
     this.drawCompactTallaColor(doc, label, x, y, w, pad);
   }
 
-  private calculateCompactPosition(globalIndex: number): { x: number; y: number } {
-    const indexOnSheet = globalIndex % this.COMPACT_CONFIG.labelsPerSheet;
-    const column = indexOnSheet % this.COMPACT_CONFIG.columns;
-    const row = Math.floor(indexOnSheet / this.COMPACT_CONFIG.columns);
+  private calculateCompactPosition(
+    globalIndex: number,
+    layout: CompactLayout,
+  ): { x: number; y: number } {
+    const { labelWidth: lw, labelHeight: lh, gap } = this.COMPACT_LABEL;
+    const indexOnSheet = globalIndex % layout.labelsPerSheet;
+    const column = indexOnSheet % layout.columns;
+    const row = Math.floor(indexOnSheet / layout.columns);
 
     return {
-      x: this.COMPACT_CONFIG.leftMargin + column * (this.COMPACT_CONFIG.labelWidth + this.COMPACT_CONFIG.gap),
-      y: this.COMPACT_CONFIG.topMargin + row * (this.COMPACT_CONFIG.labelHeight + this.COMPACT_CONFIG.gap),
+      x: layout.leftMargin + column * (lw + gap),
+      y: layout.topMargin + row * (lh + gap),
     };
   }
 
   private drawCompactBorder(doc: jsPDF, x: number, y: number): void {
     doc.setDrawColor(153, 153, 153);
     doc.setLineWidth(0.3);
-    doc.rect(x, y, this.COMPACT_CONFIG.labelWidth, this.COMPACT_CONFIG.labelHeight);
+    doc.rect(x, y, this.COMPACT_LABEL.labelWidth, this.COMPACT_LABEL.labelHeight);
   }
 
   private async drawCompactQr(
@@ -318,7 +368,7 @@ export class LabelPrintService {
     w: number,
     pad: number,
   ): void {
-    const cleanName = (productName || '').replace(/[\/\s]+$/, '').trim();
+    const cleanName = (productName || '').trim();
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 17, 17);
     const maxWidth = w - pad * 2;
