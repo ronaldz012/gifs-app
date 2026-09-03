@@ -1,15 +1,27 @@
-import { Component, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, EMPTY, Subject, switchMap, tap } from 'rxjs';
-import { FormsModule } from '@angular/forms';
 import { ProductService } from '@features/inventory/services/product-service';
 import { ProductVariantBySkuDto } from '@features/inventory/dtos/products/product-variant-by-sku-dto';
+import { SkuInput } from '@shared/components/sku-input/sku-input';
 
+/**
+ * @deprecated Use SkuInput directly (shared/components/sku-input). Kept for backward compat.
+ */
 @Component({
   selector: 'app-product-variant-search',
-  imports: [FormsModule],
-  templateUrl: './product-variant-search.html',
-  styles: ``,
+  imports: [SkuInput],
+  template: `
+    <div class="flex flex-col gap-1">
+      <app-sku-input [placeholder]="placeholder()" (skuSubmit)="onSkuSubmit($event)" />
+      @if (loading()) {
+        <span class="text-xs text-text-soft px-1">Buscando...</span>
+      }
+      @if (errorMsg()) {
+        <p class="text-xs text-feedback-error-text px-1">{{ errorMsg() }}</p>
+      }
+    </div>
+  `,
 })
 export class ProductVariantSearch {
   private productService = inject(ProductService);
@@ -17,11 +29,9 @@ export class ProductVariantSearch {
   placeholder = input<string>('Código...');
   productFound = output<ProductVariantBySkuDto>();
 
-  code = '';
   loading = signal(false);
   errorMsg = signal('');
 
-  private inputRef = viewChild.required<ElementRef<HTMLInputElement>>('searchInput');
   private search$ = new Subject<string>();
 
   constructor() {
@@ -51,15 +61,11 @@ export class ProductVariantSearch {
       .subscribe((variant) => {
         this.loading.set(false);
         this.productFound.emit(variant);
-        this.inputRef().nativeElement.focus();
       });
   }
 
-  onEnter(): void {
-    const trimmed = this.code.trim();
-    if (!trimmed || this.loading()) return;
-
-    this.code = '';
-    this.search$.next(trimmed);
+  onSkuSubmit(code: string): void {
+    if (!code || this.loading()) return;
+    this.search$.next(code);
   }
 }

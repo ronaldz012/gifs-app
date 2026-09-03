@@ -12,10 +12,9 @@ import { Component, input, output, computed } from '@angular/core';
         <span>Mostrar</span>
         <select
           class="border border-border rounded-lg px-2 py-1 text-sm bg-bg-muted text-text-main transition-colors focus:outline-none focus:ring-2 focus:ring-ring-focus-ring"
-          [value]="pageSize()"
           (change)="onPageSizeChange($event)">
           @for (size of pageSizeOptions; track size) {
-            <option class="bg-bg-surface text-text-main" [value]="size">{{ size }}</option>
+            <option class="bg-bg-surface text-text-main" [value]="size" [selected]="size === pageSize()">{{ size }}</option>
           }
         </select>
         <span>por página · <strong class="text-text-main">{{ totalItems() }}</strong> total</span>

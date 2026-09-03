@@ -9,7 +9,7 @@ import {
 
 import { ReceptionService } from '../../../services/reception-service';
 import { LabelData } from '../../../interfaces/reception-labels';
-import { LabelPrintService } from '../../../services/print-label-service';
+import { LabelPrintService, SheetFormat } from '../../../services/print-label-service';
 import { ReceptionLabelsDto } from '../../../dtos/receptions/reception-labels-dto';
 import { ReceptionStatus } from '../../../dtos/receptions/stock-reception-list-dto';
 import {
@@ -51,6 +51,17 @@ export default class ReceptionDetails implements OnInit {
 
   rollbackModalOpen = signal(false);
   private printService = inject(LabelPrintService);
+
+  sheetFormat = signal<SheetFormat>('a4');
+  readonly sheetOptions: { value: SheetFormat; label: string }[] = [
+    { value: 'a4', label: 'A4 · 56' },
+    { value: 'a5', label: 'A5 · 24' },
+    { value: 'a6', label: 'A6 · 12' },
+  ];
+
+  onSheetFormatChange(value: string): void {
+    this.sheetFormat.set(value as SheetFormat);
+  }
 
   goBack(): void {
     if (window.history.length > 1) {
@@ -154,8 +165,8 @@ export default class ReceptionDetails implements OnInit {
               receptionId: data.receptionId,
             })),
           );
-          const doc = await this.printService.generatePdfCompact(labels);
-          doc.save(`etiquetas-recepcion-${data.receptionId}.pdf`);
+          const doc = await this.printService.generatePdfCompact(labels, this.sheetFormat());
+          doc.save(`etiquetas-recepcion-${data.receptionId}-${this.sheetFormat()}.pdf`);
         } catch (e) {
           console.error('Error generando PDF de etiquetas', e);
         } finally {

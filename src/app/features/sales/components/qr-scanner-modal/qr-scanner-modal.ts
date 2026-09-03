@@ -20,6 +20,9 @@ export class QrScannerModal implements OnDestroy {
   isOpen = signal(false);
   isInitializing = signal(false);
   errorMsg = signal<string | null>(null);
+  private popHandler = () => {
+    if (this.isOpen()) this.close(true);
+  };
 
   private mediaStream: MediaStream | null = null;
   private animationFrameId: number | null = null;
@@ -42,6 +45,10 @@ export class QrScannerModal implements OnDestroy {
   async open(): Promise<void> {
     this.errorMsg.set(null);
     this.isOpen.set(true);
+    if (typeof window !== 'undefined') {
+      history.pushState({ qr: true }, '', window.location.href);
+      window.addEventListener('popstate', this.popHandler);
+    }
     this.isInitializing.set(true); // Muestra el spinner de "Iniciando cámara..."
 
     try {
@@ -116,9 +123,13 @@ export class QrScannerModal implements OnDestroy {
     this.animationFrameId = requestAnimationFrame(scan);
   }
 
-  close(): void {
+  close(fromPop = false): void {
     this.stopHardware();
     this.isOpen.set(false);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('popstate', this.popHandler);
+      if (!fromPop && history.state?.qr) history.back();
+    }
     this.closed.emit();
   }
 

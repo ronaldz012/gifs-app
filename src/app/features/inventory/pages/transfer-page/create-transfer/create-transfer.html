@@ -6,10 +6,21 @@
         <p class="text-xs font-medium text-text-soft uppercase tracking-wide mb-3">
           Agregar producto
         </p>
-        <app-product-variant-search
-          placeholder="Escanear o ingresar SKU..."
-          (productFound)="onProductFound($event)"
-        />
+        <div class="flex items-center gap-2">
+          <app-sku-input class="flex-1" placeholder="Escanear o ingresar SKU..." (skuSubmit)="onSkuSubmit($event)" />
+          @if (scannerAvailable()) {
+            <button type="button" class="flex items-center justify-center bg-accent-ui text-white p-2.5 rounded-xl shadow-xs hover:bg-accent-ui/90 active:scale-95 transition-all shrink-0" (click)="openScanner(scanner)" title="Escanear Código">
+              <span class="material-icons text-[18px]">qr_code_scanner</span>
+            </button>
+          }
+        </div>
+        <app-qr-scanner-modal #scanner (scanned)="onSkuSubmit($event)" />
+        @if (searchingSku()) {
+          <span class="text-xs text-text-soft px-1 mt-2 block">Buscando...</span>
+        }
+        @if (skuError()) {
+          <p class="text-xs text-feedback-error-text px-1 mt-1">{{ skuError() }}</p>
+        }
       </div>
 
       <div class="bg-bg-surface rounded-xl border border-border shadow-sm p-4">

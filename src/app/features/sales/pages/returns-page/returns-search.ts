@@ -1,15 +1,19 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { SaleService } from '@features/sales/services/sale-service';
 import SkeletonList from '@shared/ui/skeleton-list/skeleton-list';
 import { Paginator } from '@shared/components/app-paginator/app-paginator';
 import { SmartDatePipe } from '@shared/pipes/smart-date.pipe';
+import { SkuInput } from '@shared/components/sku-input/sku-input';
+import { QrScannerModal, isBarcodeApiAvailable } from '@features/sales/components/qr-scanner-modal/qr-scanner-modal';
 import { SaleSkuSearchDto } from '@features/sales/dtos/returns-dto';
+import ReturnRefund from './return-refund';
+import { closeModal, getModalId, openModal } from '@shared/utils/modal-query';
 
 @Component({
   selector: 'app-returns-search',
-  imports: [CurrencyPipe, RouterLink, SkeletonList, Paginator, SmartDatePipe],
+  imports: [CurrencyPipe, RouterLink, SkeletonList, Paginator, SmartDatePipe, SkuInput, QrScannerModal, ReturnRefund],
   styles: `
     @keyframes fade-up {
       from { opacity: 0; transform: translateY(8px); }
@@ -30,31 +34,14 @@ import { SaleSkuSearchDto } from '@features/sales/dtos/returns-dto';
 
       <!-- Buscador -->
       <div class="bg-bg-surface rounded-xl border border-border-strong px-6 py-5">
-        <label class="field-label block mb-2" for="skuInput">SKU del producto</label>
-        <div class="flex gap-2">
-          <input
-            id="skuInput"
-            type="text"
-            placeholder="Escaneá o pegá el SKU..."
-            autocomplete="off"
-            class="flex-1 px-3 py-2.5 text-sm rounded-lg border border-border bg-bg-muted text-text-main
-                   font-mono placeholder:text-text-soft outline-none transition-colors
-                   focus:border-border-strong focus:ring-1 focus:ring-accent-ui"
-            [value]="skuValue()"
-            (input)="onSkuInput($event)"
-            (keydown.enter)="search()"
-          />
-          <button
-            type="button"
-            (click)="search()"
-            [disabled]="searching() || !skuValue().trim()"
-            class="px-4 py-2.5 rounded-lg text-sm font-semibold bg-btn-primary-bg text-btn-primary-text hover:bg-btn-primary-hover disabled:opacity-40 transition-colors flex items-center gap-2"
-          >
-            @if (searching()) {
-              <span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
-            }
-            Buscar ventas (7 días)
-          </button>
+        <label class="field-label block mb-2">SKU del producto</label>
+        <div class="flex items-center gap-2">
+          <app-sku-input class="flex-1" [initialValue]="skuValue()" placeholder="Escaneá o pegá el SKU..." (skuSubmit)="onSkuSubmit($event)" />
+          @if (scannerAvailable()) {
+            <button type="button" class="flex items-center justify-center bg-accent-ui text-white p-2.5 rounded-xl shadow-xs hover:bg-accent-ui/90 active:scale-95 transition-all shrink-0" (click)="openScanner(scanner)" title="Escanear Código">
+              <span class="material-icons text-[18px]">qr_code_scanner</span>
+            </button>
+          }
         </div>
         <p class="mt-2 text-[11px] text-text-soft">
           Se listan las ventas de los últimos 7 días que contengan ese SKU en sus ítems.
@@ -157,12 +144,26 @@ import { SaleSkuSearchDto } from '@features/sales/dtos/returns-dto';
         }
       }
     </div>
+    <app-qr-scanner-modal #scanner (scanned)="onSkuSubmit($event)" />
+
+    <!-- Procesar devolución: bottom-sheet en mobile, side-panel en desktop -->
+    @if (refundSaleId(); as rid) {
+      <div class="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-overlay backdrop-blur-[1px]" (click)="closeRefund()"></div>
+        <div class="relative z-10 w-full md:w-[600px] md:max-w-[90%] h-[92vh] md:h-screen bg-bg-surface rounded-t-2xl md:rounded-none md:border-l md:border-border md:shadow-[-20px_0_40px_-15px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden animate-fade-in">
+          <app-return-refund class="flex-1 min-h-0 flex flex-col" [saleId]="rid" (closed)="closeRefund()" (refunded)="onRefunded()" />
+        </div>
+      </div>
+    }
   `,
 })
-export default class ReturnsSearch {
+export default class ReturnsSearch implements OnInit {
   private saleService = inject(SaleService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+
+  scannerAvailable = signal(false);
+  refundSaleId = signal<GUID | null>(null);
 
   private readonly DAYS = 7;
 
@@ -179,7 +180,20 @@ export default class ReturnsSearch {
     pageSize: 10,
   });
 
+  async ngOnInit(): Promise<void> {
+    this.scannerAvailable.set(await isBarcodeApiAvailable());
+  }
+
+  openScanner(scanner: QrScannerModal): void {
+    scanner.open();
+  }
+
   constructor() {
+    this.route.queryParamMap.subscribe((params) => {
+      const modal = params.get('modal');
+      const rid = getModalId(modal, 'return');
+      this.refundSaleId.set(rid);
+    });
     this.route.queryParamMap.subscribe((params) => {
       const sku = params.get('sku') ?? '';
       this.skuValue.set(sku);
@@ -195,12 +209,7 @@ export default class ReturnsSearch {
     });
   }
 
-  onSkuInput(event: Event): void {
-    this.skuValue.set((event.target as HTMLInputElement).value);
-  }
-
-  search(): void {
-    const sku = this.skuValue().trim();
+  onSkuSubmit(sku: string): void {
     if (!sku || this.searching()) return;
     this.router.navigate([], {
       relativeTo: this.route,
@@ -210,9 +219,16 @@ export default class ReturnsSearch {
   }
 
   openRefund(sale: SaleSkuSearchDto): void {
-    this.router.navigate(['/sales/pos/returns', sale.id], {
-      queryParams: { sku: this.skuValue().trim() },
-    });
+    openModal(this.router, this.route, `return:${sale.id}`);
+  }
+
+  closeRefund(): void {
+    closeModal(this.router, this.route);
+  }
+
+  onRefunded(): void {
+    closeModal(this.router, this.route);
+    this.doSearch(this.skuValue().trim());
   }
 
   onPage(page: number): void {
